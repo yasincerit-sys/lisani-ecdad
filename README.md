@@ -62,3 +62,4 @@ Canlı site için adım adım rehber: **[KURULUM-RENDER.md](KURULUM-RENDER.md)**
 | GET | `/api/hoca/ogrenci-takip` |
 | GET | `/api/odevler` |
 | POST | `/api/progress/sync` |
+# lisani-ecdad
