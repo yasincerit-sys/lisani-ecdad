@@ -1,0 +1,884 @@
+/**
+ * Laravel + MySQL API köprüsü (Firebase yerine)
+ */
+(function () {
+    function getXsrfCookie() {
+        const match = document.cookie.match(/(?:^|;\s*)XSRF-TOKEN=([^;]*)/);
+        return match ? decodeURIComponent(match[1]) : '';
+    }
+
+    function getMetaCsrf() {
+        return document.querySelector('meta[name="csrf-token"]')?.content || '';
+    }
+
+    /** Laravel önce X-CSRF-TOKEN'a bakar; eski meta değeri cookie'yi ezer. Cookie varsa sadece X-XSRF-TOKEN gönder. */
+    function csrfHeaders() {
+        const xsrf = getXsrfCookie();
+        if (xsrf) {
+            return { 'X-XSRF-TOKEN': xsrf };
+        }
+        const meta = getMetaCsrf();
+        if (meta) {
+            return { 'X-CSRF-TOKEN': meta };
+        }
+        return {};
+    }
+
+    function applyCsrfToken(token) {
+        if (!token) return;
+        const meta = document.querySelector('meta[name="csrf-token"]');
+        if (meta) meta.setAttribute('content', token);
+    }
+
+    async function refreshMetaCsrf() {
+        try {
+            const res = await fetch('/api/csrf-token', { credentials: 'same-origin' });
+            const data = await res.json();
+            applyCsrfToken(data.token);
+        } catch (e) {}
+    }
+
+    async function ensureCsrfCookie() {
+        if (getXsrfCookie()) return;
+        await refreshMetaCsrf();
+    }
+
+    async function apiFetch(url, options = {}) {
+        await ensureCsrfCookie();
+
+        const headers = {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+            ...csrfHeaders(),
+            ...(options.headers || {}),
+        };
+
+        const res = await fetch(url, {
+            credentials: 'same-origin',
+            ...options,
+            headers,
+        });
+
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+            if (res.status === 419) {
+                await refreshMetaCsrf();
+                throw new Error('Oturum süresi doldu. Sayfayı yenileyip (Ctrl+F5) tekrar giriş yapın.');
+            }
+            if (res.status === 401) {
+                window._loginDone = false;
+                throw new Error('Oturumunuz yok veya süresi doldu. Lütfen tekrar giriş yapın.');
+            }
+            const errValues = data.errors ? Object.values(data.errors).flat() : [];
+            const msg =
+                errValues[0] ||
+                data.errors?.sinif_kodu?.[0] ||
+                data.message ||
+                'İstek başarısız.';
+            throw new Error(msg);
+        }
+        return data;
+    }
+
+    function userFromApi(u) {
+        return {
+            uid: u.uid,
+            name: u.name,
+            email: u.email,
+            avatar: u.avatar || '🐱',
+            role: u.role || 'ogrenci',
+            sinif: u.sinif,
+            sinifKodu: u.sinifKodu,
+            birthdate: u.birthdate || '',
+            totalScore: u.totalScore || 0,
+            password: '',
+        };
+    }
+
+    window._firebaseReady = false;
+    window._db = null;
+    window._auth = null;
+
+    window._waitFirebase = async () => {};
+
+    window._saveUserLocally = function (user) {
+        try {
+            const saved = localStorage.getItem('lisani_all_users');
+            const users = saved ? JSON.parse(saved) : [];
+            const idx = users.findIndex((u) => u.name.toLowerCase() === user.name.toLowerCase());
+            if (idx >= 0) users[idx] = { ...users[idx], ...user };
+            else users.push(user);
+            localStorage.setItem('lisani_all_users', JSON.stringify(users));
+        } catch (e) {}
+    };
+
+    const origSubmitLogin = window.submitLogin;
+    window.submitLogin = async function () {
+        playClickSound();
+        const usernameInput = document.getElementById('login-username').value.trim();
+        const passwordInput = document.getElementById('login-password').value;
+        const rememberMe = document.getElementById('login-remember-me')
+            ? document.getElementById('login-remember-me').checked
+            : false;
+
+        if (!usernameInput || !passwordInput) {
+            showToast('İsim ve şifre boş bırakılamaz.', 'error');
+            return;
+        }
+
+        showLoading('Giriş yapılıyor...');
+        try {
+            const data = await apiFetch('/api/login', {
+                method: 'POST',
+                body: JSON.stringify({
+                    name: usernameInput,
+                    password: passwordInput,
+                    remember: rememberMe,
+                }),
+            });
+            const user = userFromApi(data.user);
+            user.password = passwordInput;
+            window._loginDone = true;
+            currentUserRole = user.role;
+            _saveUserLocally(user);
+            applyCsrfToken(data.csrf_token);
+            hideLoading();
+            loginSuccess(user, rememberMe);
+        } catch (e) {
+            hideLoading();
+            if (!window._loginDone) showToast(e.message, 'error');
+        }
+    };
+
+    const origSubmitRegister = window.submitRegister;
+    window.submitRegister = async function () {
+        playClickSound();
+        const name = document.getElementById('reg-username').value.trim();
+        const password = document.getElementById('reg-password').value;
+        const passwordConfirm = document.getElementById('reg-password-confirm').value;
+        const role = document.getElementById('reg-role') ? document.getElementById('reg-role').value : 'ogrenci';
+        const sinif =
+            role === 'hoca'
+                ? document.getElementById('reg-sinif')
+                    ? document.getElementById('reg-sinif').value.trim()
+                    : ''
+                : '';
+        const sinifKodu =
+            role === 'ogrenci'
+                ? document.getElementById('reg-sinif-kodu')
+                    ? document.getElementById('reg-sinif-kodu').value.trim().toUpperCase()
+                    : ''
+                : '';
+
+        if (!name || !password || !passwordConfirm) {
+            showToast('Lütfen tüm alanları doldurun.', 'error');
+            return;
+        }
+        if (password !== passwordConfirm) {
+            showToast('Şifreler eşleşmiyor.', 'error');
+            return;
+        }
+        if (password.length < 6) {
+            showToast('Şifre en az 6 karakter olmalı.', 'error');
+            return;
+        }
+
+        showLoading('Hesap oluşturuluyor...');
+        try {
+            const data = await apiFetch('/api/register', {
+                method: 'POST',
+                body: JSON.stringify({
+                    name,
+                    password,
+                    role,
+                    sinif,
+                    sinif_kodu: sinifKodu || null,
+                    avatar: typeof selectedAvatarValue !== 'undefined' ? selectedAvatarValue : '🐱',
+                    remember: true,
+                }),
+            });
+            const user = userFromApi(data.user);
+            user.password = password;
+            window._loginDone = true;
+            currentUserRole = role;
+            _saveUserLocally(user);
+            applyCsrfToken(data.csrf_token);
+            hideLoading();
+            const sinifMsg = sinifKodu ? ' Sınıfa kaydedildiniz.' : '';
+            showToast('Hesap oluşturuldu!' + sinifMsg, 'success');
+            loginSuccess(user, true);
+            if (role === 'ogrenci') setTimeout(() => loadOgrenciOdevler(), 600);
+        } catch (e) {
+            hideLoading();
+            showToast(e.message, 'error');
+        }
+    };
+
+    window._firebaseLoginBg = async () => {};
+    window._firebaseRegisterBg = async () => {};
+
+    const origLogout = window.logoutApp;
+    window.logoutApp = async function () {
+        playClickSound();
+        window._manualLogout = true;
+        window._loginDone = false;
+        currentUser = null;
+        currentUserRole = null;
+
+        try {
+            localStorage.removeItem('lisani_session_user');
+            localStorage.removeItem('lisani_remember_me');
+            const data = await apiFetch('/api/logout', { method: 'POST', body: '{}' });
+            applyCsrfToken(data.csrf_token);
+        } catch (e) {}
+
+        document.getElementById('login-username').value = '';
+        document.getElementById('login-password').value = '';
+        const ru = document.getElementById('reg-username');
+        if (ru) ru.value = '';
+        const rp = document.getElementById('reg-password');
+        if (rp) rp.value = '';
+        const rpc = document.getElementById('reg-password-confirm');
+        if (rpc) rpc.value = '';
+
+        document.getElementById('main-application-flow').classList.add('hidden');
+        document.getElementById('auth-container').classList.remove('hidden');
+        toggleAuthTab('login');
+        showToast('Çıkış yapıldı.', 'info');
+    };
+
+    window.sinifaKatil = async function (sinifKodu) {
+        if (!currentUser || !sinifKodu || sinifKodu.trim().length < 4) {
+            showToast('Geçerli bir sınıf kodu girin.', 'error');
+            return;
+        }
+        const kod = sinifKodu.trim().toUpperCase();
+        showLoading('Sınıfa katılınıyor...');
+        try {
+            const data = await apiFetch('/api/sinif/' + encodeURIComponent(kod) + '/join', {
+                method: 'POST',
+                body: '{}',
+            });
+            const sd = data.sinif;
+            _saveLocalSinif(kod, sd);
+            _saveUserLocally(data.user);
+            currentUser = userFromApi(data.user);
+            loadOgrenciOdevler();
+            hideLoading();
+            showToast('✅ ' + sd.sinifAdi + ' sınıfına katıldınız!', 'success');
+            const modal = document.getElementById('sinif-katil-modal');
+            if (modal) modal.remove();
+        } catch (e) {
+            hideLoading();
+            showToast(e.message, 'error');
+        }
+    };
+
+    window.odevVer = function (hocaUid) {
+        const icerik = document.getElementById('odev-icerik').value.trim();
+        if (!icerik) {
+            showToast('Ödev içeriği boş olamaz.', 'error');
+            return;
+        }
+        apiFetch('/api/sinif/odev', {
+            method: 'POST',
+            body: JSON.stringify({ icerik }),
+        })
+            .then((data) => {
+                _saveLocalSinif(hocaUid, data.sinif);
+                showToast('Ödev gönderildi!', 'success');
+                loadHocaPanel(hocaUid);
+            })
+            .catch((e) => showToast(e.message, 'error'));
+    };
+
+    function statusBadge(status) {
+        const map = {
+            aktif: { label: 'Aktif', cls: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30' },
+            orta: { label: 'Orta', cls: 'bg-amber-500/15 text-amber-400 border-amber-500/30' },
+            pasif: { label: 'Pasif', cls: 'bg-stone-500/15 text-stone-400 border-stone-500/30' },
+        };
+        const s = map[status] || map.pasif;
+        return `<span class="text-[9px] font-bold px-2 py-0.5 rounded-full border ${s.cls}">${s.label}</span>`;
+    }
+
+    function formatLastActive(iso) {
+        if (!iso) return 'Henüz veri yok';
+        try {
+            const d = new Date(iso);
+            const diff = Math.floor((Date.now() - d.getTime()) / 86400000);
+            if (diff === 0) return 'Bugün';
+            if (diff === 1) return 'Dün';
+            if (diff < 7) return diff + ' gün önce';
+            return d.toLocaleDateString('tr-TR');
+        } catch (e) {
+            return '—';
+        }
+    }
+
+    function renderOgrenciAnalizTable(analiz) {
+        const a = analiz || { toplamDogru: 0, toplamYanlis: 0, sinavlar: [] };
+        const sinavlar = a.sinavlar || [];
+
+        if (sinavlar.length === 0) {
+            return '<p class="text-[9px] theme-text-muted py-2 text-center">Henüz çözülmüş test kaydı yok.</p>';
+        }
+
+        let rows = '';
+        sinavlar.forEach((s) => {
+            const pct = s.percent ?? 0;
+            const pctCls =
+                pct >= 80 ? 'text-emerald-400' : pct >= 60 ? 'text-blue-400' : 'text-amber-400';
+            rows += `<tr class="border-b theme-border/50">
+                <td class="py-1.5 pr-1 text-[9px] theme-text-muted whitespace-nowrap">${s.date || '—'}</td>
+                <td class="py-1.5 pr-1 text-[9px] theme-text-main">S${s.level}</td>
+                <td class="py-1.5 pr-1 text-[9px] theme-text-main truncate max-w-[72px]">${s.test || '—'}</td>
+                <td class="py-1.5 px-1 text-[9px] font-bold text-emerald-400 text-center">${s.correct ?? 0}</td>
+                <td class="py-1.5 px-1 text-[9px] font-bold text-red-400 text-center">${s.wrong ?? 0}</td>
+                <td class="py-1.5 pl-1 text-[9px] font-bold ${pctCls} text-right">%${pct}</td>
+            </tr>`;
+        });
+
+        return `
+        <div class="mt-2 p-2 rounded-xl bg-black/25 border theme-border/50">
+            <p class="text-[9px] font-bold theme-text-muted mb-2">
+                Özet: <span class="text-emerald-400">${a.toplamDogru} doğru</span> ·
+                <span class="text-red-400">${a.toplamYanlis} yanlış</span> ·
+                ${sinavlar.length} kayıtlı sınav
+            </p>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left">
+                    <thead>
+                        <tr class="text-[8px] theme-text-muted uppercase">
+                            <th class="pb-1">Tarih</th>
+                            <th class="pb-1">Sv</th>
+                            <th class="pb-1">Test</th>
+                            <th class="pb-1 text-center">✓</th>
+                            <th class="pb-1 text-center">✗</th>
+                            <th class="pb-1 text-right">%</th>
+                        </tr>
+                    </thead>
+                    <tbody>${rows}</tbody>
+                </table>
+            </div>
+        </div>`;
+    }
+
+    window.toggleOgrenciRapor = function (uid) {
+        const el = document.getElementById('ogrenci-rapor-' + uid);
+        if (el) el.classList.toggle('hidden');
+    };
+
+    window._renderHocaPanel = function (uid, payload) {
+        const sinif = payload.sinif || payload;
+        const ozet = payload.ozet || {};
+        const ogrenciler = payload.ogrenciler || [];
+
+        let ogrencilerHTML = '';
+        if (ogrenciler.length > 0) {
+            ogrenciler.forEach((o) => {
+                const barW = Math.min(100, o.avgSuccess || 0);
+                const analiz = o.analiz || {};
+                const lastTest = o.lastTestLabel
+                    ? `<p class="text-[9px] theme-text-muted mt-1 truncate">Son: ${o.lastTestLabel}${o.lastTestPercent != null ? ' · %' + o.lastTestPercent : ''}</p>`
+                    : '<p class="text-[9px] theme-text-muted mt-1">Henüz sınav çözmedi</p>';
+                ogrencilerHTML += `
+                <div class="glass-card-interactive rounded-2xl p-3.5 mb-2.5 border theme-border">
+                    <div class="flex items-start gap-3">
+                        <span class="text-2xl flex-shrink-0">${o.avatar || '🎒'}</span>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center justify-between gap-2">
+                                <span class="text-xs font-extrabold theme-text-main truncate">${o.name}</span>
+                                ${statusBadge(o.activityStatus)}
+                            </div>
+                            <p class="text-[9px] theme-text-muted mt-0.5">${formatLastActive(o.lastActiveAt)}</p>
+                            ${lastTest}
+                            <div class="mt-2 h-1.5 rounded-full bg-black/30 overflow-hidden">
+                                <div class="h-full rounded-full bg-gradient-to-r from-amber-600 to-amber-400" style="width:${barW}%"></div>
+                            </div>
+                            <div class="flex flex-wrap gap-x-3 gap-y-1 mt-2 text-[9px] font-bold">
+                                <span class="text-amber-400">${o.totalXp || 0} XP</span>
+                                <span class="theme-text-muted">${o.testsCount || 0} sınav</span>
+                                <span class="text-emerald-400">%${o.avgSuccess || 0} ort.</span>
+                                <span class="text-emerald-400">✓ ${analiz.toplamDogru ?? 0}</span>
+                                <span class="text-red-400">✗ ${analiz.toplamYanlis ?? 0}</span>
+                            </div>
+                            <button type="button" onclick="toggleOgrenciRapor('${o.uid}')" class="mt-2 w-full py-1.5 rounded-lg text-[9px] font-bold border theme-border theme-light-bg theme-text-main hover:opacity-90 flex items-center justify-center gap-1">
+                                <i data-lucide="file-bar-chart" class="w-3 h-3"></i>
+                                Analiz Raporu
+                            </button>
+                            <div id="ogrenci-rapor-${o.uid}" class="hidden">
+                                ${renderOgrenciAnalizTable(analiz)}
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+            });
+        } else {
+            ogrencilerHTML =
+                '<div class="text-center py-8"><p class="text-3xl mb-2">👥</p><p class="text-xs theme-text-muted">Henüz öğrenci yok.<br>Aşağıdaki sınıf kodunu öğrencilerinize verin.</p></div>';
+        }
+
+        let odevlerHTML = '';
+        const odevler = sinif.odevler || [];
+        if (odevler.length > 0) {
+            odevler
+                .slice(-3)
+                .reverse()
+                .forEach((o) => {
+                    odevlerHTML += `<div class="py-1.5 border-b theme-border last:border-0"><p class="text-xs theme-text-main">${o.icerik}</p><p class="text-[10px] theme-text-muted">${o.tarih}</p></div>`;
+                });
+        }
+
+        let panel = document.getElementById('hoca-panel-modal');
+        if (!panel) {
+            panel = document.createElement('div');
+            panel.id = 'hoca-panel-modal';
+            panel.className = 'fixed inset-0 z-50 flex flex-col theme-bg-phone';
+            document.body.appendChild(panel);
+        }
+
+        panel.innerHTML = `
+        <div class="flex flex-col h-full max-w-lg mx-auto w-full">
+            <div class="flex items-center justify-between px-5 pt-5 pb-3 border-b theme-border">
+                <div>
+                    <h2 class="text-sm font-extrabold theme-text-main">📊 Öğrenci Takip Paneli</h2>
+                    <p class="text-[10px] theme-text-muted">${sinif.sinifAdi || 'Sınıf'}</p>
+                </div>
+                <button onclick="document.getElementById('hoca-panel-modal').remove()" class="w-9 h-9 rounded-full theme-light-bg flex items-center justify-center theme-text-muted hover:opacity-80">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <div class="flex-1 overflow-y-auto px-5 py-4 space-y-4">
+                <div class="grid grid-cols-2 gap-2">
+                    <div class="glass-card rounded-xl p-3 text-center">
+                        <p class="text-[9px] theme-text-muted uppercase font-bold">Öğrenci</p>
+                        <p class="text-lg font-black text-amber-400">${ozet.ogrenciSayisi ?? ogrenciler.length}</p>
+                    </div>
+                    <div class="glass-card rounded-xl p-3 text-center">
+                        <p class="text-[9px] theme-text-muted uppercase font-bold">Aktif (7 gün)</p>
+                        <p class="text-lg font-black text-emerald-400">${ozet.aktifOgrenci ?? 0}</p>
+                    </div>
+                    <div class="glass-card rounded-xl p-3 text-center">
+                        <p class="text-[9px] theme-text-muted uppercase font-bold">Sınıf Ort.</p>
+                        <p class="text-lg font-black text-blue-400">%${ozet.ortalamaBasari ?? 0}</p>
+                    </div>
+                    <div class="glass-card rounded-xl p-3 text-center">
+                        <p class="text-[9px] theme-text-muted uppercase font-bold">Toplam XP</p>
+                        <p class="text-lg font-black theme-primary-color">${ozet.toplamXp ?? 0}</p>
+                    </div>
+                    <div class="glass-card rounded-xl p-3 text-center col-span-2">
+                        <p class="text-[9px] theme-text-muted uppercase font-bold">Sınıf test özeti</p>
+                        <p class="text-[10px] font-bold mt-1">
+                            <span class="text-emerald-400">${ozet.toplamDogru ?? 0} doğru</span>
+                            <span class="theme-text-muted mx-1">·</span>
+                            <span class="text-red-400">${ozet.toplamYanlis ?? 0} yanlış</span>
+                            <span class="theme-text-muted mx-1">·</span>
+                            <span class="theme-text-main">${ozet.toplamSinav ?? 0} sınav</span>
+                        </p>
+                    </div>
+                </div>
+                <div class="glass-card rounded-2xl p-4 border border-amber-500/20">
+                    <p class="text-[10px] theme-text-muted mb-1">Sınıf kodu (öğrencilere verin)</p>
+                    <p class="text-2xl font-black text-amber-400 font-mono tracking-widest text-center">${sinif.kisaKod || '—'}</p>
+                </div>
+                <div>
+                    <h3 class="text-xs font-extrabold theme-text-main mb-1 flex items-center gap-2">
+                        <i data-lucide="users" class="w-4 h-4 text-amber-400"></i>
+                        Öğrenci Durumları & Analiz
+                    </h3>
+                    <p class="text-[9px] theme-text-muted mb-2">Her öğrencide «Analiz Raporu» ile test detaylarını görün.</p>
+                    ${ogrencilerHTML}
+                </div>
+                ${odevlerHTML ? `<div><h3 class="text-xs font-extrabold theme-text-main mb-2">📋 Son Ödevler</h3><div class="glass-card rounded-xl p-3">${odevlerHTML}</div></div>` : ''}
+                <div class="glass-card rounded-2xl p-4">
+                    <h3 class="text-xs font-extrabold theme-text-main mb-2">📝 Yeni Ödev Ver</h3>
+                    <textarea id="odev-icerik" placeholder="Ödev içeriğini yazın..." class="w-full p-2.5 rounded-xl border theme-border theme-card-bg theme-text-main text-xs focus:outline-none resize-none h-20 mb-2"></textarea>
+                    <button onclick="odevVer('${uid}')" class="w-full py-2.5 theme-primary-btn rounded-xl text-xs font-bold">Ödevi Gönder</button>
+                </div>
+            </div>
+        </div>`;
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+    };
+
+    window.forceAuthScreen = function () {
+        window._loginDone = false;
+        window._manualLogout = false;
+        currentUser = null;
+        currentUserRole = null;
+        const auth = document.getElementById('auth-container');
+        const main = document.getElementById('main-application-flow');
+        if (main) main.classList.add('hidden');
+        if (auth) auth.classList.remove('hidden');
+        if (typeof toggleAuthTab === 'function') toggleAuthTab('login');
+    };
+
+    async function ensureServerSession() {
+        try {
+            const data = await apiFetch('/api/user');
+            if (data.user) {
+                const user = userFromApi(data.user);
+                window._loginDone = true;
+                currentUser = user;
+                currentUserRole = user.role;
+                return user;
+            }
+        } catch (e) {}
+        return null;
+    }
+
+    window.loadHocaPanel = async function (uid) {
+        showLoading('Öğrenciler yükleniyor...');
+        try {
+            const sessionUser = await ensureServerSession();
+            if (!sessionUser) {
+                hideLoading();
+                showToast('Sunucu oturumu yok. Tekrar giriş yapın (Demo Hoca / hoca123).', 'error');
+                forceAuthScreen();
+                return;
+            }
+            if (sessionUser.role !== 'hoca') {
+                hideLoading();
+                showToast('Bu panel sadece hoca hesapları içindir.', 'error');
+                return;
+            }
+            const data = await apiFetch('/api/hoca/ogrenci-takip');
+            _saveLocalSinif(uid, data.sinif);
+            hideLoading();
+            window._renderHocaPanel(uid, data);
+        } catch (e) {
+            hideLoading();
+            if ((e.message || '').includes('Oturum')) {
+                forceAuthScreen();
+            }
+            showToast(e.message || 'Panel yüklenemedi.', 'error');
+        }
+    };
+
+    window.showHocaPanel = async function () {
+        const user = await ensureServerSession();
+        if (!user || user.role !== 'hoca') {
+            if (currentUserRole === 'hoca' && !user) {
+                showToast('Lütfen çıkış yapıp Demo Hoca ile tekrar giriş yapın.', 'error');
+                forceAuthScreen();
+                return;
+            }
+            showToast('Bu ekran sadece hocalar içindir.', 'error');
+            return;
+        }
+        loadHocaPanel(user.uid);
+    };
+
+    const origInitSinif = window._initSinif;
+    window._initSinif = function (hocaUid) {
+        let sinif = _getLocalSinif(hocaUid);
+        if (!sinif) {
+            apiFetch('/api/sinif')
+                .then((data) => {
+                    _saveLocalSinif(hocaUid, data.sinif);
+                })
+                .catch(() => {});
+            sinif = {
+                hocaId: hocaUid,
+                hocaAdi: currentUser?.name || '',
+                sinifAdi: currentUser?.sinif || "Sınıf",
+                kisaKod: '...',
+                ogrenciler: [],
+                odevler: [],
+            };
+        }
+        return sinif;
+    };
+
+    function applyProfileToUI(user, avatarHtml) {
+        const avatar = avatarHtml ?? user.avatar;
+        document.getElementById('settings-profile-name').innerText = user.name;
+        const roleBadge = (user.role || currentUserRole) === 'hoca' ? '📚 Hoca' : '🎒 Öğrenci';
+        document.getElementById('settings-profile-sub').innerHTML = roleBadge;
+        document.getElementById('home-welcome-text').innerText = `Hoş Geldin, ${user.name}! 👋`;
+
+        const avatarContainers = [
+            document.getElementById('home-avatar-display'),
+            document.getElementById('settings-avatar-container'),
+        ];
+        avatarContainers.forEach((container) => {
+            if (!container) return;
+            container.innerHTML = avatar;
+            if (avatar && avatar.includes('<img')) {
+                container.classList.remove('text-lg');
+            } else {
+                container.classList.add('text-lg');
+            }
+        });
+    }
+
+    window.saveProfileChanges = async function () {
+        playClickSound();
+
+        const nameInput = document.getElementById('edit-profile-username').value.trim();
+        const birthdateInput = document.getElementById('edit-profile-birthdate').value;
+        const emailInput = document.getElementById('edit-profile-email').value.trim();
+        const avatar =
+            typeof editAvatarValue !== 'undefined' ? editAvatarValue : currentUser?.avatar || '🐱';
+
+        if (!nameInput || !birthdateInput) {
+            showToast('Lütfen tüm alanları doldurun.', 'error');
+            return;
+        }
+
+        const birthYear = new Date(birthdateInput).getFullYear();
+        const age = new Date().getFullYear() - birthYear;
+
+        showLoading('Profil kaydediliyor...');
+        try {
+            const data = await apiFetch('/api/profile', {
+                method: 'POST',
+                body: JSON.stringify({
+                    name: nameInput,
+                    birthdate: birthdateInput,
+                    email: emailInput || currentUser?.email,
+                    avatar,
+                }),
+            });
+
+            const user = userFromApi(data.user);
+            user.age = age;
+            if (currentUser?.password) user.password = currentUser.password;
+
+            currentUser = user;
+            _saveUserLocally(user);
+
+            try {
+                if (localStorage.getItem('lisani_remember_me') === 'true') {
+                    localStorage.setItem('lisani_session_user', JSON.stringify(user));
+                }
+            } catch (e) {}
+
+            applyProfileToUI(user, avatar);
+            hideLoading();
+            showToast('Profil güncellendi.', 'success');
+            closeEditProfile();
+        } catch (e) {
+            hideLoading();
+            showToast(e.message || 'Profil kaydedilemedi.', 'error');
+        }
+    };
+
+    async function trySessionRestore() {
+        if (window._manualLogout) return;
+
+        try {
+            const data = await apiFetch('/api/user');
+            if (data.user) {
+                const user = userFromApi(data.user);
+                window._loginDone = true;
+                currentUserRole = user.role;
+                const remember = localStorage.getItem('lisani_remember_me') === 'true';
+                loginSuccess(user, remember);
+                return;
+            }
+        } catch (e) {}
+
+        if (window._loginDone) return;
+
+        const rememberMe = localStorage.getItem('lisani_remember_me') === 'true';
+        const savedSession = localStorage.getItem('lisani_session_user');
+        if (!rememberMe || !savedSession) return;
+
+        try {
+            const savedUser = JSON.parse(savedSession);
+            const all = JSON.parse(localStorage.getItem('lisani_all_users') || '[]');
+            const found = all.find(
+                (u) => u.name && u.name.toLowerCase() === (savedUser.name || '').toLowerCase()
+            );
+            if (!found?.password) return;
+
+            const data = await apiFetch('/api/login', {
+                method: 'POST',
+                body: JSON.stringify({
+                    name: found.name,
+                    password: found.password,
+                    remember: true,
+                }),
+            });
+            const user = userFromApi(data.user);
+            user.password = found.password;
+            window._loginDone = true;
+            currentUserRole = user.role;
+            applyCsrfToken(data.csrf_token);
+            _saveUserLocally(user);
+            loginSuccess(user, true);
+        } catch (e) {}
+    }
+
+    window.restoreServerSession = trySessionRestore;
+
+    window.syncProgressToServer = async function () {
+        if (!currentUser || currentUserRole === 'hoca') return;
+        if (typeof testHistory === 'undefined') return;
+
+        const solvedCount = testHistory.length;
+        let totalSuccess = 0;
+        testHistory.forEach((r) => {
+            totalSuccess += r.percent;
+        });
+        const avgSuccess = solvedCount > 0 ? Math.round(totalSuccess / solvedCount) : 0;
+        const last = testHistory[testHistory.length - 1];
+
+        try {
+            await apiFetch('/api/progress/sync', {
+                method: 'POST',
+                body: JSON.stringify({
+                    total_xp: typeof totalScore !== 'undefined' ? totalScore : 0,
+                    tests_count: solvedCount,
+                    avg_success: avgSuccess,
+                    last_test: last
+                        ? {
+                              date: last.date,
+                              level: last.level,
+                              test: last.test,
+                              correct: last.correct,
+                              wrong: last.wrong,
+                              percent: last.percent,
+                          }
+                        : null,
+                    recent_tests: testHistory.map((r) => ({
+                        date: r.date,
+                        level: r.level,
+                        test: r.test,
+                        correct: r.correct,
+                        wrong: r.wrong,
+                        percent: r.percent,
+                    })),
+                }),
+            });
+        } catch (e) {}
+    };
+
+    function renderOdevlerList(containerId, data) {
+        const list = document.getElementById(containerId);
+        if (!list) return;
+
+        const sinifEl = document.getElementById('home-odevler-sinif');
+        if (sinifEl && data.sinifAdi) {
+            sinifEl.textContent = data.sinifAdi + (data.hocaAdi ? ' · ' + data.hocaAdi : '');
+        }
+
+        if (!data.sinifAdi && data.message) {
+            list.innerHTML = `<p class="text-[10px] theme-text-muted text-center py-3">${data.message}</p>`;
+            return;
+        }
+
+        const odevler = data.odevler || [];
+        if (odevler.length === 0) {
+            list.innerHTML =
+                '<p class="text-[10px] theme-text-muted text-center py-3">Henüz ödev yok. Hocanız ödev verdiğinde burada görünecek.</p>';
+            return;
+        }
+
+        list.innerHTML = odevler
+            .map(
+                (o) => `
+            <div class="glass-card-interactive rounded-xl p-3 border theme-border">
+                <p class="text-xs theme-text-main leading-relaxed">${o.icerik}</p>
+                <p class="text-[9px] theme-text-muted mt-1.5 flex justify-between">
+                    <span>${o.hocaAdi || data.hocaAdi || 'Hoca'}</span>
+                    <span>${o.tarih || ''}</span>
+                </p>
+            </div>`
+            )
+            .join('');
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    window.loadOgrenciOdevler = async function () {
+        if (currentUserRole === 'hoca' || !window._loginDone) return;
+        try {
+            const data = await apiFetch('/api/odevler');
+            renderOdevlerList('home-odevler-list', data);
+            renderOdevlerList('settings-odevler-list', data);
+        } catch (e) {
+            const msg = `<p class="text-[10px] text-red-400 text-center py-2">${e.message}</p>`;
+            const h = document.getElementById('home-odevler-list');
+            const s = document.getElementById('settings-odevler-list');
+            if (h) h.innerHTML = msg;
+            if (s) s.innerHTML = msg;
+        }
+    };
+
+    function updateOgrenciSinifUI(user) {
+        const block = document.getElementById('settings-sinif-kayit-block');
+        const mevcut = document.getElementById('settings-sinif-mevcut');
+        const input = document.getElementById('settings-sinif-kodu');
+        if (!block) return;
+        const isOgrenci = (user?.role || currentUserRole) === 'ogrenci';
+        block.classList.toggle('hidden', !isOgrenci);
+        if (!isOgrenci) return;
+        if (user?.sinifKodu || user?.sinif) {
+            const ad = user.sinif || 'Sınıf';
+            const kod = user.sinifKodu || '';
+            if (mevcut) mevcut.innerHTML = `Kayıtlı: <strong class="theme-text-main">${ad}</strong>${kod ? ' · Kod: <span class="font-mono text-amber-400">' + kod + '</span>' : ''}`;
+            if (input && kod) input.value = kod;
+        } else if (mevcut) {
+            mevcut.textContent = 'Henüz sınıfa kayıtlı değilsiniz. Hocanızdan kod alıp aşağıya yazın.';
+        }
+    }
+
+    window.saveOgrenciSinifKodu = async function () {
+        playClickSound();
+        const input = document.getElementById('settings-sinif-kodu');
+        const kod = input ? input.value.trim().toUpperCase() : '';
+        if (!kod || kod.length < 4) {
+            showToast('Geçerli bir sınıf kodu girin.', 'error');
+            return;
+        }
+        showLoading('Sınıf kaydediliyor...');
+        try {
+            const data = await apiFetch('/api/profile', {
+                method: 'POST',
+                body: JSON.stringify({ sinif_kodu: kod }),
+            });
+            const user = userFromApi(data.user);
+            currentUser = user;
+            _saveUserLocally(user);
+            updateOgrenciSinifUI(user);
+            loadOgrenciOdevler();
+            hideLoading();
+            showToast('Sınıfınız kaydedildi!', 'success');
+        } catch (e) {
+            hideLoading();
+            showToast(e.message, 'error');
+        }
+    };
+
+    function updateRoleBasedUI(user) {
+        const isHoca = (user?.role || currentUserRole) === 'hoca';
+        const isOgrenci = !isHoca;
+        const hocaCard = document.getElementById('home-hoca-takip-card');
+        const hocaRow = document.getElementById('settings-hoca-takip-row');
+        const odevCard = document.getElementById('home-odevler-card');
+        const odevSettings = document.getElementById('settings-odevler-block');
+        if (hocaCard) hocaCard.classList.toggle('hidden', !isHoca);
+        if (hocaRow) hocaRow.classList.toggle('hidden', !isHoca);
+        if (odevCard) odevCard.classList.toggle('hidden', !isOgrenci);
+        if (odevSettings) odevSettings.classList.toggle('hidden', !isOgrenci);
+        updateOgrenciSinifUI(user);
+        if (isOgrenci) {
+            setTimeout(() => window.loadOgrenciOdevler(), 400);
+        }
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    window.onLoginSuccessHook = function (user) {
+        updateRoleBasedUI(user);
+        if (user.role !== 'hoca') {
+            setTimeout(() => window.syncProgressToServer(), 800);
+        }
+    };
+
+    document.addEventListener('appReady', () => {
+        setTimeout(trySessionRestore, 300);
+        if (currentUser) updateRoleBasedUI(currentUser);
+    });
+    document.addEventListener('DOMContentLoaded', () => setTimeout(trySessionRestore, 2000));
+})();

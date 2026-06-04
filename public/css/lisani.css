@@ -1,0 +1,232 @@
+﻿        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: #050303;
+            transition: background-color 0.4s ease;
+            overflow-x: hidden;
+        }
+        .arabic-text {
+            font-family: 'Amiri', serif;
+        }
+
+        /* SEKME GEÇİŞLERİ İÇİN AKICI ANİMASYONLAR */
+        @keyframes slideUpFade {
+            from {
+                opacity: 0;
+                transform: translateY(14px) scale(0.98);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .screen {
+            display: none;
+            opacity: 0;
+            will-change: transform, opacity;
+        }
+
+        /* Aktif olan ekrana animasyon uygula */
+        .screen.active {
+            display: flex;
+            animation: slideUpFade 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        
+        /* DİNAMİK TEMA DEĞİŞKENLERİ */
+        :root {
+            --theme-bg-phone: #110a08; 
+            --theme-card-bg: rgba(43, 29, 22, 0.42);  /* Transparan cam arka planı */
+            --theme-border: rgba(255, 255, 255, 0.08);   /* İnce ışık yansıması veren kenarlık */
+            --theme-text-main: #FDF8F5; 
+            --theme-text-muted: #C5AFA4; 
+            --theme-primary: #D49B6A;   
+            --theme-primary-hover: #C58855;
+            --theme-secondary: rgba(58, 41, 32, 0.5);
+            --theme-card-gradient-from: #9E6C4C;
+            --theme-card-gradient-to: #4A3329;
+            --theme-accent-light: rgba(255, 255, 255, 0.03);
+            --theme-button-text: #FFFFFF;
+        }
+
+        /* Tema Sınıfları */
+        .theme-bg-phone {
+            background-color: var(--theme-bg-phone);
+        }
+        
+        /* BÜTÜNSEL CAM (GLASSMORPHISM) EFEKTLERİ */
+        .glass-card {
+            background: var(--theme-card-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--theme-border);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        .glass-card-interactive {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .glass-card-interactive:hover {
+            background: rgba(255, 255, 255, 0.07);
+            border-color: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 0 12px 0 rgba(var(--theme-primary-rgb, 212, 155, 106), 0.15);
+        }
+
+        /* Başarı ve Hata Cam Efektleri */
+        .glass-emerald {
+            background: rgba(16, 185, 129, 0.12) !important;
+            backdrop-filter: blur(16px) !important;
+            -webkit-backdrop-filter: blur(16px) !important;
+            border: 1.5px solid rgba(16, 185, 129, 0.4) !important;
+            box-shadow: 0 8px 24px rgba(16, 185, 129, 0.15) !important;
+        }
+
+        .glass-rose {
+            background: rgba(244, 63, 94, 0.12) !important;
+            backdrop-filter: blur(16px) !important;
+            -webkit-backdrop-filter: blur(16px) !important;
+            border: 1.5px solid rgba(244, 63, 94, 0.4) !important;
+            box-shadow: 0 8px 24px rgba(244, 63, 94, 0.15) !important;
+        }
+
+        .theme-card-bg {
+            background-color: var(--theme-card-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+        }
+        .theme-border {
+            border-color: var(--theme-border);
+        }
+        .theme-text-main {
+            color: var(--theme-text-main);
+            transition: color 0.2s ease-in-out;
+        }
+        .theme-text-muted {
+            color: var(--theme-text-muted);
+            transition: color 0.2s ease-in-out;
+        }
+        .theme-primary-color {
+            color: var(--theme-primary);
+            transition: color 0.2s ease-in-out;
+        }
+        .theme-primary-bg {
+            background-color: var(--theme-primary);
+            transition: background-color 0.2s ease-in-out;
+        }
+        .theme-primary-btn {
+            background-color: var(--theme-primary);
+            color: var(--theme-button-text);
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 14px 0 rgba(var(--theme-primary-rgb, 212, 155, 106), 0.25);
+        }
+        .theme-primary-btn:hover {
+            background-color: var(--theme-primary-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px 0 rgba(var(--theme-primary-rgb, 212, 155, 106), 0.35);
+        }
+        .theme-primary-btn:active {
+            transform: translateY(1px);
+        }
+        .theme-secondary-badge {
+            background-color: var(--theme-secondary);
+            color: var(--theme-text-main);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid var(--theme-border);
+        }
+        .theme-light-bg {
+            background-color: var(--theme-accent-light);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+        }
+        .theme-gradient-card {
+            background: linear-gradient(135deg, var(--theme-card-gradient-from) 0%, var(--theme-card-gradient-to) 100%);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.25);
+        }
+
+        /* DİNAMİK YAZI BOYUTU SINIFLARI */
+        .font-size-standard {
+            font-size: 1rem;
+        }
+        .font-size-standard .text-xs { font-size: 0.75rem; }
+        .font-size-standard .text-sm { font-size: 0.875rem; }
+        .font-size-standard .text-base { font-size: 1rem; }
+        .font-size-standard .text-lg { font-size: 1.125rem; }
+
+        .font-size-large {
+            font-size: 1.15rem; 
+        }
+        .font-size-large .text-xs { font-size: 0.875rem; }
+        .font-size-large .text-sm { font-size: 1rem; }
+        .font-size-large .text-base { font-size: 1.15rem; }
+        .font-size-large .text-lg { font-size: 1.3rem; }
+
+        .font-size-xlarge {
+            font-size: 1.3rem; 
+        }
+        .font-size-xlarge .text-xs { font-size: 1rem; }
+        .font-size-xlarge .text-sm { font-size: 1.15rem; }
+        .font-size-xlarge .text-base { font-size: 1.3rem; }
+        .font-size-xlarge .text-lg { font-size: 1.5rem; }
+
+        .overflow-y-auto {
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: thin;
+            scrollbar-color: var(--theme-primary) transparent;
+        }
+
+        ::-webkit-scrollbar {
+            width: 5px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--theme-primary);
+            border-radius: 10px;
+        }
+
+        .avatar-option.selected {
+            border-color: var(--theme-primary) !important;
+            transform: scale(1.06);
+            box-shadow: 0 0 16px rgba(212, 155, 106, 0.5), inset 0 0 0 1px rgba(212,155,106,0.3);
+            background: rgba(212,155,106,0.12) !important;
+        }
+        .avatar-option.selected span.text-3xl {
+            filter: drop-shadow(0 0 6px rgba(255,200,100,0.6));
+        }
+
+        @keyframes spinSlow {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .animate-spin-slow {
+            animation: spinSlow 15s linear infinite;
+        }
+
+        @keyframes floatCloudLeft {
+            0% { transform: translateX(-10px) translateY(0); }
+            50% { transform: translateX(15px) translateY(-5px); }
+            100% { transform: translateX(-10px) translateY(0); }
+        }
+        @keyframes floatCloudRight {
+            0% { transform: translateX(15px) translateY(0); }
+            50% { transform: translateX(-10px) translateY(5px); }
+            100% { transform: translateX(15px) translateY(0); }
+        }
+        .animate-cloud-1 {
+            animation: floatCloudLeft 8s ease-in-out infinite;
+        }
+        .animate-cloud-2 {
+            animation: floatCloudRight 10s ease-in-out infinite;
+        }
+
+        /* Cam parlaması animasyonu */
+        .glass-glow-blob {
+            filter: blur(80px);
+            mix-blend-mode: plus-lighter;
+            transition: background-color 0.6s ease;
+        }
