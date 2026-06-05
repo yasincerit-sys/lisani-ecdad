@@ -346,18 +346,16 @@
             playClickSound();
             const chosenSize = event.target.value;
             const bodyMain = document.getElementById('body-main');
-            
-            bodyMain.classList.remove('font-size-standard', 'font-size-large', 'font-size-xlarge');
-            
+            bodyMain.classList.remove('text-base', 'text-lg', 'text-xl');
             if (chosenSize === 'large') {
-                bodyMain.classList.add('font-size-large');
-                showToast("Bilişsel Odak Değişti! 🔎 Optik sinirlerin için taze bir görünüm alanı sağlandı.", "success");
+                bodyMain.classList.add('text-lg');
+                showToast('Yazı boyutu büyütüldü.', 'success');
             } else if (chosenSize === 'xlarge') {
-                bodyMain.classList.add('font-size-xlarge');
-                showToast("Büyüteç Etkisi! 🔎 Fotoreseptörlerin için en geniş okuma modu aktif edildi.", "success");
+                bodyMain.classList.add('text-xl');
+                showToast('En büyük yazı boyutu etkin.', 'success');
             } else {
-                bodyMain.classList.add('font-size-standard');
-                showToast("Doğal Görünüm Dengelendi! 🔎 Standart odaklama sistemine geri dönüldü.", "success");
+                bodyMain.classList.add('text-base');
+                showToast('Standart yazı boyutu etkin.', 'success');
             }
         }
 
@@ -391,16 +389,15 @@
             toastBox.style.transform = '';
             toastBox.style.opacity = '';
             
-            const baseCommon = "lisani-toast z-[100] transform translate-x-[-50%] translate-y-0 opacity-100 transition-all duration-300 pointer-events-auto cursor-grab select-none touch-none text-xs font-bold px-5 py-3.5 rounded-2xl flex items-center space-x-2 backdrop-blur-md left-1/2";
-            
+            const baseCommon = 'fixed top-4 left-1/2 z-[100] max-w-sm -translate-x-1/2 translate-y-0 opacity-100 transition-all duration-300 pointer-events-auto text-xs font-semibold px-4 py-2.5 rounded-lg flex items-center gap-2 shadow-lg border lg:top-20';
             if (type === 'success') {
-                toastBox.className = baseCommon + " bg-emerald-950/80 border-2 border-emerald-400 text-green-100 shadow-[0_10px_35px_rgba(16,185,129,0.35)]";
-                toastIcon.setAttribute('data-lucide', 'leaf');
+                toastBox.className = baseCommon + ' bg-emerald-600 border-emerald-700 text-white';
+                toastIcon.setAttribute('data-lucide', 'check');
             } else if (type === 'error') {
-                toastBox.className = baseCommon + " bg-rose-950/80 border-2 border-rose-500 text-rose-100 shadow-[0_10px_35px_rgba(244,63,94,0.35)]";
+                toastBox.className = baseCommon + ' bg-red-600 border-red-700 text-white';
                 toastIcon.setAttribute('data-lucide', 'alert-triangle');
             } else {
-                toastBox.className = baseCommon + " bg-stone-900/80 border border-stone-750 text-stone-200 shadow-xl";
+                toastBox.className = baseCommon + ' bg-gray-900 dark:bg-neutral-800 border-gray-700 text-white';
                 toastIcon.setAttribute('data-lucide', 'info');
             }
             
@@ -424,7 +421,7 @@
             toastBox.style.opacity = '0';
             
             setTimeout(() => {
-                toastBox.className = "lisani-toast left-1/2 z-[100] transform -translate-x-1/2 -translate-y-20 opacity-0 transition-all duration-300 pointer-events-none text-white text-xs font-bold px-5 py-3 rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.5)] flex items-center space-x-2 backdrop-blur-md";
+                toastBox.className = 'fixed top-4 left-1/2 -translate-x-1/2 z-[100] -translate-y-20 opacity-0 transition-all duration-300 pointer-events-none text-white text-xs font-semibold px-4 py-2.5 rounded-lg bg-gray-900 dark:bg-neutral-800 border border-gray-700 flex items-center gap-2 shadow-lg';
                 toastBox.style.transform = '';
                 toastBox.style.opacity = '';
                 toastBox.style.transition = '';
@@ -541,6 +538,91 @@
         }
 
         // --- KULLANICI / AUTH YÖNETİMİ (Firebase) ---
+        const TAKKE_AVATAR = '<span class="inline-flex flex-col items-center leading-none"><span class="text-[1.15em] leading-none">🧑</span><span class="-mt-px block h-1.5 w-4 min-w-[14px] rounded-t-full bg-indigo-950"></span></span>';
+
+        function teamAvatarImg(file) {
+            const base = (window.LISANI_ASSETS && window.LISANI_ASSETS.avatars) || '/images/avatars';
+            return `<img src="${base}/${file}" alt="" class="h-full w-full object-contain p-0.5" />`;
+        }
+
+        const AVATAR_OPTIONS = [
+            { type: 'cat', emoji: '🐱', label: 'Kedi' },
+            { type: 'alp', emoji: '🏹', label: 'Alp' },
+            { type: 'flower', emoji: '🌷', label: 'Lale' },
+            { type: 'scholar', emoji: '🎓', label: 'Talebe' },
+            { type: 'takke', emoji: TAKKE_AVATAR, label: 'Lacivert Takke' },
+            { type: 'besiktas', emoji: teamAvatarImg('besiktas.svg'), label: 'Beşiktaş' },
+            { type: 'goztepe', emoji: teamAvatarImg('goztepe.svg'), label: 'Göztepe' },
+            { type: 'bursaspor', emoji: teamAvatarImg('bursaspor.svg'), label: 'Bursaspor' },
+            { type: 'eskisehirspor', emoji: teamAvatarImg('eskisehirspor.svg'), label: 'Eskişehirspor' },
+            { type: 'falcon', emoji: '🦅', label: 'Kartal' },
+            { type: 'scribe', emoji: '📜', label: 'Hattat' },
+            { type: 'sword', emoji: '⚔️', label: 'Savaşçı' },
+            { type: 'book', emoji: '📖', label: 'Kitap' },
+            { type: 'mosque', emoji: '🕌', label: 'Cami' },
+            { type: 'lamp', emoji: '🪔', label: 'Kandil' },
+            { type: 'horse', emoji: '🐎', label: 'Sipahi' },
+            { type: 'owl', emoji: '🦉', label: 'Bilge' },
+        ];
+
+        function getAvatarLabel(type) {
+            const found = AVATAR_OPTIONS.find((a) => a.type === type);
+            return found ? found.label : type;
+        }
+
+        function highlightAvatarSelection(selector, emoji) {
+            document.querySelectorAll(selector).forEach((btn) => {
+                const active = btn.getAttribute('data-avatar-emoji') === emoji;
+                btn.classList.toggle('ring-2', active);
+                btn.classList.toggle('ring-blue-600', active);
+                btn.classList.toggle('border-blue-600', active);
+                if (selector === '.avatar-option') {
+                    btn.classList.toggle('scale-105', active);
+                }
+            });
+        }
+
+        function avatarIconHtml(value, size) {
+            const isImg = typeof value === 'string' && value.includes('<img');
+            if (isImg) {
+                return `<span class="flex ${size} items-center justify-center overflow-hidden">${value}</span>`;
+            }
+            return `<span class="${size === 'h-8 w-8' ? 'text-2xl' : 'text-xl'} leading-none">${value}</span>`;
+        }
+
+        function createAvatarButton(opt, mode) {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.setAttribute('data-avatar-type', opt.type);
+            btn.setAttribute('data-avatar-emoji', opt.emoji);
+            const iconSize = mode === 'register' ? 'h-8 w-8' : 'h-7 w-7';
+            const labelSize = mode === 'register' ? 'text-[8px]' : 'text-[7px]';
+            btn.className = mode === 'register'
+                ? 'avatar-option flex flex-col items-center justify-center gap-1 rounded-xl border-2 border-gray-200 bg-white py-2.5 transition-all dark:border-neutral-700 dark:bg-neutral-900'
+                : 'edit-avatar-option flex flex-col items-center justify-center gap-1 rounded-xl border-2 border-gray-200 bg-gray-100 py-2 transition-all dark:border-neutral-700 dark:bg-neutral-800';
+            btn.innerHTML = `${avatarIconHtml(opt.emoji, iconSize)}<span class="${labelSize} font-semibold text-gray-500 dark:text-neutral-400">${opt.label}</span>`;
+            if (mode === 'register') {
+                btn.addEventListener('click', () => selectAvatar(opt.type, opt.emoji, btn));
+            } else {
+                btn.addEventListener('click', () => selectEditAvatar(opt.type, opt.emoji, btn));
+            }
+            return btn;
+        }
+
+        function initAvatarGrids() {
+            const regGrid = document.getElementById('avatar-grid');
+            const editGrid = document.getElementById('edit-avatar-grid');
+            if (regGrid) {
+                regGrid.innerHTML = '';
+                AVATAR_OPTIONS.forEach((opt) => regGrid.appendChild(createAvatarButton(opt, 'register')));
+                highlightAvatarSelection('.avatar-option', selectedAvatarValue);
+            }
+            if (editGrid) {
+                editGrid.innerHTML = '';
+                AVATAR_OPTIONS.forEach((opt) => editGrid.appendChild(createAvatarButton(opt, 'edit')));
+            }
+        }
+
         let selectedAvatarType = 'cat';
         let selectedAvatarValue = '🐱';
         let editAvatarValue = '🐱';
@@ -564,13 +646,13 @@
             const hocaDiv = document.getElementById('reg-sinif-hoca-div');
             const ogrenciDiv = document.getElementById('reg-sinif-ogrenci-div');
             if (role === 'hoca') {
-                document.getElementById('role-btn-hoca').className = 'flex-1 py-2.5 rounded-xl text-xs font-bold transition-all theme-primary-bg text-white border border-[var(--theme-primary)]';
-                document.getElementById('role-btn-ogrenci').className = 'flex-1 py-2.5 rounded-xl text-xs font-bold transition-all theme-card-bg theme-text-muted border theme-border';
+                document.getElementById('role-btn-hoca').className = 'flex-1 py-2.5 rounded-xl text-xs font-bold transition-all bg-blue-600 text-white border border-blue-600';
+                document.getElementById('role-btn-ogrenci').className = 'flex-1 py-2.5 rounded-xl text-xs font-bold transition-all bg-white dark:bg-neutral-900 text-gray-500 dark:text-neutral-400 border border-gray-200 dark:border-neutral-700';
                 if (hocaDiv) hocaDiv.classList.remove('hidden');
                 if (ogrenciDiv) ogrenciDiv.classList.add('hidden');
             } else {
-                document.getElementById('role-btn-ogrenci').className = 'flex-1 py-2.5 rounded-xl text-xs font-bold transition-all theme-primary-bg text-white border border-[var(--theme-primary)]';
-                document.getElementById('role-btn-hoca').className = 'flex-1 py-2.5 rounded-xl text-xs font-bold transition-all theme-card-bg theme-text-muted border theme-border';
+                document.getElementById('role-btn-ogrenci').className = 'flex-1 py-2.5 rounded-xl text-xs font-bold transition-all bg-blue-600 text-white border border-blue-600';
+                document.getElementById('role-btn-hoca').className = 'flex-1 py-2.5 rounded-xl text-xs font-bold transition-all bg-white dark:bg-neutral-900 text-gray-500 dark:text-neutral-400 border border-gray-200 dark:border-neutral-700';
                 if (hocaDiv) hocaDiv.classList.add('hidden');
                 if (ogrenciDiv) ogrenciDiv.classList.remove('hidden');
             }
@@ -584,52 +666,37 @@
             const registerForm = document.getElementById('auth-form-register');
 
             if (tab === 'login') {
-                loginTab.className = "flex-1 py-2.5 rounded-xl text-xs font-bold transition-all theme-primary-bg text-white shadow-md";
-                registerTab.className = "flex-1 py-2.5 rounded-xl text-xs font-bold transition-all theme-text-muted hover:text-white";
+                loginTab.className = "flex-1 py-2.5 rounded-xl text-xs font-bold transition-all bg-blue-600 text-white shadow-md";
+                registerTab.className = "flex-1 py-2.5 rounded-xl text-xs font-bold transition-all text-gray-500 dark:text-neutral-400 hover:text-white";
                 loginForm.classList.remove('hidden');
                 registerForm.classList.add('hidden');
             } else {
-                registerTab.className = "flex-1 py-2.5 rounded-xl text-xs font-bold transition-all theme-primary-bg text-white shadow-md";
-                loginTab.className = "flex-1 py-2.5 rounded-xl text-xs font-bold transition-all theme-text-muted hover:text-white";
+                registerTab.className = "flex-1 py-2.5 rounded-xl text-xs font-bold transition-all bg-blue-600 text-white shadow-md";
+                loginTab.className = "flex-1 py-2.5 rounded-xl text-xs font-bold transition-all text-gray-500 dark:text-neutral-400 hover:text-white";
                 registerForm.classList.remove('hidden');
                 loginForm.classList.add('hidden');
             }
         }
 
-        function selectAvatar(type, emoji) {
+        function selectAvatar(type, emoji, btnEl) {
             playClickSound();
             selectedAvatarType = type;
             selectedAvatarValue = emoji;
+            highlightAvatarSelection('.avatar-option', emoji);
 
-            document.querySelectorAll('.avatar-option').forEach(btn => {
-                btn.classList.remove('selected');
-            });
-
-            event.currentTarget.classList.add('selected');
-
-            // Büyük önizlemeyi güncelle
             const preview = document.getElementById('avatar-preview-big');
             const label = document.getElementById('avatar-preview-label');
             if (preview) preview.innerHTML = emoji;
-            if (label) {
-                const names = {cat:'Kedi', alp:'Alp', flower:'Lale', scholar:'Talebe', falcon:'Kartal', scribe:'Hattat', sword:'Savaşçı'};
-                label.textContent = names[type] || type;
-            }
+            if (label) label.textContent = getAvatarLabel(type);
         }
 
-        function selectEditAvatar(type, emoji) {
+        function selectEditAvatar(type, emoji, btnEl) {
             playClickSound();
             editAvatarValue = emoji;
-            
-            document.querySelectorAll('.edit-avatar-option').forEach(btn => {
-                btn.classList.remove('selected');
-            });
-            if (event) {
-                event.currentTarget.classList.add('selected');
-            }
+            highlightAvatarSelection('.edit-avatar-option', emoji);
 
             const preview = document.getElementById('edit-avatar-preview');
-            preview.innerHTML = emoji;
+            if (preview) preview.innerHTML = emoji;
         }
 
         function triggerAvatarUpload() {
@@ -751,38 +818,38 @@
             // 3 Normal Test Sürümü (Ultra Glassmorphic)
             for (let i = 1; i <= 3; i++) {
                 const testBtn = document.createElement('button');
-                testBtn.className = "glass-card glass-card-interactive rounded-2xl p-4 text-left flex items-center justify-between shadow-md w-full";
+                testBtn.className = 'flex w-full items-center justify-between gap-2 rounded-xl border border-gray-200 bg-white p-4 text-left transition-colors active:bg-gray-50 dark:border-neutral-700 dark:bg-neutral-900 dark:active:bg-neutral-800';
                 testBtn.onclick = () => launchQuizEngine(level, `Test ${i}`);
                 testBtn.innerHTML = `
-                    <div class="flex items-center space-x-3.5">
-                        <div class="w-10 h-10 rounded-full bg-amber-500/10 text-amber-500 flex items-center justify-center border border-amber-500/25">
-                            <i data-lucide="file-question" class="w-5 h-5"></i>
+                    <div class="flex min-w-0 flex-1 items-center gap-3">
+                        <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-amber-500/25 bg-amber-500/10">
+                            <i data-lucide="file-question" class="h-5 w-5 text-amber-500"></i>
                         </div>
-                        <div>
-                            <h4 class="text-xs font-extrabold theme-text-main">Test ${i}</h4>
-                            <p class="text-[10px] theme-text-muted mt-0.5">Seviye kazanımını ölçecek 5 özel soru.</p>
+                        <div class="min-w-0 flex-1">
+                            <h4 class="text-xs font-extrabold text-gray-900 dark:text-neutral-100">Test ${i}</h4>
+                            <p class="mt-0.5 text-[10px] leading-snug text-gray-500 dark:text-neutral-400">Seviye kazanımını ölçecek 5 özel soru.</p>
                         </div>
                     </div>
-                    <span class="text-[9px] theme-primary-color bg-white/5 border border-white/10 px-2.5 py-1 rounded-full font-bold uppercase tracking-wider">Hemen Başla</span>
+                    <span class="shrink-0 rounded-full border border-blue-200 bg-blue-50 px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider text-blue-600 dark:border-blue-800 dark:bg-blue-950/50 dark:text-blue-400">Başla</span>
                 `;
                 testsContainer.appendChild(testBtn);
             }
 
             // 1 Genel Sınav (Ultra Glassmorphic Parıltı)
             const generalTestBtn = document.createElement('button');
-            generalTestBtn.className = "glass-card glass-card-interactive border-2 border-dashed border-[var(--theme-primary)] hover:border-neutral-500 rounded-2xl p-4.5 text-left flex items-center justify-between shadow-lg w-full mt-2";
+            generalTestBtn.className = 'mt-2 flex w-full items-center justify-between gap-2 rounded-xl border-2 border-dashed border-blue-600 bg-white p-4 text-left transition-colors active:bg-gray-50 dark:bg-neutral-900 dark:active:bg-neutral-800';
             generalTestBtn.onclick = () => launchQuizEngine(level, 'Genel');
             generalTestBtn.innerHTML = `
-                <div class="flex items-center space-x-3.5">
-                    <div class="w-10 h-10 rounded-full bg-emerald-500/10 text-emerald-450 flex items-center justify-center border border-emerald-500/25">
-                        <i data-lucide="award" class="w-5 h-5"></i>
+                <div class="flex min-w-0 flex-1 items-center gap-3">
+                    <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-emerald-500/25 bg-emerald-500/10">
+                        <i data-lucide="award" class="h-5 w-5 text-emerald-500"></i>
                     </div>
-                    <div>
-                        <h4 class="text-xs font-black theme-text-main">Genel Değerlendirme Testi 🏆</h4>
-                        <p class="text-[10px] theme-text-muted mt-0.5">Seviyenin tüm harf ve kurallarını içeren karma test.</p>
+                    <div class="min-w-0 flex-1">
+                        <h4 class="text-xs font-black text-gray-900 dark:text-neutral-100">Genel Değerlendirme Testi 🏆</h4>
+                        <p class="mt-0.5 text-[10px] leading-snug text-gray-500 dark:text-neutral-400">Seviyenin tüm harf ve kurallarını içeren karma test.</p>
                     </div>
                 </div>
-                <span class="text-[9px] text-emerald-450 bg-emerald-500/15 border border-emerald-500/30 px-3 py-1.5 rounded-full font-extrabold uppercase tracking-wider animate-pulse">Büyük Sınav</span>
+                <span class="shrink-0 rounded-full border border-emerald-500/30 bg-emerald-500/15 px-3 py-1.5 text-[9px] font-extrabold uppercase tracking-wider text-emerald-500">Büyük Sınav</span>
             `;
             testsContainer.appendChild(generalTestBtn);
 
@@ -835,8 +902,8 @@
             q.options.forEach(option => {
                 const btn = document.createElement('button');
                 // Premium Buzlu Cam Seçenek Butonu
-                btn.className = "w-full py-3.5 px-4 bg-white/5 border border-white/10 rounded-xl theme-text-main text-xs font-bold transition-all text-left flex justify-between items-center cursor-pointer active:scale-[0.98] shadow-sm hover:bg-white/10 hover:border-white/20";
-                btn.innerHTML = `<span>${option}</span> <i data-lucide="chevron-right" class="w-4 h-4 theme-text-muted"></i>`;
+                btn.className = "w-full py-3.5 px-4 bg-white/5 border border-white/10 rounded-xl text-gray-900 dark:text-neutral-100 text-xs font-bold transition-all text-left flex justify-between items-center cursor-pointer active:scale-[0.98] shadow-sm hover:bg-white/10 hover:border-white/20";
+                btn.innerHTML = `<span>${option}</span> <i data-lucide="chevron-right" class="w-4 h-4 text-gray-500 dark:text-neutral-400"></i>`;
                 btn.onclick = () => selectQuizOption(option, q.answer, btn);
                 container.appendChild(btn);
             });
@@ -856,8 +923,8 @@
             allButtons.forEach(b => b.disabled = true);
 
             if (selected === correct) {
-                // glass-emerald sınıfı eklendi
-                btn.className = "w-full py-3.5 px-4 glass-emerald rounded-xl text-emerald-400 text-xs font-black transition-all text-left flex justify-between items-center";
+                // bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-700 sınıfı eklendi
+                btn.className = "w-full py-3.5 px-4 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-700 rounded-xl text-emerald-400 text-xs font-black transition-all text-left flex justify-between items-center";
                 
                 feedback.className = "rounded-xl p-3.5 text-center text-xs font-bold bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 backdrop-blur-md";
                 feedback.innerHTML = "Harika Başarı! 🌿 Bilgileriniz pekişiyor, yeni bir soruyu başarıyla çözdünüz! +10 XP";
@@ -866,8 +933,8 @@
                 updateUIPoints();
                 updateLearningStats();
             } else {
-                // glass-rose sınıfı eklendi
-                btn.className = "w-full py-3.5 px-4 glass-rose rounded-xl text-red-400 text-xs font-black transition-all text-left flex justify-between items-center";
+                // bg-rose-50 dark:bg-rose-950/40 border border-rose-300 dark:border-rose-700 sınıfı eklendi
+                btn.className = "w-full py-3.5 px-4 bg-rose-50 dark:bg-rose-950/40 border border-rose-300 dark:border-rose-700 rounded-xl text-red-400 text-xs font-black transition-all text-left flex justify-between items-center";
                 
                 feedback.className = "rounded-xl p-3.5 text-center text-xs font-bold bg-red-500/10 border border-red-500/30 text-red-400 backdrop-blur-md";
                 feedback.innerHTML = `Yeni Bir Öğrenim! 📈 Hatalar en iyi öğrenme fırsatıdır. Doğru yanıt: <strong>${correct}</strong>`;
@@ -968,12 +1035,7 @@
             preview.innerHTML = currentUser.avatar;
             editAvatarValue = currentUser.avatar;
 
-            document.querySelectorAll('.edit-avatar-option').forEach(btn => {
-                btn.classList.remove('selected');
-                if (btn.innerText === currentUser.avatar) {
-                    btn.classList.add('selected');
-                }
-            });
+            highlightAvatarSelection('.edit-avatar-option', currentUser.avatar);
 
             document.getElementById('edit-profile-container').classList.remove('hidden');
         }
@@ -1450,20 +1512,20 @@
             if (sinif.ogrenciler && sinif.ogrenciler.length > 0) {
                 sinif.ogrenciler.forEach(oid => {
                     const o = allUsers.find(u => u.uid === oid) || { name: '(bilinmiyor)', avatar: '🎒', totalScore: 0 };
-                    ogrencilerHTML += `<div class="flex items-center gap-2 py-2 border-b theme-border">
+                    ogrencilerHTML += `<div class="flex items-center gap-2 py-2 border-b border-gray-200 dark:border-neutral-700">
                         <span class="text-xl">${o.avatar || '🎒'}</span>
-                        <div class="flex-1"><div class="text-xs font-bold theme-text-main">${o.name}</div></div>
+                        <div class="flex-1"><div class="text-xs font-bold text-gray-900 dark:text-neutral-100">${o.name}</div></div>
                         <span class="text-xs font-bold text-amber-400">${o.totalScore || 0} XP</span>
                     </div>`;
                 });
             } else {
-                ogrencilerHTML = '<p class="text-xs theme-text-muted text-center py-4">Henüz öğrenci yok.<br>Sınıf kodunu öğrencilerinize verin.</p>';
+                ogrencilerHTML = '<p class="text-xs text-gray-500 dark:text-neutral-400 text-center py-4">Henüz öğrenci yok.<br>Sınıf kodunu öğrencilerinize verin.</p>';
             }
 
             let odevlerHTML = '';
             if (sinif.odevler && sinif.odevler.length > 0) {
                 sinif.odevler.slice(-3).reverse().forEach(o => {
-                    odevlerHTML += `<div class="py-1.5 border-b theme-border"><p class="text-xs theme-text-main">${o.icerik}</p><p class="text-[10px] theme-text-muted">${o.tarih}</p></div>`;
+                    odevlerHTML += `<div class="py-1.5 border-b border-gray-200 dark:border-neutral-700"><p class="text-xs text-gray-900 dark:text-neutral-100">${o.icerik}</p><p class="text-[10px] text-gray-500 dark:text-neutral-400">${o.tarih}</p></div>`;
                 });
             }
 
@@ -1471,20 +1533,20 @@
             if (!panel) { panel = document.createElement('div'); panel.id = 'hoca-panel-modal'; panel.className = 'fixed inset-0 z-50 flex items-end justify-center'; document.body.appendChild(panel); }
             panel.innerHTML = `<div class="w-full max-w-sm bg-stone-950 rounded-t-3xl border-t border-stone-700 p-5 max-h-[85vh] overflow-y-auto">
                 <div class="flex items-center justify-between mb-4">
-                    <h2 class="text-sm font-extrabold theme-text-main">📚 Hoca Paneli</h2>
+                    <h2 class="text-sm font-extrabold text-gray-900 dark:text-neutral-100">📚 Hoca Paneli</h2>
                     <button onclick="document.getElementById('hoca-panel-modal').remove()" class="text-stone-500 hover:text-stone-300 text-xl">✕</button>
                 </div>
                 <div class="bg-stone-800/60 rounded-xl p-3 mb-4">
-                    <p class="text-[10px] theme-text-muted mb-1">📎 Grup: <strong class="theme-text-main">${sinif.sinifAdi}</strong></p>
-                    <p class="text-[10px] theme-text-muted mb-0.5">Sınıf Kodu (öğrencilere verin):</p>
+                    <p class="text-[10px] text-gray-500 dark:text-neutral-400 mb-1">📎 Grup: <strong class="text-gray-900 dark:text-neutral-100">${sinif.sinifAdi}</strong></p>
+                    <p class="text-[10px] text-gray-500 dark:text-neutral-400 mb-0.5">Sınıf Kodu (öğrencilere verin):</p>
                     <p class="text-2xl font-bold text-amber-400 font-mono tracking-widest">${sinif.kisaKod || kod.substring(0,8)}</p>
                 </div>
-                <h3 class="text-xs font-bold theme-text-main mb-2">👥 Öğrenciler (${sinif.ogrenciler.length})</h3>
+                <h3 class="text-xs font-bold text-gray-900 dark:text-neutral-100 mb-2">👥 Öğrenciler (${sinif.ogrenciler.length})</h3>
                 <div class="mb-4">${ogrencilerHTML}</div>
-                ${odevlerHTML ? `<h3 class="text-xs font-bold theme-text-main mb-2">📋 Son Ödevler</h3><div class="mb-4">${odevlerHTML}</div>` : ''}
-                <h3 class="text-xs font-bold theme-text-main mb-2">📝 Yeni Ödev Ver</h3>
-                <textarea id="odev-icerik" placeholder="Ödev içeriğini yazın..." class="w-full p-2.5 rounded-xl border theme-border bg-stone-900 theme-text-main text-xs focus:outline-none resize-none h-20 mb-2"></textarea>
-                <button onclick="odevVer('${uid}')" class="w-full py-2.5 theme-primary-btn rounded-xl text-xs font-bold">Ödevi Gönder</button>
+                ${odevlerHTML ? `<h3 class="text-xs font-bold text-gray-900 dark:text-neutral-100 mb-2">📋 Son Ödevler</h3><div class="mb-4">${odevlerHTML}</div>` : ''}
+                <h3 class="text-xs font-bold text-gray-900 dark:text-neutral-100 mb-2">📝 Yeni Ödev Ver</h3>
+                <textarea id="odev-icerik" placeholder="Ödev içeriğini yazın..." class="w-full p-2.5 rounded-xl border border-gray-200 dark:border-neutral-700 bg-stone-900 text-gray-900 dark:text-neutral-100 text-xs focus:outline-none resize-none h-20 mb-2"></textarea>
+                <button onclick="odevVer('${uid}')" class="w-full py-2.5 inline-flex items-center justify-center bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold transition-colors rounded-xl text-xs font-bold">Ödevi Gönder</button>
             </div>`;
         }
 
@@ -1561,12 +1623,12 @@
             }
             modal.innerHTML = `<div class="w-full max-w-sm bg-stone-900 rounded-t-3xl border-t border-stone-700 p-5">
                 <div class="flex items-center justify-between mb-4">
-                    <h2 class="text-sm font-extrabold theme-text-main">🏫 Sınıfa Katıl</h2>
+                    <h2 class="text-sm font-extrabold text-gray-900 dark:text-neutral-100">🏫 Sınıfa Katıl</h2>
                     <button onclick="document.getElementById('sinif-katil-modal').remove()" class="text-stone-500 hover:text-stone-300">✕</button>
                 </div>
-                <p class="text-xs theme-text-muted mb-3">Hocanızdan aldığınız 8 haneli sınıf kodunu girin:</p>
-                <input id="sinif-kod-input" type="text" maxlength="8" placeholder="ÖRN: AB1C2D3E" class="w-full p-3 rounded-xl border theme-border theme-card-bg theme-text-main text-sm font-mono font-bold uppercase focus:outline-none mb-3">
-                <button onclick="sinifaKatil(document.getElementById('sinif-kod-input').value)" class="w-full py-3 theme-primary-btn rounded-xl text-xs font-bold">Katıl</button>
+                <p class="text-xs text-gray-500 dark:text-neutral-400 mb-3">Hocanızdan aldığınız 8 haneli sınıf kodunu girin:</p>
+                <input id="sinif-kod-input" type="text" maxlength="8" placeholder="ÖRN: AB1C2D3E" class="w-full p-3 rounded-xl border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-gray-900 dark:text-neutral-100 text-sm font-mono font-bold uppercase focus:outline-none mb-3">
+                <button onclick="sinifaKatil(document.getElementById('sinif-kod-input').value)" class="w-full py-3 inline-flex items-center justify-center bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold transition-colors rounded-xl text-xs font-bold">Katıl</button>
             </div>`;
         }
 
@@ -1589,6 +1651,51 @@
 
         // --- TEMA PALETİ VE AYARLARI ---
         const themes = {
+            'preline-light': {
+                bgPhone: '#f9fafb',
+                cardBg: '#ffffff',
+                border: '#e5e7eb',
+                textMain: '#111827',
+                textMuted: '#6b7280',
+                primary: '#2563eb',
+                primaryHover: '#1d4ed8',
+                secondary: '#f3f4f6',
+                gradientFrom: '#2563eb',
+                gradientTo: '#1d4ed8',
+                accentLight: '#f3f4f6',
+                buttonText: '#FFFFFF',
+                isDark: false,
+            },
+            'preline-dark': {
+                bgPhone: '#0a0a0a',
+                cardBg: '#171717',
+                border: '#404040',
+                textMain: '#f5f5f5',
+                textMuted: '#a3a3a3',
+                primary: '#3b82f6',
+                primaryHover: '#2563eb',
+                secondary: '#262626',
+                gradientFrom: '#3b82f6',
+                gradientTo: '#2563eb',
+                accentLight: '#262626',
+                buttonText: '#FFFFFF',
+                isDark: true,
+            },
+            'ecdad-authentic': {
+                bgPhone: '#1a120c',
+                cardBg: '#2a1f18',
+                border: '#5c4a38',
+                textMain: '#f4ece1',
+                textMuted: '#b8a088',
+                primary: '#c9a227',
+                primaryHover: '#a8841f',
+                secondary: '#352820',
+                gradientFrom: '#8c6239',
+                gradientTo: '#5c3e2e',
+                accentLight: '#352820',
+                buttonText: '#f4ece1',
+                isDark: true,
+            },
             'brown-classic': {
                 bgPhone: '#f4ece1',
                 cardBg: 'rgba(255, 255, 255, 0.55)',
@@ -1601,7 +1708,8 @@
                 gradientFrom: '#5C3E2E',
                 gradientTo: '#8C6239',
                 accentLight: 'rgba(250, 246, 240, 0.45)',
-                buttonText: '#FFFFFF'
+                buttonText: '#FFFFFF',
+                isDark: false,
             },
             'brown-darkbrown': {
                 bgPhone: '#18100c', 
@@ -1615,7 +1723,8 @@
                 gradientFrom: '#9E6C4C',
                 gradientTo: '#52392E',
                 accentLight: 'rgba(54, 38, 30, 0.35)',
-                buttonText: '#FFFFFF'
+                buttonText: '#FFFFFF',
+                isDark: true,
             },
             'emerald-mint': {
                 bgPhone: '#051813',
@@ -1629,7 +1738,8 @@
                 gradientFrom: '#064E3B',
                 gradientTo: '#0F766E',
                 accentLight: 'rgba(15, 118, 110, 0.15)',
-                buttonText: '#FFFFFF'
+                buttonText: '#FFFFFF',
+                isDark: true,
             },
             'blue-darkblue': {
                 bgPhone: '#040814',
@@ -1643,104 +1753,131 @@
                 gradientFrom: '#3B82F6',
                 gradientTo: '#1E3A8A',
                 accentLight: 'rgba(11, 19, 43, 0.35)',
-                buttonText: '#FFFFFF'
+                buttonText: '#FFFFFF',
+                isDark: true,
             }
         };
 
         let currentActiveScreen = 'home';
 
-        function applyTheme(themeKey) {
+        const THEME_MODE_KEY = 'lisani_theme_mode';
+        const THEME_PALETTE_KEY = 'lisani_theme_palette';
+
+        function getSystemColorScheme() {
+            return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        }
+
+        function resolveThemeKey() {
+            const mode = localStorage.getItem(THEME_MODE_KEY) || 'system';
+            if (mode === 'ecdad') return 'ecdad-authentic';
+            if (mode === 'system') {
+                return getSystemColorScheme() === 'dark' ? 'preline-dark' : 'preline-light';
+            }
+            if (mode === 'light') return 'preline-light';
+            if (mode === 'dark') return 'preline-dark';
+            const saved = localStorage.getItem(THEME_PALETTE_KEY);
+            if (saved && themes[saved]) return saved;
+            return getSystemColorScheme() === 'dark' ? 'preline-dark' : 'preline-light';
+        }
+
+        function updateThemeColorMeta() {
+            const root = document.documentElement;
+            let color = '#f9fafb';
+            if (root.classList.contains('theme-ecdad')) color = '#1a120c';
+            else if (root.classList.contains('dark')) color = '#0a0a0a';
+            const meta = document.querySelector('meta[name="theme-color"]');
+            if (meta) meta.setAttribute('content', color);
+        }
+
+        function updateThemeModeUI() {
+            const mode = localStorage.getItem(THEME_MODE_KEY) || 'system';
+            document.querySelectorAll('[data-theme-mode]').forEach((btn) => {
+                const active = btn.getAttribute('data-theme-mode') === mode;
+                btn.classList.toggle('ring-2', active);
+                btn.classList.toggle('ring-blue-500', active);
+                btn.classList.toggle('border-blue-600', active);
+            });
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        }
+
+        function setThemeMode(mode) {
             playClickSound();
+            localStorage.setItem(THEME_MODE_KEY, mode);
+            applyTheme(resolveThemeKey(), { silent: true, fromSystem: true });
+            updateThemeModeUI();
+            const labels = {
+                system: 'Sistem teması',
+                light: 'Açık tema',
+                dark: 'Koyu tema',
+                ecdad: 'Ecdad otantik teması',
+            };
+            showToast((labels[mode] || 'Tema') + ' etkin.', 'success');
+        }
+
+        window.setThemeMode = setThemeMode;
+
+        let _themeSchemeListenerBound = false;
+
+        function initTheme() {
+            const isNarrow = window.innerWidth < 1024;
+            if (!localStorage.getItem(THEME_MODE_KEY) && isNarrow) {
+                localStorage.setItem(THEME_MODE_KEY, 'system');
+            }
+            applyTheme(resolveThemeKey(), { silent: true, fromSystem: true });
+            updateThemeModeUI();
+
+            if (!_themeSchemeListenerBound) {
+                _themeSchemeListenerBound = true;
+                window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+                    if ((localStorage.getItem(THEME_MODE_KEY) || 'system') === 'system') {
+                        applyTheme(resolveThemeKey(), { silent: true, fromSystem: true });
+                    }
+                });
+            }
+        }
+
+        window.initTheme = initTheme;
+
+        const TAB_IDLE = 'flex flex-col items-center justify-center flex-1 gap-0.5 py-2 text-gray-500 transition-colors dark:text-neutral-400 lg:w-full lg:flex-none lg:rounded-xl lg:px-1 lg:py-3 lg:hover:bg-gray-100 dark:lg:hover:bg-neutral-800';
+        const TAB_ACTIVE = 'flex flex-col items-center justify-center flex-1 gap-0.5 py-2 font-semibold text-blue-600 transition-colors dark:text-blue-400 lg:w-full lg:flex-none lg:rounded-xl lg:bg-blue-50 lg:px-1 lg:py-3 dark:lg:bg-blue-950/50';
+
+        function applyTheme(themeKey, options = {}) {
+            if (!options.silent) playClickSound();
             const theme = themes[themeKey];
             if (!theme) return;
-
-            const root = document.documentElement;
-            root.style.setProperty('--theme-bg-phone', theme.bgPhone);
-            root.style.setProperty('--theme-card-bg', theme.cardBg);
-            root.style.setProperty('--theme-border', theme.border);
-            root.style.setProperty('--theme-text-main', theme.textMain);
-            root.style.setProperty('--theme-text-muted', theme.textMuted);
-            root.style.setProperty('--theme-primary', theme.primary);
-            root.style.setProperty('--theme-primary-hover', theme.primaryHover);
-            root.style.setProperty('--theme-secondary', theme.secondary);
-            root.style.setProperty('--theme-card-gradient-from', theme.gradientFrom);
-            root.style.setProperty('--theme-card-gradient-to', theme.gradientTo);
-            root.style.setProperty('--theme-accent-light', theme.accentLight);
-            root.style.setProperty('--theme-button-text', theme.buttonText);
-
-            // Dinamik cam parlaması küresinin (glow-blob) rengini tema birincil rengine eşle
-            document.getElementById('glow-blob-1').style.backgroundColor = theme.primary;
-
-            // Özel renk buton değerini güncelle
-            document.getElementById('custom-theme-color-picker').value = theme.primary;
-            document.getElementById('custom-color-indicator').innerText = theme.primary;
-            document.getElementById('custom-color-indicator').style.color = theme.primary;
-
-            // Butonun RGB halini gölgeler için hesapla
-            const rgbVal = hexToRgb(theme.primary);
-            root.style.setProperty('--theme-primary-rgb', rgbVal);
-
-            document.querySelectorAll('.theme-select-card').forEach(btn => {
-                btn.style.borderColor = 'var(--theme-border)';
-                btn.classList.remove('ring-2', 'ring-offset-1');
-                
-                const targetBtnKey = btn.getAttribute('onclick').match(/'([^']+)'/)[1];
-                if (targetBtnKey === themeKey) {
-                    btn.classList.add('ring-2', 'ring-offset-1');
-                    btn.style.borderColor = 'var(--theme-primary)';
-                }
-            });
-
-            const homeInner = document.getElementById('home-inner-circle');
-            if (homeInner) {
-                homeInner.style.backgroundColor = theme.primary;
-                homeInner.style.borderColor = theme.bgPhone;
+            if (!options.fromSystem) {
+                localStorage.setItem(THEME_PALETTE_KEY, themeKey);
             }
-
+            const root = document.documentElement;
+            const isEcdad = themeKey === 'ecdad-authentic';
+            root.classList.toggle('theme-ecdad', isEcdad);
+            root.classList.toggle('dark', isEcdad || !!theme.isDark);
             initLettersGrid();
             renderProgressChart();
-            switchTab(currentActiveScreen);
+            updateThemeColorMeta();
+            updateThemeModeUI();
+            if (!options.silent) switchTab(currentActiveScreen);
         }
 
-        function handleCustomColorSelect(event) {
-            const hex = event.target.value;
-            const root = document.documentElement;
-            
-            root.style.setProperty('--theme-primary', hex);
-            root.style.setProperty('--theme-primary-hover', darkenColor(hex, 10));
-            root.style.setProperty('--theme-secondary', darkenColor(hex, 30));
-            root.style.setProperty('--theme-card-gradient-from', hex);
-
-            // Dinamik parlayan küreyi özelleştirilen renge ayarla
-            document.getElementById('glow-blob-1').style.backgroundColor = hex;
-
-            const rgbVal = hexToRgb(hex);
-            root.style.setProperty('--theme-primary-rgb', rgbVal);
-            
-            document.getElementById('custom-color-indicator').innerText = hex;
-            document.getElementById('custom-color-indicator').style.color = hex;
-            
-            const homeInner = document.getElementById('home-inner-circle');
-            if (homeInner) {
-                homeInner.style.backgroundColor = hex;
-            }
-            
-            renderProgressChart();
-            updateLearningStats();
-        }
+        function handleCustomColorSelect() {}
 
         function switchTab(screenId) {
             playClickSound();
             currentActiveScreen = screenId;
-            
-            const screens = document.querySelectorAll('.screen');
-            screens.forEach(screen => {
-                screen.classList.remove('active');
+
+            document.querySelectorAll('.screen').forEach((screen) => {
+                screen.classList.add('hidden');
+                screen.classList.remove('flex', 'lg:grid');
             });
 
             const targetScreen = document.getElementById(`screen-${screenId}`);
             if (targetScreen) {
-                targetScreen.classList.add('active');
+                targetScreen.classList.remove('hidden');
+                if (screenId === 'home') {
+                    targetScreen.classList.add('flex', 'lg:grid');
+                } else {
+                    targetScreen.classList.add('flex');
+                }
             }
 
             if (screenId === 'ai') {
@@ -1762,45 +1899,19 @@
                 updateLearningStats();
             }
 
-            const tabIds = ['ai', 'tests', 'home', 'letters', 'settings'];
-            tabIds.forEach(id => {
+            ['ai', 'tests', 'home', 'letters', 'settings'].forEach((id) => {
                 const tabBtn = document.getElementById(`tab-${id}`);
-                if (tabBtn) {
-                    const icon = tabBtn.querySelector('i');
-                    if (icon) {
-                        icon.style.transform = "scale(1)";
-                    }
-
-                    if (id === 'home') {
-                        const homeText = document.getElementById('tab-home-text');
-                        if (homeText) {
-                            homeText.style.color = 'var(--theme-text-muted)';
-                            homeText.className = "text-[9px] font-extrabold mt-7";
-                        }
-                    } else {
-                        tabBtn.style.color = 'var(--theme-text-muted)';
-                        tabBtn.className = "flex flex-col items-center justify-center flex-1 py-1 text-xs transition duration-155";
-                    }
-                }
+                if (!tabBtn) return;
+                tabBtn.className = TAB_IDLE;
+                const icon = tabBtn.querySelector('i');
+                if (icon) icon.classList.remove('scale-110');
             });
 
             const activeTab = document.getElementById(`tab-${screenId}`);
             if (activeTab) {
+                activeTab.className = TAB_ACTIVE;
                 const activeIcon = activeTab.querySelector('i');
-                if (activeIcon) {
-                    activeIcon.style.transform = "scale(1.15)";
-                }
-
-                if (screenId === 'home') {
-                    const homeText = document.getElementById('tab-home-text');
-                    if (homeText) {
-                        homeText.style.color = 'var(--theme-primary)';
-                        homeText.className = "text-[9px] font-black mt-7";
-                    }
-                } else {
-                    activeTab.style.color = 'var(--theme-primary)';
-                    activeTab.className = "flex flex-col items-center justify-center flex-1 py-1 font-black transition duration-155";
-                }
+                if (activeIcon) activeIcon.classList.add('scale-110');
             }
         }
 
@@ -1881,9 +1992,9 @@
                 if (detailCard) detailCard.classList.add('hidden');
                 listEl.innerHTML = `
                     <div class="flex flex-col items-center justify-center py-8 text-center space-y-2">
-                        <i data-lucide="clipboard-list" class="w-8 h-8 theme-text-muted opacity-50"></i>
-                        <p class="text-[11px] theme-text-muted font-bold">Henüz çözülen sınav yok</p>
-                        <p class="text-[10px] theme-text-muted opacity-70">Test çözdükçe sonuçların burada listelenecek</p>
+                        <i data-lucide="clipboard-list" class="w-8 h-8 text-gray-500 dark:text-neutral-400 opacity-50"></i>
+                        <p class="text-[11px] text-gray-500 dark:text-neutral-400 font-bold">Henüz çözülen sınav yok</p>
+                        <p class="text-[10px] text-gray-500 dark:text-neutral-400 opacity-70">Test çözdükçe sonuçların burada listelenecek</p>
                     </div>
                 `;
                 if (window.lucide) lucide.createIcons();
@@ -1892,7 +2003,7 @@
 
             testHistory.slice().reverse().forEach(record => {
                 const row = document.createElement('div');
-                row.className = "flex items-center justify-between p-3.5 theme-light-bg border theme-border rounded-xl cursor-pointer hover:opacity-90 active:scale-[0.99] transition-all";
+                row.className = "flex items-center justify-between p-3.5 bg-gray-100 dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 rounded-xl cursor-pointer hover:opacity-90 active:scale-[0.99] transition-all";
                 row.onclick = () => {
                     playClickSound();
                     showTrialDetail(record.id);
@@ -1901,13 +2012,13 @@
                 
                 row.innerHTML = `
                     <div class="flex items-center space-x-2.5">
-                        <span class="text-xs font-bold theme-text-main">Sev. ${record.level} - ${record.test}</span>
-                        <span class="text-[9px] theme-text-muted font-semibold">${record.date}</span>
+                        <span class="text-xs font-bold text-gray-900 dark:text-neutral-100">Sev. ${record.level} - ${record.test}</span>
+                        <span class="text-[9px] text-gray-500 dark:text-neutral-400 font-semibold">${record.date}</span>
                     </div>
                     <div class="flex items-center space-x-2">
                         <span class="text-[10px] text-emerald-400 font-bold">${record.correct}D</span>
                         <span class="text-[10px] text-red-400 font-bold mr-1.5">${record.wrong}Y</span>
-                        <span class="text-[10px] font-black theme-primary-color bg-black/45 px-2.5 py-0.5 rounded-md">%${record.percent}</span>
+                        <span class="text-[10px] font-black text-blue-600 dark:text-blue-400 bg-black/45 px-2.5 py-0.5 rounded-md">%${record.percent}</span>
                     </div>
                 `;
                 listEl.appendChild(row);
@@ -1918,17 +2029,25 @@
         function renderProgressChart() {
             const svg = document.getElementById('progress-svg-chart');
             if (!svg) return;
+            const root = document.documentElement;
+            const isEcdad = root.classList.contains('theme-ecdad');
+            const isDark = root.classList.contains('dark');
+            const chartPrimary = isEcdad ? '#c9a227' : '#2563eb';
+            const chartText = isEcdad ? '#f4ece1' : (isDark ? '#f5f5f5' : '#111827');
+            const chartMuted = isEcdad ? '#b8a088' : (isDark ? '#a3a3a3' : '#6b7280');
+            const chartGrid = isEcdad ? '#5c4a38' : (isDark ? '#404040' : '#e5e7eb');
+            const chartDotFill = isEcdad ? '#2a1f18' : (isDark ? '#171717' : '#ffffff');
             svg.innerHTML = `
                 <defs>
                     <linearGradient id="chart-area-grad" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stop-color="var(--theme-primary)" stop-opacity="0.45" />
-                        <stop offset="100%" stop-color="var(--theme-primary)" stop-opacity="0.0" />
+                        <stop offset="0%" stop-color="${chartPrimary}" stop-opacity="0.45" />
+                        <stop offset="100%" stop-color="${chartPrimary}" stop-opacity="0.0" />
                     </linearGradient>
                 </defs>
             `;
 
             if (testHistory.length === 0) {
-                svg.innerHTML += `<text x="250" y="130" fill="var(--theme-text-muted)" font-size="14" font-weight="bold" text-anchor="middle">Henüz tamamlanan test yok</text>`;
+                svg.innerHTML += `<text x="250" y="130" fill="${chartMuted}" font-size="14" font-weight="bold" text-anchor="middle">Henüz tamamlanan test yok</text>`;
                 return;
             }
 
@@ -1957,7 +2076,7 @@
                 line.setAttribute("y1", gy);
                 line.setAttribute("x2", width - marginR);
                 line.setAttribute("y2", gy);
-                line.setAttribute("stroke", "var(--theme-border)");
+                line.setAttribute("stroke", chartGrid);
                 line.setAttribute("stroke-opacity", "0.35");
                 line.setAttribute("stroke-width", "1");
                 svg.appendChild(line);
@@ -1965,7 +2084,7 @@
                 const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
                 text.setAttribute("x", marginL - 10);
                 text.setAttribute("y", gy + 4);
-                text.setAttribute("fill", "var(--theme-text-muted)");
+                text.setAttribute("fill", chartMuted);
                 text.setAttribute("font-size", "10");
                 text.setAttribute("font-weight", "bold");
                 text.setAttribute("text-anchor", "end");
@@ -1995,7 +2114,7 @@
                 vLine.setAttribute("y1", pt.y);
                 vLine.setAttribute("x2", pt.x);
                 vLine.setAttribute("y2", bottomY);
-                vLine.setAttribute("stroke", "var(--theme-primary)");
+                vLine.setAttribute("stroke", chartPrimary);
                 vLine.setAttribute("stroke-opacity", "0.2");
                 vLine.setAttribute("stroke-dasharray", "3,3");
                 vLine.setAttribute("stroke-width", "1");
@@ -2032,7 +2151,7 @@
                 const mainLine = document.createElementNS("http://www.w3.org/2000/svg", "path");
                 mainLine.setAttribute("d", pathData);
                 mainLine.setAttribute("fill", "none");
-                mainLine.setAttribute("stroke", "var(--theme-primary)");
+                mainLine.setAttribute("stroke", chartPrimary);
                 mainLine.setAttribute("stroke-width", "3.5");
                 mainLine.setAttribute("stroke-linecap", "round");
                 svg.appendChild(mainLine);
@@ -2043,8 +2162,8 @@
                 circle.setAttribute("cx", pt.x);
                 circle.setAttribute("cy", pt.y);
                 circle.setAttribute("r", "6");
-                circle.setAttribute("fill", "#FFFFFF"); 
-                circle.setAttribute("stroke", "var(--theme-primary)"); 
+                circle.setAttribute("fill", chartDotFill);
+                circle.setAttribute("stroke", chartPrimary);
                 circle.setAttribute("stroke-width", "3");
                 circle.style.cursor = "pointer";
 
@@ -2058,7 +2177,7 @@
                 const pctText = document.createElementNS("http://www.w3.org/2000/svg", "text");
                 pctText.setAttribute("x", pt.x);
                 pctText.setAttribute("y", pt.y - 12);
-                pctText.setAttribute("fill", "var(--theme-text-main)");
+                pctText.setAttribute("fill", chartText);
                 pctText.setAttribute("font-size", "10");
                 pctText.setAttribute("font-weight", "black");
                 pctText.setAttribute("text-anchor", "middle");
@@ -2068,7 +2187,7 @@
                 const labelText = document.createElementNS("http://www.w3.org/2000/svg", "text");
                 labelText.setAttribute("x", pt.x);
                 labelText.setAttribute("y", bottomY + 20);
-                labelText.setAttribute("fill", "var(--theme-text-muted)");
+                labelText.setAttribute("fill", chartMuted);
                 labelText.setAttribute("font-size", "10");
                 labelText.setAttribute("font-weight", "bold");
                 labelText.setAttribute("text-anchor", "middle");
@@ -2150,8 +2269,8 @@
 
             if (filteredAlphabet.length === 0) {
                 grid.innerHTML = `
-                    <div class="lisani-letters-empty text-center py-8">
-                        <p class="text-xs theme-text-muted font-bold">Aradığınız harf bulunamadı.</p>
+                    <div class="col-span-full text-center py-8">
+                        <p class="text-xs text-gray-500 dark:text-neutral-400 font-bold">Aradığınız harf bulunamadı.</p>
                     </div>
                 `;
                 return;
@@ -2159,16 +2278,16 @@
             
             filteredAlphabet.forEach((letter) => {
                 const card = document.createElement('div');
-                card.className = "lisani-letter-card theme-card-bg hover:opacity-90 border theme-border rounded-xl p-2 sm:p-2.5 text-center cursor-pointer transition transform hover:-translate-y-0.5 active:scale-95 flex flex-col items-center justify-center gap-0.5 shadow-sm min-h-0";
+                card.className = 'bg-white dark:bg-neutral-900 border border-gray-200 dark:border-neutral-700 rounded-xl p-2 sm:p-2.5 text-center cursor-pointer min-h-[4.25rem] flex flex-col items-center justify-center gap-0.5 active:scale-95 transition-transform';
                 card.onclick = () => {
                     playClickSound();
                     showLetterDetail(letter);
                     showToast(`${letter.name} harfi seçildi.`, "success");
                 };
                 card.innerHTML = `
-                    <span class="lisani-letter-card__ar arabic-text font-bold theme-primary-color drop-shadow-sm">${letter.ar}</span>
-                    <span class="lisani-letter-card__name text-[10px] font-bold theme-text-main leading-tight">${letter.name}</span>
-                    <span class="lisani-letter-card__sound text-[9px] theme-text-muted font-semibold leading-tight">${letter.sounds}</span>
+                    <span class="text-xl sm:text-2xl font-arabic font-bold text-blue-600 dark:text-blue-400">${letter.ar}</span>
+                    <span class="text-[10px] font-bold text-gray-900 dark:text-neutral-100 truncate max-w-full leading-tight">${letter.name}</span>
+                    <span class="text-[9px] font-semibold text-gray-500 dark:text-neutral-400 truncate max-w-full leading-tight">${letter.sounds}</span>
                 `;
                 grid.appendChild(card);
             });
@@ -2569,23 +2688,74 @@ self.addEventListener('notificationclick', e => {
             return dailyNotifications[Math.floor(Math.random() * dailyNotifications.length)];
         }
 
+        async function showHadisNotification(title, body, tag) {
+            const payload = { title, body, tag: tag || 'lisani-daily', icon: 'icon-192.png' };
+            if ('serviceWorker' in navigator) {
+                try {
+                    const reg = await navigator.serviceWorker.ready;
+                    if (reg?.showNotification) {
+                        await reg.showNotification(payload.title, {
+                            body: payload.body,
+                            icon: payload.icon,
+                            tag: payload.tag,
+                            vibrate: [200, 100, 200],
+                        });
+                        return true;
+                    }
+                } catch (e) {}
+            }
+            if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
+                new Notification(payload.title, {
+                    body: payload.body,
+                    icon: payload.icon,
+                    tag: payload.tag,
+                });
+                return true;
+            }
+            return false;
+        }
+
         async function initNotifications() {
-            if (!("Notification" in window)) {
-                showToast("Bu tarayıcı bildirimleri desteklemiyor.", "error");
+            if (typeof window.isNativeHadisNotifications === 'function' && window.isNativeHadisNotifications()) {
+                const granted = await window.requestNativeHadisPermission();
+                if (granted) {
+                    localStorage.setItem('lisani_notif_enabled', '1');
+                    autoSetNotifTime();
+                    await scheduleDailyNotification();
+                    const h = parseInt(localStorage.getItem('lisani_notif_hour'), 10);
+                    showToast(
+                        'Bildirimler açıldı! Uygulama kapalıyken bile her gün saat ' +
+                            String(h).padStart(2, '0') +
+                            ":00'da günün hadisi gelecek.",
+                        'success'
+                    );
+                } else {
+                    showToast('Bildirim izni verilmedi.', 'error');
+                }
+                return;
+            }
+
+            if (!('Notification' in window)) {
+                showToast('Bu cihaz bildirimleri desteklemiyor.', 'error');
                 return;
             }
             const permission = await Notification.requestPermission();
-            if (permission === "granted") {
-                if ("serviceWorker" in navigator) {
-                    try { await registerInlineSW(); } catch(e) {}
+            if (permission === 'granted') {
+                localStorage.setItem('lisani_notif_enabled', '1');
+                if ('serviceWorker' in navigator) {
+                    try { await registerInlineSW(); } catch (e) {}
                 }
-                // Cihazın şu anki yerel saatine göre en uygun bildirimi otomatik ayarla
                 autoSetNotifTime();
-                scheduleDailyNotification();
-                const h = parseInt(localStorage.getItem("lisani_notif_hour"));
-                showToast("Bildirimler açıldı! Her gün saat " + String(h).padStart(2,"0") + ":00'da günün hadisi gelecek.", "success");
+                await scheduleDailyNotification();
+                const h = parseInt(localStorage.getItem('lisani_notif_hour'), 10);
+                showToast(
+                    'Bildirimler açıldı! Her gün saat ' +
+                        String(h).padStart(2, '0') +
+                        ":00'da günün hadisi gelir.",
+                    'success'
+                );
             } else {
-                showToast("Bildirim izni verilmedi.", "error");
+                showToast('Bildirim izni verilmedi.', 'error');
             }
         }
 
@@ -2611,37 +2781,45 @@ self.addEventListener('notificationclick', e => {
             if (inp) inp.value = String(bestH).padStart(2,"0") + ":00";
         }
 
-        function getTodaysHadis() {
-            // Her gün farklı hadis - tarihe göre sıralı döner
-            const today = new Date();
-            const dayOfYear = Math.floor((today - new Date(today.getFullYear(), 0, 0)) / 86400000);
+        function getHadisForDate(date) {
+            const dayOfYear = Math.floor((date - new Date(date.getFullYear(), 0, 0)) / 86400000);
             return hadisList[dayOfYear % hadisList.length];
         }
 
-        function scheduleDailyNotification() {
-            if (typeof Notification === "undefined" || Notification.permission !== "granted") return;
+        function getTodaysHadis() {
+            return getHadisForDate(new Date());
+        }
+
+        async function scheduleDailyNotification() {
+            if (typeof window.isNativeHadisNotifications === 'function' && window.isNativeHadisNotifications()) {
+                if (typeof window.scheduleNativeHadithNotifications === 'function') {
+                    await window.scheduleNativeHadithNotifications(getHadisForDate, getDefaultNotifTime);
+                }
+                return;
+            }
+
+            if (typeof Notification === 'undefined' || Notification.permission !== 'granted') return;
             const { h: savedHour, m: savedMin } = getDefaultNotifTime();
             const now = new Date();
             const target = new Date();
             target.setHours(savedHour, savedMin, 0, 0);
             if (target <= now) target.setDate(target.getDate() + 1);
             const delay = target - now;
-            const oldTimer = localStorage.getItem("lisani_notif_timer_id");
-            if (oldTimer) clearTimeout(parseInt(oldTimer));
-            const timerId = setTimeout(() => {
+            const oldTimer = localStorage.getItem('lisani_notif_timer_id');
+            if (oldTimer) clearTimeout(parseInt(oldTimer, 10));
+            const timerId = setTimeout(async () => {
                 const hadis = getTodaysHadis();
-                new Notification("Günün Hadisi 📖", {
-                    body: hadis.turkce + "\n— " + hadis.kaynak,
-                    icon: "icon-192.png",
-                    badge: "icon-192.png",
-                    vibrate: [200, 100, 200],
-                    tag: "lisani-daily",
-                    renotify: true
-                });
+                await showHadisNotification(
+                    'Günün Hadisi 📖',
+                    hadis.turkce + '\n— ' + hadis.kaynak,
+                    'lisani-daily'
+                );
                 scheduleDailyNotification();
             }, delay);
-            try { localStorage.setItem("lisani_notif_timer_id", String(timerId)); } catch(e) {}
+            try { localStorage.setItem('lisani_notif_timer_id', String(timerId)); } catch (e) {}
         }
+
+        window._scheduleHadithNotifications = scheduleDailyNotification;
 
         function getDefaultNotifTime() {
             const savedH = localStorage.getItem("lisani_notif_hour");
@@ -2668,31 +2846,45 @@ self.addEventListener('notificationclick', e => {
             document.getElementById("notif-settings-panel").classList.add("hidden");
         }
 
-        function saveNotifTime() {
+        async function saveNotifTime() {
             playClickSound();
             const val = document.getElementById("notif-time-input").value;
             if (!val) return;
             const [h, m] = val.split(":").map(Number);
             localStorage.setItem("lisani_notif_hour", String(h));
             localStorage.setItem("lisani_notif_min",  String(m));
-            scheduleDailyNotification();
+            await scheduleDailyNotification();
             closeNotifSettings();
             showToast("Bildirim saati " + String(h).padStart(2,"0") + ":" + String(m).padStart(2,"0") + " olarak ayarlandı.", "success");
         }
 
-        function testNotification() {
+        async function testNotification() {
             playClickSound();
+
+            if (typeof window.isNativeHadisNotifications === 'function' && window.isNativeHadisNotifications()) {
+                if (!(await window.checkNativeHadisPermission())) {
+                    showToast('Önce bildirim iznini ver.', 'error');
+                    return;
+                }
+                const ok = await window.showNativeHadisTestNotification(getHadisForDate);
+                showToast(
+                    ok ? '4 saniye içinde test hadisi gelecek.' : 'Bildirim gönderilemedi.',
+                    ok ? 'success' : 'error'
+                );
+                return;
+            }
+
             if (typeof Notification === "undefined" || Notification.permission !== "granted") {
                 showToast("Önce bildirim iznini ver.", "error");
                 return;
             }
             const hadis = getTodaysHadis();
-            new Notification("Günün Hadisi 📖", {
-                body: hadis.turkce + "\n— " + hadis.kaynak,
-                icon: "icon-192.png",
-                tag: "lisani-test"
-            });
-            showToast("Test bildirimi gönderildi.", "success");
+            const ok = await showHadisNotification(
+                'Günün Hadisi 📖',
+                hadis.turkce + '\n— ' + hadis.kaynak,
+                'lisani-test'
+            );
+            showToast(ok ? 'Test bildirimi gönderildi.' : 'Bildirim gönderilemedi.', ok ? 'success' : 'error');
         }
 
         // --- BAŞLANGIÇ KURULUMLARI ---
@@ -2705,10 +2897,11 @@ self.addEventListener('notificationclick', e => {
             } catch (e) {}
 
             lucide.createIcons();
+            initAvatarGrids();
             initLettersGrid();
             renderQuizHistoryList();
             renderProgressChart();
-            applyTheme('brown-darkbrown');
+            initTheme();
             updateLearningStats();
             updateLettersStats();
             initSwipeGestures();
@@ -2746,11 +2939,17 @@ self.addEventListener('notificationclick', e => {
                 }
             }, 800);
 
-            // Bildirim
+            // Bildirimleri yeniden planla (APK: kapalıyken hadis; web: açıkken)
             try {
-                if (typeof Notification !== "undefined" && Notification.permission === "granted") {
-                    if ("serviceWorker" in navigator) registerInlineSW().catch(() => {});
-                    scheduleDailyNotification();
+                if (localStorage.getItem('lisani_notif_enabled') === '1') {
+                    if (typeof window.isNativeHadisNotifications === 'function' && window.isNativeHadisNotifications()) {
+                        window.checkNativeHadisPermission().then((ok) => {
+                            if (ok) scheduleDailyNotification();
+                        });
+                    } else if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
+                        if ('serviceWorker' in navigator) registerInlineSW().catch(() => {});
+                        scheduleDailyNotification();
+                    }
                 }
-            } catch(e) {}
+            } catch (e) {}
         };

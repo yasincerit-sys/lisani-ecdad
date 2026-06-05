@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Eski_ehirspor">
+  <rect x="4" y="4" width="56" height="56" rx="8" fill="#111" stroke="#e30613" stroke-width="3"/>
+  <path fill="#e30613" d="M14 42c4-14 14-22 26-22 6 0 11 2 14 6-8 1-14 5-17 11-5-2-10-1-14 2-3 2-6 5-9 3z"/>
+  <path fill="#e30613" d="M40 30c5 3 8 8 8 14h-3c-1-3-3-6-6-8 1-2 1-4 1-6z"/>
+  <path fill="#fff" stroke="#e30613" stroke-width="1" d="M18 44h28v4H18z"/>
+  <text x="32" y="17" text-anchor="middle" font-family="Arial,sans-serif" font-size="5.5" font-weight="700" fill="#e30613">ESK0^EH0R</text>
+</svg>
