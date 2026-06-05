@@ -91,6 +91,7 @@
             sinifKodu: u.sinifKodu,
             birthdate: u.birthdate || '',
             totalScore: u.totalScore || 0,
+            streakDays: u.streakDays ?? 0,
             password: '',
         };
     }
@@ -728,12 +729,18 @@
         const last = testHistory[testHistory.length - 1];
 
         try {
-            await apiFetch('/api/progress/sync', {
+            const studiedLetters =
+                typeof window.getStudiedLettersList === 'function'
+                    ? window.getStudiedLettersList()
+                    : [];
+
+            const data = await apiFetch('/api/progress/sync', {
                 method: 'POST',
                 body: JSON.stringify({
                     total_xp: typeof totalScore !== 'undefined' ? totalScore : 0,
                     tests_count: solvedCount,
                     avg_success: avgSuccess,
+                    studied_letters: studiedLetters,
                     last_test: last
                         ? {
                               date: last.date,
@@ -754,6 +761,19 @@
                     })),
                 }),
             });
+            if (typeof window.applyProgressFromServer === 'function') {
+                window.applyProgressFromServer(data);
+            }
+        } catch (e) {}
+    };
+
+    window.loadProgressFromServer = async function () {
+        if (!currentUser || currentUserRole === 'hoca') return;
+        try {
+            const data = await apiFetch('/api/progress');
+            if (typeof window.applyProgressFromServer === 'function') {
+                window.applyProgressFromServer(data);
+            }
         } catch (e) {}
     };
 
@@ -1224,7 +1244,7 @@
         updateRoleBasedUI(user);
         setTimeout(() => window.refreshMesajBadge(), 600);
         if (user.role !== 'hoca') {
-            setTimeout(() => window.syncProgressToServer(), 800);
+            setTimeout(() => window.loadProgressFromServer(), 400);
         }
     };
 

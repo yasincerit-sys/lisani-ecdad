@@ -287,7 +287,7 @@
 
                             <div class="flex justify-between items-center theme-light-bg border theme-border p-3.5 rounded-xl mt-1">
                                 <span class="text-[10px] font-bold theme-text-main uppercase tracking-wider">Toplam Başarı Oranı</span>
-                                <span class="text-sm font-black text-emerald-450" id="detail-trial-success">%80 Başarı</span>
+                                <span class="text-sm font-black text-emerald-450" id="detail-trial-success">%0 Başarı</span>
                             </div>
                         </div>
 
@@ -536,7 +536,7 @@
                         </div>
                         <div class="flex flex-col items-center justify-center bg-white/15 rounded-2xl p-3 border border-white/20 min-w-[75px] relative z-10 backdrop-blur-sm shadow-inner">
                             <i data-lucide="flame" class="w-6 h-6 text-orange-500 fill-current animate-bounce"></i>
-                            <span class="text-[10px] font-extrabold mt-1">3 Gün</span>
+                            <span class="text-[10px] font-extrabold mt-1" id="home-streak-days">0 Gün</span>
                         </div>
                     </div>
 
@@ -721,22 +721,22 @@
                                 <div class="theme-light-bg border theme-border rounded-xl p-3 flex flex-col justify-between shadow-sm">
                                     <span class="text-[9px] theme-text-muted font-bold uppercase tracking-wider">İncelenen Harf</span>
                                     <div class="flex items-baseline space-x-1 mt-1">
-                                        <span class="text-base font-black theme-text-main">35</span>
-                                        <span class="text-[10px] theme-text-muted">/ 35</span>
+                                        <span class="text-base font-black theme-text-main" id="stats-letters-studied">0</span>
+                                        <span class="text-[10px] theme-text-muted" id="stats-letters-total">/ 35</span>
                                     </div>
-                                    <span class="text-[8px] text-emerald-400 font-semibold mt-1">Hafıza İndeksi Tamamlandı</span>
+                                    <span class="text-[8px] text-emerald-400 font-semibold mt-1" id="stats-letters-status">Henüz harf incelenmedi</span>
                                 </div>
                                 <div class="theme-light-bg border theme-border rounded-xl p-3 flex flex-col justify-between shadow-sm">
                                     <span class="text-[9px] theme-text-muted font-bold uppercase tracking-wider">Ortalama Başarı</span>
                                     <div class="flex items-baseline space-x-1 mt-1">
-                                        <span class="text-base font-black theme-primary-color" id="stats-avg-success">%80</span>
+                                        <span class="text-base font-black theme-primary-color" id="stats-avg-success">%0</span>
                                     </div>
                                     <span class="text-[8px] theme-text-muted font-semibold mt-1">Çözülen Sınavlardan</span>
                                 </div>
                                 <div class="theme-light-bg border theme-border rounded-xl p-3 flex flex-col justify-between shadow-sm">
                                     <span class="text-[9px] theme-text-muted font-bold uppercase tracking-wider">Toplam Çözüm</span>
                                     <div class="flex items-baseline space-x-1 mt-1">
-                                        <span class="text-base font-black theme-text-main" id="stats-solved-count">3</span>
+                                        <span class="text-base font-black theme-text-main" id="stats-solved-count">0</span>
                                         <span class="text-[10px] theme-text-muted">Sınav</span>
                                     </div>
                                     <span class="text-[8px] theme-text-muted font-semibold mt-1">Prefrontal Aktivite</span>

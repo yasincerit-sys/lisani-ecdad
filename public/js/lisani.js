@@ -1,5 +1,6 @@
 ﻿        // --- GEÇMİŞ TEST SONUÇLARI VERİ TABANI ---
         let testHistory = [];
+        let studiedLetters = new Set();
 
         // --- TOPLAM PUAN DEĞİŞKENİ (GÜVENLİ TAKİP) ---
         let totalScore = 0;
@@ -636,6 +637,76 @@
             document.getElementById('avatar-upload-input').click();
         }
 
+        function persistLocalProgress() {
+            try {
+                localStorage.setItem('lisani_test_history', JSON.stringify(testHistory));
+                localStorage.setItem('lisani_studied_letters', JSON.stringify([...studiedLetters]));
+            } catch (e) {}
+        }
+
+        function mapRecentTestsToHistory(recentTests) {
+            if (!Array.isArray(recentTests) || recentTests.length === 0) return [];
+            return recentTests.map((r, idx) => ({
+                id: idx + 1,
+                date: r.date || '',
+                level: r.level ?? '',
+                test: r.test || '',
+                correct: r.correct ?? 0,
+                wrong: r.wrong ?? 0,
+                percent: r.percent ?? 0,
+                score: r.percent ?? 0,
+            }));
+        }
+
+        function updateLettersStats() {
+            const studiedEl = document.getElementById('stats-letters-studied');
+            const totalEl = document.getElementById('stats-letters-total');
+            const statusEl = document.getElementById('stats-letters-status');
+            const total = typeof alphabet !== 'undefined' ? alphabet.length : 35;
+            const count = studiedLetters.size;
+
+            if (studiedEl) studiedEl.textContent = String(count);
+            if (totalEl) totalEl.textContent = `/ ${total}`;
+            if (statusEl) {
+                if (count === 0) {
+                    statusEl.textContent = 'Henüz harf incelenmedi';
+                } else if (count >= total) {
+                    statusEl.textContent = 'Hafıza İndeksi Tamamlandı';
+                } else {
+                    statusEl.textContent = `${total - count} harf kaldı`;
+                }
+            }
+        }
+
+        window.updateLettersStats = updateLettersStats;
+        window.getStudiedLettersList = function () {
+            return [...studiedLetters];
+        };
+
+        window.applyProgressFromServer = function (data) {
+            if (!data) return;
+
+            if (typeof data.totalXp === 'number') {
+                totalScore = data.totalXp;
+            }
+
+            if (Array.isArray(data.recentTests)) {
+                testHistory = mapRecentTestsToHistory(data.recentTests);
+            }
+
+            if (Array.isArray(data.studiedLetters)) {
+                studiedLetters = new Set(data.studiedLetters);
+            }
+
+            persistLocalProgress();
+            updateUIPoints();
+            updateHomeStreak(data.streakDays ?? 0);
+            updateLearningStats();
+            updateLettersStats();
+            renderQuizHistoryList();
+            renderProgressChart();
+        };
+
         // --- ÖĞRENİM İSTATİSTİKLERİNİ DİNAMİK HESAPLAMA VE GÜNCELLEME ---
         function updateLearningStats() {
             const solvedCountEl = document.getElementById('stats-solved-count');
@@ -838,9 +909,7 @@
             };
 
             testHistory.push(newRecord);
-            try {
-                localStorage.setItem('lisani_test_history', JSON.stringify(testHistory));
-            } catch (e) {}
+            persistLocalProgress();
 
             // Sonuçları Sonuç Paneline Çiz
             document.getElementById('result-correct-count').innerText = `${activeCorrects} Doğru`;
@@ -1509,6 +1578,15 @@
             lucide.createIcons();
         }
 
+        function updateHomeStreak(days) {
+            const el = document.getElementById('home-streak-days');
+            if (!el) return;
+            const n = Math.max(0, parseInt(days, 10) || 0);
+            el.textContent = n <= 1 ? `${n} Gün` : `${n} Gün`;
+        }
+
+        window.updateHomeStreak = updateHomeStreak;
+
         // --- TEMA PALETİ VE AYARLARI ---
         const themes = {
             'brown-classic': {
@@ -2096,6 +2174,16 @@
             });
         }
 
+        function markLetterStudied(letterName) {
+            if (!letterName || studiedLetters.has(letterName)) return;
+            studiedLetters.add(letterName);
+            persistLocalProgress();
+            updateLettersStats();
+            if (typeof window.syncProgressToServer === 'function') {
+                window.syncProgressToServer();
+            }
+        }
+
         function showLetterDetail(letter) {
             document.getElementById('letter-detail-card').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
             document.getElementById('detail-title').innerText = `${letter.name} (${letter.ar})`;
@@ -2106,6 +2194,8 @@
             document.getElementById('detail-f2').innerText = letter.f2 || letter.f1;
             document.getElementById('detail-f3').innerText = letter.f3 || letter.f1;
             document.getElementById('detail-f4').innerText = letter.f4 || letter.f1;
+
+            markLetterStudied(letter.name);
         }
 
         // ================= DOKUNMATİK SEKMELER ARASI KAYDIRMA MOTORU (SWIPE) =================
@@ -2610,6 +2700,8 @@ self.addEventListener('notificationclick', e => {
             try {
                 const savedTests = localStorage.getItem('lisani_test_history');
                 if (savedTests) testHistory = JSON.parse(savedTests);
+                const savedLetters = localStorage.getItem('lisani_studied_letters');
+                if (savedLetters) studiedLetters = new Set(JSON.parse(savedLetters));
             } catch (e) {}
 
             lucide.createIcons();
@@ -2618,6 +2710,7 @@ self.addEventListener('notificationclick', e => {
             renderProgressChart();
             applyTheme('brown-darkbrown');
             updateLearningStats();
+            updateLettersStats();
             initSwipeGestures();
             initToastSwipe();
 

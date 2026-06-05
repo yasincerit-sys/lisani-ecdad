@@ -50,6 +50,10 @@ class User extends Authenticatable
 
     public function toFrontendArray(bool $includePassword = false): array
     {
+        $progress = $this->relationLoaded('progress')
+            ? $this->progress
+            : $this->progress()->first();
+
         $data = [
             'uid' => (string) $this->id,
             'name' => $this->name,
@@ -59,7 +63,8 @@ class User extends Authenticatable
             'sinif' => $this->sinif_adi ?: null,
             'sinifKodu' => $this->sinif_kodu ?: null,
             'birthdate' => $this->birthdate?->format('Y-m-d') ?? '',
-            'totalScore' => $this->total_score ?? 0,
+            'totalScore' => $progress?->total_xp ?? $this->total_score ?? 0,
+            'streakDays' => $progress?->streak_days ?? 0,
         ];
 
         if ($includePassword) {
