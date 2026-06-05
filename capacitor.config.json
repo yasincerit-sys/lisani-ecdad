@@ -1,0 +1,31 @@
+{
+    "appId": "com.lisaniecdad.app",
+    "appName": "Lisanı Ecdad",
+    "webDir": "mobile-shell",
+    "server": {
+        "url": "https://lisani-ecdad.onrender.com",
+        "cleartext": false,
+        "androidScheme": "https"
+    },
+    "android": {
+        "allowMixedContent": true,
+        "backgroundColor": "#18100c"
+    },
+    "plugins": {
+        "SplashScreen": {
+            "launchShowDuration": 2000,
+            "launchAutoHide": true,
+            "backgroundColor": "#18100c",
+            "androidScaleType": "CENTER_CROP"
+        },
+        "StatusBar": {
+            "style": "DARK",
+            "backgroundColor": "#18100c",
+            "overlaysWebView": false
+        },
+        "LocalNotifications": {
+            "smallIcon": "ic_launcher",
+            "iconColor": "#D49B6A"
+        }
+    }
+}

@@ -35,8 +35,6 @@ class ProgressController extends Controller
             'recent_tests.*.correct' => ['nullable', 'integer', 'min:0'],
             'recent_tests.*.wrong' => ['nullable', 'integer', 'min:0'],
             'recent_tests.*.percent' => ['nullable', 'integer', 'min:0', 'max:100'],
-            'studied_letters' => ['nullable', 'array'],
-            'studied_letters.*' => ['string', 'max:40'],
         ]);
 
         $lastTest = $validated['last_test'] ?? null;
@@ -48,61 +46,23 @@ class ProgressController extends Controller
             $lastPercent = $lastTest['percent'] ?? null;
         }
 
-        $progress = UserProgress::firstOrNew(['user_id' => $user->id]);
-        $progress->fill([
-            'total_xp' => $validated['total_xp'],
-            'tests_count' => $validated['tests_count'],
-            'avg_success' => $validated['avg_success'],
-            'last_active_at' => now(),
-            'last_test_label' => $lastLabel,
-            'last_test_percent' => $lastPercent,
-            'recent_tests' => array_slice($validated['recent_tests'] ?? [], -30),
-            'studied_letters' => array_values(array_unique($validated['studied_letters'] ?? [])),
-        ]);
-        if ($validated['tests_count'] > 0) {
-            $progress->recordStreakActivity();
-        }
-        $progress->save();
+        UserProgress::updateOrCreate(
+            ['user_id' => $user->id],
+            [
+                'total_xp' => $validated['total_xp'],
+                'tests_count' => $validated['tests_count'],
+                'avg_success' => $validated['avg_success'],
+                'last_active_at' => now(),
+                'last_test_label' => $lastLabel,
+                'last_test_percent' => $lastPercent,
+                'recent_tests' => array_slice($validated['recent_tests'] ?? [], -30),
+            ]
+        );
 
         $user->total_score = $validated['total_xp'];
         $user->save();
 
-        return response()->json([
-            'success' => true,
-            'totalXp' => $progress->total_xp ?? 0,
-            'testsCount' => $progress->tests_count ?? 0,
-            'avgSuccess' => $progress->avg_success ?? 0,
-            'streakDays' => $progress->streak_days ?? 0,
-            'studiedLetters' => $progress->studied_letters ?? [],
-            'recentTests' => $progress->recent_tests ?? [],
-        ]);
-    }
-
-    public function show(Request $request): JsonResponse
-    {
-        $user = $request->user();
-
-        if ($user->role === 'hoca') {
-            return response()->json([
-                'totalXp' => 0,
-                'testsCount' => 0,
-                'avgSuccess' => 0,
-                'streakDays' => 0,
-                'studiedLetters' => [],
-                'recentTests' => [],
-            ]);
-        }
-
-        $progress = UserProgress::where('user_id', $user->id)->first();
-
-        return response()->json([
-            'totalXp' => $progress?->total_xp ?? $user->total_score ?? 0,
-            'testsCount' => $progress?->tests_count ?? 0,
-            'avgSuccess' => $progress?->avg_success ?? 0,
-            'streakDays' => $progress?->streak_days ?? 0,
-            'studiedLetters' => $progress?->studied_letters ?? [],
-            'recentTests' => $progress?->recent_tests ?? [],
-        ]);
+        return response()->json(['success' => true]);
     }
 
     public function ogrenciTakip(Request $request): JsonResponse

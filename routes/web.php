@@ -29,7 +29,6 @@ Route::prefix('api')->group(function () {
         Route::get('/odevler', [SinifController::class, 'myOdevler']);
         Route::post('/sinif/odev', [SinifController::class, 'addOdev']);
 
-        Route::get('/progress', [ProgressController::class, 'show']);
         Route::post('/progress/sync', [ProgressController::class, 'sync']);
         Route::get('/hoca/ogrenci-takip', [ProgressController::class, 'ogrenciTakip']);
 

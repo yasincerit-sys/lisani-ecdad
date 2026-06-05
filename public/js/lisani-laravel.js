@@ -91,7 +91,6 @@
             sinifKodu: u.sinifKodu,
             birthdate: u.birthdate || '',
             totalScore: u.totalScore || 0,
-            streakDays: u.streakDays ?? 0,
             password: '',
         };
     }
@@ -323,7 +322,7 @@
         const sinavlar = a.sinavlar || [];
 
         if (sinavlar.length === 0) {
-            return '<p class="text-[9px] text-gray-500 dark:text-neutral-400 py-2 text-center">Henüz çözülmüş test kaydı yok.</p>';
+            return '<p class="text-[9px] theme-text-muted py-2 text-center">Henüz çözülmüş test kaydı yok.</p>';
         }
 
         let rows = '';
@@ -331,10 +330,10 @@
             const pct = s.percent ?? 0;
             const pctCls =
                 pct >= 80 ? 'text-emerald-400' : pct >= 60 ? 'text-blue-400' : 'text-amber-400';
-            rows += `<tr class="border-b border-gray-200 dark:border-neutral-700/50">
-                <td class="py-1.5 pr-1 text-[9px] text-gray-500 dark:text-neutral-400 whitespace-nowrap">${s.date || '—'}</td>
-                <td class="py-1.5 pr-1 text-[9px] text-gray-900 dark:text-neutral-100">S${s.level}</td>
-                <td class="py-1.5 pr-1 text-[9px] text-gray-900 dark:text-neutral-100 truncate max-w-[72px]">${s.test || '—'}</td>
+            rows += `<tr class="border-b theme-border/50">
+                <td class="py-1.5 pr-1 text-[9px] theme-text-muted whitespace-nowrap">${s.date || '—'}</td>
+                <td class="py-1.5 pr-1 text-[9px] theme-text-main">S${s.level}</td>
+                <td class="py-1.5 pr-1 text-[9px] theme-text-main truncate max-w-[72px]">${s.test || '—'}</td>
                 <td class="py-1.5 px-1 text-[9px] font-bold text-emerald-400 text-center">${s.correct ?? 0}</td>
                 <td class="py-1.5 px-1 text-[9px] font-bold text-red-400 text-center">${s.wrong ?? 0}</td>
                 <td class="py-1.5 pl-1 text-[9px] font-bold ${pctCls} text-right">%${pct}</td>
@@ -342,8 +341,8 @@
         });
 
         return `
-        <div class="mt-2 p-2 rounded-xl bg-black/25 border border-gray-200 dark:border-neutral-700/50">
-            <p class="text-[9px] font-bold text-gray-500 dark:text-neutral-400 mb-2">
+        <div class="mt-2 p-2 rounded-xl bg-black/25 border theme-border/50">
+            <p class="text-[9px] font-bold theme-text-muted mb-2">
                 Özet: <span class="text-emerald-400">${a.toplamDogru} doğru</span> ·
                 <span class="text-red-400">${a.toplamYanlis} yanlış</span> ·
                 ${sinavlar.length} kayıtlı sınav
@@ -351,7 +350,7 @@
             <div class="overflow-x-auto">
                 <table class="w-full text-left">
                     <thead>
-                        <tr class="text-[8px] text-gray-500 dark:text-neutral-400 uppercase">
+                        <tr class="text-[8px] theme-text-muted uppercase">
                             <th class="pb-1">Tarih</th>
                             <th class="pb-1">Sv</th>
                             <th class="pb-1">Test</th>
@@ -382,30 +381,30 @@
                 const barW = Math.min(100, o.avgSuccess || 0);
                 const analiz = o.analiz || {};
                 const lastTest = o.lastTestLabel
-                    ? `<p class="text-[9px] text-gray-500 dark:text-neutral-400 mt-1 truncate">Son: ${o.lastTestLabel}${o.lastTestPercent != null ? ' · %' + o.lastTestPercent : ''}</p>`
-                    : '<p class="text-[9px] text-gray-500 dark:text-neutral-400 mt-1">Henüz sınav çözmedi</p>';
+                    ? `<p class="text-[9px] theme-text-muted mt-1 truncate">Son: ${o.lastTestLabel}${o.lastTestPercent != null ? ' · %' + o.lastTestPercent : ''}</p>`
+                    : '<p class="text-[9px] theme-text-muted mt-1">Henüz sınav çözmedi</p>';
                 ogrencilerHTML += `
-                <div class="bg-white dark:bg-neutral-900 border border-gray-200 dark:border-neutral-700 rounded-xl active:bg-gray-50 dark:active:bg-neutral-800 transition-colors rounded-2xl p-3.5 mb-2.5 border border-gray-200 dark:border-neutral-700">
+                <div class="glass-card-interactive rounded-2xl p-3.5 mb-2.5 border theme-border">
                     <div class="flex items-start gap-3">
                         <span class="text-2xl flex-shrink-0">${o.avatar || '🎒'}</span>
                         <div class="flex-1 min-w-0">
                             <div class="flex items-center justify-between gap-2">
-                                <span class="text-xs font-extrabold text-gray-900 dark:text-neutral-100 truncate">${o.name}</span>
+                                <span class="text-xs font-extrabold theme-text-main truncate">${o.name}</span>
                                 ${statusBadge(o.activityStatus)}
                             </div>
-                            <p class="text-[9px] text-gray-500 dark:text-neutral-400 mt-0.5">${formatLastActive(o.lastActiveAt)}</p>
+                            <p class="text-[9px] theme-text-muted mt-0.5">${formatLastActive(o.lastActiveAt)}</p>
                             ${lastTest}
                             <div class="mt-2 h-1.5 rounded-full bg-black/30 overflow-hidden">
                                 <div class="h-full rounded-full bg-gradient-to-r from-amber-600 to-amber-400" style="width:${barW}%"></div>
                             </div>
                             <div class="flex flex-wrap gap-x-3 gap-y-1 mt-2 text-[9px] font-bold">
                                 <span class="text-amber-400">${o.totalXp || 0} XP</span>
-                                <span class="text-gray-500 dark:text-neutral-400">${o.testsCount || 0} sınav</span>
+                                <span class="theme-text-muted">${o.testsCount || 0} sınav</span>
                                 <span class="text-emerald-400">%${o.avgSuccess || 0} ort.</span>
                                 <span class="text-emerald-400">✓ ${analiz.toplamDogru ?? 0}</span>
                                 <span class="text-red-400">✗ ${analiz.toplamYanlis ?? 0}</span>
                             </div>
-                            <button type="button" onclick="toggleOgrenciRapor('${o.uid}')" class="mt-2 w-full py-1.5 rounded-lg text-[9px] font-bold border border-gray-200 dark:border-neutral-700 bg-gray-100 dark:bg-neutral-800 text-gray-900 dark:text-neutral-100 hover:opacity-90 flex items-center justify-center gap-1">
+                            <button type="button" onclick="toggleOgrenciRapor('${o.uid}')" class="mt-2 w-full py-1.5 rounded-lg text-[9px] font-bold border theme-border theme-light-bg theme-text-main hover:opacity-90 flex items-center justify-center gap-1">
                                 <i data-lucide="file-bar-chart" class="w-3 h-3"></i>
                                 Analiz Raporu
                             </button>
@@ -418,7 +417,7 @@
             });
         } else {
             ogrencilerHTML =
-                '<div class="text-center py-8"><p class="text-3xl mb-2">👥</p><p class="text-xs text-gray-500 dark:text-neutral-400">Henüz öğrenci yok.<br>Aşağıdaki sınıf kodunu öğrencilerinize verin.</p></div>';
+                '<div class="text-center py-8"><p class="text-3xl mb-2">👥</p><p class="text-xs theme-text-muted">Henüz öğrenci yok.<br>Aşağıdaki sınıf kodunu öğrencilerinize verin.</p></div>';
         }
 
         let odevlerHTML = '';
@@ -428,7 +427,7 @@
                 .slice(-3)
                 .reverse()
                 .forEach((o) => {
-                    odevlerHTML += `<div class="py-1.5 border-b border-gray-200 dark:border-neutral-700 last:border-0"><p class="text-xs text-gray-900 dark:text-neutral-100">${o.icerik}</p><p class="text-[10px] text-gray-500 dark:text-neutral-400">${o.tarih}</p></div>`;
+                    odevlerHTML += `<div class="py-1.5 border-b theme-border last:border-0"><p class="text-xs theme-text-main">${o.icerik}</p><p class="text-[10px] theme-text-muted">${o.tarih}</p></div>`;
                 });
         }
 
@@ -436,68 +435,68 @@
         if (!panel) {
             panel = document.createElement('div');
             panel.id = 'hoca-panel-modal';
-            panel.className = 'absolute inset-0 z-50 flex flex-col bg-gray-50 dark:bg-neutral-950 absolute inset-0 z-50 flex flex-col bg-gray-50 dark:bg-neutral-950';
+            panel.className = 'lisani-panel-overlay absolute inset-0 z-50 flex flex-col theme-bg-phone';
             const host = document.getElementById('app-container') || document.body;
             host.appendChild(panel);
         }
 
         panel.innerHTML = `
         <div class="flex flex-col h-full w-full max-w-none lg:max-w-4xl lg:mx-auto">
-            <div class="flex items-center justify-between px-5 pt-5 pb-3 border-b border-gray-200 dark:border-neutral-700">
+            <div class="flex items-center justify-between px-5 pt-5 pb-3 border-b theme-border">
                 <div>
-                    <h2 class="text-sm font-extrabold text-gray-900 dark:text-neutral-100">📊 Öğrenci Takip Paneli</h2>
-                    <p class="text-[10px] text-gray-500 dark:text-neutral-400">${sinif.sinifAdi || 'Sınıf'}</p>
+                    <h2 class="text-sm font-extrabold theme-text-main">📊 Öğrenci Takip Paneli</h2>
+                    <p class="text-[10px] theme-text-muted">${sinif.sinifAdi || 'Sınıf'}</p>
                 </div>
-                <button onclick="document.getElementById('hoca-panel-modal').remove()" class="w-9 h-9 rounded-full bg-gray-100 dark:bg-neutral-800 flex items-center justify-center text-gray-500 dark:text-neutral-400 hover:opacity-80">
+                <button onclick="document.getElementById('hoca-panel-modal').remove()" class="w-9 h-9 rounded-full theme-light-bg flex items-center justify-center theme-text-muted hover:opacity-80">
                     <i data-lucide="x" class="w-5 h-5"></i>
                 </button>
             </div>
             <div class="flex-1 overflow-y-auto px-5 py-4 space-y-4">
                 <div class="grid grid-cols-2 gap-2">
-                    <div class="bg-white dark:bg-neutral-900 border border-gray-200 dark:border-neutral-700 rounded-xl rounded-xl p-3 text-center">
-                        <p class="text-[9px] text-gray-500 dark:text-neutral-400 uppercase font-bold">Öğrenci</p>
+                    <div class="glass-card rounded-xl p-3 text-center">
+                        <p class="text-[9px] theme-text-muted uppercase font-bold">Öğrenci</p>
                         <p class="text-lg font-black text-amber-400">${ozet.ogrenciSayisi ?? ogrenciler.length}</p>
                     </div>
-                    <div class="bg-white dark:bg-neutral-900 border border-gray-200 dark:border-neutral-700 rounded-xl rounded-xl p-3 text-center">
-                        <p class="text-[9px] text-gray-500 dark:text-neutral-400 uppercase font-bold">Aktif (7 gün)</p>
+                    <div class="glass-card rounded-xl p-3 text-center">
+                        <p class="text-[9px] theme-text-muted uppercase font-bold">Aktif (7 gün)</p>
                         <p class="text-lg font-black text-emerald-400">${ozet.aktifOgrenci ?? 0}</p>
                     </div>
-                    <div class="bg-white dark:bg-neutral-900 border border-gray-200 dark:border-neutral-700 rounded-xl rounded-xl p-3 text-center">
-                        <p class="text-[9px] text-gray-500 dark:text-neutral-400 uppercase font-bold">Sınıf Ort.</p>
+                    <div class="glass-card rounded-xl p-3 text-center">
+                        <p class="text-[9px] theme-text-muted uppercase font-bold">Sınıf Ort.</p>
                         <p class="text-lg font-black text-blue-400">%${ozet.ortalamaBasari ?? 0}</p>
                     </div>
-                    <div class="bg-white dark:bg-neutral-900 border border-gray-200 dark:border-neutral-700 rounded-xl rounded-xl p-3 text-center">
-                        <p class="text-[9px] text-gray-500 dark:text-neutral-400 uppercase font-bold">Toplam XP</p>
-                        <p class="text-lg font-black text-blue-600 dark:text-blue-400">${ozet.toplamXp ?? 0}</p>
+                    <div class="glass-card rounded-xl p-3 text-center">
+                        <p class="text-[9px] theme-text-muted uppercase font-bold">Toplam XP</p>
+                        <p class="text-lg font-black theme-primary-color">${ozet.toplamXp ?? 0}</p>
                     </div>
-                    <div class="bg-white dark:bg-neutral-900 border border-gray-200 dark:border-neutral-700 rounded-xl rounded-xl p-3 text-center col-span-2">
-                        <p class="text-[9px] text-gray-500 dark:text-neutral-400 uppercase font-bold">Sınıf test özeti</p>
+                    <div class="glass-card rounded-xl p-3 text-center col-span-2">
+                        <p class="text-[9px] theme-text-muted uppercase font-bold">Sınıf test özeti</p>
                         <p class="text-[10px] font-bold mt-1">
                             <span class="text-emerald-400">${ozet.toplamDogru ?? 0} doğru</span>
-                            <span class="text-gray-500 dark:text-neutral-400 mx-1">·</span>
+                            <span class="theme-text-muted mx-1">·</span>
                             <span class="text-red-400">${ozet.toplamYanlis ?? 0} yanlış</span>
-                            <span class="text-gray-500 dark:text-neutral-400 mx-1">·</span>
-                            <span class="text-gray-900 dark:text-neutral-100">${ozet.toplamSinav ?? 0} sınav</span>
+                            <span class="theme-text-muted mx-1">·</span>
+                            <span class="theme-text-main">${ozet.toplamSinav ?? 0} sınav</span>
                         </p>
                     </div>
                 </div>
-                <div class="bg-white dark:bg-neutral-900 border border-gray-200 dark:border-neutral-700 rounded-xl rounded-2xl p-4 border border-amber-500/20">
-                    <p class="text-[10px] text-gray-500 dark:text-neutral-400 mb-1">Sınıf kodu (öğrencilere verin)</p>
+                <div class="glass-card rounded-2xl p-4 border border-amber-500/20">
+                    <p class="text-[10px] theme-text-muted mb-1">Sınıf kodu (öğrencilere verin)</p>
                     <p class="text-2xl font-black text-amber-400 font-mono tracking-widest text-center">${sinif.kisaKod || '—'}</p>
                 </div>
                 <div>
-                    <h3 class="text-xs font-extrabold text-gray-900 dark:text-neutral-100 mb-1 flex items-center gap-2">
+                    <h3 class="text-xs font-extrabold theme-text-main mb-1 flex items-center gap-2">
                         <i data-lucide="users" class="w-4 h-4 text-amber-400"></i>
                         Öğrenci Durumları & Analiz
                     </h3>
-                    <p class="text-[9px] text-gray-500 dark:text-neutral-400 mb-2">Her öğrencide «Analiz Raporu» ile test detaylarını görün.</p>
+                    <p class="text-[9px] theme-text-muted mb-2">Her öğrencide «Analiz Raporu» ile test detaylarını görün.</p>
                     ${ogrencilerHTML}
                 </div>
-                ${odevlerHTML ? `<div><h3 class="text-xs font-extrabold text-gray-900 dark:text-neutral-100 mb-2">📋 Son Ödevler</h3><div class="bg-white dark:bg-neutral-900 border border-gray-200 dark:border-neutral-700 rounded-xl rounded-xl p-3">${odevlerHTML}</div></div>` : ''}
-                <div class="bg-white dark:bg-neutral-900 border border-gray-200 dark:border-neutral-700 rounded-xl rounded-2xl p-4">
-                    <h3 class="text-xs font-extrabold text-gray-900 dark:text-neutral-100 mb-2">📝 Yeni Ödev Ver</h3>
-                    <textarea id="odev-icerik" placeholder="Ödev içeriğini yazın..." class="w-full p-2.5 rounded-xl border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-gray-900 dark:text-neutral-100 text-xs focus:outline-none resize-none h-20 mb-2"></textarea>
-                    <button onclick="odevVer('${uid}')" class="w-full py-2.5 inline-flex items-center justify-center bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold transition-colors rounded-xl text-xs font-bold">Ödevi Gönder</button>
+                ${odevlerHTML ? `<div><h3 class="text-xs font-extrabold theme-text-main mb-2">📋 Son Ödevler</h3><div class="glass-card rounded-xl p-3">${odevlerHTML}</div></div>` : ''}
+                <div class="glass-card rounded-2xl p-4">
+                    <h3 class="text-xs font-extrabold theme-text-main mb-2">📝 Yeni Ödev Ver</h3>
+                    <textarea id="odev-icerik" placeholder="Ödev içeriğini yazın..." class="w-full p-2.5 rounded-xl border theme-border theme-card-bg theme-text-main text-xs focus:outline-none resize-none h-20 mb-2"></textarea>
+                    <button onclick="odevVer('${uid}')" class="w-full py-2.5 theme-primary-btn rounded-xl text-xs font-bold">Ödevi Gönder</button>
                 </div>
             </div>
         </div>`;
@@ -729,18 +728,12 @@
         const last = testHistory[testHistory.length - 1];
 
         try {
-            const studiedLetters =
-                typeof window.getStudiedLettersList === 'function'
-                    ? window.getStudiedLettersList()
-                    : [];
-
-            const data = await apiFetch('/api/progress/sync', {
+            await apiFetch('/api/progress/sync', {
                 method: 'POST',
                 body: JSON.stringify({
                     total_xp: typeof totalScore !== 'undefined' ? totalScore : 0,
                     tests_count: solvedCount,
                     avg_success: avgSuccess,
-                    studied_letters: studiedLetters,
                     last_test: last
                         ? {
                               date: last.date,
@@ -761,19 +754,6 @@
                     })),
                 }),
             });
-            if (typeof window.applyProgressFromServer === 'function') {
-                window.applyProgressFromServer(data);
-            }
-        } catch (e) {}
-    };
-
-    window.loadProgressFromServer = async function () {
-        if (!currentUser || currentUserRole === 'hoca') return;
-        try {
-            const data = await apiFetch('/api/progress');
-            if (typeof window.applyProgressFromServer === 'function') {
-                window.applyProgressFromServer(data);
-            }
         } catch (e) {}
     };
 
@@ -787,23 +767,23 @@
         }
 
         if (!data.sinifAdi && data.message) {
-            list.innerHTML = `<p class="text-[10px] text-gray-500 dark:text-neutral-400 text-center py-3">${data.message}</p>`;
+            list.innerHTML = `<p class="text-[10px] theme-text-muted text-center py-3">${data.message}</p>`;
             return;
         }
 
         const odevler = data.odevler || [];
         if (odevler.length === 0) {
             list.innerHTML =
-                '<p class="text-[10px] text-gray-500 dark:text-neutral-400 text-center py-3">Henüz ödev yok. Hocanız ödev verdiğinde burada görünecek.</p>';
+                '<p class="text-[10px] theme-text-muted text-center py-3">Henüz ödev yok. Hocanız ödev verdiğinde burada görünecek.</p>';
             return;
         }
 
         list.innerHTML = odevler
             .map(
                 (o) => `
-            <div class="bg-white dark:bg-neutral-900 border border-gray-200 dark:border-neutral-700 rounded-xl active:bg-gray-50 dark:active:bg-neutral-800 transition-colors rounded-xl p-3 border border-gray-200 dark:border-neutral-700">
-                <p class="text-xs text-gray-900 dark:text-neutral-100 leading-relaxed">${o.icerik}</p>
-                <p class="text-[9px] text-gray-500 dark:text-neutral-400 mt-1.5 flex justify-between">
+            <div class="glass-card-interactive rounded-xl p-3 border theme-border">
+                <p class="text-xs theme-text-main leading-relaxed">${o.icerik}</p>
+                <p class="text-[9px] theme-text-muted mt-1.5 flex justify-between">
                     <span>${o.hocaAdi || data.hocaAdi || 'Hoca'}</span>
                     <span>${o.tarih || ''}</span>
                 </p>
@@ -839,7 +819,7 @@
         if (user?.sinifKodu || user?.sinif) {
             const ad = user.sinif || 'Sınıf';
             const kod = user.sinifKodu || '';
-            if (mevcut) mevcut.innerHTML = `Kayıtlı: <strong class="text-gray-900 dark:text-neutral-100">${ad}</strong>${kod ? ' · Kod: <span class="font-mono text-amber-400">' + kod + '</span>' : ''}`;
+            if (mevcut) mevcut.innerHTML = `Kayıtlı: <strong class="theme-text-main">${ad}</strong>${kod ? ' · Kod: <span class="font-mono text-amber-400">' + kod + '</span>' : ''}`;
             if (input && kod) input.value = kod;
         } else if (mevcut) {
             mevcut.textContent = 'Henüz sınıfa kayıtlı değilsiniz. Hocanızdan kod alıp aşağıya yazın.';
@@ -1001,12 +981,12 @@
             .map((c) => {
                 const unread =
                     c.unreadCount > 0
-                        ? `<span class="bg-emerald-500 text-white min-w-5 h-5 text-[10px] font-bold rounded-full px-1.5 flex items-center justify-center text-[9px]">${c.unreadCount > 99 ? '99+' : c.unreadCount}</span>`
+                        ? `<span class="wa-unread-badge rounded-full px-1.5 flex items-center justify-center text-[9px]">${c.unreadCount > 99 ? '99+' : c.unreadCount}</span>`
                         : `<span class="text-[10px] text-[#8696a0]">${c.lastAt || ''}</span>`;
                 const preview = c.lastMessage
                     ? escapeHtml(c.lastMessage)
                     : '<span class="italic text-[#667781]">Mesaj yok</span>';
-                return `<button type="button" data-wa-partner="${c.uid}" class="wa-contact-btn w-full flex items-center gap-3 px-4 py-3 text-left bg-[#111b21] border-b border-white/5 active:bg-[#202c33]">
+                return `<button type="button" data-wa-partner="${c.uid}" class="wa-list-item wa-contact-btn w-full flex items-center gap-3 px-4 py-3 text-left">
                     <div class="w-12 h-12 rounded-full bg-[#2a3942] flex items-center justify-center flex-shrink-0 overflow-hidden">${formatAvatarHtml(c.avatar)}</div>
                     <div class="flex-1 min-w-0">
                         <div class="flex justify-between items-center gap-2">
@@ -1031,9 +1011,7 @@
                 lastDate = m.date;
                 html += `<div class="text-center my-3"><span class="text-[10px] bg-[#182229] text-[#8696a0] px-3 py-1 rounded-lg">${escapeHtml(m.date)}</span></div>`;
             }
-            const cls = m.isMine
-                ? 'ml-auto bg-[#005c4b] text-[#e9edef] rounded-lg rounded-br-none'
-                : 'mr-auto bg-[#202c33] text-[#e9edef] rounded-lg rounded-bl-none';
+            const cls = m.isMine ? 'wa-bubble-sent ml-auto' : 'wa-bubble-received mr-auto';
             const tick = m.isMine
                 ? m.read
                     ? '<span class="text-[#53bdeb] ml-1">✓✓</span>'
@@ -1065,7 +1043,6 @@
         if (el) return el;
         el = document.createElement('div');
         el.id = 'wa-mesajlar-overlay';
-        el.className = 'absolute inset-0 z-[80] flex flex-col w-full h-full max-h-full overflow-hidden bg-[#0b141a]';
         el.setAttribute('role', 'dialog');
         el.setAttribute('aria-modal', 'true');
         const host = document.getElementById('app-container') || document.body;
@@ -1077,9 +1054,9 @@
     function renderWaShell(innerHtml, headerHtml, headerMode) {
         const el = ensureWaOverlay();
         el.innerHTML = `
-            <div class="flex flex-col flex-1 min-h-0 w-full h-full">
-                <div class="flex-shrink-0 flex items-center gap-2 px-3 py-3 pt-[max(0.75rem,env(safe-area-inset-top))] bg-[#1f2c34] border-b border-white/5">${headerHtml}</div>
-                <div class="flex flex-1 min-h-0 flex-col overflow-hidden">${innerHtml}</div>
+            <div class="wa-overlay-inner">
+                <div class="wa-header flex items-center gap-2 px-3 py-3">${headerHtml}</div>
+                <div class="wa-body">${innerHtml}</div>
             </div>`;
         bindWaHeaderButtons(headerMode || 'list');
         el.querySelectorAll('.wa-contact-btn').forEach((btn) => {
@@ -1168,10 +1145,10 @@
             hideLoading();
             renderWaShell(
                 `<div class="flex flex-col flex-1 min-h-0 h-full">
-                    <div id="wa-messages-box" class="flex-1 min-h-0 overflow-y-auto px-3 py-4 bg-[#0b141a]">${renderWaMessages(data.messages || [])}</div>
-                    <div class="flex-shrink-0 flex items-end gap-2 px-3 py-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] bg-[#1f2c34] border-t border-white/5">
+                    <div id="wa-messages-box" class="wa-chat-bg flex-1 min-h-0 overflow-y-auto px-3 py-4">${renderWaMessages(data.messages || [])}</div>
+                    <div class="wa-input-bar flex items-end gap-2 px-3 py-2">
                         <textarea id="wa-message-input" rows="1" maxlength="2000" placeholder="Mesaj yazın..." class="flex-1 resize-none max-h-24 bg-[#2a3942] text-[#e9edef] text-sm rounded-2xl px-4 py-2.5 border-0 focus:outline-none focus:ring-1 focus:ring-emerald-500/40"></textarea>
-                        <button type="button" id="wa-send-btn" class="w-11 h-11 rounded-full flex items-center justify-center flex-shrink-0 bg-[#25d366] text-white disabled:opacity-45">
+                        <button type="button" id="wa-send-btn" class="wa-send-btn wa-header-btn w-11 h-11 rounded-full flex items-center justify-center flex-shrink-0 shadow-lg">
                             <i data-lucide="send" class="w-5 h-5"></i>
                         </button>
                     </div>
@@ -1247,7 +1224,7 @@
         updateRoleBasedUI(user);
         setTimeout(() => window.refreshMesajBadge(), 600);
         if (user.role !== 'hoca') {
-            setTimeout(() => window.loadProgressFromServer(), 400);
+            setTimeout(() => window.syncProgressToServer(), 800);
         }
     };
 
