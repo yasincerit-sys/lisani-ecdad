@@ -1510,6 +1510,97 @@
         }
 
         // --- TEMA PALETİ VE AYARLARI ---
+        const UI_FRAMEWORK_KEY = 'lisani_ui_framework';
+        const COLOR_MODE_KEY = 'lisani_color_mode';
+        const THEME_PALETTE_KEY = 'lisani_theme_palette';
+        let _colorModeMedia = null;
+
+        function isPrelineUi() {
+            return localStorage.getItem(UI_FRAMEWORK_KEY) === 'preline';
+        }
+
+        function resolveDarkFromMode(mode) {
+            if (mode === 'dark') return true;
+            if (mode === 'light') return false;
+            return window.matchMedia('(prefers-color-scheme: dark)').matches;
+        }
+
+        function highlightUiFrameworkButtons() {
+            const current = localStorage.getItem(UI_FRAMEWORK_KEY) || 'classic';
+            document.querySelectorAll('[data-ui-framework]').forEach((btn) => {
+                const active = btn.getAttribute('data-ui-framework') === current;
+                btn.classList.toggle('ring-2', active);
+                btn.classList.toggle('ring-offset-1', active);
+                btn.style.borderColor = active ? 'var(--theme-primary)' : '';
+            });
+            const prelineModes = document.getElementById('preline-color-modes');
+            if (prelineModes) prelineModes.classList.toggle('hidden', current !== 'preline');
+        }
+
+        function highlightColorModeButtons() {
+            const current = localStorage.getItem(COLOR_MODE_KEY) || 'system';
+            document.querySelectorAll('[data-color-mode]').forEach((btn) => {
+                const active = btn.getAttribute('data-color-mode') === current;
+                btn.classList.toggle('ring-2', active);
+                btn.classList.toggle('ring-offset-1', active);
+                btn.style.borderColor = active ? 'var(--theme-primary)' : '';
+            });
+        }
+
+        function applyDocumentColorMode(mode) {
+            const root = document.documentElement;
+            const dark = resolveDarkFromMode(mode);
+            root.classList.toggle('dark', dark);
+            const meta = document.getElementById('meta-theme-color');
+            if (meta) meta.setAttribute('content', dark ? '#0a0a0a' : '#f9fafb');
+        }
+
+        function bindColorModeMediaListener() {
+            if (_colorModeMedia) return;
+            _colorModeMedia = window.matchMedia('(prefers-color-scheme: dark)');
+            _colorModeMedia.addEventListener('change', () => {
+                if (isPrelineUi() && (localStorage.getItem(COLOR_MODE_KEY) || 'system') === 'system') {
+                    applyDocumentColorMode('system');
+                }
+            });
+        }
+
+        function setColorMode(mode) {
+            playClickSound();
+            localStorage.setItem(COLOR_MODE_KEY, mode);
+            if (isPrelineUi()) applyDocumentColorMode(mode);
+            highlightColorModeButtons();
+        }
+
+        function setUiFramework(framework) {
+            playClickSound();
+            localStorage.setItem(UI_FRAMEWORK_KEY, framework);
+            const root = document.documentElement;
+            if (framework === 'preline') {
+                root.classList.add('preline-ui');
+                applyDocumentColorMode(localStorage.getItem(COLOR_MODE_KEY) || 'system');
+                bindColorModeMediaListener();
+            } else {
+                root.classList.remove('preline-ui', 'dark');
+                const meta = document.getElementById('meta-theme-color');
+                if (meta) meta.setAttribute('content', '#18100c');
+            }
+            highlightUiFrameworkButtons();
+            highlightColorModeButtons();
+            const savedPalette = localStorage.getItem(THEME_PALETTE_KEY) || 'brown-darkbrown';
+            applyTheme(savedPalette, { silent: true });
+            if (window.HSStaticMethods && typeof window.HSStaticMethods.autoInit === 'function') {
+                window.HSStaticMethods.autoInit();
+            }
+            showToast(framework === 'preline' ? 'Preline UI etkinleştirildi.' : 'Klasik Ecdad teması etkinleştirildi.', 'success');
+        }
+
+        function initUiFrameworkSettings() {
+            highlightUiFrameworkButtons();
+            highlightColorModeButtons();
+            if (isPrelineUi()) bindColorModeMediaListener();
+        }
+
         const themes = {
             'brown-classic': {
                 bgPhone: '#f4ece1',
@@ -1571,10 +1662,12 @@
 
         let currentActiveScreen = 'home';
 
-        function applyTheme(themeKey) {
-            playClickSound();
+        function applyTheme(themeKey, options = {}) {
+            if (!options.silent) playClickSound();
             const theme = themes[themeKey];
             if (!theme) return;
+
+            localStorage.setItem(THEME_PALETTE_KEY, themeKey);
 
             const root = document.documentElement;
             root.style.setProperty('--theme-bg-phone', theme.bgPhone);
@@ -1622,6 +1715,7 @@
             initLettersGrid();
             renderProgressChart();
             switchTab(currentActiveScreen);
+            if (!options.silent) showToast('Renk teması güncellendi.', 'success');
         }
 
         function handleCustomColorSelect(event) {
@@ -2616,7 +2710,8 @@ self.addEventListener('notificationclick', e => {
             initLettersGrid();
             renderQuizHistoryList();
             renderProgressChart();
-            applyTheme('brown-darkbrown');
+            applyTheme(localStorage.getItem(THEME_PALETTE_KEY) || 'brown-darkbrown', { silent: true });
+            initUiFrameworkSettings();
             updateLearningStats();
             initSwipeGestures();
             initToastSwipe();

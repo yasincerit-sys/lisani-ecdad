@@ -1,0 +1,258 @@
+/**
+ * Preline UI görünümü — mevcut lisani sınıfları Preline bileşen stiline map edilir.
+ * Tailwind CDN + dark class ile çalışır.
+ */
+
+:root {
+    --ph-bg: #f9fafb;
+    --ph-surface: #ffffff;
+    --ph-surface-2: #f3f4f6;
+    --ph-border: #e5e7eb;
+    --ph-text: #111827;
+    --ph-muted: #6b7280;
+    --ph-primary: #2563eb;
+    --ph-primary-hover: #1d4ed8;
+    --ph-ring: rgba(37, 99, 235, 0.25);
+}
+
+html.dark {
+    --ph-bg: #0a0a0a;
+    --ph-surface: #171717;
+    --ph-surface-2: #262626;
+    --ph-border: #404040;
+    --ph-text: #f5f5f5;
+    --ph-muted: #a3a3a3;
+    --ph-primary: #3b82f6;
+    --ph-primary-hover: #2563eb;
+    --ph-ring: rgba(59, 130, 246, 0.3);
+}
+
+/* Tema değişkenlerini Preline paletine bağla */
+html.preline-ui {
+    --theme-bg-phone: var(--ph-bg);
+    --theme-card-bg: var(--ph-surface);
+    --theme-border: var(--ph-border);
+    --theme-text-main: var(--ph-text);
+    --theme-text-muted: var(--ph-muted);
+    --theme-primary: var(--ph-primary);
+    --theme-primary-hover: var(--ph-primary-hover);
+    --theme-secondary: var(--ph-surface-2);
+    --theme-card-gradient-from: var(--ph-primary);
+    --theme-card-gradient-to: var(--ph-primary-hover);
+    --theme-accent-light: var(--ph-surface-2);
+    --theme-button-text: #ffffff;
+    --theme-primary-rgb: 37, 99, 235;
+}
+
+html.dark.preline-ui {
+    --theme-primary-rgb: 59, 130, 246;
+}
+
+html.preline-ui body,
+html.preline-ui .lisani-body {
+    background: var(--ph-bg);
+    background-image: none;
+    color: var(--ph-text);
+}
+
+/* Preline Card */
+html.preline-ui .glass-card,
+html.preline-ui .glass-card-interactive {
+    background: var(--ph-surface);
+    border: 1px solid var(--ph-border);
+    border-radius: 0.75rem;
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+}
+
+html.preline-ui .glass-card-interactive:hover {
+    background: var(--ph-surface);
+    border-color: var(--ph-border);
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.08);
+}
+
+html.dark.preline-ui .glass-card,
+html.dark.preline-ui .glass-card-interactive {
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.3);
+}
+
+/* Preline Button — primary */
+html.preline-ui .theme-primary-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    background: var(--ph-primary);
+    color: #fff;
+    border: 1px solid transparent;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    box-shadow: none;
+    transition: background 0.15s ease, opacity 0.15s ease;
+}
+
+html.preline-ui .theme-primary-btn:hover {
+    background: var(--ph-primary-hover);
+}
+
+/* Preline Input */
+html.preline-ui input[type="text"],
+html.preline-ui input[type="password"],
+html.preline-ui input[type="email"],
+html.preline-ui input[type="time"],
+html.preline-ui textarea,
+html.preline-ui select {
+    border-radius: 0.5rem;
+    border: 1px solid var(--ph-border);
+    background: var(--ph-surface);
+    color: var(--ph-text);
+}
+
+html.preline-ui input:focus,
+html.preline-ui textarea:focus {
+    outline: none;
+    border-color: var(--ph-primary);
+    box-shadow: 0 0 0 3px var(--ph-ring);
+}
+
+html.preline-ui .theme-light-bg {
+    background: var(--ph-surface-2);
+}
+
+/* Preline bottom nav */
+html.preline-ui .lisani-nav-bar,
+html.preline-ui #bottom-bar {
+    background: var(--ph-surface) !important;
+    border-top: 1px solid var(--ph-border) !important;
+    box-shadow: 0 -1px 3px 0 rgb(0 0 0 / 0.06);
+    backdrop-filter: none !important;
+}
+
+html.preline-ui #bottom-bar button {
+    color: var(--ph-muted);
+    border-radius: 0.5rem;
+}
+
+html.preline-ui #bottom-bar button:hover {
+    color: var(--ph-text);
+    background: var(--ph-surface-2);
+}
+
+html.preline-ui #tab-home #home-inner-circle {
+    position: static !important;
+    width: 2.5rem;
+    height: 2.5rem;
+    margin: 0 auto 0.15rem;
+    border-width: 0 !important;
+    box-shadow: none !important;
+    background: var(--ph-primary) !important;
+}
+
+html.preline-ui #tab-home-text {
+    margin-top: 0 !important;
+}
+
+/* Toast — Preline alert style */
+html.preline-ui .lisani-toast,
+html.preline-ui #toast-box {
+    border-radius: 0.5rem;
+    border: 1px solid var(--ph-border);
+    background: var(--ph-surface);
+    color: var(--ph-text);
+    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+}
+
+/* Glow blobs — kapat */
+html.preline-ui .glass-glow-blob {
+    display: none !important;
+}
+
+/* Auth ekranı */
+html.preline-ui #auth-container .glass-card {
+    padding: 1.5rem;
+}
+
+/* Preline badge / secondary */
+html.preline-ui .theme-secondary-badge {
+    background: var(--ph-surface-2);
+    color: var(--ph-muted);
+    border: 1px solid var(--ph-border);
+    border-radius: 9999px;
+}
+
+/* Gradient kart — sade mavi */
+html.preline-ui .theme-gradient-card {
+    background: linear-gradient(135deg, var(--ph-primary), var(--ph-primary-hover));
+    border: none;
+}
+
+/* Desktop header */
+html.preline-ui .lisani-desktop-header {
+    background: var(--ph-surface);
+    border-bottom: 1px solid var(--ph-border);
+}
+
+/* Tema modu butonları */
+html.preline-ui .theme-mode-btn.ring-2 {
+    border-color: var(--ph-primary) !important;
+    box-shadow: 0 0 0 2px var(--ph-ring);
+}
+
+/* Eski palet seçicileri gizle — Preline tek stil */
+html.preline-ui .lisani-legacy-palettes {
+    display: none !important;
+}
+
+/* Preline — responsive (mobil / tablet / masaüstü) */
+@media (max-width: 639px) {
+    html.preline-ui .lisani-screens {
+        padding-bottom: max(1.5rem, env(safe-area-inset-bottom, 0px));
+    }
+
+    html.preline-ui .ui-framework-btn,
+    html.preline-ui .theme-mode-btn {
+        min-height: 2.75rem;
+    }
+}
+
+@media (min-width: 640px) and (max-width: 1023.98px) {
+    html.preline-ui .lisani-body {
+        background: var(--ph-bg);
+    }
+
+    html.preline-ui .lisani-app-shell {
+        border-color: var(--ph-border);
+    }
+}
+
+@media (min-width: 1024px) {
+    html.preline-ui .lisani-desktop-header {
+        background: var(--ph-surface);
+        border-bottom: 1px solid var(--ph-border);
+    }
+
+    html.preline-ui .lisani-desktop-brand__title {
+        color: var(--ph-text);
+    }
+
+    html.preline-ui .lisani-desktop-brand__tagline {
+        color: var(--ph-muted);
+    }
+
+    html.preline-ui .lisani-nav-bar {
+        background: var(--ph-surface) !important;
+        border-right-color: var(--ph-border) !important;
+    }
+
+    html.preline-ui .lisani-screens {
+        background: var(--ph-bg);
+    }
+}
+
+@media (min-width: 1280px) {
+    html.preline-ui #screen-home.screen.active,
+    html.preline-ui #screen-home.active {
+        gap: 1.25rem;
+    }
+}

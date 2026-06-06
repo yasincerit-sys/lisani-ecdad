@@ -752,8 +752,35 @@
                             </div>
                         </div>
 
-                        <!-- TEMA AYARLAMA PALETİ -->
+                        <!-- ARAYÜZ STİLİ -->
                         <div class="space-y-3 pt-3.5 border-t border-[var(--theme-border)]">
+                            <h4 class="text-xs font-bold theme-text-main flex items-center space-x-1.5">
+                                <i data-lucide="layout-template" class="w-4 h-4 theme-primary-color"></i>
+                                <span class="font-extrabold">Arayüz Stili</span>
+                            </h4>
+                            <p class="text-[10px] theme-text-muted leading-normal">Preline UI modern mavi/gri tema; Klasik Osmanlı cam efektli temadır.</p>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                <button type="button" onclick="setUiFramework('classic')" data-ui-framework="classic" class="ui-framework-btn flex flex-col items-start gap-1 rounded-xl border theme-border theme-light-bg p-2.5 text-left transition-all hover:opacity-90 active:scale-95">
+                                    <span class="text-xs font-bold theme-text-main">Klasik Ecdad</span>
+                                    <span class="text-[9px] theme-text-muted">Kahve tonları, cam kartlar</span>
+                                </button>
+                                <button type="button" onclick="setUiFramework('preline')" data-ui-framework="preline" class="ui-framework-btn flex flex-col items-start gap-1 rounded-xl border theme-border theme-light-bg p-2.5 text-left transition-all hover:opacity-90 active:scale-95">
+                                    <span class="text-xs font-bold theme-text-main">Preline UI</span>
+                                    <span class="text-[9px] theme-text-muted">Modern mavi, düz kartlar</span>
+                                </button>
+                            </div>
+                            <div id="preline-color-modes" class="hidden space-y-2">
+                                <span class="text-[10px] font-bold theme-text-muted uppercase tracking-wider block">Preline Renk Modu</span>
+                                <div class="grid grid-cols-3 gap-2">
+                                    <button type="button" onclick="setColorMode('system')" data-color-mode="system" class="theme-mode-btn rounded-lg border theme-border theme-light-bg py-2 text-[10px] font-bold theme-text-main transition-all">Sistem</button>
+                                    <button type="button" onclick="setColorMode('light')" data-color-mode="light" class="theme-mode-btn rounded-lg border theme-border theme-light-bg py-2 text-[10px] font-bold theme-text-main transition-all">Açık</button>
+                                    <button type="button" onclick="setColorMode('dark')" data-color-mode="dark" class="theme-mode-btn rounded-lg border theme-border theme-light-bg py-2 text-[10px] font-bold theme-text-main transition-all">Koyu</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- TEMA AYARLAMA PALETİ -->
+                        <div class="lisani-legacy-palettes space-y-3 pt-3.5 border-t border-[var(--theme-border)]">
                             <h4 class="text-xs font-bold theme-text-main flex items-center space-x-1.5 transition-all">
                                 <i data-lucide="palette" class="w-4 h-4 theme-primary-color"></i>
                                 <span class="font-extrabold">Arayüz Renk Teması</span>

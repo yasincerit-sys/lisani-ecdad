@@ -29,19 +29,54 @@
         document.head.appendChild(link);
     })();
     </script>
-    <meta name="theme-color" content="#18100c">
+    <meta name="theme-color" content="#18100c" id="meta-theme-color">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Lisanı Ecdad">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+                        arabic: ['Amiri', 'serif'],
+                    },
+                },
+            },
+        };
+    </script>
     <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400;1,700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <link rel="stylesheet" href="{{ asset('css/lisani.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/preline-lisani.css') }}">
+    <script>
+        (function () {
+            const ui = localStorage.getItem('lisani_ui_framework');
+            const mode = localStorage.getItem('lisani_color_mode') || 'system';
+            if (ui === 'preline') {
+                document.documentElement.classList.add('preline-ui');
+                const dark =
+                    mode === 'dark' ||
+                    (mode === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+                if (dark) document.documentElement.classList.add('dark');
+            }
+        })();
+    </script>
 </head>
 <body class="lisani-body select-none font-size-standard" id="body-main">
     @yield('content')
+    <script src="{{ asset('js/preline.js') }}"></script>
     <script src="{{ asset('js/lisani.js') }}" defer></script>
     <script src="{{ asset('js/lisani-laravel.js') }}" defer></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            if (window.HSStaticMethods && typeof window.HSStaticMethods.autoInit === 'function') {
+                window.HSStaticMethods.autoInit();
+            }
+        });
+    </script>
 </body>
 </html>
