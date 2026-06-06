@@ -1,4 +1,4 @@
-﻿    <div class="lisani-site-wrapper">
+﻿    <div class="lisani-site-wrapper max-w-full overflow-x-hidden">
     <!-- Masaüstü site üst çubuğu -->
     <header class="lisani-desktop-header">
         <div class="lisani-desktop-header__inner">
@@ -18,18 +18,14 @@
     </header>
 
     <!-- Özel Toast Bildirim Kutusu (Glassmorphic) -->
-    <div id="toast-box" class="lisani-toast left-1/2 -translate-x-1/2 transform -translate-y-20 opacity-0 transition-all duration-300 pointer-events-none text-white text-xs font-bold px-5 py-3 rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.5)] flex items-center space-x-2 backdrop-blur-md">
-        <i data-lucide="info" class="w-4 h-4" id="toast-icon"></i>
+    <div id="toast-box" class="lisani-toast" aria-live="polite">
+        <i data-lucide="info" class="lisani-toast__icon" id="toast-icon"></i>
         <span id="toast-message">Bildirim mesajı buraya gelecek.</span>
     </div>
 
     <!-- Uygulama kabuğu: mobil tam ekran, masaüstü geniş site düzeni -->
-    <div id="app-container" class="lisani-app-shell theme-bg-phone theme-border flex flex-col overflow-hidden transition-all duration-300">
+    <div id="app-container" class="lisani-app-shell theme-bg-phone theme-border flex flex-col overflow-hidden transition-colors duration-300">
         
-        <!-- ================= DINAMIK CAM PARLAMA BLAKLARI (GLOW BLOBS) ================= -->
-        <div class="absolute -top-12 -left-12 w-64 h-64 rounded-full glass-glow-blob opacity-25 pointer-events-none z-0" id="glow-blob-1" style="background-color: var(--theme-primary);"></div>
-        <div class="absolute bottom-20 -right-12 w-72 h-72 rounded-full glass-glow-blob opacity-20 pointer-events-none z-0" id="glow-blob-2" style="background-color: #3b82f6;"></div>
-
         <!-- ================= GİRİŞ / KAYDOL BÖLÜMÜ (AUTH SCREEN) ================= -->
         <!-- Yükleme Ekranı -->
         <div id="loading-overlay" class="hidden absolute inset-0 z-50 flex flex-col items-center justify-center bg-black/80 backdrop-blur-sm">
@@ -54,8 +50,8 @@
 
             <!-- Giriş / Kaydol Sekme Butonları (Glassmorphic) -->
             <div class="flex p-1.5 theme-light-bg rounded-2xl border theme-border mb-6 relative z-10">
-                <button onclick="toggleAuthTab('login')" id="auth-tab-login" class="flex-1 py-2.5 rounded-xl text-xs font-bold transition-all theme-primary-bg text-white shadow-md">Giriş Yap</button>
-                <button onclick="toggleAuthTab('register')" id="auth-tab-register" class="flex-1 py-2.5 rounded-xl text-xs font-bold transition-all theme-text-muted hover:text-white">Kaydol</button>
+                <button onclick="toggleAuthTab('login')" id="auth-tab-login" class="flex-1 py-2.5 rounded-xl text-xs font-semibold transition-all lisani-segment-btn is-active">Giriş Yap</button>
+                <button onclick="toggleAuthTab('register')" id="auth-tab-register" class="flex-1 py-2.5 rounded-xl text-xs font-semibold transition-all lisani-segment-btn">Kaydol</button>
             </div>
 
             <!-- GİRİŞ YAP FORMU -->
@@ -99,46 +95,12 @@
                 <div class="space-y-2.5">
                     <label class="text-xs font-bold theme-text-main block text-center tracking-wide">✨ Profilinizi Özelleştirin</label>
                     
-                    <!-- Avatar Seçenekleri — 4'lü büyük grid -->
-                    <div class="grid grid-cols-4 gap-2" id="avatar-grid">
-                        <button onclick="selectAvatar('cat', '🐱')" class="avatar-option flex flex-col items-center gap-1 py-2.5 rounded-2xl border-2 theme-border bg-stone-900/70 transition-all duration-200 selected">
-                            <span class="text-3xl leading-none">🐱</span>
-                            <span class="text-[8px] theme-text-muted font-semibold">Kedi</span>
-                        </button>
-                        <button onclick="selectAvatar('alp', '🏹')" class="avatar-option flex flex-col items-center gap-1 py-2.5 rounded-2xl border-2 theme-border bg-stone-900/70 transition-all duration-200">
-                            <span class="text-3xl leading-none">🏹</span>
-                            <span class="text-[8px] theme-text-muted font-semibold">Alp</span>
-                        </button>
-                        <button onclick="selectAvatar('flower', '🌷')" class="avatar-option flex flex-col items-center gap-1 py-2.5 rounded-2xl border-2 theme-border bg-stone-900/70 transition-all duration-200">
-                            <span class="text-3xl leading-none">🌷</span>
-                            <span class="text-[8px] theme-text-muted font-semibold">Lale</span>
-                        </button>
-                        <button onclick="selectAvatar('scholar', '🎓')" class="avatar-option flex flex-col items-center gap-1 py-2.5 rounded-2xl border-2 theme-border bg-stone-900/70 transition-all duration-200">
-                            <span class="text-3xl leading-none">🎓</span>
-                            <span class="text-[8px] theme-text-muted font-semibold">Talebe</span>
-                        </button>
-                        <button onclick="selectAvatar('falcon', '🦅')" class="avatar-option flex flex-col items-center gap-1 py-2.5 rounded-2xl border-2 theme-border bg-stone-900/70 transition-all duration-200">
-                            <span class="text-3xl leading-none">🦅</span>
-                            <span class="text-[8px] theme-text-muted font-semibold">Kartal</span>
-                        </button>
-                        <button onclick="selectAvatar('scribe', '📜')" class="avatar-option flex flex-col items-center gap-1 py-2.5 rounded-2xl border-2 theme-border bg-stone-900/70 transition-all duration-200">
-                            <span class="text-3xl leading-none">📜</span>
-                            <span class="text-[8px] theme-text-muted font-semibold">Hattat</span>
-                        </button>
-                        <button onclick="selectAvatar('sword', '⚔️')" class="avatar-option flex flex-col items-center gap-1 py-2.5 rounded-2xl border-2 theme-border bg-stone-900/70 transition-all duration-200">
-                            <span class="text-3xl leading-none">⚔️</span>
-                            <span class="text-[8px] theme-text-muted font-semibold">Savaşçı</span>
-                        </button>
-                        <!-- Fotoğraf Yükleme -->
-                        <button onclick="triggerAvatarUpload()" class="avatar-option flex flex-col items-center gap-1 py-2.5 rounded-2xl border-2 border-dashed theme-border bg-stone-900/40 transition-all duration-200 hover:bg-stone-800/60">
-                            <i data-lucide="camera" class="w-7 h-7 theme-text-muted"></i>
-                            <span class="text-[8px] theme-text-muted font-semibold">Fotoğraf</span>
-                        </button>
-                    </div>
+                    <!-- Avatar Seçenekleri — JS ile doldurulur -->
+                    <div class="grid grid-cols-4 gap-2" id="avatar-grid"></div>
                     
                     <!-- Seçili avatar büyük önizleme -->
                     <div class="flex items-center justify-center gap-3 mt-1">
-                        <div id="avatar-preview-big" class="w-14 h-14 rounded-full border-2 border-[var(--theme-primary)] bg-stone-800 flex items-center justify-center text-4xl shadow-lg">🐱</div>
+                        <div id="avatar-preview-big" class="w-14 h-14 rounded-full border-2 border-[var(--theme-primary)] flex items-center justify-center text-4xl shadow-lg overflow-hidden">🐱</div>
                         <div>
                             <p class="text-[10px] theme-text-muted">Seçilen avatar</p>
                             <p class="text-xs font-bold theme-text-main" id="avatar-preview-label">Kedi</p>
@@ -179,10 +141,10 @@
                 <div class="space-y-1.5">
                     <label class="text-xs font-bold theme-text-main pl-1">Hesap Türü</label>
                     <div class="flex gap-2">
-                        <button onclick="selectRole('ogrenci')" id="role-btn-ogrenci" class="flex-1 py-2.5 rounded-xl text-xs font-bold transition-all theme-primary-bg text-white border border-[var(--theme-primary)]">
+                        <button onclick="selectRole('ogrenci')" id="role-btn-ogrenci" class="flex-1 py-2.5 rounded-xl text-xs font-semibold transition-all lisani-segment-btn is-active">
                             🎒 Öğrenci
                         </button>
-                        <button onclick="selectRole('hoca')" id="role-btn-hoca" class="flex-1 py-2.5 rounded-xl text-xs font-bold transition-all theme-card-bg theme-text-muted border theme-border">
+                        <button onclick="selectRole('hoca')" id="role-btn-hoca" class="flex-1 py-2.5 rounded-xl text-xs font-semibold transition-all lisani-segment-btn">
                             📚 Hoca
                         </button>
                     </div>
@@ -326,44 +288,44 @@
                         
                         <div class="grid grid-cols-1 gap-3.5" id="level-buttons-container">
                             <!-- Seviye 1 -->
-                            <button onclick="startLevel(1)" class="glass-card glass-card-interactive rounded-2xl p-4.5 text-left flex items-center justify-between shadow-md">
+                            <button onclick="startLevel(1)" class="glass-card glass-card-interactive rounded-2xl p-4.5 text-left flex items-center justify-between">
                                 <div class="flex items-center space-x-3.5">
-                                    <div class="w-10 h-10 rounded-full bg-emerald-500/10 text-emerald-400 flex items-center justify-center font-extrabold border border-emerald-500/20">1</div>
+                                    <div class="w-10 h-10 rounded-full lisani-level-badge--1 flex items-center justify-center font-extrabold border">1</div>
                                     <div>
                                         <h4 class="text-xs font-extrabold theme-text-main">Seviye 1: Harfler & Sayılar</h4>
                                         <p class="text-[10px] theme-text-muted mt-0.5">Elifba harfleri, özellikleri og munfasıl harfler</p>
                                     </div>
                                 </div>
-                                <div class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center border border-white/10">
-                                    <i data-lucide="play" class="w-3.5 h-3.5 theme-primary-color"></i>
+                                <div class="w-8 h-8 rounded-full lisani-play-btn flex items-center justify-center border">
+                                    <i data-lucide="play" class="w-3.5 h-3.5"></i>
                                 </div>
                             </button>
 
                             <!-- Seviye 2 -->
-                            <button onclick="startLevel(2)" class="glass-card glass-card-interactive rounded-2xl p-4.5 text-left flex items-center justify-between shadow-md">
+                            <button onclick="startLevel(2)" class="glass-card glass-card-interactive rounded-2xl p-4.5 text-left flex items-center justify-between">
                                 <div class="flex items-center space-x-3.5">
-                                    <div class="w-10 h-10 rounded-full bg-blue-500/10 text-blue-400 flex items-center justify-center font-extrabold border border-blue-500/20">2</div>
+                                    <div class="w-10 h-10 rounded-full lisani-level-badge--2 flex items-center justify-center font-extrabold border">2</div>
                                     <div>
                                         <h4 class="text-xs font-extrabold theme-text-main">Seviye 2: Yazım Kuralları & Okuma</h4>
                                         <p class="text-[10px] theme-text-muted mt-0.5">Metin okuma, harf birleşimleri ve temel cümleler</p>
                                     </div>
                                 </div>
-                                <div class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center border border-white/10">
-                                    <i data-lucide="play" class="w-3.5 h-3.5 theme-primary-color"></i>
+                                <div class="w-8 h-8 rounded-full lisani-play-btn flex items-center justify-center border">
+                                    <i data-lucide="play" class="w-3.5 h-3.5"></i>
                                 </div>
                             </button>
 
                             <!-- Seviye 3 -->
-                            <button onclick="startLevel(3)" class="glass-card glass-card-interactive rounded-2xl p-4.5 text-left flex items-center justify-between shadow-md">
+                            <button onclick="startLevel(3)" class="glass-card glass-card-interactive rounded-2xl p-4.5 text-left flex items-center justify-between">
                                 <div class="flex items-center space-x-3.5">
-                                    <div class="w-10 h-10 rounded-full bg-purple-500/10 text-purple-400 flex items-center justify-center font-extrabold border border-purple-500/20">3</div>
+                                    <div class="w-10 h-10 rounded-full lisani-level-badge--3 flex items-center justify-center font-extrabold border">3</div>
                                     <div>
                                         <h4 class="text-xs font-extrabold theme-text-main">Seviye 3: Kelime Kökü & Kaynak Dil</h4>
                                         <p class="text-[10px] theme-text-muted mt-0.5">Türkçe, Arapça ve Farsça kökenli kelime tahlilleri</p>
                                     </div>
                                 </div>
-                                <div class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center border border-white/10">
-                                    <i data-lucide="play" class="w-3.5 h-3.5 theme-primary-color"></i>
+                                <div class="w-8 h-8 rounded-full lisani-play-btn flex items-center justify-center border">
+                                    <i data-lucide="play" class="w-3.5 h-3.5"></i>
                                 </div>
                             </button>
 
@@ -455,8 +417,8 @@
                     <div class="lisani-span-full glass-card p-4 rounded-3xl shadow-lg flex items-center justify-between cursor-pointer transition-all hover:scale-[1.01] active:scale-[0.99]" onclick="switchTab('settings')">
                         <div class="flex items-center space-x-3.5">
                             <!-- Altın Çerçeveli Parlayan Avatar -->
-                            <div class="w-14 h-14 rounded-full bg-gradient-to-tr from-amber-500 to-yellow-300 p-0.5 shadow-[0_0_20px_rgba(245,158,11,0.25)] flex-shrink-0">
-                                <div class="w-full h-full rounded-full bg-neutral-900 flex items-center justify-center text-2xl overflow-hidden" id="home-avatar-display">
+                            <div class="w-14 h-14 rounded-full home-avatar-ring flex-shrink-0">
+                                <div class="w-full h-full rounded-full flex items-center justify-center text-2xl overflow-hidden bg-[var(--ph-bg)]" id="home-avatar-display">
                                     🐱
                                 </div>
                             </div>
@@ -469,45 +431,46 @@
                         </div>
                         
                         <!-- Puan Kartı -->
-                        <div class="bg-gradient-to-br from-neutral-950/60 to-neutral-900/60 border theme-border px-3.5 py-2.5 rounded-2xl text-right flex flex-col items-end shadow-inner">
+                        <div class="home-score-box px-3.5 py-2.5 rounded-2xl text-right flex flex-col items-end shadow-inner">
                             <span class="text-[8px] theme-text-muted uppercase font-extrabold tracking-wider">Toplam Skor</span>
                             <span class="text-xs font-black theme-primary-color flex items-center space-x-1 mt-0.5" id="home-score-display">
-                                <i data-lucide="zap" class="w-3.5 h-3.5 fill-current text-amber-500"></i>
+                                <i data-lucide="zap" class="w-3.5 h-3.5 fill-current home-warn-icon"></i>
                                 <span id="total-xp-display-home">0 XP</span>
                             </span>
                         </div>
                     </div>
 
                     <!-- Mesajlar (WhatsApp tarzı) -->
-                    <div id="home-mesajlar-card" class="hidden glass-card-interactive rounded-3xl p-4 border border-emerald-500/30 cursor-pointer transition-all hover:scale-[1.01]" onclick="showMesajlar()">
+                    <div id="home-mesajlar-card" class="hidden glass-card-interactive rounded-3xl p-4 border home-accent-border cursor-pointer transition-all hover:scale-[1.01]" onclick="showMesajlar()">
                         <div class="flex items-center justify-between">
                             <div class="flex items-center space-x-3">
-                                <div class="w-11 h-11 rounded-2xl bg-emerald-500/15 flex items-center justify-center border border-emerald-500/25 relative">
-                                    <i data-lucide="message-circle" class="w-5 h-5 text-emerald-400"></i>
+                                <div class="w-11 h-11 rounded-2xl home-accent-icon-wrap flex items-center justify-center relative">
+                                    <i data-lucide="message-circle" class="w-5 h-5 home-accent-text"></i>
                                     <span id="home-mesaj-badge" class="hidden absolute -top-1 -right-1 wa-unread-badge rounded-full px-1.5 flex items-center justify-center">0</span>
                                 </div>
                                 <div>
-                                    <h3 class="text-xs font-extrabold text-emerald-400">Mesajlar</h3>
-                                    <p class="text-[10px] theme-text-muted mt-0.5" id="home-mesajlar-sub">Hocanız veya öğrencilerinizle yazışın</p>
+                                    <h3 class="text-xs font-extrabold home-accent-text">Mesajlar</h3>
+                                    <p class="text-[10px] theme-text-muted mt-0.5 truncate max-w-[200px]" id="home-mesajlar-sub">Hocanız veya öğrencilerinizle yazışın</p>
+                                    <p class="text-[9px] home-accent-text/80 mt-0.5 truncate max-w-[200px] hidden opacity-80" id="home-mesajlar-preview"></p>
                                 </div>
                             </div>
-                            <i data-lucide="chevron-right" class="w-5 h-5 text-emerald-400"></i>
+                            <i data-lucide="chevron-right" class="w-5 h-5 home-accent-text"></i>
                         </div>
                     </div>
 
                     <!-- Hoca: Öğrenci takip kartı (sadece hoca rolünde görünür) -->
-                    <div id="home-hoca-takip-card" class="hidden glass-card-interactive rounded-3xl p-4 border border-amber-500/30 cursor-pointer transition-all hover:scale-[1.01]" onclick="showHocaPanel()">
+                    <div id="home-hoca-takip-card" class="hidden glass-card-interactive rounded-3xl p-4 border home-accent-border cursor-pointer transition-all hover:scale-[1.01]" onclick="showHocaPanel()">
                         <div class="flex items-center justify-between">
                             <div class="flex items-center space-x-3">
-                                <div class="w-11 h-11 rounded-2xl bg-amber-500/15 flex items-center justify-center border border-amber-500/25">
-                                    <i data-lucide="bar-chart-3" class="w-5 h-5 text-amber-400"></i>
+                                <div class="w-11 h-11 rounded-2xl home-accent-icon-wrap flex items-center justify-center">
+                                    <i data-lucide="bar-chart-3" class="w-5 h-5 home-accent-text"></i>
                                 </div>
                                 <div>
-                                    <h3 class="text-xs font-extrabold text-amber-400">Öğrenci Takip Paneli</h3>
+                                    <h3 class="text-xs font-extrabold home-accent-text">Öğrenci Takip Paneli</h3>
                                     <p class="text-[10px] theme-text-muted mt-0.5">Sınıfınızın ilerlemesini ve durumunu izleyin</p>
                                 </div>
                             </div>
-                            <i data-lucide="chevron-right" class="w-5 h-5 text-amber-400"></i>
+                            <i data-lucide="chevron-right" class="w-5 h-5 home-accent-text"></i>
                         </div>
                     </div>
 
@@ -515,7 +478,7 @@
                     <div id="home-odevler-card" class="hidden glass-card rounded-3xl p-4 shadow-md space-y-3">
                         <div class="flex items-center justify-between border-b theme-border pb-2">
                             <span class="text-xs font-extrabold theme-text-main flex items-center gap-2">
-                                <i data-lucide="clipboard-list" class="w-4 h-4 text-blue-400"></i>
+                                <i data-lucide="clipboard-list" class="w-4 h-4 theme-primary-color"></i>
                                 Hocadan Ödevler
                             </span>
                             <span id="home-odevler-sinif" class="text-[9px] theme-text-muted font-bold"></span>
@@ -526,16 +489,15 @@
                     </div>
 
                     <!-- 🔥 Günlük Seri ve Motivasyon Kartı (Premium Gradient) -->
-                    <div class="lisani-span-full theme-gradient-card rounded-3xl p-5 text-white shadow-xl flex items-center justify-between transition-all relative overflow-hidden">
-                        <!-- Parlak cam şerit efekti -->
-                        <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full animate-[pulse_6s_infinite] pointer-events-none"></div>
+                    <div class="lisani-span-full theme-gradient-card rounded-3xl p-5 shadow-xl flex items-center justify-between transition-all relative overflow-hidden">
+                        <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full animate-[pulse_6s_infinite] pointer-events-none"></div>
                         <div class="space-y-1 relative z-10">
-                            <span class="text-[9px] uppercase font-black tracking-widest text-white/80">Günlük Hedef</span>
+                            <span class="text-[9px] uppercase font-black tracking-widest opacity-75">Günlük Hedef</span>
                             <h3 class="text-sm font-extrabold">Harfleri Çalış & Seriyi Sürdür!</h3>
-                            <p class="text-[11px] text-white/70 max-w-[220px]">Bugün Osmanlı Elifbası'nı tekrar ettin mi?</p>
+                            <p class="text-[11px] opacity-70 max-w-[220px]">Bugün Osmanlı Elifbası'nı tekrar ettin mi?</p>
                         </div>
-                        <div class="flex flex-col items-center justify-center bg-white/15 rounded-2xl p-3 border border-white/20 min-w-[75px] relative z-10 backdrop-blur-sm shadow-inner">
-                            <i data-lucide="flame" class="w-6 h-6 text-orange-500 fill-current animate-bounce"></i>
+                        <div class="home-streak-box flex flex-col items-center justify-center rounded-2xl p-3 min-w-[75px] relative z-10 shadow-inner">
+                            <i data-lucide="flame" class="w-6 h-6 home-warn-icon fill-current"></i>
                             <span class="text-[10px] font-extrabold mt-1">3 Gün</span>
                         </div>
                     </div>
@@ -555,7 +517,7 @@
                                 يَسِّرُوا وَلَا تُعَسِّرُوا وَبَشِّرُوا وَلَا تُنَفِّرُوا
                             </h4>
                             <!-- Hadis Okunuşu ve Manası -->
-                            <div class="space-y-1 bg-stone-950/30 p-3.5 rounded-2xl border theme-border shadow-inner">
+                            <div class="space-y-1 home-hadis-quote p-3.5 rounded-2xl shadow-inner">
                                 <p class="text-xs font-bold theme-text-main" id="home-hadis-turkce">
                                     "Kolaylaştırınız, zorlaştırmayınız; müjdeleyiniz, nefret ettirmeyiniz."
                                 </p>
@@ -572,7 +534,7 @@
 
                     <!-- 🗺️ RESİMLİ GİZEMLİ KARİYER MODU BUTONU (Ultra Modern Glass over Art) -->
                     <div class="relative">
-                        <button onclick="handleKariyerModuClick()" class="relative w-full overflow-hidden rounded-[24px] border-2 border-[var(--theme-primary)] bg-gradient-to-br from-[#0c1328] to-[#121f30] p-4.5 text-left transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg group flex flex-col justify-between min-h-[135px] ring-1 ring-[var(--theme-primary)]/15">
+                        <button onclick="handleKariyerModuClick()" class="relative w-full overflow-hidden theme-gradient-card rounded-[24px] p-4.5 text-left transition-all hover:scale-[1.02] active:scale-[0.98] group flex flex-col justify-between min-h-[135px]">
                             <!-- Gerçek Muhteşem Tropikal Ada Manzarası Görseli -->
                             <div class="absolute inset-0 opacity-45 group-hover:opacity-60 transition-opacity duration-300 pointer-events-none overflow-hidden bg-slate-900">
                                 <img src="https://images.unsplash.com/photo-1559128010-7c1ad6e1b6a5?auto=format&fit=crop&w=600&q=80" alt="Eşsiz Ada Manzarası" class="w-full h-full object-cover object-center" onerror="this.style.display='none'" />
@@ -695,7 +657,7 @@
                     <div class="glass-card rounded-2xl p-4.5 shadow-md space-y-4 transition-all">
                         <div class="flex items-center justify-between pb-3.5 border-b theme-border transition-all">
                             <div class="flex items-center space-x-3.5">
-                                <div class="w-13 h-13 rounded-full theme-primary-bg text-white flex items-center justify-center font-bold text-xl border-2 theme-border shadow-md transition-all overflow-hidden flex-shrink-0" id="settings-avatar-container">
+                                <div class="w-13 h-13 rounded-full flex items-center justify-center font-bold text-xl border-2 theme-border shadow-md transition-all overflow-hidden flex-shrink-0" id="settings-avatar-container">
                                     🐱
                                 </div>
                                 <div>
@@ -703,7 +665,7 @@
                                     <p class="text-xs theme-text-muted" id="settings-profile-sub">E-posta: <strong><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="93f2fbfef6e7d3f4fef2faffbdf0fcfe">[email&#160;protected]</a></strong></p>
                                 </div>
                             </div>
-                            <button onclick="openEditProfile()" class="px-3 py-2 bg-zinc-900/50 border border-neutral-700/65 hover:bg-zinc-800/60 text-[10px] font-bold theme-primary-color rounded-xl flex items-center space-x-1 transition-all backdrop-blur-sm shadow-sm">
+                            <button onclick="openEditProfile()" class="px-3 py-2 theme-light-bg border theme-border hover:opacity-90 text-[10px] font-bold theme-primary-color rounded-xl flex items-center space-x-1 transition-all shadow-sm">
                                 <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
                                 <span>Düzenle</span>
                             </button>
@@ -752,97 +714,36 @@
                             </div>
                         </div>
 
-                        <!-- ARAYÜZ STİLİ -->
+                        <!-- GÖRÜNÜM -->
                         <div class="space-y-3 pt-3.5 border-t border-[var(--theme-border)]">
                             <h4 class="text-xs font-bold theme-text-main flex items-center space-x-1.5">
-                                <i data-lucide="layout-template" class="w-4 h-4 theme-primary-color"></i>
-                                <span class="font-extrabold">Arayüz Stili</span>
-                            </h4>
-                            <p class="text-[10px] theme-text-muted leading-normal">Preline UI modern mavi/gri tema; Klasik Osmanlı cam efektli temadır.</p>
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                                <button type="button" onclick="setUiFramework('classic')" data-ui-framework="classic" class="ui-framework-btn flex flex-col items-start gap-1 rounded-xl border theme-border theme-light-bg p-2.5 text-left transition-all hover:opacity-90 active:scale-95">
-                                    <span class="text-xs font-bold theme-text-main">Klasik Ecdad</span>
-                                    <span class="text-[9px] theme-text-muted">Kahve tonları, cam kartlar</span>
-                                </button>
-                                <button type="button" onclick="setUiFramework('preline')" data-ui-framework="preline" class="ui-framework-btn flex flex-col items-start gap-1 rounded-xl border theme-border theme-light-bg p-2.5 text-left transition-all hover:opacity-90 active:scale-95">
-                                    <span class="text-xs font-bold theme-text-main">Preline UI</span>
-                                    <span class="text-[9px] theme-text-muted">Modern mavi, düz kartlar</span>
-                                </button>
-                            </div>
-                            <div id="preline-color-modes" class="hidden space-y-2">
-                                <span class="text-[10px] font-bold theme-text-muted uppercase tracking-wider block">Preline Renk Modu</span>
-                                <div class="grid grid-cols-3 gap-2">
-                                    <button type="button" onclick="setColorMode('system')" data-color-mode="system" class="theme-mode-btn rounded-lg border theme-border theme-light-bg py-2 text-[10px] font-bold theme-text-main transition-all">Sistem</button>
-                                    <button type="button" onclick="setColorMode('light')" data-color-mode="light" class="theme-mode-btn rounded-lg border theme-border theme-light-bg py-2 text-[10px] font-bold theme-text-main transition-all">Açık</button>
-                                    <button type="button" onclick="setColorMode('dark')" data-color-mode="dark" class="theme-mode-btn rounded-lg border theme-border theme-light-bg py-2 text-[10px] font-bold theme-text-main transition-all">Koyu</button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- TEMA AYARLAMA PALETİ -->
-                        <div class="lisani-legacy-palettes space-y-3 pt-3.5 border-t border-[var(--theme-border)]">
-                            <h4 class="text-xs font-bold theme-text-main flex items-center space-x-1.5 transition-all">
                                 <i data-lucide="palette" class="w-4 h-4 theme-primary-color"></i>
-                                <span class="font-extrabold">Arayüz Renk Teması</span>
+                                <span class="font-extrabold">Tema</span>
                             </h4>
-                            <p class="text-[10px] theme-text-muted leading-normal transition-all">Arayüz renklerini ve özel tasarımlarınızı seçin:</p>
-                            
-                            <div class="bg-black/40 border theme-border rounded-xl p-3 space-y-2">
-                                <div class="flex justify-between items-center">
-                                    <span class="text-[10px] font-bold theme-text-muted uppercase tracking-wider flex items-center space-x-1">
-                                        <span class="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></span>
-                                        <span>Kendi Rengini Tasarla 🎨</span>
+                            <div class="space-y-2" id="theme-picker">
+                                <button type="button" onclick="setColorMode('kahve-kum')" data-color-mode="kahve-kum" class="theme-pick-btn">
+                                    <span class="theme-pick-btn__label">Kahve &amp; Kum</span>
+                                    <span class="theme-swatch-duo" aria-hidden="true">
+                                        <span class="theme-swatch-dot" style="background:#8c6239"></span>
+                                        <span class="theme-swatch-dot" style="background:#e5d3b3"></span>
                                     </span>
-                                    <span id="custom-color-indicator" class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-stone-900 border theme-border theme-primary-color">#D49B6A</span>
-                                </div>
-                                <div class="flex items-center space-x-3">
-                                    <div class="relative w-10 h-10 rounded-full border border-neutral-700 overflow-hidden cursor-pointer flex-shrink-0 flex items-center justify-center bg-stone-900/80">
-                                        <input type="color" id="custom-theme-color-picker" oninput="handleCustomColorSelect(event)" class="absolute inset-0 w-full h-full p-0 border-0 opacity-0 cursor-pointer" value="#D49B6A">
-                                        <i data-lucide="pipette" class="w-4 h-4 theme-text-main pointer-events-none"></i>
-                                    </div>
-                                    <div class="flex-1 space-y-0.5">
-                                        <p class="text-[10px] theme-text-main font-bold">Dilediğin Rengi Seçin</p>
-                                        <p class="text-[9px] theme-text-muted">Butonuna dokunarak renk spektrumunu açın.</p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="space-y-2">
-                                <span class="text-[10px] font-bold theme-text-muted uppercase tracking-wider block transition-colors">Klasik Renkler</span>
-                                <div class="grid grid-cols-2 gap-2">
-                                    <!-- Kahverengi / Açık Kahverengi -->
-                                    <button onclick="applyTheme('brown-classic')" data-theme-btn="brown-classic" class="theme-select-card flex items-center justify-between p-2 rounded-xl border theme-border theme-light-bg text-left transition-all hover:opacity-90 active:scale-95">
-                                        <span class="text-xs font-semibold theme-text-main">Kahve & Kum</span>
-                                        <div class="flex space-x-1">
-                                            <span class="w-4 h-4 rounded-full bg-[#8C6239] block border border-black/10"></span>
-                                            <span class="w-4 h-4 rounded-full bg-[#EADBC8] block border border-black/10"></span>
-                                        </div>
-                                    </button>
-
-                                    <!-- Yeşil / Nane -->
-                                    <button onclick="applyTheme('emerald-mint')" data-theme-btn="emerald-mint" class="theme-select-card flex items-center justify-between p-2 rounded-xl border theme-border theme-light-bg text-left transition-all hover:opacity-90 active:scale-95">
-                                        <span class="text-xs font-semibold theme-text-main">Zümrüt & Nane</span>
-                                        <div class="flex space-x-1">
-                                            <span class="w-4 h-4 rounded-full bg-[#047857] block border border-black/10"></span>
-                                            <span class="w-4 h-4 rounded-full bg-[#D1FAE5] block border border-black/10"></span>
-                                        </div>
-                                    </button>
-                                </div>
-                            </div>
-
-                            <div class="space-y-2 pt-1">
-                                <span class="text-[10px] font-bold theme-text-muted uppercase tracking-wider block transition-colors">Geçişli (Gradient) Kombinasyonlar</span>
-                                <div class="grid grid-cols-2 gap-2">
-                                    <button onclick="applyTheme('brown-darkbrown')" data-theme-btn="brown-darkbrown" class="theme-select-card flex items-center justify-between p-2 rounded-xl border theme-border theme-light-bg text-left transition-all hover:opacity-90 active:scale-95">
-                                        <span class="text-xs font-semibold theme-text-main">Saray Kahvesi ☕</span>
-                                        <span class="w-8 h-4 rounded-lg bg-gradient-to-r from-[#9E6C4C] to-[#52392E] block"></span>
-                                    </button>
-
-                                    <button onclick="applyTheme('blue-darkblue')" data-theme-btn="blue-darkblue" class="theme-select-card flex items-center justify-between p-2 rounded-xl border theme-border theme-light-bg text-left transition-all hover:opacity-90 active:scale-95">
-                                        <span class="text-xs font-semibold theme-text-main">Derin Mavi 🌊</span>
-                                        <span class="w-8 h-4 rounded-lg bg-gradient-to-r from-blue-500 to-indigo-950 block"></span>
-                                    </button>
-                                </div>
+                                </button>
+                                <button type="button" onclick="setColorMode('zumrut-nane')" data-color-mode="zumrut-nane" class="theme-pick-btn">
+                                    <span class="theme-pick-btn__label">Zümrüt &amp; Nane</span>
+                                    <span class="theme-swatch-duo" aria-hidden="true">
+                                        <span class="theme-swatch-dot" style="background:#065f46"></span>
+                                        <span class="theme-swatch-dot" style="background:#6ee7b7"></span>
+                                    </span>
+                                </button>
+                                <p class="theme-pick-section">GEÇİŞLİ (GRADIENT) KOMBİNASYONLAR</p>
+                                <button type="button" onclick="setColorMode('saray-kahvesi')" data-color-mode="saray-kahvesi" class="theme-pick-btn">
+                                    <span class="theme-pick-btn__label">Saray Kahvesi ☕</span>
+                                    <span class="theme-swatch-gradient" style="background:linear-gradient(90deg,#9e6c4c,#4a3329)" aria-hidden="true"></span>
+                                </button>
+                                <button type="button" onclick="setColorMode('derin-mavi')" data-color-mode="derin-mavi" class="theme-pick-btn">
+                                    <span class="theme-pick-btn__label">Derin Mavi 🌊</span>
+                                    <span class="theme-swatch-gradient" style="background:linear-gradient(90deg,#3b82f6,#1e3a8a)" aria-hidden="true"></span>
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -951,38 +852,38 @@
             </div>
 
             <!-- SABİTLENMİŞ ALT SEKMELER (DAİMA EKRANIN EN ALTINDA DURUR - Modern Glass Bottom Bar) -->
-            <nav id="bottom-bar" class="lisani-nav-bar relative bg-[#0d0a09]/80 border-t theme-border px-2 sm:px-4 flex items-center justify-between z-45 transition-colors duration-300 flex-shrink-0 backdrop-blur-md" aria-label="Ana menü">
+            <nav id="bottom-bar" class="lisani-nav-bar relative border-t theme-border px-2 sm:px-4 flex items-stretch justify-between z-45 transition-colors duration-300 flex-shrink-0" aria-label="Ana menü">
                 
                 <!-- 1. SEKME: Gelişim -->
-                <button onclick="switchTab('ai')" id="tab-ai" class="flex flex-col items-center justify-center flex-1 py-1 theme-text-muted hover:opacity-90 transition-all duration-155">
-                    <i data-lucide="trending-up" class="w-5 h-5 transition-transform duration-200"></i>
-                    <span class="text-[9px] font-extrabold mt-1">Gelişim</span>
+                <button onclick="switchTab('ai')" id="tab-ai" class="flex flex-col items-center justify-center flex-1 min-w-0 py-1.5 theme-text-muted hover:opacity-90 transition-all duration-155">
+                    <i data-lucide="trending-up" class="w-5 h-5 shrink-0 transition-transform duration-200"></i>
+                    <span class="text-[9px] font-semibold mt-1 truncate max-w-full px-0.5">Gelişim</span>
                 </button>
 
                 <!-- 2. SEKME: Testler -->
-                <button onclick="switchTab('tests')" id="tab-tests" class="flex flex-col items-center justify-center flex-1 py-1 theme-text-muted hover:opacity-90 transition-all duration-155">
-                    <i data-lucide="graduation-cap" class="w-5 h-5 transition-transform duration-200"></i>
-                    <span class="text-[9px] font-extrabold mt-1">Testler</span>
+                <button onclick="switchTab('tests')" id="tab-tests" class="flex flex-col items-center justify-center flex-1 min-w-0 py-1.5 theme-text-muted hover:opacity-90 transition-all duration-155">
+                    <i data-lucide="graduation-cap" class="w-5 h-5 shrink-0 transition-transform duration-200"></i>
+                    <span class="text-[9px] font-semibold mt-1 truncate max-w-full px-0.5">Testler</span>
                 </button>
 
                 <!-- 3. SEKME: Giriş -->
-                <button onclick="switchTab('home')" id="tab-home" class="flex flex-col items-center justify-center flex-1 py-1 transition-all duration-155 relative">
-                    <div id="home-inner-circle" class="absolute -top-5 w-12 h-12 rounded-full flex items-center justify-center text-white shadow-[0_8px_20px_rgba(0,0,0,0.5)] border-4 theme-border transform transition duration-300 hover:scale-110" style="background-color: var(--theme-primary); border-color: var(--theme-bg-phone)">
-                        <i data-lucide="home" class="w-5 h-5 text-white"></i>
+                <button onclick="switchTab('home')" id="tab-home" class="flex flex-col items-center justify-center flex-1 min-w-0 py-1.5 transition-all duration-155 lisani-tab-active">
+                    <div id="home-inner-circle" class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition duration-300">
+                        <i data-lucide="home" class="w-5 h-5"></i>
                     </div>
-                    <span class="text-[9px] font-extrabold mt-7 theme-text-muted" id="tab-home-text">Giriş</span>
+                    <span class="text-[9px] font-semibold mt-1 truncate max-w-full px-0.5 lisani-tab-label-active" id="tab-home-text">Giriş</span>
                 </button>
 
                 <!-- 4. SEKME: Harfler -->
-                <button onclick="switchTab('letters')" id="tab-letters" class="flex flex-col items-center justify-center flex-1 py-1 theme-text-muted hover:opacity-90 transition-all duration-155">
-                    <i data-lucide="languages" class="w-5 h-5 transition-transform duration-200"></i>
-                    <span class="text-[9px] font-extrabold mt-1">Harfler</span>
+                <button onclick="switchTab('letters')" id="tab-letters" class="flex flex-col items-center justify-center flex-1 min-w-0 py-1.5 theme-text-muted hover:opacity-90 transition-all duration-155">
+                    <i data-lucide="languages" class="w-5 h-5 shrink-0 transition-transform duration-200"></i>
+                    <span class="text-[9px] font-semibold mt-1 truncate max-w-full px-0.5">Harfler</span>
                 </button>
 
                 <!-- 5. SEKME: Ayarlar / Profil -->
-                <button onclick="switchTab('settings')" id="tab-settings" class="flex flex-col items-center justify-center flex-1 py-1 theme-text-muted hover:opacity-90 transition-all duration-155">
-                    <i data-lucide="user" class="w-5 h-5 transition-transform duration-200"></i>
-                    <span class="text-[9px] font-extrabold mt-1">Profil</span>
+                <button onclick="switchTab('settings')" id="tab-settings" class="flex flex-col items-center justify-center flex-1 min-w-0 py-1.5 theme-text-muted hover:opacity-90 transition-all duration-155">
+                    <i data-lucide="user" class="w-5 h-5 shrink-0 transition-transform duration-200"></i>
+                    <span class="text-[9px] font-semibold mt-1 truncate max-w-full px-0.5">Profil</span>
                 </button>
 
             </nav>
@@ -1065,7 +966,7 @@
                 </p>
             </div>
 
-            <button onclick="closeKariyerModu()" class="relative z-20 w-full py-3.5 bg-gradient-to-r from-cyan-600 to-blue-600 text-white rounded-xl font-bold text-xs shadow-md hover:from-cyan-500 hover:to-blue-500 transition-all flex items-center justify-center space-x-1.5">
+            <button onclick="closeKariyerModu()" class="relative z-20 w-full py-3.5 theme-primary-btn rounded-xl font-bold text-xs transition-all flex items-center justify-center space-x-1.5">
                 <i data-lucide="arrow-left" class="w-4 h-4"></i>
                 <span>Giriş Sayfasına Geri Dön</span>
             </button>
@@ -1088,23 +989,12 @@
                     <label class="text-xs font-bold theme-text-main block text-center">Profil Karakterinizi Güncelleyin</label>
                     
                     <div class="flex justify-center py-1">
-                        <div class="w-16 h-16 rounded-full theme-primary-bg border-4 border-[var(--theme-border)] shadow-md flex items-center justify-center text-3xl overflow-hidden" id="edit-avatar-preview">
+                        <div class="w-16 h-16 rounded-full border-4 border-[var(--theme-border)] shadow-md flex items-center justify-center text-3xl overflow-hidden" id="edit-avatar-preview">
                             🐱
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-4 gap-2 justify-items-center py-1" id="edit-avatar-grid">
-                        <button onclick="selectEditAvatar('cat', '🐱')" class="edit-avatar-option w-9 h-9 rounded-full border-2 theme-border bg-stone-900 text-lg flex items-center justify-center transition-all">🐱</button>
-                        <button onclick="selectEditAvatar('alp', '🏹')" class="edit-avatar-option w-9 h-9 rounded-full border-2 theme-border bg-stone-900 text-lg flex items-center justify-center transition-all">🏹</button>
-                        <button onclick="selectEditAvatar('flower', '🌷')" class="edit-avatar-option w-9 h-9 rounded-full border-2 theme-border bg-stone-900 text-lg flex items-center justify-center transition-all">🌷</button>
-                        <button onclick="selectEditAvatar('scholar', '🎓')" class="edit-avatar-option w-9 h-9 rounded-full border-2 theme-border bg-stone-900 text-lg flex items-center justify-center transition-all">🎓</button>
-                        <button onclick="selectEditAvatar('falcon', '🦅')" class="edit-avatar-option w-9 h-9 rounded-full border-2 theme-border bg-stone-900 text-lg flex items-center justify-center transition-all">🦅</button>
-                        <button onclick="selectEditAvatar('scribe', '📜')" class="edit-avatar-option w-9 h-9 rounded-full border-2 theme-border bg-stone-900 text-lg flex items-center justify-center transition-all">📜</button>
-                        
-                        <button onclick="triggerEditAvatarUpload()" class="edit-avatar-option w-9 h-9 rounded-full border-2 border-dashed theme-border bg-stone-900 text-stone-500 text-[10px] flex flex-col items-center justify-center hover:bg-stone-800 transition-all col-span-2">
-                            <i data-lucide="camera" class="w-3.5 h-3.5"></i>
-                        </button>
-                    </div>
+                    <div class="grid grid-cols-4 gap-2 py-1" id="edit-avatar-grid"></div>
                     
                     <input type="file" id="edit-avatar-upload-input" class="hidden" accept="image/*" onchange="handleEditAvatarUpload(event)">
                 </div>
@@ -1174,7 +1064,7 @@
             </div>
 
             <!-- Test Butonu -->
-            <button onclick="testNotification()" class="w-full py-3 glass-card-interactive border theme-border rounded-xl text-xs font-bold theme-text-main flex items-center justify-center space-x-2 hover:opacity-80">
+            <button onclick="testNotification()" class="w-full py-3 theme-primary-btn rounded-xl text-xs font-bold flex items-center justify-center space-x-2 transition-all">
                 <i data-lucide="send" class="w-4 h-4 theme-primary-color"></i>
                 <span>Test Bildirimi Gönder</span>
             </button>

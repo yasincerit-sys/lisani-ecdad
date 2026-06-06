@@ -39,7 +39,9 @@ class MessageController extends Controller
                 'avatar' => $partner->avatar ?? '🐱',
                 'role' => $partner->role,
                 'lastMessage' => $last ? mb_strimwidth($last->body, 0, 80, '…') : null,
+                'lastIsMine' => $last ? (int) $last->sender_id === $user->id : false,
                 'lastAt' => $last?->created_at?->format('H:i'),
+                'lastAtLabel' => $this->formatRelativeTime($last?->created_at),
                 'lastTimestamp' => $last?->created_at?->timestamp ?? 0,
                 'unreadCount' => $unread,
             ];
@@ -170,5 +172,28 @@ class MessageController extends Controller
         }
 
         return $this->allowedPartners($a)->contains('id', $b->id);
+    }
+
+    private function formatRelativeTime(?\Illuminate\Support\Carbon $at): ?string
+    {
+        if (! $at) {
+            return null;
+        }
+
+        if ($at->isToday()) {
+            return 'Bugün '.$at->format('H:i');
+        }
+
+        if ($at->isYesterday()) {
+            return 'Dün '.$at->format('H:i');
+        }
+
+        if ($at->greaterThan(now()->subDays(6))) {
+            $days = ['Paz', 'Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt'];
+
+            return $days[$at->dayOfWeek].' '.$at->format('H:i');
+        }
+
+        return $at->format('d.m H:i');
     }
 }

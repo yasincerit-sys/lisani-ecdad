@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="tr" class="preline-ui">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
@@ -13,12 +13,12 @@
             "description": "Osmanlıca kolay öğrenim uygulaması",
             "start_url": "{{ url('/') }}",
             "display": "standalone",
-            "background_color": "#18100c",
-            "theme_color": "#18100c",
+            "background_color": "#f9fafb",
+            "theme_color": "#f9fafb",
             "orientation": "portrait",
             "icons": [
-                { "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='36' fill='%2318100c'/%3E%3Ctext x='96' y='130' font-size='110' text-anchor='middle'%3E📖%3C/text%3E%3C/svg%3E", "sizes": "192x192", "type": "image/svg+xml" },
-                { "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='96' fill='%2318100c'/%3E%3Ctext x='256' y='350' font-size='300' text-anchor='middle'%3E📖%3C/text%3E%3C/svg%3E", "sizes": "512x512", "type": "image/svg+xml" }
+                { "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='36' fill='%232563eb'/%3E%3Ctext x='96' y='130' font-size='110' text-anchor='middle'%3E📖%3C/text%3E%3C/svg%3E", "sizes": "192x192", "type": "image/svg+xml" },
+                { "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='96' fill='%232563eb'/%3E%3Ctext x='256' y='350' font-size='300' text-anchor='middle'%3E📖%3C/text%3E%3C/svg%3E", "sizes": "512x512", "type": "image/svg+xml" }
             ]
         };
         const blob = new Blob([JSON.stringify(manifest)], {type: 'application/json'});
@@ -29,7 +29,7 @@
         document.head.appendChild(link);
     })();
     </script>
-    <meta name="theme-color" content="#18100c" id="meta-theme-color">
+    <meta name="theme-color" content="#f9fafb" id="meta-theme-color">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -54,20 +54,29 @@
     <link rel="stylesheet" href="{{ asset('css/preline-lisani.css') }}">
     <script>
         (function () {
-            const ui = localStorage.getItem('lisani_ui_framework');
-            const mode = localStorage.getItem('lisani_color_mode') || 'system';
-            if (ui === 'preline') {
-                document.documentElement.classList.add('preline-ui');
-                const dark =
-                    mode === 'dark' ||
-                    (mode === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
-                if (dark) document.documentElement.classList.add('dark');
+            const valid = ['kahve-kum', 'zumrut-nane', 'saray-kahvesi', 'derin-mavi'];
+            const metaMap = {
+                'kahve-kum': '#14100e',
+                'zumrut-nane': '#081210',
+                'saray-kahvesi': '#0f0c0a',
+                'derin-mavi': '#080c14',
+            };
+            let mode = localStorage.getItem('lisani_color_mode') || 'saray-kahvesi';
+            if (!valid.includes(mode)) {
+                if (mode === 'light') mode = 'kahve-kum';
+                else if (mode === 'dark') mode = 'derin-mavi';
+                else mode = 'saray-kahvesi';
             }
+            const root = document.documentElement;
+            root.classList.add('dark', 'theme-' + mode);
+            const meta = document.getElementById('meta-theme-color');
+            if (meta) meta.setAttribute('content', metaMap[mode] || '#100c0a');
         })();
     </script>
 </head>
 <body class="lisani-body select-none font-size-standard" id="body-main">
     @yield('content')
+    <script>window.LISANI_ASSETS = { avatars: @json(asset('images/avatars')) };</script>
     <script src="{{ asset('js/preline.js') }}"></script>
     <script src="{{ asset('js/lisani.js') }}" defer></script>
     <script src="{{ asset('js/lisani-laravel.js') }}" defer></script>

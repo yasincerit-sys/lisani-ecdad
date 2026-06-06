@@ -380,30 +380,32 @@
             const toastBox = document.getElementById('toast-box');
             const toastMessage = document.getElementById('toast-message');
             const toastIcon = document.getElementById('toast-icon');
-            
+
             toastMessage.innerText = message;
-            
-            // Önceki sürükleme/kapatma stillerini sıfırla
+
             if (toastDismissTimer) { clearTimeout(toastDismissTimer); toastDismissTimer = null; }
             toastDragState = null;
             toastBox.style.transition = '';
             toastBox.style.transform = '';
             toastBox.style.opacity = '';
-            
-            const baseCommon = "lisani-toast z-[100] transform translate-x-[-50%] translate-y-0 opacity-100 transition-all duration-300 pointer-events-auto cursor-grab select-none touch-none text-xs font-bold px-5 py-3.5 rounded-2xl flex items-center space-x-2 backdrop-blur-md left-1/2";
-            
-            if (type === 'success') {
-                toastBox.className = baseCommon + " bg-emerald-950/80 border-2 border-emerald-400 text-green-100 shadow-[0_10px_35px_rgba(16,185,129,0.35)]";
-                toastIcon.setAttribute('data-lucide', 'leaf');
-            } else if (type === 'error') {
-                toastBox.className = baseCommon + " bg-rose-950/80 border-2 border-rose-500 text-rose-100 shadow-[0_10px_35px_rgba(244,63,94,0.35)]";
+            toastBox.style.cursor = '';
+
+            const toastVariant = type === 'error' ? 'error' : 'success';
+            toastBox.className = 'lisani-toast lisani-toast--' + toastVariant;
+
+            if (type === 'error') {
                 toastIcon.setAttribute('data-lucide', 'alert-triangle');
-            } else {
-                toastBox.className = baseCommon + " bg-stone-900/80 border border-stone-750 text-stone-200 shadow-xl";
+            } else if (type === 'info') {
                 toastIcon.setAttribute('data-lucide', 'info');
+            } else {
+                toastIcon.setAttribute('data-lucide', 'leaf');
             }
-            
+
             lucide.createIcons();
+
+            requestAnimationFrame(() => {
+                toastBox.classList.add('is-visible');
+            });
 
             toastDismissTimer = setTimeout(() => { dismissToast(null); }, 3500);
         }
@@ -413,6 +415,8 @@
             const toastBox = document.getElementById('toast-box');
             if (!toastBox) return;
             if (toastDismissTimer) { clearTimeout(toastDismissTimer); toastDismissTimer = null; }
+
+            toastBox.classList.remove('is-visible');
             
             let offX = 0, offY = -80;
             if (direction === 'left') offX = -Math.max(window.innerWidth, 400);
@@ -423,7 +427,7 @@
             toastBox.style.opacity = '0';
             
             setTimeout(() => {
-                toastBox.className = "lisani-toast left-1/2 z-[100] transform -translate-x-1/2 -translate-y-20 opacity-0 transition-all duration-300 pointer-events-none text-white text-xs font-bold px-5 py-3 rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.5)] flex items-center space-x-2 backdrop-blur-md";
+                toastBox.className = 'lisani-toast';
                 toastBox.style.transform = '';
                 toastBox.style.opacity = '';
                 toastBox.style.transition = '';
@@ -441,7 +445,7 @@
             };
 
             const onStart = (e) => {
-                if (toastBox.classList.contains('pointer-events-none')) return;
+                if (!toastBox.classList.contains('is-visible')) return;
                 const p = getPoint(e);
                 toastDragState = { startX: p.x, startY: p.y, dx: 0, dy: 0, startTime: Date.now() };
                 toastBox.style.transition = 'none';
@@ -540,6 +544,151 @@
         }
 
         // --- KULLANICI / AUTH YÖNETİMİ (Firebase) ---
+        const TAKKE_AVATAR = '<span class="inline-flex flex-col items-center leading-none"><span class="text-[1.15em] leading-none">🧔</span><span class="-mt-px block h-1.5 w-4 min-w-[14px] rounded-t-full bg-indigo-950"></span></span>';
+
+        function avatarAssetsBase() {
+            return (window.LISANI_ASSETS && window.LISANI_ASSETS.avatars) || '/images/avatars';
+        }
+
+        function teamAvatarImg(file) {
+            const src = `${avatarAssetsBase()}/${file}`;
+            return `<span class="avatar-glass-emblem"><img src="${src}" alt="" /></span>`;
+        }
+
+        const AVATAR_OPTIONS = [
+            { type: 'cat', emoji: '🐱', label: 'Kedi' },
+            { type: 'alp', emoji: '🏹', label: 'Alp' },
+            { type: 'flower', emoji: '🌷', label: 'Lale' },
+            { type: 'scholar', emoji: '🎓', label: 'Talebe' },
+            { type: 'takke', emoji: TAKKE_AVATAR, label: 'Lacivert Takke' },
+            { type: 'saray-kavvesi', emoji: teamAvatarImg('saray-kavvesi.svg'), label: 'Saray Kavvesi' },
+            { type: 'besiktas', emoji: teamAvatarImg('besiktas.svg'), label: 'Beşiktaş' },
+            { type: 'goztepe', emoji: teamAvatarImg('goztepe.svg'), label: 'Göztepe' },
+            { type: 'bursaspor', emoji: teamAvatarImg('bursaspor.svg'), label: 'Bursaspor' },
+            { type: 'eskisehirspor', emoji: teamAvatarImg('eskisehirspor.svg'), label: 'Eskişehirspor' },
+            { type: 'falcon', emoji: '🦅', label: 'Kartal' },
+            { type: 'scribe', emoji: '📜', label: 'Hattat' },
+            { type: 'sword', emoji: '⚔️', label: 'Savaşçı' },
+            { type: 'book', emoji: '📖', label: 'Kitap' },
+            { type: 'mosque', emoji: '🕌', label: 'Cami' },
+            { type: 'lamp', emoji: '🪔', label: 'Kandil' },
+            { type: 'horse', emoji: '🐎', label: 'Sipahi' },
+            { type: 'owl', emoji: '🦉', label: 'Bilge' },
+        ];
+
+        function getAvatarLabel(type) {
+            const found = AVATAR_OPTIONS.find((a) => a.type === type);
+            return found ? found.label : type;
+        }
+
+        function isTeamAvatar(value) {
+            return typeof value === 'string' && value.includes('avatar-glass-emblem');
+        }
+
+        function isCustomPhotoAvatar(value) {
+            return typeof value === 'string' && value.includes('<img') && value.includes('object-cover');
+        }
+
+        function highlightAvatarSelection(selector, value) {
+            document.querySelectorAll(selector).forEach((btn) => {
+                const active = btn.getAttribute('data-avatar-value') === value;
+                btn.classList.toggle('selected', active);
+                btn.classList.toggle('ring-2', active);
+                btn.classList.toggle('ring-[var(--theme-primary)]', active);
+            });
+        }
+
+        function avatarIconHtml(value, size) {
+            if (isTeamAvatar(value) || (typeof value === 'string' && value.includes('<img') && !isCustomPhotoAvatar(value))) {
+                return `<span class="flex ${size} items-center justify-center overflow-hidden rounded-full">${value}</span>`;
+            }
+            if (isCustomPhotoAvatar(value)) {
+                return `<span class="flex ${size} items-center justify-center overflow-hidden rounded-full">${value}</span>`;
+            }
+            const textSize = size === 'h-8 w-8' ? 'text-2xl' : (size === 'h-7 w-7' ? 'text-xl' : 'text-3xl');
+            return `<span class="${textSize} leading-none flex items-center justify-center">${value}</span>`;
+        }
+
+        function normalizeAvatarValue(value) {
+            if (!value || typeof value !== 'string') return value || '🐱';
+            if (value.includes('avatar-glass-emblem') || value.includes('object-cover')) return value;
+            const svgMatch = value.match(/avatars\/([^"'?\s]+\.svg)/i);
+            if (svgMatch) return teamAvatarImg(svgMatch[1]);
+            return value;
+        }
+
+        function formatAvatarForDisplay(value) {
+            const normalized = normalizeAvatarValue(value);
+            if (!normalized) return '🐱';
+            if (isCustomPhotoAvatar(normalized)) return normalized;
+            if (isTeamAvatar(normalized)) {
+                return `<span class="avatar-display-glass">${normalized}</span>`;
+            }
+            return normalized;
+        }
+
+        function applyAvatarToContainer(container, value) {
+            if (!container) return;
+            container.innerHTML = formatAvatarForDisplay(value);
+            if (isTeamAvatar(value) || isCustomPhotoAvatar(value)) {
+                container.classList.remove('text-lg', 'text-2xl', 'text-3xl', 'text-4xl');
+            } else {
+                container.classList.add('text-2xl');
+            }
+        }
+
+        function createAvatarButton(opt, mode) {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.setAttribute('data-avatar-type', opt.type);
+            btn.setAttribute('data-avatar-value', opt.emoji);
+            const iconSize = mode === 'register' ? 'h-8 w-8' : 'h-7 w-7';
+            const labelSize = mode === 'register' ? 'text-[8px]' : 'text-[7px]';
+            btn.className = mode === 'register'
+                ? 'avatar-option flex flex-col items-center justify-center gap-1 rounded-xl py-2.5 transition-all duration-200 theme-border'
+                : 'edit-avatar-option flex flex-col items-center justify-center gap-1 rounded-xl py-2 transition-all duration-200 theme-border w-full';
+            btn.innerHTML = `${avatarIconHtml(opt.emoji, iconSize)}<span class="${labelSize} font-semibold theme-text-muted truncate max-w-full px-0.5">${opt.label}</span>`;
+            if (mode === 'register') {
+                btn.addEventListener('click', () => selectAvatar(opt.type, opt.emoji));
+            } else {
+                btn.addEventListener('click', () => selectEditAvatar(opt.type, opt.emoji));
+            }
+            return btn;
+        }
+
+        function createPhotoUploadButton(mode) {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = mode === 'register'
+                ? 'avatar-option flex flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed theme-border py-2.5 transition-all duration-200'
+                : 'edit-avatar-option flex flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed theme-border py-2 transition-all duration-200 col-span-2';
+            btn.innerHTML = mode === 'register'
+                ? '<i data-lucide="camera" class="w-7 h-7 theme-text-muted"></i><span class="text-[8px] theme-text-muted font-semibold">Fotoğraf</span>'
+                : '<i data-lucide="camera" class="w-3.5 h-3.5 theme-text-muted"></i><span class="text-[7px] theme-text-muted font-semibold">Fotoğraf</span>';
+            btn.addEventListener('click', () => {
+                if (mode === 'register') triggerAvatarUpload();
+                else triggerEditAvatarUpload();
+            });
+            return btn;
+        }
+
+        function initAvatarGrids() {
+            const regGrid = document.getElementById('avatar-grid');
+            const editGrid = document.getElementById('edit-avatar-grid');
+            if (regGrid) {
+                regGrid.innerHTML = '';
+                AVATAR_OPTIONS.forEach((opt) => regGrid.appendChild(createAvatarButton(opt, 'register')));
+                regGrid.appendChild(createPhotoUploadButton('register'));
+                highlightAvatarSelection('.avatar-option', selectedAvatarValue);
+            }
+            if (editGrid) {
+                editGrid.innerHTML = '';
+                AVATAR_OPTIONS.forEach((opt) => editGrid.appendChild(createAvatarButton(opt, 'edit')));
+                editGrid.appendChild(createPhotoUploadButton('edit'));
+            }
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        }
+
         let selectedAvatarType = 'cat';
         let selectedAvatarValue = '🐱';
         let editAvatarValue = '🐱';
@@ -562,14 +711,18 @@
             document.getElementById('reg-role').value = role;
             const hocaDiv = document.getElementById('reg-sinif-hoca-div');
             const ogrenciDiv = document.getElementById('reg-sinif-ogrenci-div');
+            const hocaBtn = document.getElementById('role-btn-hoca');
+            const ogrenciBtn = document.getElementById('role-btn-ogrenci');
+            const activeClass = 'flex-1 py-2.5 rounded-xl text-xs font-semibold transition-all lisani-segment-btn is-active';
+            const inactiveClass = 'flex-1 py-2.5 rounded-xl text-xs font-semibold transition-all lisani-segment-btn';
             if (role === 'hoca') {
-                document.getElementById('role-btn-hoca').className = 'flex-1 py-2.5 rounded-xl text-xs font-bold transition-all theme-primary-bg text-white border border-[var(--theme-primary)]';
-                document.getElementById('role-btn-ogrenci').className = 'flex-1 py-2.5 rounded-xl text-xs font-bold transition-all theme-card-bg theme-text-muted border theme-border';
+                hocaBtn.className = activeClass;
+                ogrenciBtn.className = inactiveClass;
                 if (hocaDiv) hocaDiv.classList.remove('hidden');
                 if (ogrenciDiv) ogrenciDiv.classList.add('hidden');
             } else {
-                document.getElementById('role-btn-ogrenci').className = 'flex-1 py-2.5 rounded-xl text-xs font-bold transition-all theme-primary-bg text-white border border-[var(--theme-primary)]';
-                document.getElementById('role-btn-hoca').className = 'flex-1 py-2.5 rounded-xl text-xs font-bold transition-all theme-card-bg theme-text-muted border theme-border';
+                ogrenciBtn.className = activeClass;
+                hocaBtn.className = inactiveClass;
                 if (hocaDiv) hocaDiv.classList.add('hidden');
                 if (ogrenciDiv) ogrenciDiv.classList.remove('hidden');
             }
@@ -581,15 +734,17 @@
             const registerTab = document.getElementById('auth-tab-register');
             const loginForm = document.getElementById('auth-form-login');
             const registerForm = document.getElementById('auth-form-register');
+            const activeClass = 'flex-1 py-2.5 rounded-xl text-xs font-semibold transition-all lisani-segment-btn is-active';
+            const inactiveClass = 'flex-1 py-2.5 rounded-xl text-xs font-semibold transition-all lisani-segment-btn';
 
             if (tab === 'login') {
-                loginTab.className = "flex-1 py-2.5 rounded-xl text-xs font-bold transition-all theme-primary-bg text-white shadow-md";
-                registerTab.className = "flex-1 py-2.5 rounded-xl text-xs font-bold transition-all theme-text-muted hover:text-white";
+                loginTab.className = activeClass;
+                registerTab.className = inactiveClass;
                 loginForm.classList.remove('hidden');
                 registerForm.classList.add('hidden');
             } else {
-                registerTab.className = "flex-1 py-2.5 rounded-xl text-xs font-bold transition-all theme-primary-bg text-white shadow-md";
-                loginTab.className = "flex-1 py-2.5 rounded-xl text-xs font-bold transition-all theme-text-muted hover:text-white";
+                registerTab.className = activeClass;
+                loginTab.className = inactiveClass;
                 registerForm.classList.remove('hidden');
                 loginForm.classList.add('hidden');
             }
@@ -599,36 +754,21 @@
             playClickSound();
             selectedAvatarType = type;
             selectedAvatarValue = emoji;
+            highlightAvatarSelection('.avatar-option', emoji);
 
-            document.querySelectorAll('.avatar-option').forEach(btn => {
-                btn.classList.remove('selected');
-            });
-
-            event.currentTarget.classList.add('selected');
-
-            // Büyük önizlemeyi güncelle
             const preview = document.getElementById('avatar-preview-big');
             const label = document.getElementById('avatar-preview-label');
-            if (preview) preview.innerHTML = emoji;
-            if (label) {
-                const names = {cat:'Kedi', alp:'Alp', flower:'Lale', scholar:'Talebe', falcon:'Kartal', scribe:'Hattat', sword:'Savaşçı'};
-                label.textContent = names[type] || type;
-            }
+            if (preview) applyAvatarToContainer(preview, emoji);
+            if (label) label.textContent = getAvatarLabel(type);
         }
 
         function selectEditAvatar(type, emoji) {
             playClickSound();
             editAvatarValue = emoji;
-            
-            document.querySelectorAll('.edit-avatar-option').forEach(btn => {
-                btn.classList.remove('selected');
-            });
-            if (event) {
-                event.currentTarget.classList.add('selected');
-            }
+            highlightAvatarSelection('.edit-avatar-option', emoji);
 
             const preview = document.getElementById('edit-avatar-preview');
-            preview.innerHTML = emoji;
+            applyAvatarToContainer(preview, emoji);
         }
 
         function triggerAvatarUpload() {
@@ -680,7 +820,7 @@
             // 3 Normal Test Sürümü (Ultra Glassmorphic)
             for (let i = 1; i <= 3; i++) {
                 const testBtn = document.createElement('button');
-                testBtn.className = "glass-card glass-card-interactive rounded-2xl p-4 text-left flex items-center justify-between shadow-md w-full";
+                testBtn.className = "glass-card glass-card-interactive rounded-2xl p-4 text-left flex items-center justify-between w-full";
                 testBtn.onclick = () => launchQuizEngine(level, `Test ${i}`);
                 testBtn.innerHTML = `
                     <div class="flex items-center space-x-3.5">
@@ -699,7 +839,7 @@
 
             // 1 Genel Sınav (Ultra Glassmorphic Parıltı)
             const generalTestBtn = document.createElement('button');
-            generalTestBtn.className = "glass-card glass-card-interactive border-2 border-dashed border-[var(--theme-primary)] hover:border-neutral-500 rounded-2xl p-4.5 text-left flex items-center justify-between shadow-lg w-full mt-2";
+            generalTestBtn.className = "glass-card glass-card-interactive border border-dashed border-[rgba(255,255,255,0.12)] rounded-2xl p-4.5 text-left flex items-center justify-between w-full mt-2";
             generalTestBtn.onclick = () => launchQuizEngine(level, 'Genel');
             generalTestBtn.innerHTML = `
                 <div class="flex items-center space-x-3.5">
@@ -738,17 +878,27 @@
             const categoryQuestions = quizBank[level]?.[testName];
             if (!categoryQuestions || categoryQuestions.length === 0) {
                 showToast("Bu test henüz hazır değil, yakında eklenecek.", "info");
-                return;
+                return false;
             }
 
             activeQuizQuestions = JSON.parse(JSON.stringify(categoryQuestions)); // Klonla
 
             document.getElementById('active-quiz-title').innerText = `Seviye ${level} - ${testName}`;
+            document.getElementById('level-selection-view').classList.add('hidden');
             document.getElementById('test-selection-view').classList.add('hidden');
+            document.getElementById('quiz-result-view').classList.add('hidden');
             document.getElementById('quiz-active-view').classList.remove('hidden');
 
             renderQuizQuestion();
+            return true;
         }
+
+        window.startOdevTest = function (level, testName) {
+            if (typeof switchTab === 'function') {
+                switchTab('tests');
+            }
+            setTimeout(() => launchQuizEngine(level, testName), 120);
+        };
 
         // Soru Çizer (Cam Şık Butonları Entegre Edildi)
         function renderQuizQuestion() {
@@ -764,7 +914,7 @@
             q.options.forEach(option => {
                 const btn = document.createElement('button');
                 // Premium Buzlu Cam Seçenek Butonu
-                btn.className = "w-full py-3.5 px-4 bg-white/5 border border-white/10 rounded-xl theme-text-main text-xs font-bold transition-all text-left flex justify-between items-center cursor-pointer active:scale-[0.98] shadow-sm hover:bg-white/10 hover:border-white/20";
+                btn.className = "w-full py-3.5 px-4 rounded-xl theme-text-main text-xs font-bold transition-all text-left flex justify-between items-center cursor-pointer active:scale-[0.98] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] backdrop-blur-md";
                 btn.innerHTML = `<span>${option}</span> <i data-lucide="chevron-right" class="w-4 h-4 theme-text-muted"></i>`;
                 btn.onclick = () => selectQuizOption(option, q.answer, btn);
                 container.appendChild(btn);
@@ -896,12 +1046,13 @@
             document.getElementById('edit-profile-email').value = currentUser.email;
 
             const preview = document.getElementById('edit-avatar-preview');
-            preview.innerHTML = currentUser.avatar;
             editAvatarValue = currentUser.avatar;
+            applyAvatarToContainer(preview, normalizeAvatarValue(currentUser.avatar));
 
             document.querySelectorAll('.edit-avatar-option').forEach(btn => {
                 btn.classList.remove('selected');
-                if (btn.innerText === currentUser.avatar) {
+                const val = btn.getAttribute('data-avatar-value');
+                if (val && val === normalizeAvatarValue(currentUser.avatar)) {
                     btn.classList.add('selected');
                 }
             });
@@ -996,11 +1147,11 @@
                 reader.onload = function(e) {
                     selectedAvatarType = 'custom';
                     selectedAvatarValue = `<img src="${e.target.result}" class="w-full h-full object-cover rounded-full" />`;
-                    // Büyük önizlemeyi güncelle
                     const preview = document.getElementById('avatar-preview-big');
                     const label = document.getElementById('avatar-preview-label');
-                    if (preview) preview.innerHTML = selectedAvatarValue;
+                    if (preview) applyAvatarToContainer(preview, selectedAvatarValue);
                     if (label) label.textContent = 'Fotoğrafım';
+                    highlightAvatarSelection('.avatar-option', '');
                     showToast("Profil görseli yüklendi.", "success");
                 };
                 reader.readAsDataURL(file);
@@ -1013,7 +1164,8 @@
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     editAvatarValue = `<img src="${e.target.result}" class="w-full h-full object-cover rounded-full" />`;
-                    document.getElementById('edit-avatar-preview').innerHTML = editAvatarValue;
+                    applyAvatarToContainer(document.getElementById('edit-avatar-preview'), editAvatarValue);
+                    highlightAvatarSelection('.edit-avatar-option', '');
                     showToast("Yeni görsel yüklendi. Kaydetmeyi unutmayın.", "success");
                 };
                 reader.readAsDataURL(file);
@@ -1054,12 +1206,7 @@
             ];
 
             avatarContainers.forEach(container => {
-                container.innerHTML = editAvatarValue;
-                if (!editAvatarValue.includes('<img')) {
-                    container.classList.add('text-lg');
-                } else {
-                    container.classList.remove('text-lg');
-                }
+                applyAvatarToContainer(container, editAvatarValue);
             });
 
             showToast("Profil güncellendi.", "success");
@@ -1262,13 +1409,7 @@
                 document.getElementById('settings-avatar-container')
             ];
             avatarContainers.forEach(container => {
-                if (!container) return;
-                container.innerHTML = user.avatar;
-                if (user.avatar && user.avatar.includes('<img')) {
-                    container.classList.remove('text-lg');
-                } else {
-                    container.classList.add('text-lg');
-                }
+                applyAvatarToContainer(container, normalizeAvatarValue(user.avatar));
             });
 
             document.getElementById('home-welcome-text').innerText = `Hoş Geldin, ${user.name}! 👋`;
@@ -1394,9 +1535,13 @@
             let odevlerHTML = '';
             if (sinif.odevler && sinif.odevler.length > 0) {
                 sinif.odevler.slice(-3).reverse().forEach(o => {
-                    odevlerHTML += `<div class="py-1.5 border-b theme-border"><p class="text-xs theme-text-main">${o.icerik}</p><p class="text-[10px] theme-text-muted">${o.tarih}</p></div>`;
+                    const lbl = o.label || (o.level && o.test ? `Seviye ${o.level} — ${o.test}` : o.icerik);
+                    odevlerHTML += `<div class="py-1.5 border-b theme-border"><p class="text-xs theme-text-main">${lbl}</p><p class="text-[10px] theme-text-muted">${o.tarih}</p></div>`;
                 });
             }
+
+            const odevLevelOpts = [1,2,3].map(l => `<option value="${l}">Seviye ${l}</option>`).join('');
+            const odevTestOpts = ['Test 1','Test 2','Test 3','Genel'].map(t => `<option value="${t}">${t}</option>`).join('');
 
             let panel = document.getElementById('hoca-panel-modal');
             if (!panel) { panel = document.createElement('div'); panel.id = 'hoca-panel-modal'; panel.className = 'fixed inset-0 z-50 flex items-end justify-center'; document.body.appendChild(panel); }
@@ -1413,17 +1558,28 @@
                 <h3 class="text-xs font-bold theme-text-main mb-2">👥 Öğrenciler (${sinif.ogrenciler.length})</h3>
                 <div class="mb-4">${ogrencilerHTML}</div>
                 ${odevlerHTML ? `<h3 class="text-xs font-bold theme-text-main mb-2">📋 Son Ödevler</h3><div class="mb-4">${odevlerHTML}</div>` : ''}
-                <h3 class="text-xs font-bold theme-text-main mb-2">📝 Yeni Ödev Ver</h3>
-                <textarea id="odev-icerik" placeholder="Ödev içeriğini yazın..." class="w-full p-2.5 rounded-xl border theme-border bg-stone-900 theme-text-main text-xs focus:outline-none resize-none h-20 mb-2"></textarea>
-                <button onclick="odevVer('${uid}')" class="w-full py-2.5 theme-primary-btn rounded-xl text-xs font-bold">Ödevi Gönder</button>
+                <h3 class="text-xs font-bold theme-text-main mb-2">📝 Yeni Test Ödevi</h3>
+                <select id="odev-level" class="w-full mb-2 p-2.5 rounded-xl border theme-border bg-stone-900 theme-text-main text-xs">${odevLevelOpts}</select>
+                <select id="odev-test" class="w-full mb-2 p-2.5 rounded-xl border theme-border bg-stone-900 theme-text-main text-xs">${odevTestOpts}</select>
+                <button onclick="odevVer('${uid}')" class="w-full py-2.5 theme-primary-btn rounded-xl text-xs font-bold">Test Ödevi Gönder</button>
             </div>`;
         }
 
         function odevVer(hocaUid) {
-            const icerik = document.getElementById('odev-icerik').value.trim();
-            if (!icerik) { showToast("Ödev içeriği boş olamaz.", "error"); return; }
+            const levelEl = document.getElementById('odev-level');
+            const testEl = document.getElementById('odev-test');
+            const level = levelEl ? parseInt(levelEl.value, 10) : 0;
+            const test = testEl ? testEl.value : '';
+            if (!level || !test) { showToast("Lütfen seviye ve test seçin.", "error"); return; }
             const sinif = _getLocalSinif(hocaUid) || _initSinif(hocaUid);
-            sinif.odevler.push({ icerik, tarih: new Date().toLocaleDateString('tr-TR'), hocaAdi: currentUser.name });
+            sinif.odevler.push({
+                type: 'test',
+                level,
+                test,
+                label: `Seviye ${level} — ${test}`,
+                tarih: new Date().toLocaleDateString('tr-TR'),
+                hocaAdi: currentUser.name
+            });
             _saveLocalSinif(hocaUid, sinif);
             // Firebase arka plan
             _waitFirebase().then(() => {
@@ -1509,242 +1665,58 @@
             lucide.createIcons();
         }
 
-        // --- TEMA PALETİ VE AYARLARI ---
-        const UI_FRAMEWORK_KEY = 'lisani_ui_framework';
+        // --- PRELINE UI GÖRÜNÜM / TEMA ---
         const COLOR_MODE_KEY = 'lisani_color_mode';
-        const THEME_PALETTE_KEY = 'lisani_theme_palette';
-        let _colorModeMedia = null;
+        const VALID_THEMES = ['kahve-kum', 'zumrut-nane', 'saray-kahvesi', 'derin-mavi'];
+        const THEME_CLASS_NAMES = VALID_THEMES.map((t) => 'theme-' + t);
+        const THEME_META_COLORS = {
+            'kahve-kum': '#14100e',
+            'zumrut-nane': '#081210',
+            'saray-kahvesi': '#120d0a',
+            'derin-mavi': '#080c14',
+        };
 
-        function isPrelineUi() {
-            return localStorage.getItem(UI_FRAMEWORK_KEY) === 'preline';
-        }
-
-        function resolveDarkFromMode(mode) {
-            if (mode === 'dark') return true;
-            if (mode === 'light') return false;
-            return window.matchMedia('(prefers-color-scheme: dark)').matches;
-        }
-
-        function highlightUiFrameworkButtons() {
-            const current = localStorage.getItem(UI_FRAMEWORK_KEY) || 'classic';
-            document.querySelectorAll('[data-ui-framework]').forEach((btn) => {
-                const active = btn.getAttribute('data-ui-framework') === current;
-                btn.classList.toggle('ring-2', active);
-                btn.classList.toggle('ring-offset-1', active);
-                btn.style.borderColor = active ? 'var(--theme-primary)' : '';
-            });
-            const prelineModes = document.getElementById('preline-color-modes');
-            if (prelineModes) prelineModes.classList.toggle('hidden', current !== 'preline');
+        function normalizeColorMode(mode) {
+            if (VALID_THEMES.includes(mode)) return mode;
+            if (mode === 'light') return 'kahve-kum';
+            if (mode === 'dark') return 'derin-mavi';
+            return 'saray-kahvesi';
         }
 
         function highlightColorModeButtons() {
-            const current = localStorage.getItem(COLOR_MODE_KEY) || 'system';
+            const current = normalizeColorMode(localStorage.getItem(COLOR_MODE_KEY) || 'saray-kahvesi');
             document.querySelectorAll('[data-color-mode]').forEach((btn) => {
                 const active = btn.getAttribute('data-color-mode') === current;
-                btn.classList.toggle('ring-2', active);
-                btn.classList.toggle('ring-offset-1', active);
-                btn.style.borderColor = active ? 'var(--theme-primary)' : '';
+                btn.classList.toggle('is-active', active);
             });
         }
 
         function applyDocumentColorMode(mode) {
+            const theme = normalizeColorMode(mode);
             const root = document.documentElement;
-            const dark = resolveDarkFromMode(mode);
-            root.classList.toggle('dark', dark);
+            THEME_CLASS_NAMES.forEach((cls) => root.classList.remove(cls));
+            root.classList.add('theme-' + theme);
+            root.classList.add('dark');
             const meta = document.getElementById('meta-theme-color');
-            if (meta) meta.setAttribute('content', dark ? '#0a0a0a' : '#f9fafb');
-        }
-
-        function bindColorModeMediaListener() {
-            if (_colorModeMedia) return;
-            _colorModeMedia = window.matchMedia('(prefers-color-scheme: dark)');
-            _colorModeMedia.addEventListener('change', () => {
-                if (isPrelineUi() && (localStorage.getItem(COLOR_MODE_KEY) || 'system') === 'system') {
-                    applyDocumentColorMode('system');
-                }
-            });
+            if (meta) meta.setAttribute('content', THEME_META_COLORS[theme] || '#100c0a');
         }
 
         function setColorMode(mode) {
             playClickSound();
-            localStorage.setItem(COLOR_MODE_KEY, mode);
-            if (isPrelineUi()) applyDocumentColorMode(mode);
+            const theme = normalizeColorMode(mode);
+            localStorage.setItem(COLOR_MODE_KEY, theme);
+            applyDocumentColorMode(theme);
             highlightColorModeButtons();
+            showToast('Renk teması güncellendi.', 'success');
         }
 
-        function setUiFramework(framework) {
-            playClickSound();
-            localStorage.setItem(UI_FRAMEWORK_KEY, framework);
-            const root = document.documentElement;
-            if (framework === 'preline') {
-                root.classList.add('preline-ui');
-                applyDocumentColorMode(localStorage.getItem(COLOR_MODE_KEY) || 'system');
-                bindColorModeMediaListener();
-            } else {
-                root.classList.remove('preline-ui', 'dark');
-                const meta = document.getElementById('meta-theme-color');
-                if (meta) meta.setAttribute('content', '#18100c');
-            }
-            highlightUiFrameworkButtons();
+        function initPrelineTheme() {
+            document.documentElement.classList.add('preline-ui');
+            applyDocumentColorMode(localStorage.getItem(COLOR_MODE_KEY) || 'saray-kahvesi');
             highlightColorModeButtons();
-            const savedPalette = localStorage.getItem(THEME_PALETTE_KEY) || 'brown-darkbrown';
-            applyTheme(savedPalette, { silent: true });
-            if (window.HSStaticMethods && typeof window.HSStaticMethods.autoInit === 'function') {
-                window.HSStaticMethods.autoInit();
-            }
-            showToast(framework === 'preline' ? 'Preline UI etkinleştirildi.' : 'Klasik Ecdad teması etkinleştirildi.', 'success');
         }
-
-        function initUiFrameworkSettings() {
-            highlightUiFrameworkButtons();
-            highlightColorModeButtons();
-            if (isPrelineUi()) bindColorModeMediaListener();
-        }
-
-        const themes = {
-            'brown-classic': {
-                bgPhone: '#f4ece1',
-                cardBg: 'rgba(255, 255, 255, 0.55)',
-                border: 'rgba(140, 98, 57, 0.15)',
-                textMain: '#3E3225',
-                textMuted: '#8C7A6B',
-                primary: '#8C6239',
-                primaryHover: '#6F4E2E',
-                secondary: 'rgba(234, 219, 200, 0.5)',
-                gradientFrom: '#5C3E2E',
-                gradientTo: '#8C6239',
-                accentLight: 'rgba(250, 246, 240, 0.45)',
-                buttonText: '#FFFFFF'
-            },
-            'brown-darkbrown': {
-                bgPhone: '#18100c', 
-                cardBg: 'rgba(46, 33, 26, 0.45)',
-                border: 'rgba(130, 95, 78, 0.25)',
-                textMain: '#FDF8F5',
-                textMuted: '#C5AFA4',
-                primary: '#D49B6A', 
-                primaryHover: '#C58855',
-                secondary: 'rgba(61, 43, 34, 0.5)',
-                gradientFrom: '#9E6C4C',
-                gradientTo: '#52392E',
-                accentLight: 'rgba(54, 38, 30, 0.35)',
-                buttonText: '#FFFFFF'
-            },
-            'emerald-mint': {
-                bgPhone: '#051813',
-                cardBg: 'rgba(6, 78, 59, 0.25)',
-                border: 'rgba(194, 236, 217, 0.15)',
-                textMain: '#E6FDF4',
-                textMuted: '#89B8A9',
-                primary: '#059669',
-                primaryHover: '#047857',
-                secondary: 'rgba(209, 250, 229, 0.25)',
-                gradientFrom: '#064E3B',
-                gradientTo: '#0F766E',
-                accentLight: 'rgba(15, 118, 110, 0.15)',
-                buttonText: '#FFFFFF'
-            },
-            'blue-darkblue': {
-                bgPhone: '#040814',
-                cardBg: 'rgba(28, 37, 65, 0.45)',
-                border: 'rgba(58, 80, 107, 0.25)',
-                textMain: '#F1F5F9',
-                textMuted: '#85929E',
-                primary: '#3B82F6',
-                primaryHover: '#1D4ED8',
-                secondary: 'rgba(28, 37, 65, 0.5)',
-                gradientFrom: '#3B82F6',
-                gradientTo: '#1E3A8A',
-                accentLight: 'rgba(11, 19, 43, 0.35)',
-                buttonText: '#FFFFFF'
-            }
-        };
 
         let currentActiveScreen = 'home';
-
-        function applyTheme(themeKey, options = {}) {
-            if (!options.silent) playClickSound();
-            const theme = themes[themeKey];
-            if (!theme) return;
-
-            localStorage.setItem(THEME_PALETTE_KEY, themeKey);
-
-            const root = document.documentElement;
-            root.style.setProperty('--theme-bg-phone', theme.bgPhone);
-            root.style.setProperty('--theme-card-bg', theme.cardBg);
-            root.style.setProperty('--theme-border', theme.border);
-            root.style.setProperty('--theme-text-main', theme.textMain);
-            root.style.setProperty('--theme-text-muted', theme.textMuted);
-            root.style.setProperty('--theme-primary', theme.primary);
-            root.style.setProperty('--theme-primary-hover', theme.primaryHover);
-            root.style.setProperty('--theme-secondary', theme.secondary);
-            root.style.setProperty('--theme-card-gradient-from', theme.gradientFrom);
-            root.style.setProperty('--theme-card-gradient-to', theme.gradientTo);
-            root.style.setProperty('--theme-accent-light', theme.accentLight);
-            root.style.setProperty('--theme-button-text', theme.buttonText);
-
-            // Dinamik cam parlaması küresinin (glow-blob) rengini tema birincil rengine eşle
-            document.getElementById('glow-blob-1').style.backgroundColor = theme.primary;
-
-            // Özel renk buton değerini güncelle
-            document.getElementById('custom-theme-color-picker').value = theme.primary;
-            document.getElementById('custom-color-indicator').innerText = theme.primary;
-            document.getElementById('custom-color-indicator').style.color = theme.primary;
-
-            // Butonun RGB halini gölgeler için hesapla
-            const rgbVal = hexToRgb(theme.primary);
-            root.style.setProperty('--theme-primary-rgb', rgbVal);
-
-            document.querySelectorAll('.theme-select-card').forEach(btn => {
-                btn.style.borderColor = 'var(--theme-border)';
-                btn.classList.remove('ring-2', 'ring-offset-1');
-                
-                const targetBtnKey = btn.getAttribute('onclick').match(/'([^']+)'/)[1];
-                if (targetBtnKey === themeKey) {
-                    btn.classList.add('ring-2', 'ring-offset-1');
-                    btn.style.borderColor = 'var(--theme-primary)';
-                }
-            });
-
-            const homeInner = document.getElementById('home-inner-circle');
-            if (homeInner) {
-                homeInner.style.backgroundColor = theme.primary;
-                homeInner.style.borderColor = theme.bgPhone;
-            }
-
-            initLettersGrid();
-            renderProgressChart();
-            switchTab(currentActiveScreen);
-            if (!options.silent) showToast('Renk teması güncellendi.', 'success');
-        }
-
-        function handleCustomColorSelect(event) {
-            const hex = event.target.value;
-            const root = document.documentElement;
-            
-            root.style.setProperty('--theme-primary', hex);
-            root.style.setProperty('--theme-primary-hover', darkenColor(hex, 10));
-            root.style.setProperty('--theme-secondary', darkenColor(hex, 30));
-            root.style.setProperty('--theme-card-gradient-from', hex);
-
-            // Dinamik parlayan küreyi özelleştirilen renge ayarla
-            document.getElementById('glow-blob-1').style.backgroundColor = hex;
-
-            const rgbVal = hexToRgb(hex);
-            root.style.setProperty('--theme-primary-rgb', rgbVal);
-            
-            document.getElementById('custom-color-indicator').innerText = hex;
-            document.getElementById('custom-color-indicator').style.color = hex;
-            
-            const homeInner = document.getElementById('home-inner-circle');
-            if (homeInner) {
-                homeInner.style.backgroundColor = hex;
-            }
-            
-            renderProgressChart();
-            updateLearningStats();
-        }
-
         function switchTab(screenId) {
             playClickSound();
             currentActiveScreen = screenId;
@@ -1781,41 +1753,39 @@
             const tabIds = ['ai', 'tests', 'home', 'letters', 'settings'];
             tabIds.forEach(id => {
                 const tabBtn = document.getElementById(`tab-${id}`);
-                if (tabBtn) {
-                    const icon = tabBtn.querySelector('i');
-                    if (icon) {
-                        icon.style.transform = "scale(1)";
-                    }
+                if (!tabBtn) return;
 
-                    if (id === 'home') {
-                        const homeText = document.getElementById('tab-home-text');
-                        if (homeText) {
-                            homeText.style.color = 'var(--theme-text-muted)';
-                            homeText.className = "text-[9px] font-extrabold mt-7";
-                        }
-                    } else {
-                        tabBtn.style.color = 'var(--theme-text-muted)';
-                        tabBtn.className = "flex flex-col items-center justify-center flex-1 py-1 text-xs transition duration-155";
+                tabBtn.classList.remove('lisani-tab-active', 'font-black', 'theme-primary-color');
+                tabBtn.classList.add('theme-text-muted');
+
+                const icon = tabBtn.querySelector('i');
+                if (icon) {
+                    icon.style.transform = '';
+                }
+
+                if (id === 'home') {
+                    const homeText = document.getElementById('tab-home-text');
+                    if (homeText) {
+                        homeText.classList.remove('lisani-tab-label-active', 'font-black', 'theme-primary-color');
+                        homeText.classList.add('theme-text-muted');
                     }
                 }
             });
 
             const activeTab = document.getElementById(`tab-${screenId}`);
             if (activeTab) {
+                activeTab.classList.remove('theme-text-muted');
+                activeTab.classList.add('lisani-tab-active');
+
                 const activeIcon = activeTab.querySelector('i');
-                if (activeIcon) {
-                    activeIcon.style.transform = "scale(1.15)";
-                }
+                if (activeIcon) activeIcon.style.transform = 'scale(1.06)';
 
                 if (screenId === 'home') {
                     const homeText = document.getElementById('tab-home-text');
                     if (homeText) {
-                        homeText.style.color = 'var(--theme-primary)';
-                        homeText.className = "text-[9px] font-black mt-7";
+                        homeText.classList.remove('theme-text-muted');
+                        homeText.classList.add('lisani-tab-label-active');
                     }
-                } else {
-                    activeTab.style.color = 'var(--theme-primary)';
-                    activeTab.className = "flex flex-col items-center justify-center flex-1 py-1 font-black transition duration-155";
                 }
             }
         }
@@ -2707,11 +2677,11 @@ self.addEventListener('notificationclick', e => {
             } catch (e) {}
 
             lucide.createIcons();
+            initAvatarGrids();
             initLettersGrid();
             renderQuizHistoryList();
             renderProgressChart();
-            applyTheme(localStorage.getItem(THEME_PALETTE_KEY) || 'brown-darkbrown', { silent: true });
-            initUiFrameworkSettings();
+            initPrelineTheme();
             updateLearningStats();
             initSwipeGestures();
             initToastSwipe();

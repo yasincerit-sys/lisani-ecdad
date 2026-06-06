@@ -275,19 +275,54 @@
         }
     };
 
+    const ODEV_TEST_OPTIONS = ['Test 1', 'Test 2', 'Test 3', 'Genel'];
+
+    const ODEV_LEVEL_LABELS = {
+        1: 'Seviye 1: Harfler & Sayılar',
+        2: 'Seviye 2: Yazım Kuralları & Okuma',
+        3: 'Seviye 3: Kelime Kökü & Kaynak Dil',
+    };
+
+    function formatOdevLabel(o) {
+        if (o.label) return o.label;
+        if (o.level && o.test) return `Seviye ${o.level} — ${o.test}`;
+        return o.icerik || 'Ödev';
+    }
+
+    function isTestOdev(o) {
+        return o && (o.type === 'test' || (o.level && o.test));
+    }
+
+    function odevPickerHtml(hocaUid) {
+        const levelOpts = [1, 2, 3]
+            .map((l) => `<option value="${l}">${ODEV_LEVEL_LABELS[l]}</option>`)
+            .join('');
+        const testOpts = ODEV_TEST_OPTIONS.map((t) => `<option value="${t}">${t}</option>`).join('');
+        return `
+            <p class="text-[10px] theme-text-muted mb-3">Öğrenciler Testler sekmesindeki seçtiğiniz teste yönlendirilir.</p>
+            <label class="text-[9px] font-bold theme-text-muted uppercase tracking-wide block mb-1">Seviye</label>
+            <select id="odev-level" class="w-full mb-2.5 p-2.5 rounded-xl border theme-border theme-card-bg theme-text-main text-xs focus:outline-none">${levelOpts}</select>
+            <label class="text-[9px] font-bold theme-text-muted uppercase tracking-wide block mb-1">Test</label>
+            <select id="odev-test" class="w-full mb-3 p-2.5 rounded-xl border theme-border theme-card-bg theme-text-main text-xs focus:outline-none">${testOpts}</select>
+            <button type="button" onclick="odevVer('${hocaUid}')" class="w-full py-2.5 theme-primary-btn rounded-xl text-xs font-bold">Test Ödevi Gönder</button>`;
+    }
+
     window.odevVer = function (hocaUid) {
-        const icerik = document.getElementById('odev-icerik').value.trim();
-        if (!icerik) {
-            showToast('Ödev içeriği boş olamaz.', 'error');
+        const levelEl = document.getElementById('odev-level');
+        const testEl = document.getElementById('odev-test');
+        const level = levelEl ? parseInt(levelEl.value, 10) : 0;
+        const test = testEl ? testEl.value : '';
+        if (!level || !test) {
+            showToast('Lütfen seviye ve test seçin.', 'error');
             return;
         }
         apiFetch('/api/sinif/odev', {
             method: 'POST',
-            body: JSON.stringify({ icerik }),
+            body: JSON.stringify({ level, test }),
         })
             .then((data) => {
                 _saveLocalSinif(hocaUid, data.sinif);
-                showToast('Ödev gönderildi!', 'success');
+                showToast('Test ödevi gönderildi!', 'success');
                 loadHocaPanel(hocaUid);
             })
             .catch((e) => showToast(e.message, 'error'));
@@ -427,7 +462,11 @@
                 .slice(-3)
                 .reverse()
                 .forEach((o) => {
-                    odevlerHTML += `<div class="py-1.5 border-b theme-border last:border-0"><p class="text-xs theme-text-main">${o.icerik}</p><p class="text-[10px] theme-text-muted">${o.tarih}</p></div>`;
+                    const lbl = formatOdevLabel(o);
+                    odevlerHTML += `<div class="py-1.5 border-b theme-border last:border-0">
+                        <p class="text-xs theme-text-main flex items-center gap-1.5"><i data-lucide="clipboard-list" class="w-3.5 h-3.5 theme-primary-color"></i>${escapeHtml(lbl)}</p>
+                        <p class="text-[10px] theme-text-muted">${o.tarih || ''}</p>
+                    </div>`;
                 });
         }
 
@@ -494,9 +533,8 @@
                 </div>
                 ${odevlerHTML ? `<div><h3 class="text-xs font-extrabold theme-text-main mb-2">📋 Son Ödevler</h3><div class="glass-card rounded-xl p-3">${odevlerHTML}</div></div>` : ''}
                 <div class="glass-card rounded-2xl p-4">
-                    <h3 class="text-xs font-extrabold theme-text-main mb-2">📝 Yeni Ödev Ver</h3>
-                    <textarea id="odev-icerik" placeholder="Ödev içeriğini yazın..." class="w-full p-2.5 rounded-xl border theme-border theme-card-bg theme-text-main text-xs focus:outline-none resize-none h-20 mb-2"></textarea>
-                    <button onclick="odevVer('${uid}')" class="w-full py-2.5 theme-primary-btn rounded-xl text-xs font-bold">Ödevi Gönder</button>
+                    <h3 class="text-xs font-extrabold theme-text-main mb-2">📝 Yeni Test Ödevi</h3>
+                    ${odevPickerHtml(uid)}
                 </div>
             </div>
         </div>`;
@@ -774,24 +812,112 @@
         const odevler = data.odevler || [];
         if (odevler.length === 0) {
             list.innerHTML =
-                '<p class="text-[10px] theme-text-muted text-center py-3">Henüz ödev yok. Hocanız ödev verdiğinde burada görünecek.</p>';
+                '<p class="text-[10px] theme-text-muted text-center py-3">Henüz ödev yok. Hocanız test seçtiğinde burada görünecek.</p>';
             return;
         }
 
         list.innerHTML = odevler
-            .map(
-                (o) => `
-            <div class="glass-card-interactive rounded-xl p-3 border theme-border">
-                <p class="text-xs theme-text-main leading-relaxed">${o.icerik}</p>
-                <p class="text-[9px] theme-text-muted mt-1.5 flex justify-between">
-                    <span>${o.hocaAdi || data.hocaAdi || 'Hoca'}</span>
-                    <span>${o.tarih || ''}</span>
-                </p>
-            </div>`
-            )
+            .map((o, idx) => {
+                const label = formatOdevLabel(o);
+                const testOdev = isTestOdev(o);
+                const interactive = testOdev
+                    ? ' odev-test-item cursor-pointer hover:opacity-90 active:scale-[0.99] transition-all'
+                    : '';
+                const badge = testOdev
+                    ? '<span class="text-[8px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full bg-[rgba(127,168,138,0.15)] text-[#7fa88a] border border-[rgba(127,168,138,0.25)]">Test</span>'
+                    : '';
+                return `
+            <div class="glass-card-interactive rounded-xl p-3 border theme-border${interactive}"
+                ${testOdev ? `data-odev-index="${idx}" role="button" tabindex="0"` : ''}>
+                <div class="flex items-start justify-between gap-2">
+                    <div class="flex-1 min-w-0">
+                        <p class="text-xs font-semibold theme-text-main leading-relaxed flex items-center gap-1.5">
+                            <i data-lucide="file-question" class="w-3.5 h-3.5 theme-primary-color shrink-0"></i>
+                            <span class="truncate">${escapeHtml(label)}</span>
+                        </p>
+                        <p class="text-[9px] theme-text-muted mt-1.5 flex justify-between">
+                            <span>${escapeHtml(o.hocaAdi || data.hocaAdi || 'Hoca')}</span>
+                            <span>${escapeHtml(o.tarih || '')}</span>
+                        </p>
+                    </div>
+                    ${badge}
+                </div>
+                ${testOdev ? '<p class="text-[9px] theme-text-muted mt-2 opacity-80">Başlamak için dokunun →</p>' : ''}
+            </div>`;
+            })
             .join('');
+
+        list._odevItems = odevler;
+
+        list.querySelectorAll('.odev-test-item').forEach((el) => {
+            const open = () => {
+                const idx = parseInt(el.getAttribute('data-odev-index'), 10);
+                const o = list._odevItems && list._odevItems[idx];
+                if (!o || !isTestOdev(o)) return;
+                window.showOdevTestConfirm(o.level, o.test, formatOdevLabel(o));
+            };
+            el.addEventListener('click', open);
+            el.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    open();
+                }
+            });
+        });
+
         if (typeof lucide !== 'undefined') lucide.createIcons();
     }
+
+    window.showOdevTestConfirm = function (level, test, label) {
+        playClickSound();
+        let modal = document.getElementById('odev-confirm-modal');
+        if (!modal) {
+            modal = document.createElement('div');
+            modal.id = 'odev-confirm-modal';
+            modal.className = 'lisani-odev-confirm absolute inset-0 z-[90] flex items-center justify-center p-4';
+            const host = document.getElementById('app-container') || document.body;
+            host.appendChild(modal);
+        }
+        modal.innerHTML = `
+            <div class="lisani-odev-confirm__backdrop absolute inset-0 bg-black/55 backdrop-blur-sm" data-odev-dismiss></div>
+            <div class="lisani-odev-confirm__card relative z-10 w-full max-w-sm rounded-2xl p-5 border theme-border glass-card shadow-xl">
+                <div class="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3 home-accent-icon-wrap">
+                    <i data-lucide="help-circle" class="w-6 h-6 home-accent-text"></i>
+                </div>
+                <h3 class="text-sm font-bold theme-text-main text-center">Teste gitmek istiyor musunuz?</h3>
+                <p class="text-xs theme-text-muted text-center mt-2 leading-relaxed">${escapeHtml(label || `Seviye ${level} — ${test}`)}</p>
+                <p class="text-[10px] theme-text-muted text-center mt-1 opacity-80">Evet derseniz test hemen başlar.</p>
+                <div class="flex gap-2.5 mt-5">
+                    <button type="button" class="flex-1 py-2.5 rounded-xl text-xs font-semibold border theme-border theme-text-muted hover:opacity-90 transition-all" data-odev-dismiss>Hayır</button>
+                    <button type="button" class="flex-1 py-2.5 theme-primary-btn rounded-xl text-xs font-bold" id="odev-confirm-yes">Evet</button>
+                </div>
+            </div>`;
+        modal.classList.remove('hidden');
+        modal.style.display = 'flex';
+
+        const close = () => {
+            modal.style.display = 'none';
+            modal.classList.add('hidden');
+        };
+
+        modal.querySelectorAll('[data-odev-dismiss]').forEach((btn) => {
+            btn.onclick = close;
+        });
+
+        const yesBtn = document.getElementById('odev-confirm-yes');
+        if (yesBtn) {
+            yesBtn.onclick = () => {
+                close();
+                if (typeof window.startOdevTest === 'function') {
+                    window.startOdevTest(level, test);
+                } else {
+                    showToast('Test ekranı yüklenemedi. Testler sekmesinden deneyin.', 'error');
+                }
+            };
+        }
+
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+    };
 
     window.loadOgrenciOdevler = async function () {
         if (currentUserRole === 'hoca' || !window._loginDone) return;
@@ -888,6 +1014,8 @@
     let _waPollTimer = null;
     let _waActivePartnerId = null;
     let _waView = 'list';
+    let _waContactsCache = [];
+    let _waThreadMessages = {};
 
     function escapeHtml(text) {
         const d = document.createElement('div');
@@ -898,6 +1026,42 @@
     function formatAvatarHtml(avatar) {
         if (avatar && avatar.includes('<img')) return avatar;
         return `<span class="text-2xl">${escapeHtml(avatar || '🐱')}</span>`;
+    }
+
+    function formatWaDateLabel(dateStr) {
+        if (!dateStr) return '';
+        const parts = dateStr.split('.');
+        if (parts.length !== 3) return dateStr;
+        const d = new Date(parseInt(parts[2], 10), parseInt(parts[1], 10) - 1, parseInt(parts[0], 10));
+        const today = new Date();
+        const yesterday = new Date();
+        yesterday.setDate(today.getDate() - 1);
+        if (d.toDateString() === today.toDateString()) return 'Bugün';
+        if (d.toDateString() === yesterday.toDateString()) return 'Dün';
+        return dateStr;
+    }
+
+    function getWaQuickReplies() {
+        if (currentUserRole === 'hoca') {
+            return ['Merhaba 👋', 'Ödevini kontrol ettim ✅', 'Yarın sınıfta görüşürüz', 'Sorularını bekliyorum'];
+        }
+        return ['Hocam merhaba 👋', 'Ödev hakkında sorum var', 'Anlamadığım bir konu var', 'Teşekkür ederim'];
+    }
+
+    function updateMesajHomePreview(contacts) {
+        const preview = document.getElementById('home-mesajlar-preview');
+        if (!preview || !contacts?.length) {
+            if (preview) preview.classList.add('hidden');
+            return;
+        }
+        const top = contacts[0];
+        if (!top.lastMessage) {
+            preview.classList.add('hidden');
+            return;
+        }
+        const prefix = top.lastIsMine ? 'Sen: ' : '';
+        preview.textContent = prefix + top.lastMessage;
+        preview.classList.remove('hidden');
     }
 
     function updateMesajBadges(count) {
@@ -919,6 +1083,9 @@
         try {
             const data = await apiFetch('/api/messages/unread-count');
             updateMesajBadges(data.unreadTotal || 0);
+            const contactsData = await apiFetch('/api/messages/contacts');
+            _waContactsCache = contactsData.contacts || [];
+            updateMesajHomePreview(_waContactsCache);
         } catch (e) {}
     };
 
@@ -971,10 +1138,12 @@
 
     function renderWaList(contacts) {
         if (!contacts.length) {
-            return `<div class="flex flex-col items-center justify-center flex-1 px-6 text-center">
-                <i data-lucide="message-circle" class="w-12 h-12 text-emerald-500/40 mb-3"></i>
-                <p class="text-sm text-[#8696a0]">Henüz sohbet yok</p>
-                <p class="text-[11px] text-[#667781] mt-2">${currentUserRole === 'hoca' ? 'Sınıfınıza öğrenci katıldığında burada görünür.' : 'Ayarlar → Sınıf kodunu girerek hocanıza ulaşın.'}</p>
+            return `<div class="flex flex-col items-center justify-center flex-1 px-6 text-center wa-empty-state">
+                <div class="w-16 h-16 rounded-full flex items-center justify-center mb-4" style="background:rgba(127,168,138,0.12);border:1px solid rgba(127,168,138,0.25)">
+                    <i data-lucide="message-circle" class="w-8 h-8 home-accent-text"></i>
+                </div>
+                <p class="text-sm font-semibold theme-text-main">Henüz sohbet yok</p>
+                <p class="text-[11px] mt-2 leading-relaxed max-w-[240px]">${currentUserRole === 'hoca' ? 'Sınıfınıza öğrenci katıldığında burada görünür.' : 'Ayarlar → Sınıf kodunu girerek hocanıza ulaşın.'}</p>
             </div>`;
         }
         return contacts
@@ -982,49 +1151,134 @@
                 const unread =
                     c.unreadCount > 0
                         ? `<span class="wa-unread-badge rounded-full px-1.5 flex items-center justify-center text-[9px]">${c.unreadCount > 99 ? '99+' : c.unreadCount}</span>`
-                        : `<span class="text-[10px] text-[#8696a0]">${c.lastAt || ''}</span>`;
+                        : `<span class="text-[10px] wa-empty-state">${escapeHtml(c.lastAtLabel || c.lastAt || '')}</span>`;
+                const prefix = c.lastIsMine ? '<span class="opacity-70">Sen: </span>' : '';
                 const preview = c.lastMessage
-                    ? escapeHtml(c.lastMessage)
-                    : '<span class="italic text-[#667781]">Mesaj yok</span>';
-                return `<button type="button" data-wa-partner="${c.uid}" class="wa-list-item wa-contact-btn w-full flex items-center gap-3 px-4 py-3 text-left">
-                    <div class="w-12 h-12 rounded-full bg-[#2a3942] flex items-center justify-center flex-shrink-0 overflow-hidden">${formatAvatarHtml(c.avatar)}</div>
+                    ? prefix + escapeHtml(c.lastMessage)
+                    : '<span class="italic opacity-60">Mesaj yok — sohbeti başlatın</span>';
+                const roleLabel = c.role === 'hoca' ? 'Hoca' : 'Öğrenci';
+                const unreadCls = c.unreadCount > 0 ? ' wa-list-item--unread' : '';
+                return `<button type="button" data-wa-partner="${c.uid}" data-wa-name="${escapeHtml(c.name)}" class="wa-list-item wa-contact-btn w-full flex items-center gap-3 px-4 py-3.5 text-left${unreadCls}">
+                    <div class="w-12 h-12 rounded-full wa-contact-avatar flex items-center justify-center flex-shrink-0 overflow-hidden">${formatAvatarHtml(c.avatar)}</div>
                     <div class="flex-1 min-w-0">
-                        <div class="flex justify-between items-center gap-2">
-                            <span class="text-sm font-semibold text-[#e9edef] truncate">${escapeHtml(c.name)}</span>
+                        <div class="flex justify-between items-center gap-2 mb-0.5">
+                            <span class="text-sm font-semibold theme-text-main truncate">${escapeHtml(c.name)}</span>
                             ${unread}
                         </div>
-                        <p class="text-[12px] text-[#8696a0] truncate mt-0.5">${preview}</p>
+                        <div class="flex items-center gap-1.5">
+                            <span class="wa-role-pill">${roleLabel}</span>
+                            <p class="text-[12px] theme-text-muted truncate flex-1">${preview}</p>
+                        </div>
                     </div>
                 </button>`;
             })
             .join('');
     }
 
-    function renderWaMessages(messages) {
-        if (!messages.length) {
-            return `<div class="text-center text-[11px] text-[#8696a0] py-8">Henüz mesaj yok. İlk mesajı siz gönderin 👋</div>`;
+    function renderWaMessages(messages, pendingBody) {
+        let html = '';
+        if (!messages.length && !pendingBody) {
+            return `<div class="text-center text-[11px] wa-empty-state py-10">
+                <p class="text-sm font-medium theme-text-main mb-1">Sohbeti başlatın 👋</p>
+                <p class="text-[10px] opacity-80">Aşağıdan mesaj yazın veya hızlı yanıt seçin</p>
+            </div>`;
         }
         let lastDate = '';
-        let html = '';
         messages.forEach((m) => {
-            if (m.date !== lastDate) {
-                lastDate = m.date;
-                html += `<div class="text-center my-3"><span class="text-[10px] bg-[#182229] text-[#8696a0] px-3 py-1 rounded-lg">${escapeHtml(m.date)}</span></div>`;
+            const dateLabel = formatWaDateLabel(m.date);
+            if (dateLabel !== lastDate) {
+                lastDate = dateLabel;
+                html += `<div class="text-center my-3"><span class="wa-date-chip">${escapeHtml(dateLabel)}</span></div>`;
             }
-            const cls = m.isMine ? 'wa-bubble-sent ml-auto' : 'wa-bubble-received mr-auto';
-            const tick = m.isMine
-                ? m.read
-                    ? '<span class="text-[#53bdeb] ml-1">✓✓</span>'
-                    : '<span class="text-[#8696a0] ml-1">✓</span>'
-                : '';
-            html += `<div class="flex ${m.isMine ? 'justify-end' : 'justify-start'} mb-1.5 px-1">
-                <div class="${cls} max-w-[82%] px-3 py-2 text-[13px] leading-relaxed break-words">
-                    <p>${escapeHtml(m.body)}</p>
-                    <p class="text-[9px] text-right mt-1 opacity-70 flex items-center justify-end gap-0.5">${m.time}${tick}</p>
-                </div>
-            </div>`;
+            html += renderWaBubble(m.body, m.isMine, m.time, m.read, false);
         });
+        if (pendingBody) {
+            html += renderWaBubble(pendingBody, true, '…', false, true);
+        }
         return html;
+    }
+
+    function renderWaBubble(body, isMine, time, read, pending) {
+        const cls = isMine
+            ? 'wa-bubble-sent ml-auto' + (pending ? ' wa-bubble--pending' : '')
+            : 'wa-bubble-received mr-auto';
+        const tick = isMine && !pending
+            ? read
+                ? '<span class="wa-tick-read ml-1">✓✓</span>'
+                : '<span class="wa-tick-sent ml-1">✓</span>'
+            : '';
+        return `<div class="flex ${isMine ? 'justify-end' : 'justify-start'} mb-2 px-1 wa-bubble-row">
+            <div class="${cls} max-w-[85%] px-3.5 py-2 text-[13px] leading-relaxed break-words">
+                <p>${escapeHtml(body)}</p>
+                <p class="text-[9px] text-right mt-1 opacity-70 flex items-center justify-end gap-0.5">${time}${tick}</p>
+            </div>
+        </div>`;
+    }
+
+    function waSearchBarHtml() {
+        return `<div class="wa-search-wrap relative">
+            <i data-lucide="search" class="w-4 h-4 absolute left-7 top-1/2 -translate-y-1/2 wa-empty-state pointer-events-none"></i>
+            <input type="search" id="wa-search-input" class="wa-search-input" placeholder="Kişi veya mesaj ara..." autocomplete="off" />
+        </div>`;
+    }
+
+    function bindWaSearch() {
+        const input = document.getElementById('wa-search-input');
+        if (!input) return;
+        input.addEventListener('input', () => {
+            const q = input.value.trim().toLowerCase();
+            const filtered = !_waContactsCache.length
+                ? []
+                : !q
+                  ? _waContactsCache
+                  : _waContactsCache.filter(
+                        (c) =>
+                            (c.name || '').toLowerCase().includes(q) ||
+                            (c.lastMessage || '').toLowerCase().includes(q)
+                    );
+            const list = document.getElementById('wa-contacts-list');
+            if (list) list.innerHTML = renderWaList(filtered);
+            document.querySelectorAll('.wa-contact-btn').forEach((btn) => {
+                btn.addEventListener('click', () => {
+                    const id = btn.getAttribute('data-wa-partner');
+                    if (id) window.openWaChat(id);
+                });
+            });
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        });
+    }
+
+    function bindWaTextarea(input) {
+        if (!input) return;
+        const grow = () => {
+            input.style.height = 'auto';
+            input.style.height = Math.min(input.scrollHeight, 96) + 'px';
+        };
+        input.addEventListener('input', grow);
+        grow();
+    }
+
+    function bindWaQuickReplies() {
+        document.querySelectorAll('.wa-quick-reply').forEach((btn) => {
+            btn.addEventListener('click', () => {
+                const input = document.getElementById('wa-message-input');
+                if (input) {
+                    input.value = btn.textContent.trim();
+                    bindWaTextarea(input);
+                    input.focus();
+                }
+            });
+        });
+    }
+
+    function scrollWaToBottom(smooth) {
+        const box = document.getElementById('wa-messages-box');
+        if (!box) return;
+        if (smooth) {
+            box.scrollTo({ top: box.scrollHeight, behavior: 'smooth' });
+        } else {
+            box.scrollTop = box.scrollHeight;
+        }
     }
 
     function onWaEscapeKey(e) {
@@ -1069,36 +1323,50 @@
     }
 
     function waListHeaderHtml() {
+        const count = _waContactsCache.length;
         return `
-            <button type="button" id="wa-btn-close" aria-label="Kapat" class="wa-header-btn w-10 h-10 rounded-full flex items-center justify-center text-[#aebac1] hover:bg-white/10">
+            <button type="button" id="wa-btn-close" aria-label="Kapat" class="wa-header-btn w-10 h-10 rounded-full flex items-center justify-center">
                 <i data-lucide="x" class="w-5 h-5"></i>
             </button>
             <div class="flex-1 min-w-0 px-1">
-                <h2 class="text-base font-bold text-[#e9edef]">Mesajlar</h2>
-                <p class="text-[10px] text-[#8696a0]">${currentUserRole === 'hoca' ? 'Öğrencileriniz' : 'Hocanız'}</p>
+                <h2 class="text-base font-bold theme-text-main">Mesajlar</h2>
+                <p class="text-[10px] theme-text-muted">${currentUserRole === 'hoca' ? `${count} kişi · Öğrencileriniz` : 'Hocanız ile güvenli sohbet'}</p>
             </div>`;
     }
 
     function waChatHeaderHtml(p) {
         return `
-            <button type="button" id="wa-btn-back" aria-label="Geri" class="wa-header-btn w-10 h-10 rounded-full flex items-center justify-center text-[#aebac1] hover:bg-white/10">
+            <button type="button" id="wa-btn-back" aria-label="Geri" class="wa-header-btn w-10 h-10 rounded-full flex items-center justify-center">
                 <i data-lucide="arrow-left" class="w-5 h-5"></i>
             </button>
-            <div class="w-10 h-10 rounded-full bg-[#2a3942] flex items-center justify-center overflow-hidden flex-shrink-0">${formatAvatarHtml(p.avatar)}</div>
+            <div class="w-10 h-10 rounded-full wa-contact-avatar flex items-center justify-center overflow-hidden flex-shrink-0">${formatAvatarHtml(p.avatar)}</div>
             <div class="flex-1 min-w-0">
-                <h2 class="text-sm font-bold text-[#e9edef] truncate">${escapeHtml(p.name)}</h2>
-                <p class="text-[10px] text-[#8696a0]">${p.role === 'hoca' ? 'Hoca' : 'Öğrenci'}</p>
+                <h2 class="text-sm font-bold theme-text-main truncate">${escapeHtml(p.name)}</h2>
+                <p class="text-[10px] theme-text-muted">${p.role === 'hoca' ? 'Hoca · Çevrimiçi' : 'Öğrenci · Sınıf sohbeti'}</p>
             </div>
-            <button type="button" id="wa-btn-close" aria-label="Kapat" class="wa-header-btn w-10 h-10 rounded-full flex items-center justify-center text-[#aebac1] hover:bg-white/10">
+            <button type="button" id="wa-btn-close" aria-label="Kapat" class="wa-header-btn w-10 h-10 rounded-full flex items-center justify-center">
                 <i data-lucide="x" class="w-5 h-5"></i>
             </button>`;
     }
 
+    function waQuickRepliesHtml() {
+        return getWaQuickReplies()
+            .map((t) => `<button type="button" class="wa-quick-reply">${escapeHtml(t)}</button>`)
+            .join('');
+    }
+
     async function loadWaContacts() {
         const data = await apiFetch('/api/messages/contacts');
+        _waContactsCache = data.contacts || [];
         updateMesajBadges(data.unreadTotal || 0);
-        const listHtml = renderWaList(data.contacts || []);
-        renderWaShell(`<div class="flex-1 overflow-y-auto min-h-0">${listHtml}</div>`, waListHeaderHtml(), 'list');
+        updateMesajHomePreview(_waContactsCache);
+        const listHtml = renderWaList(_waContactsCache);
+        renderWaShell(
+            `${waSearchBarHtml()}<div id="wa-contacts-list" class="flex-1 overflow-y-auto min-h-0">${listHtml}</div>`,
+            waListHeaderHtml(),
+            'list'
+        );
+        bindWaSearch();
     }
 
     window.showMesajlar = async function () {
@@ -1122,17 +1390,18 @@
         }
     };
 
-    async function loadWaThread(partnerId, silent) {
+    async function loadWaThread(partnerId, silent, pendingBody) {
         const data = await apiFetch('/api/messages/' + encodeURIComponent(partnerId));
-        const partner = data.partner;
+        _waThreadMessages[partnerId] = data.messages || [];
         const box = document.getElementById('wa-messages-box');
-        if (!box) return;
-        const wasBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 80;
-        box.innerHTML = renderWaMessages(data.messages || []);
-        if (wasBottom || !silent) {
-            box.scrollTop = box.scrollHeight;
+        if (!box) return data;
+        const wasBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 100;
+        box.innerHTML = renderWaMessages(_waThreadMessages[partnerId], pendingBody || null);
+        if (wasBottom || !silent || pendingBody) {
+            scrollWaToBottom(!silent && !pendingBody);
         }
         if (!silent) refreshMesajBadge();
+        return data;
     }
 
     window.openWaChat = async function (partnerId) {
@@ -1142,13 +1411,15 @@
         try {
             const data = await apiFetch('/api/messages/' + encodeURIComponent(partnerId));
             const p = data.partner;
+            _waThreadMessages[partnerId] = data.messages || [];
             hideLoading();
             renderWaShell(
                 `<div class="flex flex-col flex-1 min-h-0 h-full">
                     <div id="wa-messages-box" class="wa-chat-bg flex-1 min-h-0 overflow-y-auto px-3 py-4">${renderWaMessages(data.messages || [])}</div>
+                    <div class="wa-quick-replies">${waQuickRepliesHtml()}</div>
                     <div class="wa-input-bar flex items-end gap-2 px-3 py-2">
-                        <textarea id="wa-message-input" rows="1" maxlength="2000" placeholder="Mesaj yazın..." class="flex-1 resize-none max-h-24 bg-[#2a3942] text-[#e9edef] text-sm rounded-2xl px-4 py-2.5 border-0 focus:outline-none focus:ring-1 focus:ring-emerald-500/40"></textarea>
-                        <button type="button" id="wa-send-btn" class="wa-send-btn wa-header-btn w-11 h-11 rounded-full flex items-center justify-center flex-shrink-0 shadow-lg">
+                        <textarea id="wa-message-input" rows="1" maxlength="2000" placeholder="Mesaj yazın..." class="wa-message-input"></textarea>
+                        <button type="button" id="wa-send-btn" class="wa-send-btn wa-header-btn w-11 h-11 rounded-full flex items-center justify-center flex-shrink-0">
                             <i data-lucide="send" class="w-5 h-5"></i>
                         </button>
                     </div>
@@ -1163,9 +1434,10 @@
                     window.sendWaMessage();
                 };
             }
-            const box = document.getElementById('wa-messages-box');
-            if (box) box.scrollTop = box.scrollHeight;
+            scrollWaToBottom(false);
             const input = document.getElementById('wa-message-input');
+            bindWaTextarea(input);
+            bindWaQuickReplies();
             if (input) {
                 input.addEventListener('keydown', (e) => {
                     if (e.key === 'Enter' && !e.shiftKey) {
@@ -1200,6 +1472,16 @@
         if (!body || !_waActivePartnerId) return;
         const btn = document.getElementById('wa-send-btn');
         if (btn) btn.disabled = true;
+        if (input) {
+            input.value = '';
+            input.style.height = 'auto';
+        }
+        const box = document.getElementById('wa-messages-box');
+        const existing = _waThreadMessages[_waActivePartnerId] || [];
+        if (box) {
+            box.innerHTML = renderWaMessages(existing, body);
+            scrollWaToBottom(true);
+        }
         try {
             await apiFetch('/api/messages', {
                 method: 'POST',
@@ -1208,15 +1490,14 @@
                     body,
                 }),
             });
-            if (input) {
-                input.value = '';
-                input.style.height = 'auto';
-            }
             await loadWaThread(_waActivePartnerId, true);
+            scrollWaToBottom(true);
         } catch (e) {
             showToast(e.message || 'Gönderilemedi.', 'error');
+            await loadWaThread(_waActivePartnerId, true);
         } finally {
             if (btn) btn.disabled = false;
+            if (input) input.focus();
         }
     };
 

@@ -112,7 +112,8 @@ class SinifController extends Controller
         }
 
         $validated = $request->validate([
-            'icerik' => ['required', 'string', 'max:2000'],
+            'level' => ['required', 'integer', 'between:1,3'],
+            'test' => ['required', 'string', 'in:Test 1,Test 2,Test 3,Genel'],
         ]);
 
         $sinif = $user->sinifAsHoca;
@@ -121,9 +122,15 @@ class SinifController extends Controller
             return response()->json(['message' => 'Sınıf bulunamadı.'], 404);
         }
 
+        $level = (int) $validated['level'];
+        $test = $validated['test'];
+
         $odevler = $sinif->odevler ?? [];
         $odevler[] = [
-            'icerik' => $validated['icerik'],
+            'type' => 'test',
+            'level' => $level,
+            'test' => $test,
+            'label' => "Seviye {$level} — {$test}",
             'tarih' => now()->format('d.m.Y'),
             'hocaAdi' => $user->name,
         ];
