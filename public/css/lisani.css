@@ -15,7 +15,7 @@
             height: -webkit-fill-available;
         }
         .arabic-text {
-            font-family: 'Amiri', serif;
+            font-family: 'Amiri', 'Noto Naskh Arabic', 'Geeza Pro', 'Traditional Arabic', serif;
         }
 
         /* SEKME GEÇİŞLERİ İÇİN AKICI ANİMASYONLAR */

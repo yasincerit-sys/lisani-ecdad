@@ -930,6 +930,128 @@ html.preline-ui[class*="theme-"] .theme-pick-btn.is-active {
     transform: scale(0.97);
 }
 
+/* ===== Harfler — okunabilir kontrast (mobil / koyu tema) ===== */
+#screen-letters .lisani-letter-card.lisani-glass-panel {
+    background: rgba(var(--theme-primary-rgb, 90, 143, 212), 0.16) !important;
+    border-color: rgba(var(--theme-primary-rgb, 90, 143, 212), 0.38) !important;
+}
+
+#screen-letters .lisani-letters-form-cell.lisani-glass-panel {
+    background: rgba(255, 255, 255, 0.11) !important;
+    border-color: rgba(255, 255, 255, 0.22) !important;
+}
+
+#screen-letters .lisani-letters-detail__arabic.lisani-glass-panel {
+    background: rgba(var(--theme-primary-rgb, 90, 143, 212), 0.2) !important;
+    border-color: rgba(var(--theme-primary-rgb, 90, 143, 212), 0.42) !important;
+}
+
+#screen-letters .lisani-letter-card__ar,
+#screen-letters .lisani-letters-forms .arabic-text,
+#screen-letters .lisani-letters-detail__arabic,
+#screen-letters #letter-example-ar {
+    font-family: 'Amiri', 'Noto Naskh Arabic', 'Geeza Pro', 'Traditional Arabic', serif !important;
+    color: #f2f7ff !important;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.55);
+    font-weight: 700 !important;
+}
+
+#screen-letters .lisani-letter-card__ar {
+    font-size: clamp(1.45rem, 6vw, 2rem) !important;
+    line-height: 1.15 !important;
+    filter: none !important;
+}
+
+#screen-letters .lisani-letters-forms .arabic-text {
+    font-size: clamp(1.35rem, 5.5vw, 1.65rem) !important;
+    line-height: 1.35 !important;
+    min-height: 1.85rem;
+    display: block;
+}
+
+#screen-letters .lisani-letters-detail__arabic {
+    font-size: clamp(2.35rem, 11vw, 3.1rem) !important;
+}
+
+#screen-letters .lisani-letters-forms .theme-text-muted {
+    color: rgba(255, 255, 255, 0.78) !important;
+}
+
+#screen-letters .lisani-letter-card__name {
+    color: var(--ph-text, #e8edf5) !important;
+    opacity: 1 !important;
+}
+
+#screen-letters .lisani-letter-card__sound {
+    color: rgba(255, 255, 255, 0.72) !important;
+    opacity: 1 !important;
+}
+
+#screen-letters .lisani-letter-card.is-selected {
+    border-color: rgba(var(--theme-primary-rgb, 90, 143, 212), 0.72) !important;
+    box-shadow:
+        0 0 0 1px rgba(var(--theme-primary-rgb, 90, 143, 212), 0.45),
+        0 8px 24px rgba(0, 0, 0, 0.28),
+        inset 0 1px 0 rgba(255, 255, 255, 0.16) !important;
+    background: rgba(var(--theme-primary-rgb, 90, 143, 212), 0.28) !important;
+}
+
+#screen-letters .lisani-letters-form-cell.is-selected {
+    background: rgba(var(--theme-primary-rgb, 90, 143, 212), 0.22) !important;
+    border-color: rgba(var(--theme-primary-rgb, 90, 143, 212), 0.55) !important;
+}
+
+/* Mobil — harf kartları daha geniş/uzun, alt yazılar web gibi görünsün */
+@media (max-width: 1023.98px) {
+    #screen-letters .lisani-letters-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 0.65rem !important;
+    }
+
+    #screen-letters .lisani-letter-card.lisani-glass-panel {
+        min-height: 6.25rem !important;
+        padding: 0.7rem 0.55rem !important;
+    }
+
+    #screen-letters .lisani-letter-card__ar {
+        font-size: clamp(1.9rem, 9vw, 2.5rem) !important;
+        margin-bottom: 0.15rem;
+    }
+
+    #screen-letters .lisani-letter-card__name,
+    #screen-letters .lisani-letter-card__sound {
+        display: block !important;
+        width: 100%;
+        max-width: 100%;
+        white-space: normal !important;
+        overflow: visible !important;
+        text-overflow: unset !important;
+        line-height: 1.25 !important;
+        text-align: center;
+    }
+
+    #screen-letters .lisani-letter-card__name {
+        font-size: 0.6875rem !important;
+        font-weight: 700 !important;
+    }
+
+    #screen-letters .lisani-letter-card__sound {
+        font-size: 0.625rem !important;
+        font-weight: 600 !important;
+        margin-top: 0.1rem;
+    }
+}
+
+@media (min-width: 480px) and (max-width: 1023.98px) {
+    #screen-letters .lisani-letters-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    }
+
+    #screen-letters .lisani-letter-card.lisani-glass-panel {
+        min-height: 5.85rem !important;
+    }
+}
+
 .lisani-letter-example {
     background: var(--theme-light-bg, rgba(255, 255, 255, 0.04));
 }

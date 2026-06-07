@@ -2822,16 +2822,17 @@
             
             filteredAlphabet.forEach((letter) => {
                 const card = document.createElement('div');
-                card.className = "lisani-letter-card lisani-glass-panel lisani-glass-card rounded-xl p-2 sm:p-2.5 text-center cursor-pointer transition flex flex-col items-center justify-center gap-0.5 min-h-0";
+                card.className = "lisani-letter-card lisani-glass-panel lisani-glass-card rounded-xl p-2.5 sm:p-3 text-center cursor-pointer transition flex flex-col items-center justify-center gap-1";
+                card.dataset.letterName = letter.name;
                 card.onclick = () => {
                     playClickSound();
                     showLetterDetail(letter);
                     showToast(`${letter.name} harfi seçildi.`, "success");
                 };
                 card.innerHTML = `
-                    <span class="lisani-letter-card__ar arabic-text font-bold theme-primary-color drop-shadow-sm">${letter.ar}</span>
-                    <span class="lisani-letter-card__name text-[10px] font-bold theme-text-main leading-tight">${letter.name}</span>
-                    <span class="lisani-letter-card__sound text-[9px] theme-text-muted font-semibold leading-tight">${letter.sounds}</span>
+                    <span class="lisani-letter-card__ar arabic-text font-bold">${letter.ar}</span>
+                    <span class="lisani-letter-card__name text-[11px] sm:text-[10px] font-bold theme-text-main leading-snug">${letter.name}</span>
+                    <span class="lisani-letter-card__sound text-[10px] sm:text-[9px] theme-text-muted font-semibold leading-snug">${letter.sounds}</span>
                 `;
                 grid.appendChild(card);
             });
@@ -2851,6 +2852,9 @@
             document.getElementById('detail-f4').innerText = letter.f4 || letter.f1;
 
             document.querySelectorAll('.lisani-letters-form-cell').forEach((c) => c.classList.remove('is-selected'));
+            document.querySelectorAll('#letters-grid .lisani-letter-card').forEach((card) => {
+                card.classList.toggle('is-selected', card.dataset.letterName === letter.name);
+            });
             const exampleBox = document.getElementById('letter-form-example');
             if (exampleBox) exampleBox.classList.add('hidden');
         }
