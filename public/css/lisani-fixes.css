@@ -1031,11 +1031,76 @@ html.preline-ui[class*="theme-"] .theme-pick-btn.is-active {
     overflow: hidden !important;
 }
 
+/* ===== Mobil scroll — tek kaydırma alanı (#screens-container) ===== */
+@media (max-width: 1023.98px) {
+    html,
+    body.lisani-body {
+        height: 100%;
+        max-height: 100dvh;
+        overflow: hidden;
+        overscroll-behavior: none;
+    }
+
+    .lisani-site-wrapper {
+        height: 100%;
+        max-height: 100dvh;
+        min-height: 0;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+    }
+
+    #app-container.lisani-app-shell {
+        flex: 1 1 auto;
+        min-height: 0;
+        display: flex;
+        flex-direction: column;
+    }
+
+    #main-application-flow.lisani-main-flow {
+        flex: 1 1 auto;
+        min-height: 0;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+
+    #screens-container.lisani-screens {
+        flex: 1 1 auto;
+        min-height: 0 !important;
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+        -webkit-overflow-scrolling: touch;
+        touch-action: pan-y;
+        overscroll-behavior-y: contain;
+    }
+
+    /* h-full aktif ekranı viewport'a kilitler; içerik taşsa da scroll olmaz */
+    #screens-container:not(.lisani-screens--letters-only) > .screen.active {
+        height: auto !important;
+        min-height: 0;
+        flex: 0 0 auto;
+    }
+
+    #auth-container,
+    #edit-profile-container {
+        overflow-y: auto !important;
+        -webkit-overflow-scrolling: touch;
+        touch-action: pan-y;
+    }
+}
+
 /* Safari iOS */
 @supports (-webkit-touch-callout: none) {
     html,
     body.lisani-body {
         height: -webkit-fill-available;
+        max-height: -webkit-fill-available;
+    }
+
+    .lisani-site-wrapper {
+        height: -webkit-fill-available;
+        max-height: -webkit-fill-available;
     }
 
     .lisani-app-shell {

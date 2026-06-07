@@ -888,7 +888,9 @@ html.preline-ui:not([class*="theme-"]) #bottom-bar {
 
 .lisani-screens {
     overflow-x: hidden;
+    overflow-y: auto;
     -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
     min-height: 0;
 }
 
