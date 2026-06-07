@@ -120,6 +120,7 @@
     <script src="{{ asset('js/preline.js') }}"></script>
     <script src="{{ asset('js/lisani-flappy.js') }}?v={{ @filemtime(public_path('js/lisani-flappy.js')) ?: time() }}" defer></script>
     <script src="{{ asset('js/lisani-gokhan-easter.js') }}?v={{ @filemtime(public_path('js/lisani-gokhan-easter.js')) ?: time() }}" defer></script>
+    <script src="{{ asset('js/lisani-native-notifications.js') }}?v={{ @filemtime(public_path('js/lisani-native-notifications.js')) ?: time() }}" defer></script>
     <script src="{{ asset('js/lisani.js') }}?v={{ @filemtime(public_path('js/lisani.js')) ?: time() }}" defer></script>
     <script src="{{ asset('js/lisani-osm-translate.js') }}?v={{ @filemtime(public_path('js/lisani-osm-translate.js')) ?: time() }}" defer></script>
     <script src="{{ asset('js/lisani-laravel.js') }}?v={{ @filemtime(public_path('js/lisani-laravel.js')) ?: time() }}" defer></script>

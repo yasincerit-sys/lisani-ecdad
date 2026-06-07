@@ -3720,23 +3720,68 @@ self.addEventListener('notificationclick', e => {
             return dailyNotifications[Math.floor(Math.random() * dailyNotifications.length)];
         }
 
+        function getHadisForDate(date) {
+            const dayOfYear = Math.floor((date - new Date(date.getFullYear(), 0, 0)) / 86400000);
+            return hadisList[dayOfYear % hadisList.length];
+        }
+
+        function getTodaysHadis() {
+            return getHadisForDate(new Date());
+        }
+
+        function formatNotifTimeLabel(h, m) {
+            return String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0');
+        }
+
+        function usesNativeHadisNotifications() {
+            return typeof window.isNativeHadisNotifications === 'function' && window.isNativeHadisNotifications();
+        }
+
+        window._scheduleHadithNotifications = async function () {
+            if (usesNativeHadisNotifications()) {
+                if (!(await window.checkNativeHadisPermission())) return false;
+                return window.scheduleNativeHadithNotifications(getHadisForDate, getDefaultNotifTime);
+            }
+            scheduleDailyNotification();
+            return true;
+        };
+
         async function initNotifications() {
-            if (!("Notification" in window)) {
-                showToast("Bu tarayıcı bildirimleri desteklemiyor.", "error");
+            if (usesNativeHadisNotifications()) {
+                autoSetNotifTime();
+                const granted = await window.requestNativeHadisPermission();
+                if (granted) {
+                    await window._scheduleHadithNotifications();
+                    const { h, m } = getDefaultNotifTime();
+                    showToast(
+                        'Bildirimler açıldı! Her gün saat ' + formatNotifTimeLabel(h, m) + "'da günün hadisi gelecek.",
+                        'success'
+                    );
+                } else {
+                    showToast('Bildirim izni verilmedi.', 'error');
+                }
+                return;
+            }
+            if (!('Notification' in window)) {
+                showToast('Bu tarayıcı bildirimleri desteklemiyor.', 'error');
                 return;
             }
             const permission = await Notification.requestPermission();
-            if (permission === "granted") {
-                if ("serviceWorker" in navigator) {
-                    try { await registerInlineSW(); } catch(e) {}
+            if (permission === 'granted') {
+                if ('serviceWorker' in navigator) {
+                    try {
+                        await registerInlineSW();
+                    } catch (e) {}
                 }
-                // Cihazın şu anki yerel saatine göre en uygun bildirimi otomatik ayarla
                 autoSetNotifTime();
                 scheduleDailyNotification();
-                const h = parseInt(localStorage.getItem("lisani_notif_hour"));
-                showToast("Bildirimler açıldı! Her gün saat " + String(h).padStart(2,"0") + ":00'da günün hadisi gelecek.", "success");
+                const { h, m } = getDefaultNotifTime();
+                showToast(
+                    'Bildirimler açıldı! Her gün saat ' + formatNotifTimeLabel(h, m) + "'da günün hadisi gelecek.",
+                    'success'
+                );
             } else {
-                showToast("Bildirim izni verilmedi.", "error");
+                showToast('Bildirim izni verilmedi.', 'error');
             }
         }
 
@@ -3762,15 +3807,14 @@ self.addEventListener('notificationclick', e => {
             if (inp) inp.value = String(bestH).padStart(2,"0") + ":00";
         }
 
-        function getTodaysHadis() {
-            // Her gün farklı hadis - tarihe göre sıralı döner
-            const today = new Date();
-            const dayOfYear = Math.floor((today - new Date(today.getFullYear(), 0, 0)) / 86400000);
-            return hadisList[dayOfYear % hadisList.length];
-        }
-
-        function scheduleDailyNotification() {
-            if (typeof Notification === "undefined" || Notification.permission !== "granted") return;
+        async function scheduleDailyNotification() {
+            if (usesNativeHadisNotifications()) {
+                if (await window.checkNativeHadisPermission()) {
+                    await window.scheduleNativeHadithNotifications(getHadisForDate, getDefaultNotifTime);
+                }
+                return;
+            }
+            if (typeof Notification === 'undefined' || Notification.permission !== 'granted') return;
             const { h: savedHour, m: savedMin } = getDefaultNotifTime();
             const now = new Date();
             const target = new Date();
@@ -3821,29 +3865,41 @@ self.addEventListener('notificationclick', e => {
 
         function saveNotifTime() {
             playClickSound();
-            const val = document.getElementById("notif-time-input").value;
+            const val = document.getElementById('notif-time-input').value;
             if (!val) return;
-            const [h, m] = val.split(":").map(Number);
-            localStorage.setItem("lisani_notif_hour", String(h));
-            localStorage.setItem("lisani_notif_min",  String(m));
+            const [h, m] = val.split(':').map(Number);
+            localStorage.setItem('lisani_notif_hour', String(h));
+            localStorage.setItem('lisani_notif_min', String(m));
             scheduleDailyNotification();
             closeNotifSettings();
-            showToast("Bildirim saati " + String(h).padStart(2,"0") + ":" + String(m).padStart(2,"0") + " olarak ayarlandı.", "success");
+            showToast('Bildirim saati ' + formatNotifTimeLabel(h, m) + ' olarak ayarlandı.', 'success');
         }
 
-        function testNotification() {
+        async function testNotification() {
             playClickSound();
-            if (typeof Notification === "undefined" || Notification.permission !== "granted") {
-                showToast("Önce bildirim iznini ver.", "error");
+            if (usesNativeHadisNotifications()) {
+                if (!(await window.checkNativeHadisPermission())) {
+                    showToast('Önce bildirim iznini ver.', 'error');
+                    return;
+                }
+                const ok = await window.showNativeHadisTestNotification(getHadisForDate);
+                showToast(
+                    ok ? 'Test bildirimi 4 saniye içinde gelecek.' : 'Test bildirimi gönderilemedi.',
+                    ok ? 'success' : 'error'
+                );
+                return;
+            }
+            if (typeof Notification === 'undefined' || Notification.permission !== 'granted') {
+                showToast('Önce bildirim iznini ver.', 'error');
                 return;
             }
             const hadis = getTodaysHadis();
-            new Notification("Günün Hadisi 📖", {
-                body: hadis.turkce + "\n— " + hadis.kaynak,
-                icon: "icon-192.png",
-                tag: "lisani-test"
+            new Notification('Günün Hadisi 📖', {
+                body: hadis.turkce + '\n— ' + hadis.kaynak,
+                icon: 'icon-192.png',
+                tag: 'lisani-test',
             });
-            showToast("Test bildirimi gönderildi.", "success");
+            showToast('Test bildirimi gönderildi.', 'success');
         }
 
         // --- BAŞLANGIÇ KURULUMLARI ---
@@ -3898,9 +3954,13 @@ self.addEventListener('notificationclick', e => {
 
             // Bildirim
             try {
-                if (typeof Notification !== "undefined" && Notification.permission === "granted") {
-                    if ("serviceWorker" in navigator) registerInlineSW().catch(() => {});
+                if (usesNativeHadisNotifications()) {
+                    window.checkNativeHadisPermission().then((granted) => {
+                        if (granted) window._scheduleHadithNotifications();
+                    });
+                } else if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
+                    if ('serviceWorker' in navigator) registerInlineSW().catch(() => {});
                     scheduleDailyNotification();
                 }
-            } catch(e) {}
+            } catch (e) {}
         };
