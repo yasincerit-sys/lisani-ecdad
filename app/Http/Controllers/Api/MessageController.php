@@ -153,14 +153,26 @@ class MessageController extends Controller
             return User::whereIn('id', $ids)->where('role', 'ogrenci')->get();
         }
 
-        if ($user->role === 'ogrenci' && $user->sinif_kodu) {
-            $sinif = Sinif::findByKod($user->sinif_kodu);
-            if ($sinif?->hoca_id) {
-                $hoca = User::find($sinif->hoca_id);
-                if ($hoca) {
-                    return collect([$hoca]);
+        if ($user->role === 'yonetici') {
+            return User::where('role', 'ogrenci')->orderBy('name')->get();
+        }
+
+        if ($user->role === 'ogrenci') {
+            $partners = collect();
+
+            if ($user->sinif_kodu) {
+                $sinif = Sinif::findByKod($user->sinif_kodu);
+                if ($sinif?->hoca_id) {
+                    $hoca = User::find($sinif->hoca_id);
+                    if ($hoca) {
+                        $partners->push($hoca);
+                    }
                 }
             }
+
+            $yoneticiler = User::where('role', 'yonetici')->orderBy('name')->get();
+
+            return $partners->merge($yoneticiler)->unique('id')->values();
         }
 
         return collect();

@@ -835,34 +835,34 @@
                     </div>
 
                     <!-- Harf Detay -->
-                    <div id="letter-detail-card" class="lisani-letters-fixed-top lisani-letters-detail lisani-glass-panel rounded-2xl p-4 sm:p-4.5 space-y-3 transition-all animate-fade-in">
-                        <p class="text-xs theme-text-muted font-bold uppercase tracking-wider">Seçilen Harf Detayı</p>
+                    <div id="letter-detail-card" class="lisani-letters-fixed-top lisani-letters-detail lisani-glass-panel rounded-2xl p-2.5 sm:p-3 space-y-2 transition-all animate-fade-in">
+                        <p class="text-[10px] theme-text-muted font-bold uppercase tracking-wide">Seçilen Harf Detayı</p>
                         <div class="lisani-letters-detail__head">
                             <div class="lisani-letters-detail__text min-w-0">
-                                <h3 class="text-lg sm:text-xl font-extrabold theme-text-main break-words" id="detail-title">Elif (ا)</h3>
-                                <p class="text-xs theme-text-muted mt-1 leading-relaxed" id="detail-desc">Kelime başlarında ince seslilerde 'E/A' sesi verir.</p>
+                                <h3 class="text-base sm:text-lg font-extrabold theme-text-main break-words leading-tight" id="detail-title">Elif (ا)</h3>
+                                <p class="text-[11px] theme-text-muted mt-0.5 leading-snug" id="detail-desc">Kelime başlarında ince seslilerde 'E/A' sesi verir.</p>
                             </div>
                             <span class="lisani-letters-detail__arabic arabic-text font-black theme-text-main lisani-glass-panel rounded-xl transition-all shrink-0 self-center sm:self-auto" id="detail-arabic">ا</span>
                         </div>
-                        <div class="lisani-letters-forms grid gap-2 text-center text-[10px] pt-2.5 border-t border-white/10 transition-all">
-                            <div class="lisani-letters-form-cell lisani-glass-panel p-1.5 rounded-lg cursor-pointer" data-form="f1" role="button" tabindex="0" title="Örnek kelime için tıkla">
+                        <div class="lisani-letters-forms grid gap-1.5 text-center text-[10px] pt-1.5 border-t border-white/10 transition-all">
+                            <div class="lisani-letters-form-cell lisani-glass-panel p-1 rounded-lg cursor-pointer" data-form="f1" role="button" tabindex="0" title="Örnek kelime için tıkla">
                                 <span class="block theme-text-muted font-bold">Yalın</span>
                                 <span class="text-base font-black arabic-text theme-text-main" id="detail-f1">ا</span>
                             </div>
-                            <div class="lisani-letters-form-cell lisani-glass-panel p-1.5 rounded-lg cursor-pointer" data-form="f2" role="button" tabindex="0" title="Örnek kelime için tıkla">
+                            <div class="lisani-letters-form-cell lisani-glass-panel p-1 rounded-lg cursor-pointer" data-form="f2" role="button" tabindex="0" title="Örnek kelime için tıkla">
                                 <span class="block theme-text-muted font-bold">Başta</span>
                                 <span class="text-base font-black arabic-text theme-text-main" id="detail-f2">ا</span>
                             </div>
-                            <div class="lisani-letters-form-cell lisani-glass-panel p-1.5 rounded-lg cursor-pointer" data-form="f3" role="button" tabindex="0" title="Örnek kelime için tıkla">
+                            <div class="lisani-letters-form-cell lisani-glass-panel p-1 rounded-lg cursor-pointer" data-form="f3" role="button" tabindex="0" title="Örnek kelime için tıkla">
                                 <span class="block theme-text-muted font-bold">Ortada</span>
                                 <span class="text-base font-black arabic-text theme-text-main" id="detail-f3">ـا</span>
                             </div>
-                            <div class="lisani-letters-form-cell lisani-glass-panel p-1.5 rounded-lg cursor-pointer" data-form="f4" role="button" tabindex="0" title="Örnek kelime için tıkla">
+                            <div class="lisani-letters-form-cell lisani-glass-panel p-1 rounded-lg cursor-pointer" data-form="f4" role="button" tabindex="0" title="Örnek kelime için tıkla">
                                 <span class="block theme-text-muted font-bold">Sonda</span>
                                 <span class="text-base font-black arabic-text theme-text-main" id="detail-f4">ـا</span>
                             </div>
                         </div>
-                        <div id="letter-form-example" class="hidden lisani-letter-example rounded-xl p-3 border theme-border space-y-1">
+                        <div id="letter-form-example" class="hidden lisani-letter-example rounded-xl p-2 border theme-border space-y-0.5">
                             <p class="text-[9px] theme-text-muted font-bold uppercase tracking-wide">
                                 Örnek kelime · <span id="letter-example-label">Başta</span>
                             </p>

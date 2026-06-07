@@ -1866,17 +1866,17 @@
         }
         if (odevCard) odevCard.classList.toggle('hidden', !isOgrenci);
         if (odevSettings) odevSettings.classList.toggle('hidden', !isOgrenci);
-        if (mesajCard) mesajCard.classList.toggle('hidden', isYonetici);
-        if (mesajRow) mesajRow.classList.toggle('hidden', isYonetici);
+        if (mesajCard) mesajCard.classList.toggle('hidden', !(isHoca || isYonetici || isOgrenci));
+        if (mesajRow) mesajRow.classList.toggle('hidden', !(isHoca || isYonetici || isOgrenci));
         const sub = document.getElementById('home-mesajlar-sub');
         if (sub) {
             sub.textContent = isHoca
                 ? 'Öğrencilerinizle yazışın'
                 : isYonetici
-                  ? 'Yönetici hesabında mesajlaşma kapalı'
+                  ? 'Tüm öğrencilerle yazışın'
                   : user?.sinifKodu
-                    ? 'Hocanızla yazışın'
-                    : 'Önce sınıfa katılın (Ayarlar)';
+                    ? 'Hocanız ve yönetici ile yazışın'
+                    : 'Yönetici ile yazışın veya sınıfa katılın (Ayarlar)';
         }
         updateOgrenciSinifUI(user);
         const testsHocaHint = document.getElementById('tests-hoca-hint');
@@ -2077,7 +2077,13 @@
                     <i data-lucide="message-circle" class="w-8 h-8 home-accent-text"></i>
                 </div>
                 <p class="text-sm font-semibold theme-text-main">Henüz sohbet yok</p>
-                <p class="text-[11px] mt-2 leading-relaxed max-w-[240px]">${currentUserRole === 'hoca' ? 'Sınıfınıza öğrenci katıldığında burada görünür.' : 'Ayarlar → Sınıf kodunu girerek hocanıza ulaşın.'}</p>
+                <p class="text-[11px] mt-2 leading-relaxed max-w-[240px]">${
+                    currentUserRole === 'hoca'
+                        ? 'Sınıfınıza öğrenci katıldığında burada görünür.'
+                        : currentUserRole === 'yonetici'
+                          ? 'Kayıtlı öğrenciler burada listelenir.'
+                          : 'Ayarlar → Sınıf kodunu girerek hocanıza ulaşın.'
+                }</p>
             </div>`;
         }
         return contacts
@@ -2090,7 +2096,8 @@
                 const preview = c.lastMessage
                     ? prefix + escapeHtml(c.lastMessage)
                     : '<span class="italic opacity-60">Mesaj yok — sohbeti başlatın</span>';
-                const roleLabel = c.role === 'hoca' ? 'Hoca' : 'Öğrenci';
+                const roleLabel =
+                    c.role === 'hoca' ? 'Hoca' : c.role === 'yonetici' ? 'Yönetici' : 'Öğrenci';
                 const unreadCls = c.unreadCount > 0 ? ' wa-list-item--unread' : '';
                 return `<button type="button" data-wa-partner="${c.uid}" data-wa-name="${escapeHtml(c.name)}" class="wa-contact-btn wa-contact-card w-full flex items-center gap-3 px-4 py-3.5 text-left rounded-2xl${unreadCls}">
                     <div class="w-12 h-12 rounded-full wa-contact-avatar flex items-center justify-center flex-shrink-0 overflow-hidden">${formatAvatarHtml(c.avatar)}</div>

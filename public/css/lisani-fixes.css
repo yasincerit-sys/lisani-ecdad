@@ -671,7 +671,7 @@ div.lisani-glass-panel.lisani-glass-card:active {
 }
 
 #screen-letters .lisani-letters-detail__arabic.lisani-glass-panel {
-    padding: 0.35rem 0.85rem;
+    padding: 0.25rem 0.65rem;
     box-shadow:
         0 6px 20px rgba(0, 0, 0, 0.24),
         inset 0 1px 0 rgba(255, 255, 255, 0.12) !important;
@@ -986,14 +986,14 @@ html.preline-ui[class*="theme-"] .theme-pick-btn.is-active {
 }
 
 #screen-letters .lisani-letters-forms .arabic-text {
-    font-size: clamp(1.35rem, 5.5vw, 1.65rem) !important;
-    line-height: 1.35 !important;
-    min-height: 1.85rem;
+    font-size: clamp(1.15rem, 4.5vw, 1.4rem) !important;
+    line-height: 1.25 !important;
+    min-height: 1.55rem;
     display: block;
 }
 
 #screen-letters .lisani-letters-detail__arabic {
-    font-size: clamp(2.35rem, 11vw, 3.1rem) !important;
+    font-size: clamp(1.85rem, 8.5vw, 2.45rem) !important;
 }
 
 #screen-letters .lisani-letters-forms .theme-text-muted {
