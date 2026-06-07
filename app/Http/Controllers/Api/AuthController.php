@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Sinif;
 use App\Models\User;
+use App\Support\AiBotRegistry;
 use App\Support\AvatarHelper;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -76,7 +77,7 @@ class AuthController extends Controller
 
         $user = User::whereRaw('LOWER(name) = ?', [Str::lower($validated['name'])])->first();
 
-        if (! $user || $user->role === 'bot') {
+        if (! $user || AiBotRegistry::isBot($user)) {
             throw ValidationException::withMessages([
                 'name' => ['İsim veya şifre hatalı.'],
             ]);

@@ -2165,14 +2165,12 @@
                     ? prefix + escapeHtml(c.lastMessage)
                     : '<span class="italic opacity-60">Mesaj yok — sohbeti başlatın</span>';
                 const roleLabel =
-                    c.role === 'bot'
-                        ? 'Asistan'
-                        : c.role === 'hoca'
-                          ? 'Hoca'
-                          : c.role === 'yonetici'
-                            ? 'Yönetici'
-                            : 'Öğrenci';
-                const rolePillCls = c.role === 'bot' ? 'wa-role-pill wa-role-pill--bot' : 'wa-role-pill';
+                    c.role === 'hoca'
+                        ? 'Hoca'
+                        : c.role === 'yonetici'
+                          ? 'Yönetici'
+                          : 'Öğrenci';
+                const rolePillCls = 'wa-role-pill';
                 const unreadCls = c.unreadCount > 0 ? ' wa-list-item--unread' : '';
                 return `<button type="button" data-wa-partner="${c.uid}" data-wa-name="${escapeHtml(c.name)}" class="wa-contact-btn wa-contact-card w-full flex items-center gap-3 px-4 py-3.5 text-left rounded-2xl${unreadCls}">
                     <div class="w-12 h-12 rounded-full wa-contact-avatar flex items-center justify-center flex-shrink-0 overflow-hidden">${formatAvatarHtml(c.avatar)}</div>

@@ -65,6 +65,6 @@ class DatabaseSeeder extends Seeder
         $this->command?->info('  Sınıf kodu (öğrencilere verin): DEMO01');
         $this->command?->info('Demo öğrenci: Demo Öğrenci / ogrenci123 (DEMO01 sınıfında)');
         $this->command?->info('Uygulama yöneticisi: Kerem Cerit / es26ma45');
-        $this->command?->info('Yapay zeka asistanları: Elif, Lügat, Tercüme, Hikmet (Mesajlar sekmesinde)');
+        $this->command?->info('Yapay zeka asistanları (öğrenci): Elif, Lügat, Tercüme, Hikmet — DEMO01 sınıfında, test geçmişiyle');
     }
 }

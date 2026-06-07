@@ -50,11 +50,6 @@ class MessageController extends Controller
             ];
         })
             ->sort(function (array $a, array $b) {
-                $aBot = ($a['role'] ?? '') === 'bot';
-                $bBot = ($b['role'] ?? '') === 'bot';
-                if ($aBot !== $bBot) {
-                    return $aBot ? -1 : 1;
-                }
                 $ta = (int) ($a['lastTimestamp'] ?? 0);
                 $tb = (int) ($b['lastTimestamp'] ?? 0);
                 if ($ta !== $tb) {
@@ -144,7 +139,7 @@ class MessageController extends Controller
             'message' => $message->toFrontendArray($user->id),
         ];
 
-        if ($partner->role === 'bot') {
+        if (AiBotRegistry::isBot($partner)) {
             $reply = Message::create([
                 'sender_id' => $partner->id,
                 'receiver_id' => $user->id,
@@ -226,11 +221,11 @@ class MessageController extends Controller
 
     private function botUsers()
     {
-        if (User::where('role', 'bot')->count() < count(AiBotRegistry::BOTS)) {
+        if (User::whereIn('email', AiBotRegistry::emails())->count() < count(AiBotRegistry::BOTS)) {
             AiBotRegistry::ensureBotsExist();
         }
 
-        return User::where('role', 'bot')->orderBy('name')->get();
+        return User::whereIn('email', AiBotRegistry::emails())->orderBy('name')->get();
     }
 
     private function canMessage(User $a, User $b): bool

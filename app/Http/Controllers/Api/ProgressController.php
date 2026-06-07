@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Sinif;
 use App\Models\User;
 use App\Models\UserProgress;
+use App\Support\AiBotRegistry;
 use App\Support\AvatarHelper;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -16,7 +17,7 @@ class ProgressController extends Controller
     {
         $user = $request->user();
 
-        if (in_array($user->role, ['hoca', 'yonetici'], true)) {
+        if (in_array($user->role, ['hoca', 'yonetici'], true) || AiBotRegistry::isBot($user)) {
             return response()->json(['message' => 'Hocalar ve yöneticiler ilerleme kaydı görüntüleyemez.'], 403);
         }
 
@@ -37,8 +38,8 @@ class ProgressController extends Controller
     {
         $user = $request->user();
 
-        if (in_array($user->role, ['hoca', 'yonetici'], true)) {
-            return response()->json(['message' => 'Hocalar ve yöneticiler ilerleme senkronize edemez.'], 403);
+        if (in_array($user->role, ['hoca', 'yonetici'], true) || AiBotRegistry::isBot($user)) {
+            return response()->json(['success' => true]);
         }
 
         $validated = $request->validate([
