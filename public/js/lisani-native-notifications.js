@@ -20,6 +20,25 @@
         );
     }
 
+    function formatHadisNotificationTitle() {
+        return 'Günün Hadisi · حديث اليوم 📖';
+    }
+
+    window.formatHadisNotificationBody = function (hadis) {
+        if (!hadis) return '';
+        const ar = (hadis.osmanli || '').trim();
+        const tr = (hadis.turkce || '').trim();
+        const kaynak = (hadis.kaynak || '').trim();
+        const parts = [];
+        if (ar) parts.push(ar);
+        if (tr) parts.push(tr);
+        let body = parts.join('\n\n');
+        if (kaynak) body += (body ? '\n' : '') + '— ' + kaynak;
+        return body;
+    };
+
+    window.formatHadisNotificationTitle = formatHadisNotificationTitle;
+
     async function ensureChannel(LocalNotifications) {
         try {
             await LocalNotifications.createChannel({
@@ -86,8 +105,8 @@
             const hadis = getHadisForDate(target);
             notifications.push({
                 id: ID_BASE + scheduled,
-                title: 'Günün Hadisi 📖',
-                body: hadis.turkce + '\n— ' + hadis.kaynak,
+                title: formatHadisNotificationTitle(),
+                body: window.formatHadisNotificationBody(hadis),
                 schedule: { at: target },
                 channelId: CHANNEL_ID,
                 smallIcon: 'ic_launcher',
@@ -106,7 +125,7 @@
         if (!(await window.checkNativeHadisPermission())) return false;
         await ensureChannel(LN);
 
-        const hadis = typeof getHadisForDate === 'function' ? getHadisForDate(new Date()) : { turkce: 'Test', kaynak: '' };
+        const hadis = typeof getHadisForDate === 'function' ? getHadisForDate(new Date()) : { osmanli: 'يَسِّرُوا وَلَا تُعَسِّرُوا', turkce: 'Test', kaynak: '' };
         const at = new Date(Date.now() + 4000);
 
         try {
@@ -117,8 +136,8 @@
             notifications: [
                 {
                     id: TEST_NOTIF_ID,
-                    title: 'Günün Hadisi 📖',
-                    body: hadis.turkce + '\n— ' + hadis.kaynak,
+                    title: formatHadisNotificationTitle(),
+                    body: window.formatHadisNotificationBody(hadis),
                     schedule: { at },
                     channelId: CHANNEL_ID,
                     smallIcon: 'ic_launcher',

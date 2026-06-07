@@ -3825,8 +3825,16 @@ self.addEventListener('notificationclick', e => {
             if (oldTimer) clearTimeout(parseInt(oldTimer));
             const timerId = setTimeout(() => {
                 const hadis = getTodaysHadis();
-                new Notification("Günün Hadisi 📖", {
-                    body: hadis.turkce + "\n— " + hadis.kaynak,
+                const title =
+                    typeof window.formatHadisNotificationTitle === 'function'
+                        ? window.formatHadisNotificationTitle()
+                        : 'Günün Hadisi 📖';
+                const body =
+                    typeof window.formatHadisNotificationBody === 'function'
+                        ? window.formatHadisNotificationBody(hadis)
+                        : hadis.turkce + '\n— ' + hadis.kaynak;
+                new Notification(title, {
+                    body,
                     icon: "icon-192.png",
                     badge: "icon-192.png",
                     vibrate: [200, 100, 200],
@@ -3894,8 +3902,16 @@ self.addEventListener('notificationclick', e => {
                 return;
             }
             const hadis = getTodaysHadis();
-            new Notification('Günün Hadisi 📖', {
-                body: hadis.turkce + '\n— ' + hadis.kaynak,
+            const title =
+                typeof window.formatHadisNotificationTitle === 'function'
+                    ? window.formatHadisNotificationTitle()
+                    : 'Günün Hadisi 📖';
+            const body =
+                typeof window.formatHadisNotificationBody === 'function'
+                    ? window.formatHadisNotificationBody(hadis)
+                    : hadis.turkce + '\n— ' + hadis.kaynak;
+            new Notification(title, {
+                body,
                 icon: 'icon-192.png',
                 tag: 'lisani-test',
             });
