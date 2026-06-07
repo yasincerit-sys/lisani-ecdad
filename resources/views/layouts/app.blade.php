@@ -2,7 +2,8 @@
 <html lang="tr" class="preline-ui">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1">
+    <meta name="format-detection" content="telephone=no">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Lisanı Ecdad - Osmanlıca Kolay Öğrenim</title>
     <script>
@@ -50,8 +51,44 @@
     </script>
     <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400;1,700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
-    <link rel="stylesheet" href="{{ asset('css/lisani.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/preline-lisani.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/lisani.css') }}?v={{ @filemtime(public_path('css/lisani.css')) ?: time() }}">
+    <link rel="stylesheet" href="{{ asset('css/preline-lisani.css') }}?v={{ @filemtime(public_path('css/preline-lisani.css')) ?: time() }}">
+    <link rel="stylesheet" href="{{ asset('css/lisani-fixes.css') }}?v={{ @filemtime(public_path('css/lisani-fixes.css')) ?: time() }}">
+    <style>
+        /* Cam — cache/atlatma; Preline solid kart ezilmesin */
+        html.preline-ui[class*="theme-"] #app-container .glass-card,
+        html.preline-ui[class*="theme-"] #app-container .glass-card-interactive,
+        html.preline-ui[class*="theme-"] #auth-container .glass-card,
+        html.preline-ui[class*="theme-"] .lisani-glass-panel,
+        html.preline-ui[class*="theme-"] .lisani-glass-action,
+        html.preline-ui[class*="theme-"] button.lisani-glass-panel,
+        html.preline-ui[class*="theme-"] button.lisani-glass-action,
+        html.preline-ui[class*="theme-"] div.lisani-glass-action {
+            background: linear-gradient(145deg, rgba(255,255,255,.16), rgba(255,255,255,.06)) !important;
+            backdrop-filter: blur(20px) saturate(165%) !important;
+            -webkit-backdrop-filter: blur(20px) saturate(165%) !important;
+            border: 1px solid rgba(255,255,255,.22) !important;
+            box-shadow: 0 10px 32px rgba(0,0,0,.32), inset 0 1px 0 rgba(255,255,255,.18) !important;
+        }
+        html.preline-ui[class*="theme-"] #app-container button.theme-primary-btn:not(.lisani-segment-btn),
+        html.preline-ui[class*="theme-"] #auth-container button.theme-primary-btn:not(.lisani-segment-btn),
+        html.preline-ui[class*="theme-"] .lisani-glass-action--primary {
+            background: linear-gradient(145deg, rgba(var(--theme-primary-rgb),.38), rgba(var(--theme-primary-rgb),.16)) !important;
+            border: 1px solid rgba(var(--theme-primary-rgb),.48) !important;
+            backdrop-filter: blur(20px) saturate(165%) !important;
+            -webkit-backdrop-filter: blur(20px) saturate(165%) !important;
+            box-shadow: 0 10px 32px rgba(0,0,0,.32), inset 0 1px 0 rgba(255,255,255,.2) !important;
+            color: var(--ph-text) !important;
+            filter: none !important;
+        }
+        html.preline-ui[class*="theme-"] #bottom-bar.lisani-tab-bar-ios {
+            background: linear-gradient(165deg, rgba(255,255,255,.18), rgba(255,255,255,.06)) !important;
+            backdrop-filter: blur(44px) saturate(185%) !important;
+            -webkit-backdrop-filter: blur(44px) saturate(185%) !important;
+            border: 1px solid rgba(255,255,255,.2) !important;
+            box-shadow: 0 10px 40px rgba(0,0,0,.38), inset 0 1px 0 rgba(255,255,255,.22) !important;
+        }
+    </style>
     <script>
         (function () {
             const valid = ['kahve-kum', 'zumrut-nane', 'saray-kahvesi', 'derin-mavi'];
@@ -76,10 +113,17 @@
 </head>
 <body class="lisani-body select-none font-size-standard" id="body-main">
     @yield('content')
-    <script>window.LISANI_ASSETS = { avatars: @json(asset('images/avatars')) };</script>
+    <script>window.LISANI_ASSETS = {
+        avatars: @json(asset('images/avatars')),
+        gokhanAudio: @json(asset('audio/gokhan-abi-call.mp4'))
+    };</script>
     <script src="{{ asset('js/preline.js') }}"></script>
-    <script src="{{ asset('js/lisani.js') }}" defer></script>
-    <script src="{{ asset('js/lisani-laravel.js') }}" defer></script>
+    <script src="{{ asset('js/lisani-flappy.js') }}?v={{ @filemtime(public_path('js/lisani-flappy.js')) ?: time() }}" defer></script>
+    <script src="{{ asset('js/lisani-gokhan-easter.js') }}?v={{ @filemtime(public_path('js/lisani-gokhan-easter.js')) ?: time() }}" defer></script>
+    <script src="{{ asset('js/lisani.js') }}?v={{ @filemtime(public_path('js/lisani.js')) ?: time() }}" defer></script>
+    <script src="{{ asset('js/lisani-osm-translate.js') }}?v={{ @filemtime(public_path('js/lisani-osm-translate.js')) ?: time() }}" defer></script>
+    <script src="{{ asset('js/lisani-laravel.js') }}?v={{ @filemtime(public_path('js/lisani-laravel.js')) ?: time() }}" defer></script>
+    <script src="{{ asset('js/lisani-tennis-online.js') }}?v={{ @filemtime(public_path('js/lisani-tennis-online.js')) ?: time() }}" defer></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             if (window.HSStaticMethods && typeof window.HSStaticMethods.autoInit === 'function') {

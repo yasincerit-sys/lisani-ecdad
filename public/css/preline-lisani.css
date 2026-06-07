@@ -249,6 +249,17 @@ html.preline-ui[class*="theme-"] .glass-card-interactive {
         inset 0 1px 0 rgba(255, 255, 255, 0.04) !important;
 }
 
+/* #app-container içinde cam — lisani-fixes.css ile birlikte */
+html.preline-ui[class*="theme-"] #app-container .glass-card,
+html.preline-ui[class*="theme-"] #app-container .glass-card-interactive,
+html.preline-ui[class*="theme-"] #auth-container .glass-card {
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.06)) !important;
+    backdrop-filter: blur(20px) saturate(165%) !important;
+    -webkit-backdrop-filter: blur(20px) saturate(165%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.22) !important;
+    box-shadow: 0 10px 32px rgba(0, 0, 0, 0.32), inset 0 1px 0 rgba(255, 255, 255, 0.18) !important;
+}
+
 html.preline-ui[class*="theme-"] .glass-card-interactive:hover {
     border-color: var(--theme-accent-border) !important;
     box-shadow:
@@ -301,23 +312,10 @@ html.preline-ui[class*="theme-"] .lisani-btn-gradient:active {
     transform: none !important;
 }
 
-/* Test seviye butonları — şeffaf cam */
-html.preline-ui[class*="theme-"] #level-selection-view button.glass-card-interactive,
-html.preline-ui[class*="theme-"] #tests-buttons-container button.glass-card-interactive {
-    background: rgba(255, 255, 255, 0.03) !important;
-    border: 1px solid rgba(255, 255, 255, 0.08) !important;
-    box-shadow: none !important;
+/* Test seviye butonları — lisani-glass-panel (lisani-fixes.css ile tamamlanır) */
+html.preline-ui[class*="theme-"] #level-selection-view button.lisani-glass-panel,
+html.preline-ui[class*="theme-"] #tests-buttons-container button.lisani-glass-panel {
     color: var(--ph-text) !important;
-    backdrop-filter: blur(18px) !important;
-    -webkit-backdrop-filter: blur(18px) !important;
-}
-
-html.preline-ui[class*="theme-"] #level-selection-view button.glass-card-interactive:hover,
-html.preline-ui[class*="theme-"] #tests-buttons-container button.glass-card-interactive:hover {
-    background: rgba(255, 255, 255, 0.06) !important;
-    border-color: rgba(255, 255, 255, 0.14) !important;
-    filter: none;
-    box-shadow: none !important;
 }
 
 html.preline-ui[class*="theme-"] .lisani-segment-btn:not(.is-active) {
@@ -333,8 +331,8 @@ html.preline-ui[class*="theme-"] .lisani-segment-btn:not(.is-active):hover {
     color: var(--ph-text) !important;
 }
 
-html.preline-ui[class*="theme-"] .lisani-nav-bar,
-html.preline-ui[class*="theme-"] #bottom-bar {
+html.preline-ui[class*="theme-"] .lisani-nav-bar:not(.lisani-tab-bar-ios),
+html.preline-ui[class*="theme-"] #bottom-bar:not(.lisani-tab-bar-ios) {
     background: var(--theme-nav-bg, var(--ph-bg)) !important;
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
@@ -342,67 +340,38 @@ html.preline-ui[class*="theme-"] #bottom-bar {
     box-shadow: 0 -1px 0 rgba(255, 255, 255, 0.04) inset !important;
 }
 
-/* Alt sekmeler — yumuşak */
-html.preline-ui[class*="theme-"] #bottom-bar button,
-html.preline-ui[class*="theme-"] .lisani-nav-bar button {
+/* Alt sekmeler — tek renk sistemi */
+html.preline-ui[class*="theme-"] #bottom-bar .lisani-nav-tab,
+html.preline-ui[class*="theme-"] .lisani-nav-bar .lisani-nav-tab {
     color: var(--ph-muted) !important;
     font-weight: 500;
-    opacity: 0.82;
-    transition: color 0.2s, opacity 0.2s;
+    opacity: 0.88;
+    transition: color 0.2s ease, opacity 0.2s ease;
 }
 
-html.preline-ui[class*="theme-"] #bottom-bar button.lisani-tab-active,
-html.preline-ui[class*="theme-"] .lisani-nav-bar button.lisani-tab-active {
-    color: var(--ph-primary) !important;
+html.preline-ui[class*="theme-"] #bottom-bar .lisani-nav-tab i,
+html.preline-ui[class*="theme-"] .lisani-nav-bar .lisani-nav-tab i,
+html.preline-ui[class*="theme-"] #bottom-bar .lisani-nav-tab span,
+html.preline-ui[class*="theme-"] .lisani-nav-bar .lisani-nav-tab span {
+    color: inherit !important;
+    opacity: 1;
+}
+
+html.preline-ui[class*="theme-"] #bottom-bar .lisani-nav-tab.lisani-tab-active,
+html.preline-ui[class*="theme-"] .lisani-nav-bar .lisani-nav-tab.lisani-tab-active {
+    color: var(--theme-btn-solid, var(--ph-primary)) !important;
     font-weight: 600;
     opacity: 1;
 }
 
-html.preline-ui[class*="theme-"] #bottom-bar button.lisani-tab-active i,
-html.preline-ui[class*="theme-"] .lisani-nav-bar button.lisani-tab-active i {
-    opacity: 0.92;
-}
-
-html.preline-ui[class*="theme-"] #tab-home #home-inner-circle {
-    background: linear-gradient(
-        135deg,
-        var(--theme-btn-solid, var(--theme-card-gradient-from)) 0%,
-        var(--theme-card-gradient-to) 100%
-    ) !important;
-    border: 1px solid rgba(255, 255, 255, 0.12) !important;
-    color: var(--theme-btn-text, #ffffff) !important;
-    box-shadow:
-        0 0 20px var(--theme-btn-glow),
-        0 4px 14px rgba(0, 0, 0, 0.35) !important;
-    transition: background 0.25s ease, box-shadow 0.25s ease, opacity 0.25s ease, filter 0.25s ease;
-}
-
-html.preline-ui[class*="theme-"] #tab-home:not(.lisani-tab-active) #home-inner-circle {
-    opacity: 0.78;
-    filter: saturate(0.88);
-    box-shadow:
-        0 0 14px var(--theme-btn-glow),
-        0 3px 10px rgba(0, 0, 0, 0.28) !important;
-}
-
-html.preline-ui[class*="theme-"] #tab-home.lisani-tab-active #home-inner-circle {
-    opacity: 1;
-    filter: none;
-    box-shadow:
-        0 0 26px var(--theme-btn-glow),
-        0 6px 18px rgba(0, 0, 0, 0.38) !important;
-}
-
-html.preline-ui[class*="theme-"] #tab-home.lisani-tab-active #home-inner-circle i,
-html.preline-ui[class*="theme-"] #tab-home #home-inner-circle i {
-    color: var(--theme-btn-text, #ffffff) !important;
+html.preline-ui[class*="theme-"] #bottom-bar .lisani-nav-tab:hover,
+html.preline-ui[class*="theme-"] .lisani-nav-bar .lisani-nav-tab:hover {
     opacity: 1;
 }
 
-html.preline-ui[class*="theme-"] #tab-home-text.lisani-tab-label-active {
-    color: var(--ph-primary) !important;
-    font-weight: 600;
-    opacity: 0.95;
+html.preline-ui[class*="theme-"] #bottom-bar button span,
+html.preline-ui[class*="theme-"] .lisani-nav-bar button span {
+    font-weight: 600 !important;
 }
 
 /* Segmented kontrol — pasif cam, aktif solid */
@@ -414,11 +383,6 @@ html.preline-ui[class*="theme-"] .theme-primary-btn.shadow-md {
     box-shadow:
         0 0 18px var(--theme-btn-glow),
         0 4px 14px rgba(0, 0, 0, 0.32) !important;
-}
-
-html.preline-ui[class*="theme-"] #bottom-bar button span,
-html.preline-ui[class*="theme-"] .lisani-nav-bar button span {
-    font-weight: 600 !important;
 }
 
 html.preline-ui[class*="theme-"] #quiz-options-container button:not(.glass-emerald):not(.glass-rose) {
@@ -436,7 +400,23 @@ html.preline-ui[class*="theme-"] #quiz-options-container button:not(.glass-emera
     filter: none;
 }
 
-html.preline-ui[class*="theme-"] .lisani-letter-card {
+html.preline-ui[class*="theme-"] #screen-letters .lisani-letter-card.lisani-glass-panel {
+    background: rgba(255, 255, 255, 0.07) !important;
+    backdrop-filter: blur(18px) saturate(150%) !important;
+    -webkit-backdrop-filter: blur(18px) saturate(150%) !important;
+    border: 1px solid var(--ph-border, rgba(255, 255, 255, 0.14)) !important;
+    box-shadow:
+        0 8px 28px rgba(0, 0, 0, 0.28),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+    text-align: center !important;
+}
+
+html.preline-ui[class*="theme-"] #screen-letters .lisani-letter-card.lisani-glass-panel:hover {
+    border-color: var(--theme-accent-border) !important;
+    filter: none !important;
+}
+
+html.preline-ui[class*="theme-"] .lisani-letter-card:not(.lisani-glass-panel) {
     background: var(--ph-surface) !important;
     border: 1px solid var(--ph-border) !important;
     backdrop-filter: blur(16px) !important;
@@ -658,68 +638,54 @@ html.preline-ui:not([class*="theme-"]) #bottom-bar {
     box-shadow: 0 -1px 3px 0 rgb(0 0 0 / 0.06);
 }
 
-#bottom-bar button {
+#bottom-bar .lisani-nav-tab,
+.lisani-nav-bar .lisani-nav-tab {
     color: var(--ph-muted);
     border-radius: 0.5rem;
     min-width: 0;
     font-weight: 500;
+    transition: color 0.2s ease, opacity 0.2s ease;
 }
 
-html.preline-ui[class*="theme-"] #bottom-bar button.font-black,
-html.preline-ui[class*="theme-"] .lisani-nav-bar button.font-black {
-    color: var(--ph-muted) !important;
-    font-weight: 500;
+#bottom-bar .lisani-nav-tab i,
+.lisani-nav-bar .lisani-nav-tab i,
+#bottom-bar .lisani-nav-tab span,
+.lisani-nav-bar .lisani-nav-tab span {
+    color: inherit;
 }
 
-#bottom-bar button.lisani-tab-active,
-.lisani-nav-bar button.lisani-tab-active {
-    color: var(--ph-primary);
+#bottom-bar .lisani-nav-tab.lisani-tab-active,
+.lisani-nav-bar .lisani-nav-tab.lisani-tab-active {
+    color: var(--theme-btn-solid, var(--ph-primary));
     font-weight: 600;
 }
 
-#bottom-bar button.font-black:not(.lisani-tab-active),
-.lisani-nav-bar button.font-black:not(.lisani-tab-active) {
-    color: var(--ph-muted);
+.lisani-odev-refresh-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: 0.5rem;
+    border: 1px solid var(--ph-border, rgba(255, 255, 255, 0.1));
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--theme-btn-solid, var(--ph-primary));
+    transition: background 0.2s ease, border-color 0.2s ease, opacity 0.2s ease;
+    flex-shrink: 0;
 }
 
-#tab-home #home-inner-circle i {
-    color: var(--theme-btn-text, #ffffff);
-    opacity: 1;
+.lisani-odev-refresh-btn:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.16);
 }
 
-#tab-home #home-inner-circle {
-    position: static !important;
-    width: 2.5rem;
-    height: 2.5rem;
-    margin: 0 auto 0.15rem;
-    border: 1px solid rgba(255, 255, 255, 0.12) !important;
-    box-shadow:
-        0 0 20px var(--theme-btn-glow, rgba(198, 142, 95, 0.45)),
-        0 4px 14px rgba(0, 0, 0, 0.35) !important;
-    background: linear-gradient(
-        135deg,
-        var(--theme-btn-solid, var(--theme-card-gradient-from, var(--theme-primary))) 0%,
-        var(--theme-card-gradient-to, #2a1c14) 100%
-    ) !important;
-    color: var(--theme-btn-text, #ffffff) !important;
-    transition: background 0.25s ease, box-shadow 0.25s ease, opacity 0.25s ease, filter 0.25s ease;
+.lisani-odev-refresh-btn.is-spinning i {
+    animation: lisani-odev-spin 0.75s linear infinite;
 }
 
-#tab-home:not(.lisani-tab-active) #home-inner-circle {
-    opacity: 0.78;
-    filter: saturate(0.88);
-}
-
-#tab-home.lisani-tab-active #home-inner-circle {
-    opacity: 1;
-    filter: none;
-    box-shadow:
-        0 0 26px var(--theme-btn-glow, rgba(198, 142, 95, 0.5)),
-        0 6px 18px rgba(0, 0, 0, 0.38) !important;
-}
-
-#tab-home-text {
-    margin-top: 0 !important;
+@keyframes lisani-odev-spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
 }
 
 .lisani-toast,
@@ -923,6 +889,22 @@ html.preline-ui[class*="theme-"] .lisani-nav-bar button.font-black {
 .lisani-screens {
     overflow-x: hidden;
     -webkit-overflow-scrolling: touch;
+    min-height: 0;
+}
+
+.lisani-kariyer-modal {
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+.lisani-main-flow {
+    min-height: 0;
+}
+
+#bottom-bar .lisani-nav-tab,
+.lisani-nav-bar .lisani-nav-tab {
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
 }
 
 .screen {
@@ -962,8 +944,8 @@ html.preline-ui[class*="theme-"] .lisani-nav-bar button.font-black {
         align-items: stretch;
     }
 
-    .lisani-nav-bar,
-    #bottom-bar {
+    .lisani-nav-bar:not(.lisani-tab-bar-ios),
+    #bottom-bar:not(.lisani-tab-bar-ios) {
         order: -1;
         flex-direction: column !important;
         justify-content: flex-start !important;
@@ -983,17 +965,30 @@ html.preline-ui[class*="theme-"] .lisani-nav-bar button.font-black {
         overflow-x: hidden;
     }
 
+    .lisani-nav-bar.lisani-tab-bar-ios,
+    #bottom-bar.lisani-tab-bar-ios {
+        order: -1;
+        flex-direction: column !important;
+        justify-content: flex-start !important;
+        align-items: stretch !important;
+        width: 5.75rem;
+        min-width: 5.75rem;
+        max-width: 5.75rem;
+        min-height: auto !important;
+        height: auto;
+        align-self: stretch;
+        padding: 1.25rem 0.5rem;
+        gap: 0.35rem;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
     .lisani-nav-bar > button,
     #bottom-bar > button {
         flex: 0 0 auto !important;
         width: 100%;
         min-width: 0;
         padding: 0.65rem 0.25rem;
-    }
-
-    .lisani-nav-bar #tab-home-text,
-    #bottom-bar #tab-home-text {
-        margin-top: 0 !important;
     }
 
     .lisani-screens {

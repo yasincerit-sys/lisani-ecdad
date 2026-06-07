@@ -6,17 +6,39 @@ use App\Http\Controllers\Controller;
 use App\Models\Sinif;
 use App\Models\User;
 use App\Models\UserProgress;
+use App\Support\AvatarHelper;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class ProgressController extends Controller
 {
+    public function show(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        if (in_array($user->role, ['hoca', 'yonetici'], true)) {
+            return response()->json(['message' => 'Hocalar ve yöneticiler ilerleme kaydı görüntüleyemez.'], 403);
+        }
+
+        $progress = UserProgress::where('user_id', $user->id)->first();
+
+        return response()->json([
+            'total_xp' => $progress?->total_xp ?? $user->total_score ?? 0,
+            'tests_count' => $progress?->tests_count ?? 0,
+            'avg_success' => $progress?->avg_success ?? 0,
+            'recent_tests' => $progress?->recent_tests ?? [],
+            'last_test_label' => $progress?->last_test_label,
+            'last_test_percent' => $progress?->last_test_percent,
+            'last_active_at' => $progress?->last_active_at?->toIso8601String(),
+        ]);
+    }
+
     public function sync(Request $request): JsonResponse
     {
         $user = $request->user();
 
-        if ($user->role === 'hoca') {
-            return response()->json(['message' => 'Hocalar ilerleme senkronize edemez.'], 403);
+        if (in_array($user->role, ['hoca', 'yonetici'], true)) {
+            return response()->json(['message' => 'Hocalar ve yöneticiler ilerleme senkronize edemez.'], 403);
         }
 
         $validated = $request->validate([
@@ -102,8 +124,7 @@ class ProgressController extends Controller
             return [
                 'uid' => (string) $o->id,
                 'name' => $o->name,
-                'avatar' => $o->avatar ?? '🎒',
-                'birthdate' => $o->birthdate?->format('Y-m-d') ?? '',
+                'avatar' => AvatarHelper::resolve($o->avatar, $o->id),
                 'totalXp' => $p?->total_xp ?? $o->total_score ?? 0,
                 'testsCount' => $p?->tests_count ?? 0,
                 'avgSuccess' => $p?->avg_success ?? 0,

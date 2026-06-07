@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\AvatarHelper;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -19,8 +20,8 @@ class User extends Authenticatable
         'role',
         'sinif_adi',
         'sinif_kodu',
-        'birthdate',
         'total_score',
+        'tennis_unlocked',
     ];
 
     protected $hidden = [
@@ -33,8 +34,8 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
-            'birthdate' => 'date',
             'total_score' => 'integer',
+            'tennis_unlocked' => 'boolean',
         ];
     }
 
@@ -48,18 +49,23 @@ class User extends Authenticatable
         return $this->hasOne(UserProgress::class);
     }
 
+    public function resolvedAvatar(): string
+    {
+        return AvatarHelper::resolve($this->avatar, $this->id);
+    }
+
     public function toFrontendArray(bool $includePassword = false): array
     {
         $data = [
             'uid' => (string) $this->id,
             'name' => $this->name,
             'email' => $this->email,
-            'avatar' => $this->avatar ?? '🐱',
+            'avatar' => $this->resolvedAvatar(),
             'role' => $this->role ?? 'ogrenci',
             'sinif' => $this->sinif_adi ?: null,
             'sinifKodu' => $this->sinif_kodu ?: null,
-            'birthdate' => $this->birthdate?->format('Y-m-d') ?? '',
             'totalScore' => $this->total_score ?? 0,
+            'tennisUnlocked' => (bool) ($this->tennis_unlocked ?? false),
         ];
 
         if ($includePassword) {

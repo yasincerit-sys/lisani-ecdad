@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Sinif;
 use App\Models\User;
+use App\Support\AvatarHelper;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -149,7 +150,7 @@ class SinifController extends Controller
         $ogrenciler = User::whereIn('id', $ogrenciIds)->get()->map(fn (User $u) => [
             'uid' => (string) $u->id,
             'name' => $u->name,
-            'avatar' => $u->avatar,
+            'avatar' => AvatarHelper::resolve($u->avatar, $u->id),
             'totalScore' => $u->total_score,
         ])->values()->all();
 

@@ -1,8 +1,35 @@
-﻿        // --- GEÇMİŞ TEST SONUÇLARI VERİ TABANI ---
+        // --- GEÇMİŞ TEST SONUÇLARI VERİ TABANI ---
         let testHistory = [];
 
         // --- TOPLAM PUAN DEĞİŞKENİ (GÜVENLİ TAKİP) ---
         let totalScore = 0;
+        window._lisaniServerStats = null;
+
+        window.getLisaniProgress = function () {
+            return {
+                testHistory: testHistory.slice(),
+                totalScore,
+            };
+        };
+
+        window.setLisaniProgress = function (history, xp) {
+            if (Array.isArray(history)) testHistory = history;
+            if (typeof xp === 'number' && !Number.isNaN(xp)) totalScore = xp;
+            try {
+                localStorage.setItem('lisani_test_history', JSON.stringify(testHistory));
+            } catch (e) {}
+            updateLearningStats();
+            updateUIPoints();
+            if (typeof renderProgressChart === 'function') renderProgressChart();
+            if (typeof renderQuizHistoryList === 'function') renderQuizHistoryList();
+        };
+
+        window.refreshAllLearningUI = function () {
+            updateLearningStats();
+            updateUIPoints();
+            if (typeof renderProgressChart === 'function') renderProgressChart();
+            if (typeof renderQuizHistoryList === 'function') renderQuizHistoryList();
+        };
 
         // --- SORU BANKASI VERİLERİ (GÜNCELLENDİ: 4 SEVİYE x 20 SORU = TOPLAM 80 SORU) ---
         const quizBank = {
@@ -286,29 +313,52 @@
         let activeCorrects = 0;
         let activeWrongs = 0;
 
-        // --- GİZLİ TENİS OYUNU DURUM DEĞİŞKENLERİ ---
+        // --- GİZLİ TENİS OYUNU (2D) ---
+        const TENNIS_W = 480;
+        const TENNIS_H = 300;
+        const TENNIS_WIN = 7;
         let tennisCanvas = null;
         let tennisCtx = null;
         let tennisLoopId = null;
         let isTennisRunning = false;
-        
-        let ballX = 150;
-        let ballY = 100;
-        let ballSpeedX = 2;
-        let ballSpeedY = -2;
-        let ballRadius = 5;
+        let tennisPaused = false;
+        let tennisMatchOver = false;
+        let tennisServeReady = false;
+        let tennisCountdown = 0;
+        let tennisRallyHits = 0;
+        let tennisLastTime = 0;
+        let tennisBallSpin = 0;
+        let tennisBallRotation = 0;
+        let tennisHitParticles = [];
+        let tennisCourtCache = null;
+        let tennisBotTargetX = null;
+        let tennisBotReaction = 0;
+
+        let ballX = TENNIS_W / 2;
+        let ballY = TENNIS_H / 2;
+        let ballSpeedX = 0;
+        let ballSpeedY = 0;
+        let ballRadius = 7;
+        let ballTrail = [];
 
         let playerPaddleX = 110;
         let computerPaddleX = 110;
-        const paddleWidth = 80;
-        const paddleHeight = 8;
-        
+        const paddleWidth = 84;
+        const paddleHeight = 16;
+        const paddleHandleH = 10;
+
         let tennisPlayerScore = 0;
         let tennisComputerScore = 0;
-        
-        // Klavye dinleyicileri için tuş takibi
+
         let keyLeftPressed = false;
         let keyRightPressed = false;
+        let tennisPointerActive = false;
+
+        let tennisOnlineMode = false;
+        let tennisOnlineRole = null;
+        let tennisOnlineRoomCode = '';
+        let tennisOpponentName = '';
+        let tennisRemotePaddleX = (TENNIS_W - paddleWidth) / 2;
 
         // RENK KOYULAŞTIRMA YARDIMCI FONKSİYONU
         function darkenColor(col, amt) {
@@ -544,7 +594,6 @@
         }
 
         // --- KULLANICI / AUTH YÖNETİMİ (Firebase) ---
-        const TAKKE_AVATAR = '<span class="inline-flex flex-col items-center leading-none"><span class="text-[1.15em] leading-none">🧔</span><span class="-mt-px block h-1.5 w-4 min-w-[14px] rounded-t-full bg-indigo-950"></span></span>';
 
         function avatarAssetsBase() {
             return (window.LISANI_ASSETS && window.LISANI_ASSETS.avatars) || '/images/avatars';
@@ -555,26 +604,21 @@
             return `<span class="avatar-glass-emblem"><img src="${src}" alt="" /></span>`;
         }
 
+        const DEFAULT_AVATAR = teamAvatarImg('besiktas.svg');
+
         const AVATAR_OPTIONS = [
-            { type: 'cat', emoji: '🐱', label: 'Kedi' },
-            { type: 'alp', emoji: '🏹', label: 'Alp' },
-            { type: 'flower', emoji: '🌷', label: 'Lale' },
-            { type: 'scholar', emoji: '🎓', label: 'Talebe' },
-            { type: 'takke', emoji: TAKKE_AVATAR, label: 'Lacivert Takke' },
-            { type: 'saray-kavvesi', emoji: teamAvatarImg('saray-kavvesi.svg'), label: 'Saray Kavvesi' },
             { type: 'besiktas', emoji: teamAvatarImg('besiktas.svg'), label: 'Beşiktaş' },
-            { type: 'goztepe', emoji: teamAvatarImg('goztepe.svg'), label: 'Göztepe' },
-            { type: 'bursaspor', emoji: teamAvatarImg('bursaspor.svg'), label: 'Bursaspor' },
-            { type: 'eskisehirspor', emoji: teamAvatarImg('eskisehirspor.svg'), label: 'Eskişehirspor' },
-            { type: 'falcon', emoji: '🦅', label: 'Kartal' },
-            { type: 'scribe', emoji: '📜', label: 'Hattat' },
-            { type: 'sword', emoji: '⚔️', label: 'Savaşçı' },
-            { type: 'book', emoji: '📖', label: 'Kitap' },
-            { type: 'mosque', emoji: '🕌', label: 'Cami' },
-            { type: 'lamp', emoji: '🪔', label: 'Kandil' },
-            { type: 'horse', emoji: '🐎', label: 'Sipahi' },
-            { type: 'owl', emoji: '🦉', label: 'Bilge' },
         ];
+
+        function isLegacyEmojiAvatar(value) {
+            return typeof value === 'string' && value.length <= 8 && !value.includes('<') && !value.includes('/');
+        }
+
+        function resolveLegacyAvatar(value) {
+            if (!value || isLegacyEmojiAvatar(value)) return DEFAULT_AVATAR;
+            if (typeof value === 'string' && value.includes('istanbul/')) return DEFAULT_AVATAR;
+            return value;
+        }
 
         function getAvatarLabel(type) {
             const found = AVATAR_OPTIONS.find((a) => a.type === type);
@@ -586,7 +630,7 @@
         }
 
         function isCustomPhotoAvatar(value) {
-            return typeof value === 'string' && value.includes('<img') && value.includes('object-cover');
+            return typeof value === 'string' && value.includes('<img') && !isTeamAvatar(value);
         }
 
         function highlightAvatarSelection(selector, value) {
@@ -609,18 +653,26 @@
             return `<span class="${textSize} leading-none flex items-center justify-center">${value}</span>`;
         }
 
-        function normalizeAvatarValue(value) {
-            if (!value || typeof value !== 'string') return value || '🐱';
-            if (value.includes('avatar-glass-emblem') || value.includes('object-cover')) return value;
+        function normalizeAvatarValue(value, userId) {
+            if (!value || typeof value !== 'string') return DEFAULT_AVATAR;
+            if (value.includes('avatar-glass-emblem') || value.includes('lisani-avatar-img') || value.includes('object-cover')) {
+                if (value.includes('istanbul/')) return DEFAULT_AVATAR;
+                return value;
+            }
             const svgMatch = value.match(/avatars\/([^"'?\s]+\.svg)/i);
             if (svgMatch) return teamAvatarImg(svgMatch[1]);
-            return value;
+            return resolveLegacyAvatar(value);
         }
 
-        function formatAvatarForDisplay(value) {
-            const normalized = normalizeAvatarValue(value);
-            if (!normalized) return '🐱';
-            if (isCustomPhotoAvatar(normalized)) return normalized;
+        function formatAvatarForDisplay(value, userId) {
+            const normalized = normalizeAvatarValue(value, userId);
+            if (!normalized) return DEFAULT_AVATAR;
+            if (isCustomPhotoAvatar(normalized)) {
+                const srcMatch = normalized.match(/src="([^"]+)"/);
+                if (srcMatch) {
+                    return `<img src="${srcMatch[1]}" class="lisani-avatar-img" alt="" />`;
+                }
+            }
             if (isTeamAvatar(normalized)) {
                 return `<span class="avatar-display-glass">${normalized}</span>`;
             }
@@ -630,12 +682,34 @@
         function applyAvatarToContainer(container, value) {
             if (!container) return;
             container.innerHTML = formatAvatarForDisplay(value);
-            if (isTeamAvatar(value) || isCustomPhotoAvatar(value)) {
-                container.classList.remove('text-lg', 'text-2xl', 'text-3xl', 'text-4xl');
-            } else {
-                container.classList.add('text-2xl');
+            const isVisual = isTeamAvatar(value) || isCustomPhotoAvatar(value);
+            container.classList.remove('text-lg', 'text-xl', 'text-2xl', 'text-3xl', 'text-4xl');
+            if (!isVisual) {
+                const emojiSize = container.classList.contains('lisani-avatar-slot--sm')
+                    ? 'text-xl'
+                    : container.classList.contains('lisani-avatar-slot--lg')
+                      ? 'text-3xl'
+                      : 'text-2xl';
+                container.classList.add(emojiSize);
             }
         }
+
+        window.applyAvatarToContainer = applyAvatarToContainer;
+        window.normalizeAvatarValue = normalizeAvatarValue;
+        window.formatAvatarForDisplay = formatAvatarForDisplay;
+
+        function avatarSlotHtml(value, sizeClass, userId) {
+            const slotClass = sizeClass || 'lisani-avatar-slot--sm';
+            const normalized = normalizeAvatarValue(value || DEFAULT_AVATAR, userId);
+            const content = formatAvatarForDisplay(normalized, userId);
+            const isVisual = isTeamAvatar(normalized) || isCustomPhotoAvatar(normalized);
+            const emojiCls = !isVisual ? ' text-xl' : '';
+            return `<span class="lisani-avatar-slot ${slotClass} rounded-full inline-flex items-center justify-center flex-shrink-0${emojiCls}">${content}</span>`;
+        }
+
+        window.avatarSlotHtml = avatarSlotHtml;
+        window.DEFAULT_AVATAR = DEFAULT_AVATAR;
+        window.resolveLegacyAvatar = resolveLegacyAvatar;
 
         function createAvatarButton(opt, mode) {
             const btn = document.createElement('button');
@@ -680,6 +754,10 @@
                 AVATAR_OPTIONS.forEach((opt) => regGrid.appendChild(createAvatarButton(opt, 'register')));
                 regGrid.appendChild(createPhotoUploadButton('register'));
                 highlightAvatarSelection('.avatar-option', selectedAvatarValue);
+                const preview = document.getElementById('avatar-preview-big');
+                const label = document.getElementById('avatar-preview-label');
+                if (preview) applyAvatarToContainer(preview, selectedAvatarValue);
+                if (label) label.textContent = getAvatarLabel(selectedAvatarType);
             }
             if (editGrid) {
                 editGrid.innerHTML = '';
@@ -689,14 +767,13 @@
             if (typeof lucide !== 'undefined') lucide.createIcons();
         }
 
-        let selectedAvatarType = 'cat';
-        let selectedAvatarValue = '🐱';
-        let editAvatarValue = '🐱';
+        let selectedAvatarType = 'besiktas';
+        let selectedAvatarValue = DEFAULT_AVATAR;
+        let editAvatarValue = DEFAULT_AVATAR;
 
         let registeredUsers = {
             'ahmet': {
                 name: 'Ahmet',
-                birthdate: '2012-05-20',
                 email: 'ahmet@gmail.com',
                 password: '123',
                 avatar: '🐱'
@@ -776,6 +853,46 @@
             document.getElementById('avatar-upload-input').click();
         }
 
+        window.hydrateProgressFromServer = function (data) {
+            if (!data || currentUserRole === 'hoca') return;
+
+            window._lisaniServerStats = {
+                tests_count: Number(data.tests_count) || 0,
+                avg_success: Number(data.avg_success) || 0,
+                total_xp: Number(data.total_xp) || 0,
+            };
+
+            const serverTests = Array.isArray(data.recent_tests) ? data.recent_tests : [];
+            const hasDb =
+                window._lisaniServerStats.tests_count > 0 ||
+                window._lisaniServerStats.total_xp > 0 ||
+                serverTests.length > 0;
+
+            if (hasDb) {
+                if (serverTests.length > 0) {
+                    testHistory = serverTests.map((r, i) => ({
+                        id: r.id || i + 1,
+                        date: r.date || '',
+                        level: r.level,
+                        test: r.test || '',
+                        correct: r.correct ?? 0,
+                        wrong: r.wrong ?? 0,
+                        percent: r.percent ?? 0,
+                        score: r.percent ?? 0,
+                    }));
+                } else if (window._lisaniServerStats.tests_count === 0) {
+                    testHistory = [];
+                }
+                totalScore = window._lisaniServerStats.total_xp;
+            }
+
+            try {
+                localStorage.setItem('lisani_test_history', JSON.stringify(testHistory));
+            } catch (e) {}
+
+            window.refreshAllLearningUI();
+        };
+
         // --- ÖĞRENİM İSTATİSTİKLERİNİ DİNAMİK HESAPLAMA VE GÜNCELLEME ---
         function updateLearningStats() {
             const solvedCountEl = document.getElementById('stats-solved-count');
@@ -784,17 +901,24 @@
 
             if (!solvedCountEl || !avgSuccessEl || !totalXpEl) return;
 
-            const solvedCount = testHistory.length;
+            const server = window._lisaniServerStats;
+            const solvedCount =
+                testHistory.length > 0 ? testHistory.length : server?.tests_count || 0;
             solvedCountEl.innerText = solvedCount;
 
-            let totalSuccess = 0;
-            testHistory.forEach(record => {
-                totalSuccess += record.percent;
-            });
-            
-            const avgSuccess = solvedCount > 0 ? Math.round(totalSuccess / solvedCount) : 0;
+            let avgSuccess = 0;
+            if (testHistory.length > 0) {
+                let totalSuccess = 0;
+                testHistory.forEach((record) => {
+                    totalSuccess += record.percent;
+                });
+                avgSuccess = Math.round(totalSuccess / testHistory.length);
+            } else if (server) {
+                avgSuccess = server.avg_success || 0;
+            }
+
             avgSuccessEl.innerText = `%${avgSuccess}`;
-            totalXpEl.innerText = totalScore;
+            totalXpEl.innerText = totalScore || server?.total_xp || 0;
         }
 
         function triggerEditAvatarUpload() {
@@ -802,58 +926,234 @@
             document.getElementById('edit-avatar-upload-input').click();
         }
 
+        function isYoneticiUser() {
+            return currentUserRole === 'yonetici' || (window.currentUser && window.currentUser.role === 'yonetici');
+        }
+        window.isYoneticiUser = isYoneticiUser;
+
+        function canTrackStudents() {
+            return isHocaUser() || isYoneticiUser();
+        }
+        window.canTrackStudents = canTrackStudents;
+
+        function isHocaUser() {
+            return currentUserRole === 'hoca' || (window.currentUser && window.currentUser.role === 'hoca');
+        }
+        window.isHocaUser = isHocaUser;
+
+        function getHomeRoleBadgeText(role) {
+            if (role === 'yonetici') return 'Yönetici';
+            if (role === 'hoca') return 'Hoca';
+            return 'Matbu Yolcusu';
+        }
+
+        function getSettingsRoleBadgeHtml(role) {
+            if (role === 'yonetici') return '👑 Yönetici';
+            if (role === 'hoca') return '📚 Hoca';
+            return '🎒 Öğrenci';
+        }
+
+        window.updateHomeRoleBadge = function (role) {
+            const el = document.getElementById('home-role-badge');
+            if (!el) return;
+            const r = role || currentUserRole || (window.currentUser && window.currentUser.role) || 'ogrenci';
+            el.textContent = getHomeRoleBadgeText(r);
+        };
+        window.getSettingsRoleBadgeHtml = getSettingsRoleBadgeHtml;
+
+        window.togglePasswordVisibility = function (inputId, btn) {
+            const input = document.getElementById(inputId);
+            if (!input || !btn) return;
+            if (typeof playClickSound === 'function') playClickSound();
+            const show = input.type === 'password';
+            input.type = show ? 'text' : 'password';
+            btn.setAttribute('aria-label', show ? 'Şifreyi gizle' : 'Şifreyi göster');
+            btn.setAttribute('title', show ? 'Şifreyi gizle' : 'Şifreyi göster');
+            btn.innerHTML = show
+                ? '<i data-lucide="eye-off" class="w-4 h-4"></i>'
+                : '<i data-lucide="eye" class="w-4 h-4"></i>';
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        };
+
+        function mapTestsToHistory(tests) {
+            return (tests || []).map((r, i) => ({
+                id: r.id || i + 1,
+                date: r.date || '',
+                level: r.level,
+                test: r.test || '',
+                correct: r.correct ?? 0,
+                wrong: r.wrong ?? 0,
+                percent: r.percent ?? 0,
+                score: r.percent ?? 0,
+            }));
+        }
+
+        function getDisplayProgressHistory() {
+            return testHistory;
+        }
+
+        function updateGelisimScreenForRole() {
+            const title = document.getElementById('ai-screen-title');
+            const subtitle = document.getElementById('ai-screen-subtitle');
+            const chartBadge = document.getElementById('ai-chart-badge-label');
+            if (title) title.textContent = 'Gelişim Analizi';
+            if (subtitle) subtitle.textContent = 'Uygulamada çözdüğünüz testlerin skor geçmişi';
+            if (chartBadge) chartBadge.textContent = 'Skorlarım';
+        }
+        window.updateGelisimScreenForRole = updateGelisimScreenForRole;
+
+        window.refreshProgressView = function () {
+            renderProgressChart();
+            renderQuizHistoryList();
+            const history = getDisplayProgressHistory();
+            if (history.length > 0) {
+                showTrialDetail(history[history.length - 1].id);
+            } else {
+                const detailCard = document.getElementById('selected-trial-detail-card');
+                if (detailCard) detailCard.classList.add('hidden');
+            }
+        };
+
+        window.refreshGelisimTab = function () {
+            if (canTrackStudents()) {
+                if (typeof window.openHocaDashboard === 'function') window.openHocaDashboard();
+                return;
+            }
+            if (typeof window.loadProgressFromServer === 'function') {
+                window.loadProgressFromServer();
+            } else {
+                window.refreshProgressView();
+            }
+        };
+
+        const LEVEL_TITLES = {
+            1: 'Seviye 1: Harfler & Sayılar',
+            2: 'Seviye 2: Yazım Kuralları & Okuma',
+            3: 'Seviye 3: Kelime Kökü & Kaynak Dil',
+        };
+
+        window.odevVerFromTest = function (level, testName) {
+            const uid = currentUser?.uid || currentUser?.id;
+            if (!uid) {
+                showToast('Giriş gerekli.', 'error');
+                return;
+            }
+            odevVer(uid, level, testName);
+        };
+
+        function updateTestsTabForRole() {
+            const hint = document.getElementById('tests-hoca-hint');
+            const studentHint = document.getElementById('tests-student-hint');
+            const hoca = isHocaUser();
+            const yonetici = isYoneticiUser();
+            if (hint) hint.classList.toggle('hidden', !hoca);
+            if (studentHint) studentHint.classList.toggle('hidden', hoca || yonetici);
+        }
+        window.updateTestsTabForRole = updateTestsTabForRole;
+
+        function isTestAlreadyCompleted(level, testName) {
+            const lv = Number(level);
+            const name = String(testName || '').trim();
+            return testHistory.some((r) => Number(r.level) === lv && String(r.test || '').trim() === name);
+        }
+
+        function getCompletedTestRecord(level, testName) {
+            const lv = Number(level);
+            const name = String(testName || '').trim();
+            return testHistory.find((r) => Number(r.level) === lv && String(r.test || '').trim() === name);
+        }
+
         // --- İNTERAKTİF SINAV ÇALIŞTIRMA MOTORU ---
         function startLevel(level) {
             playClickSound();
             activeLevel = level;
-            
-            const levelTitles = {
-                1: "Seviye 1: Harfler & Sayılar",
-                2: "Seviye 2: Yazım Kuralları & Okuma",
-                3: "Seviye 3: Kelime Kökü & Kaynak Dil"
-            };
 
-            document.getElementById('selected-level-title').innerText = levelTitles[level] || `Seviye ${level}`;
+            document.getElementById('selected-level-title').innerText = LEVEL_TITLES[level] || `Seviye ${level}`;
             const testsContainer = document.getElementById('tests-buttons-container');
             testsContainer.innerHTML = '';
 
-            // 3 Normal Test Sürümü (Ultra Glassmorphic)
-            for (let i = 1; i <= 3; i++) {
+            const assignMode = isHocaUser();
+
+            function renderStudentTestBtn(level, testName, isGenel) {
+                const completed = isTestAlreadyCompleted(level, testName);
+                const record = completed ? getCompletedTestRecord(level, testName) : null;
                 const testBtn = document.createElement('button');
-                testBtn.className = "glass-card glass-card-interactive rounded-2xl p-4 text-left flex items-center justify-between w-full";
-                testBtn.onclick = () => launchQuizEngine(level, `Test ${i}`);
-                testBtn.innerHTML = `
-                    <div class="flex items-center space-x-3.5">
-                        <div class="w-10 h-10 rounded-full bg-amber-500/10 text-amber-500 flex items-center justify-center border border-amber-500/25">
-                            <i data-lucide="file-question" class="w-5 h-5"></i>
+                testBtn.type = 'button';
+                testBtn.className = `lisani-glass-panel lisani-test-btn lisani-test-list-card rounded-2xl p-4 text-left flex items-center justify-between w-full min-w-0${isGenel ? ' lisani-test-btn--genel' : ''}${completed ? ' opacity-70' : ''}`;
+                if (completed) {
+                    testBtn.onclick = () => showToast(`Bu testi zaten çözdünüz (%${record.percent}). Tekrar çözülemez.`, 'info');
+                    testBtn.innerHTML = `
+                    <div class="flex items-center gap-3 min-w-0">
+                        <div class="lisani-test-list-icon${isGenel ? ' lisani-test-list-icon--genel' : ''} w-10 h-10 rounded-xl flex items-center justify-center shrink-0">
+                            <i data-lucide="${isGenel ? 'award' : 'check-circle'}" class="w-4 h-4"></i>
                         </div>
-                        <div>
-                            <h4 class="text-xs font-extrabold theme-text-main">Test ${i}</h4>
-                            <p class="text-[10px] theme-text-muted mt-0.5">Seviye kazanımını ölçecek 5 özel soru.</p>
+                        <div class="min-w-0">
+                            <h4 class="text-xs font-extrabold theme-text-main">${isGenel ? 'Genel Değerlendirme 🏆' : testName}</h4>
+                            <p class="text-[10px] theme-text-muted mt-0.5">Tamamlandı · %${record.percent} başarı</p>
                         </div>
                     </div>
-                    <span class="text-[9px] theme-primary-color bg-white/5 border border-white/10 px-2.5 py-1 rounded-full font-bold uppercase tracking-wider">Hemen Başla</span>
-                `;
+                    <span class="lisani-test-go-chip shrink-0 ml-2 opacity-80">Çözüldü</span>`;
+                } else {
+                    testBtn.onclick = () => launchQuizEngine(level, testName);
+                    testBtn.innerHTML = `
+                    <div class="flex items-center gap-3 min-w-0">
+                        <div class="lisani-test-list-icon${isGenel ? ' lisani-test-list-icon--genel' : ''} w-10 h-10 rounded-xl flex items-center justify-center shrink-0">
+                            <i data-lucide="${isGenel ? 'award' : 'file-question'}" class="w-4 h-4"></i>
+                        </div>
+                        <div class="min-w-0">
+                            <h4 class="text-xs font-extrabold theme-text-main">${isGenel ? 'Genel Değerlendirme 🏆' : testName}</h4>
+                            <p class="text-[10px] theme-text-muted mt-0.5">${isGenel ? 'Karma sorular · tüm konular' : '5 soruluk seviye sınavı'}</p>
+                        </div>
+                    </div>
+                    <span class="lisani-test-go-chip${isGenel ? ' lisani-test-go-chip--genel' : ''} shrink-0 ml-2">${isGenel ? 'Sınav' : 'Başla'}</span>`;
+                }
                 testsContainer.appendChild(testBtn);
             }
 
-            // 1 Genel Sınav (Ultra Glassmorphic Parıltı)
-            const generalTestBtn = document.createElement('button');
-            generalTestBtn.className = "glass-card glass-card-interactive border border-dashed border-[rgba(255,255,255,0.12)] rounded-2xl p-4.5 text-left flex items-center justify-between w-full mt-2";
-            generalTestBtn.onclick = () => launchQuizEngine(level, 'Genel');
-            generalTestBtn.innerHTML = `
-                <div class="flex items-center space-x-3.5">
-                    <div class="w-10 h-10 rounded-full bg-emerald-500/10 text-emerald-450 flex items-center justify-center border border-emerald-500/25">
-                        <i data-lucide="award" class="w-5 h-5"></i>
+            for (let i = 1; i <= 3; i++) {
+                const testName = `Test ${i}`;
+                const testBtn = document.createElement('button');
+                testBtn.type = 'button';
+                testBtn.className = 'lisani-glass-panel lisani-test-btn lisani-test-list-card rounded-2xl p-4 text-left flex items-center justify-between w-full min-w-0';
+                if (assignMode) {
+                    testBtn.onclick = () => window.odevVerFromTest(level, testName);
+                    testBtn.innerHTML = `
+                    <div class="flex items-center gap-3 min-w-0">
+                        <div class="lisani-test-list-icon w-10 h-10 rounded-xl flex items-center justify-center shrink-0">
+                            <i data-lucide="clipboard-list" class="w-4 h-4"></i>
+                        </div>
+                        <div class="min-w-0">
+                            <h4 class="text-xs font-extrabold theme-text-main">${testName}</h4>
+                            <p class="text-[10px] theme-text-muted mt-0.5">5 soruluk seviye sınavı · ödev olarak gönder</p>
+                        </div>
                     </div>
-                    <div>
-                        <h4 class="text-xs font-black theme-text-main">Genel Değerlendirme Testi 🏆</h4>
-                        <p class="text-[10px] theme-text-muted mt-0.5">Seviyenin tüm harf ve kurallarını içeren karma test.</p>
+                    <span class="lisani-test-go-chip shrink-0 ml-2">Ödev Ver</span>`;
+                    testsContainer.appendChild(testBtn);
+                } else {
+                    renderStudentTestBtn(level, testName, false);
+                }
+            }
+
+            if (assignMode) {
+                const generalTestBtn = document.createElement('button');
+                generalTestBtn.type = 'button';
+                generalTestBtn.className = 'lisani-glass-panel lisani-test-btn lisani-test-list-card lisani-test-btn--genel rounded-2xl p-4 text-left flex items-center justify-between w-full min-w-0';
+                generalTestBtn.onclick = () => window.odevVerFromTest(level, 'Genel');
+                generalTestBtn.innerHTML = `
+                <div class="flex items-center gap-3 min-w-0">
+                    <div class="lisani-test-list-icon lisani-test-list-icon--genel w-10 h-10 rounded-xl flex items-center justify-center shrink-0">
+                        <i data-lucide="award" class="w-4 h-4"></i>
+                    </div>
+                    <div class="min-w-0">
+                        <h4 class="text-xs font-black theme-text-main">Genel Değerlendirme 🏆</h4>
+                        <p class="text-[10px] theme-text-muted mt-0.5">Karma sorular · ödev olarak gönder</p>
                     </div>
                 </div>
-                <span class="text-[9px] text-emerald-450 bg-emerald-500/15 border border-emerald-500/30 px-3 py-1.5 rounded-full font-extrabold uppercase tracking-wider animate-pulse">Büyük Sınav</span>
-            `;
-            testsContainer.appendChild(generalTestBtn);
+                <span class="lisani-test-go-chip lisani-test-go-chip--genel shrink-0 ml-2">Ödev Ver</span>`;
+                testsContainer.appendChild(generalTestBtn);
+            } else {
+                renderStudentTestBtn(level, 'Genel', true);
+            }
 
             document.getElementById('level-selection-view').classList.add('hidden');
             document.getElementById('test-selection-view').classList.remove('hidden');
@@ -863,11 +1163,44 @@
         function goBackToLevels() {
             playClickSound();
             document.getElementById('test-selection-view').classList.add('hidden');
+            document.getElementById('quiz-active-view').classList.add('hidden');
+            document.getElementById('quiz-result-view').classList.add('hidden');
             document.getElementById('level-selection-view').classList.remove('hidden');
+            lucide.createIcons();
         }
+
+        function goBackFromQuiz() {
+            playClickSound();
+            if (activeQuestionIndex > 0 || activeCorrects > 0 || activeWrongs > 0) {
+                if (!confirm('Sınavdan çıkılsın mı? Bu oturumdaki ilerleme kaydedilmez.')) {
+                    return;
+                }
+            }
+            document.getElementById('quiz-active-view').classList.add('hidden');
+            document.getElementById('test-selection-view').classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        function goBackToTestList() {
+            playClickSound();
+            document.getElementById('quiz-result-view').classList.add('hidden');
+            document.getElementById('quiz-active-view').classList.add('hidden');
+            document.getElementById('test-selection-view').classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        window.goBackToLevels = goBackToLevels;
+        window.goBackFromQuiz = goBackFromQuiz;
+        window.goBackToTestList = goBackToTestList;
 
         // Sınavı Başlatır
         function launchQuizEngine(level, testName) {
+            if (isTestAlreadyCompleted(level, testName)) {
+                const record = getCompletedTestRecord(level, testName);
+                showToast(`Bu testi zaten çözdünüz (%${record?.percent ?? 0}). Tekrar çözülemez.`, 'info');
+                return false;
+            }
+
             playClickSound();
             activeLevel = level;
             activeTestName = testName;
@@ -894,6 +1227,11 @@
         }
 
         window.startOdevTest = function (level, testName) {
+            if (isTestAlreadyCompleted(level, testName)) {
+                const record = getCompletedTestRecord(level, testName);
+                showToast(`Bu testi zaten çözdünüz (%${record?.percent ?? 0}). Tekrar çözülemez.`, 'info');
+                return;
+            }
             if (typeof switchTab === 'function') {
                 switchTab('tests');
             }
@@ -903,19 +1241,29 @@
         // Soru Çizer (Cam Şık Butonları Entegre Edildi)
         function renderQuizQuestion() {
             const q = activeQuizQuestions[activeQuestionIndex];
-            document.getElementById('active-question-counter').innerText = `Soru: ${activeQuestionIndex + 1}/${activeQuizQuestions.length}`;
+            const total = activeQuizQuestions.length;
+            const current = activeQuestionIndex + 1;
+            document.getElementById('active-question-counter').innerText = `${current} / ${total}`;
+
+            const progressBar = document.getElementById('quiz-progress-bar');
+            if (progressBar) {
+                progressBar.style.width = `${(current / total) * 100}%`;
+            }
             
-            // Satır sonu (\n) ayrımını korumak için innerHTML veya düzgün text formatı kullanalım
             document.getElementById('quiz-display-word').innerHTML = q.word.replace(/\n/g, '<br>');
 
             const container = document.getElementById('quiz-options-container');
             container.innerHTML = '';
 
-            q.options.forEach(option => {
+            const optionLabels = ['A', 'B', 'C', 'D', 'E', 'F'];
+            q.options.forEach((option, idx) => {
                 const btn = document.createElement('button');
-                // Premium Buzlu Cam Seçenek Butonu
-                btn.className = "w-full py-3.5 px-4 rounded-xl theme-text-main text-xs font-bold transition-all text-left flex justify-between items-center cursor-pointer active:scale-[0.98] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] backdrop-blur-md";
-                btn.innerHTML = `<span>${option}</span> <i data-lucide="chevron-right" class="w-4 h-4 theme-text-muted"></i>`;
+                btn.type = 'button';
+                btn.className = 'lisani-glass-panel lisani-quiz-option w-full py-3 px-3.5 rounded-xl theme-text-main text-xs font-bold transition-all text-left flex items-center gap-3 cursor-pointer active:scale-[0.98]';
+                btn.innerHTML = `
+                    <span class="lisani-quiz-option__letter">${optionLabels[idx] || '•'}</span>
+                    <span class="flex-1 min-w-0 leading-relaxed">${option}</span>
+                    <i data-lucide="chevron-right" class="w-4 h-4 theme-text-muted shrink-0 opacity-60"></i>`;
                 btn.onclick = () => selectQuizOption(option, q.answer, btn);
                 container.appendChild(btn);
             });
@@ -935,21 +1283,19 @@
             allButtons.forEach(b => b.disabled = true);
 
             if (selected === correct) {
-                // glass-emerald sınıfı eklendi
-                btn.className = "w-full py-3.5 px-4 glass-emerald rounded-xl text-emerald-400 text-xs font-black transition-all text-left flex justify-between items-center";
+                btn.className = 'lisani-quiz-option lisani-quiz-option--correct w-full py-3 px-3.5 rounded-xl text-xs font-black transition-all text-left flex items-center gap-3';
                 
-                feedback.className = "rounded-xl p-3.5 text-center text-xs font-bold bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 backdrop-blur-md";
-                feedback.innerHTML = "Harika Başarı! 🌿 Bilgileriniz pekişiyor, yeni bir soruyu başarıyla çözdünüz! +10 XP";
+                feedback.className = 'lisani-quiz-feedback lisani-quiz-feedback--ok rounded-xl p-3.5 text-center text-[11px] font-bold';
+                feedback.innerHTML = 'Harika! 🌿 Doğru cevap · +10 XP';
                 activeCorrects++;
                 totalScore += 10;
                 updateUIPoints();
                 updateLearningStats();
             } else {
-                // glass-rose sınıfı eklendi
-                btn.className = "w-full py-3.5 px-4 glass-rose rounded-xl text-red-400 text-xs font-black transition-all text-left flex justify-between items-center";
+                btn.className = 'lisani-quiz-option lisani-quiz-option--wrong w-full py-3 px-3.5 rounded-xl text-xs font-black transition-all text-left flex items-center gap-3';
                 
-                feedback.className = "rounded-xl p-3.5 text-center text-xs font-bold bg-red-500/10 border border-red-500/30 text-red-400 backdrop-blur-md";
-                feedback.innerHTML = `Yeni Bir Öğrenim! 📈 Hatalar en iyi öğrenme fırsatıdır. Doğru yanıt: <strong>${correct}</strong>`;
+                feedback.className = 'lisani-quiz-feedback lisani-quiz-feedback--bad rounded-xl p-3.5 text-center text-[11px] font-bold';
+                feedback.innerHTML = `Yanlış 📈 Doğru cevap: <strong>${correct}</strong>`;
                 activeWrongs++;
             }
 
@@ -993,17 +1339,33 @@
             } catch (e) {}
 
             // Sonuçları Sonuç Paneline Çiz
-            document.getElementById('result-correct-count').innerText = `${activeCorrects} Doğru`;
-            document.getElementById('result-wrong-count').innerText = `${activeWrongs} Yanlış`;
-            document.getElementById('result-percent').innerText = `%${successPercent} Başarı`;
+            document.getElementById('result-correct-count').innerText = String(activeCorrects);
+            document.getElementById('result-wrong-count').innerText = String(activeWrongs);
             
             const pctEl = document.getElementById('result-percent');
-            if (successPercent >= 80) {
-                pctEl.className = "font-black text-emerald-400 text-sm";
-            } else if (successPercent >= 60) {
-                pctEl.className = "font-black text-blue-400 text-sm";
-            } else {
-                pctEl.className = "font-black text-amber-450 text-sm";
+            pctEl.innerText = `%${successPercent}`;
+            
+            const ringFill = document.getElementById('result-score-ring-fill');
+            if (ringFill) {
+                const circumference = 2 * Math.PI * 42;
+                const offset = circumference - (successPercent / 100) * circumference;
+                ringFill.style.strokeDasharray = `${circumference}`;
+                ringFill.style.strokeDashoffset = `${offset}`;
+            }
+
+            const scoreRing = document.getElementById('result-score-ring');
+            if (scoreRing) {
+                scoreRing.classList.remove('is-good', 'is-mid', 'is-low');
+                if (successPercent >= 80) {
+                    scoreRing.classList.add('is-good');
+                    pctEl.className = 'lisani-quiz-score-ring__pct text-emerald-400';
+                } else if (successPercent >= 60) {
+                    scoreRing.classList.add('is-mid');
+                    pctEl.className = 'lisani-quiz-score-ring__pct text-blue-400';
+                } else {
+                    scoreRing.classList.add('is-low');
+                    pctEl.className = 'lisani-quiz-score-ring__pct text-amber-400';
+                }
             }
 
             document.getElementById('quiz-active-view').classList.add('hidden');
@@ -1042,17 +1404,16 @@
             if (!currentUser) return;
 
             document.getElementById('edit-profile-username').value = currentUser.name;
-            document.getElementById('edit-profile-birthdate').value = currentUser.birthdate || '';
             document.getElementById('edit-profile-email').value = currentUser.email;
 
             const preview = document.getElementById('edit-avatar-preview');
             editAvatarValue = currentUser.avatar;
-            applyAvatarToContainer(preview, normalizeAvatarValue(currentUser.avatar));
+            applyAvatarToContainer(preview, normalizeAvatarValue(currentUser.avatar, currentUser.uid));
 
             document.querySelectorAll('.edit-avatar-option').forEach(btn => {
                 btn.classList.remove('selected');
                 const val = btn.getAttribute('data-avatar-value');
-                if (val && val === normalizeAvatarValue(currentUser.avatar)) {
+                if (val && val === normalizeAvatarValue(currentUser.avatar, currentUser.uid)) {
                     btn.classList.add('selected');
                 }
             });
@@ -1067,6 +1428,17 @@
 
         function openKariyerModu() {
             playClickSound();
+            if (window.LisaniTennisOnline?.resetKariyerPanels) {
+                window.LisaniTennisOnline.resetKariyerPanels();
+            } else {
+                document.getElementById('career-intro-wrapper')?.classList.remove('hidden');
+                document.getElementById('kariyer-tennis-online-block')?.classList.add('hidden');
+                document.getElementById('tennis-game-container')?.classList.add('hidden');
+                document.getElementById('flappy-game-container')?.classList.add('hidden');
+                document.getElementById('gokhan-abi-block')?.classList.add('hidden');
+            }
+            if (window.LisaniFlappy?.stop) window.LisaniFlappy.stop();
+            if (window.LisaniGokhanEaster?.stopAudio) window.LisaniGokhanEaster.stopAudio();
             document.getElementById('kariyer-modal-container').classList.remove('hidden');
             lucide.createIcons();
         }
@@ -1074,47 +1446,180 @@
         function closeKariyerModu() {
             playClickSound();
             stopTennisGame();
+            if (window.LisaniFlappy?.stop) window.LisaniFlappy.stop();
+            if (window.LisaniGokhanEaster?.stopAudio) window.LisaniGokhanEaster.stopAudio();
+            if (window.LisaniTennisOnline) {
+                window.LisaniTennisOnline.stop(false);
+            }
             document.getElementById('kariyer-modal-container').classList.add('hidden');
-            
-            // Kariyer görünümünü varsayılan duruma sıfırla
+
             document.getElementById('career-intro-wrapper').classList.remove('hidden');
+            document.getElementById('kariyer-tennis-online-block')?.classList.add('hidden');
             document.getElementById('tennis-game-container').classList.add('hidden');
+            document.getElementById('flappy-game-container')?.classList.add('hidden');
+            document.getElementById('gokhan-abi-block')?.classList.add('hidden');
         }
 
-        // --- 🎾 GİZLİ TENİS OYUNU KİLİT DURUMU (localStorage ile kalıcı) ---
+        // --- 🎾 GİZLİ TENİS OYUNU KİLİT DURUMU (sunucu + kullanıcı bazlı localStorage) ---
         let tennisUnlocked = false;
-        try { tennisUnlocked = localStorage.getItem('lisani_tennis_unlocked') === '1'; } catch (e) {}
 
-        // --- KARİYER MODU TEK / ÇİFT TIKLAMA YÖNETİMİ ---
+        window.getTennisUnlocked = function () {
+            return tennisUnlocked;
+        };
+
+        function tennisUnlockStorageKey(uid) {
+            return uid ? `lisani_tennis_unlocked_${uid}` : 'lisani_tennis_unlocked';
+        }
+
+        function applyTennisUnlockUI(unlocked) {
+            const badge = document.getElementById('tennis-unlock-badge');
+            if (badge) badge.classList.toggle('hidden', !unlocked);
+            const form = document.getElementById('tennis-secret-form');
+            const hint = document.getElementById('tennis-secret-hint');
+            const msg = document.getElementById('tennis-unlocked-msg');
+            if (form) form.classList.toggle('hidden', unlocked);
+            if (hint) hint.classList.toggle('hidden', unlocked);
+            if (msg) msg.classList.toggle('hidden', !unlocked);
+        }
+
+        function setTennisUnlockState(unlocked, uid) {
+            tennisUnlocked = !!unlocked;
+            const key = tennisUnlockStorageKey(uid);
+            try {
+                if (unlocked) localStorage.setItem(key, '1');
+                else localStorage.removeItem(key);
+            } catch (e) {}
+            applyTennisUnlockUI(tennisUnlocked);
+            if (currentUser && (!uid || String(currentUser.uid) === String(uid))) {
+                currentUser.tennisUnlocked = tennisUnlocked;
+                try {
+                    if (localStorage.getItem('lisani_remember_me') === 'true') {
+                        localStorage.setItem('lisani_session_user', JSON.stringify(currentUser));
+                    }
+                } catch (e) {}
+            }
+        }
+
+        function syncTennisUnlockFromUser(user) {
+            if (!user?.uid) return;
+            if (user.tennisUnlocked) {
+                setTennisUnlockState(true, user.uid);
+                return;
+            }
+            try {
+                const local = localStorage.getItem(tennisUnlockStorageKey(user.uid)) === '1';
+                const legacy = localStorage.getItem('lisani_tennis_unlocked') === '1';
+                if (local || legacy) {
+                    setTennisUnlockState(true, user.uid);
+                    if (legacy && window._loginDone && typeof window.apiFetch === 'function') {
+                        window.apiFetch('/api/profile/tennis-unlock', { method: 'POST', body: '{}' }).catch(() => {});
+                    }
+                } else {
+                    setTennisUnlockState(false, user.uid);
+                }
+            } catch (e) {
+                setTennisUnlockState(false, user.uid);
+            }
+        }
+
+        window.syncTennisUnlockFromUser = syncTennisUnlockFromUser;
+
+        // --- KARİYER MODU TEK / ÇİFT / ÜÇ / DÖRT TIKLAMA YÖNETİMİ ---
         let kariyerClickCount = 0;
         let kariyerClickTimer = null;
 
         function handleKariyerModuClick() {
             kariyerClickCount++;
-            if (kariyerClickCount === 1) {
-                kariyerClickTimer = setTimeout(() => {
-                    kariyerClickCount = 0;
-                    // Tek tık -> Standart Kariyer Modu ekranı
-                    openKariyerModu();
-                }, 320);
-            } else if (kariyerClickCount === 2) {
-                clearTimeout(kariyerClickTimer);
+            clearTimeout(kariyerClickTimer);
+
+            if (kariyerClickCount >= 4) {
                 kariyerClickCount = 0;
-                // Çift tık
-                if (tennisUnlocked) {
-                    launchTennisDirectly();
-                } else {
-                    openKariyerModu();
-                    showToast("Tenis oyununu açmak için önce profil bölümündeki şifreyi gir. 🗝️", "info");
-                }
+                launchGokhanAbiEasterEgg();
+                return;
             }
+
+            kariyerClickTimer = setTimeout(() => {
+                const count = kariyerClickCount;
+                kariyerClickCount = 0;
+                if (count === 1) {
+                    openKariyerModu();
+                } else if (count === 2) {
+                    if (tennisUnlocked) {
+                        if (typeof window.openTennisOnlineLobby === 'function') {
+                            window.openTennisOnlineLobby();
+                        } else {
+                            launchTennisDirectly();
+                        }
+                    } else {
+                        openKariyerModu();
+                        showToast("Tenis oyununu açmak için önce profil bölümündeki şifreyi gir. 🗝️", "info");
+                    }
+                } else if (count === 3) {
+                    launchFlappyDirectly();
+                }
+            }, 380);
         }
+
+        function launchGokhanAbiEasterEgg() {
+            playClickSound();
+            stopTennisGame();
+            if (window.LisaniFlappy?.stop) window.LisaniFlappy.stop();
+            if (window.LisaniTennisOnline) window.LisaniTennisOnline.stop(false);
+
+            document.getElementById('kariyer-modal-container').classList.remove('hidden');
+            document.getElementById('career-intro-wrapper')?.classList.add('hidden');
+            document.getElementById('kariyer-tennis-online-block')?.classList.add('hidden');
+            document.getElementById('tennis-game-container')?.classList.add('hidden');
+            document.getElementById('flappy-game-container')?.classList.add('hidden');
+            document.getElementById('gokhan-abi-block')?.classList.remove('hidden');
+            lucide.createIcons();
+
+            showToast('Gökhan Abi açıldı — kamera ikonuna dokun. 📹', 'success');
+        }
+
+        window.launchGokhanAbiEasterEgg = launchGokhanAbiEasterEgg;
+
+        function launchFlappyDirectly() {
+            playClickSound();
+            stopTennisGame();
+            if (window.LisaniTennisOnline) {
+                window.LisaniTennisOnline.stop(false);
+            }
+            document.getElementById('kariyer-modal-container').classList.remove('hidden');
+            document.getElementById('career-intro-wrapper').classList.add('hidden');
+            document.getElementById('kariyer-tennis-online-block')?.classList.add('hidden');
+            document.getElementById('tennis-game-container')?.classList.add('hidden');
+            document.getElementById('gokhan-abi-block')?.classList.add('hidden');
+            document.getElementById('flappy-game-container')?.classList.remove('hidden');
+            lucide.createIcons();
+            try {
+                const best = parseInt(localStorage.getItem('lisani_flappy_best') || '0', 10) || 0;
+                const bestEl = document.getElementById('flappy-best-score');
+                if (bestEl) bestEl.textContent = 'En iyi: ' + best;
+            } catch (_) { /* ignore */ }
+            showToast("Flappy Bird açıldı! 🐦", "success");
+            setTimeout(() => {
+                if (window.LisaniFlappy?.start) window.LisaniFlappy.start();
+            }, 180);
+        }
+
+        window.launchFlappyDirectly = launchFlappyDirectly;
 
         // --- ANA SAYFADAN DOĞRUDAN TENİS OYUNUNU BAŞLAT ---
         function launchTennisDirectly() {
             playClickSound();
+            if (window.LisaniFlappy?.stop) window.LisaniFlappy.stop();
+            if (window.LisaniTennis) {
+                window.LisaniTennis.setOnlineMode(false, null, '', '');
+            }
+            if (window.LisaniTennisOnline) {
+                window.LisaniTennisOnline.stop(false);
+            }
             document.getElementById('kariyer-modal-container').classList.remove('hidden');
             document.getElementById('career-intro-wrapper').classList.add('hidden');
+            document.getElementById('kariyer-tennis-online-block')?.classList.add('hidden');
+            document.getElementById('flappy-game-container')?.classList.add('hidden');
+            document.getElementById('gokhan-abi-block')?.classList.add('hidden');
             document.getElementById('tennis-game-container').classList.remove('hidden');
             lucide.createIcons();
             showToast("Tenis oyunu başlatıldı! 🎾", "success");
@@ -1128,11 +1633,20 @@
             const entered = (codeField?.value || '').trim();
 
             if (entered === "264506") {
-                tennisUnlocked = true;
-                try { localStorage.setItem('lisani_tennis_unlocked', '1'); } catch (e) {}
-                const badge = document.getElementById('tennis-unlock-badge');
-                if (badge) badge.classList.remove('hidden');
-                codeField.value = '';
+                setTennisUnlockState(true, currentUser?.uid);
+                if (window._loginDone && typeof window.apiFetch === 'function') {
+                    window.apiFetch('/api/profile/tennis-unlock', { method: 'POST', body: '{}' })
+                        .then((data) => {
+                            if (data?.user && typeof window.syncTennisUnlockFromUser === 'function') {
+                                window.syncTennisUnlockFromUser({
+                                    uid: data.user.uid,
+                                    tennisUnlocked: !!data.user.tennisUnlocked,
+                                });
+                            }
+                        })
+                        .catch(() => {});
+                }
+                if (codeField) codeField.value = '';
                 showToast("Şifre doğru! Kariyer Modu'na çift tıklayarak tenis oyununu aç. 🎾", "success");
             } else {
                 showToast("Hatalı şifre.", "error");
@@ -1146,7 +1660,7 @@
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     selectedAvatarType = 'custom';
-                    selectedAvatarValue = `<img src="${e.target.result}" class="w-full h-full object-cover rounded-full" />`;
+                    selectedAvatarValue = `<img src="${e.target.result}" class="lisani-avatar-img" alt="" />`;
                     const preview = document.getElementById('avatar-preview-big');
                     const label = document.getElementById('avatar-preview-label');
                     if (preview) applyAvatarToContainer(preview, selectedAvatarValue);
@@ -1163,7 +1677,7 @@
             if (file) {
                 const reader = new FileReader();
                 reader.onload = function(e) {
-                    editAvatarValue = `<img src="${e.target.result}" class="w-full h-full object-cover rounded-full" />`;
+                    editAvatarValue = `<img src="${e.target.result}" class="lisani-avatar-img" alt="" />`;
                     applyAvatarToContainer(document.getElementById('edit-avatar-preview'), editAvatarValue);
                     highlightAvatarSelection('.edit-avatar-option', '');
                     showToast("Yeni görsel yüklendi. Kaydetmeyi unutmayın.", "success");
@@ -1177,28 +1691,23 @@
             playClickSound();
             
             const nameInput = document.getElementById('edit-profile-username').value.trim();
-            const birthdateInput = document.getElementById('edit-profile-birthdate').value;
             const emailInput = document.getElementById('edit-profile-email').value.trim();
 
-            if (!nameInput || !birthdateInput) {
+            if (!nameInput) {
                 showToast("Lütfen tüm alanları doldurun.", "error");
                 return;
             }
 
-
-            const birthYear = new Date(birthdateInput).getFullYear();
-            const currentYear = new Date().getFullYear();
-            const age = currentYear - birthYear;
-
             currentUser.name = nameInput;
-            currentUser.birthdate = birthdateInput;
             currentUser.email = emailInput;
             currentUser.avatar = editAvatarValue;
-            currentUser.age = age;
 
             document.getElementById('settings-profile-name').innerText = nameInput;
-            document.getElementById('settings-profile-sub').innerHTML = `E-posta: <strong>${emailInput}</strong>`;
+            document.getElementById('settings-profile-sub').innerHTML = getSettingsRoleBadgeHtml(currentUserRole);
             document.getElementById('home-welcome-text').innerText = `Hoş Geldin, ${nameInput}! 👋`;
+            if (typeof window.updateHomeRoleBadge === 'function') {
+                window.updateHomeRoleBadge(currentUserRole);
+            }
 
             const avatarContainers = [
                 document.getElementById('home-avatar-display'),
@@ -1269,7 +1778,7 @@
                 const uid = snap.docs[0].id;
                 await window._auth.signInWithEmailAndPassword(ud.email, passwordInput);
                 window._loginDone = true;
-                const user = { uid, name: ud.name, email: ud.email, avatar: ud.avatar || '🐱', role: ud.role || 'ogrenci', sinif: ud.sinif || null, birthdate: ud.birthdate || '', password: passwordInput };
+                const user = { uid, name: ud.name, email: ud.email, avatar: ud.avatar || '🐱', role: ud.role || 'ogrenci', sinif: ud.sinif || null, password: passwordInput };
                 currentUserRole = ud.role || 'ogrenci';
                 _saveUserLocally(user);
                 hideLoading();
@@ -1285,11 +1794,9 @@
             playClickSound();
             const devUser = {
                 name: "Geliştirici Alp 🛠️",
-                birthdate: "2008-01-01",
                 email: "developer@temrin.ai",
                 password: "dev",
                 avatar: "🛠️",
-                age: 18,
                 role: "hoca"
             };
             currentUserRole = "hoca";
@@ -1324,7 +1831,7 @@
             const nameSafe = name.toLowerCase().replace(/[^a-z0-9]/g, '').substring(0, 15) || 'kullanici';
             const randStr = Math.random().toString(36).substring(2, 8);
             const email = nameSafe + '_' + randStr + '@lisaniecdad.app';
-            const newUser = { uid: 'local_' + Date.now(), name, email, password, avatar: selectedAvatarValue, role, sinif, birthdate: '', totalScore: 0 };
+            const newUser = { uid: 'local_' + Date.now(), name, email, password, avatar: selectedAvatarValue, role, sinif, totalScore: 0 };
             _saveUserLocally(newUser);
             window._loginDone = true;
             currentUserRole = role;
@@ -1365,7 +1872,7 @@
                 const uid = cred.user.uid;
                 await window._db.collection('users').doc(uid).set({
                     name: user.name, email: user.email, avatar: user.avatar,
-                    role, sinif, birthdate: '', totalScore: 0,
+                    role, sinif, totalScore: 0,
                     createdAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
                 if (role === 'hoca') {
@@ -1380,17 +1887,27 @@
             } catch(e) { console.log('Firebase bg:', e.message); }
         }
 
-        function loginSuccess(user, rememberMe = false) {
+        function loginSuccess(user, rememberMe = false, silent = false) {
             currentUser = user;
+            window.currentUser = user;
             currentUserRole = user.role || 'ogrenci';
             window._loginDone = true;
             window._manualLogout = false;
 
-            // Beni hatırla seçildiyse localStorage'a kaydet
             if (rememberMe) {
                 try {
-                    localStorage.setItem('lisani_session_user', JSON.stringify(user));
+                    const sessionPayload = { ...user };
+                    const storedPwd =
+                        user.password ||
+                        (typeof window._resolveStoredPassword === 'function'
+                            ? window._resolveStoredPassword(user.name, sessionPayload)
+                            : '');
+                    if (storedPwd) sessionPayload.password = storedPwd;
+                    localStorage.setItem('lisani_session_user', JSON.stringify(sessionPayload));
                     localStorage.setItem('lisani_remember_me', 'true');
+                    if (localStorage.getItem('lisani_remember_me_pref') !== 'false') {
+                        localStorage.setItem('lisani_remember_me_pref', 'true');
+                    }
                 } catch(e) {}
             } else {
                 try {
@@ -1401,28 +1918,39 @@
             try { localStorage.setItem('lisani_registered_users', JSON.stringify(registeredUsers)); } catch(e) {}
             
             document.getElementById('settings-profile-name').innerText = user.name;
-            const roleBadge = currentUserRole === 'hoca' ? '📚 Hoca' : '🎒 Öğrenci';
-            document.getElementById('settings-profile-sub').innerHTML = roleBadge;
+            document.getElementById('settings-profile-sub').innerHTML = getSettingsRoleBadgeHtml(currentUserRole);
+            if (typeof window.updateHomeRoleBadge === 'function') {
+                window.updateHomeRoleBadge(currentUserRole);
+            }
             
             const avatarContainers = [
                 document.getElementById('home-avatar-display'),
                 document.getElementById('settings-avatar-container')
             ];
             avatarContainers.forEach(container => {
-                applyAvatarToContainer(container, normalizeAvatarValue(user.avatar));
+                applyAvatarToContainer(container, normalizeAvatarValue(user.avatar, user.uid));
             });
+
+            syncTennisUnlockFromUser(user);
 
             document.getElementById('home-welcome-text').innerText = `Hoş Geldin, ${user.name}! 👋`;
             document.getElementById('auth-container').classList.add('hidden');
             document.getElementById('main-application-flow').classList.remove('hidden');
-            
-            showToast("Giriş yapıldı. İyi çalışmalar!", "success");
-            switchTab('home');
-            updateLearningStats();
 
-            if (typeof window.onLoginSuccessHook === 'function') {
-                window.onLoginSuccessHook(user);
-            }
+            const afterLogin = async () => {
+                if (typeof window.onLoginSuccessHook === 'function') {
+                    await window.onLoginSuccessHook(user);
+                } else {
+                    updateLearningStats();
+                }
+                updateTestsTabForRole();
+                updateGelisimScreenForRole();
+                if (!silent) {
+                    showToast("Giriş yapıldı. İyi çalışmalar!", "success");
+                    switchTab('home');
+                }
+            };
+            afterLogin();
         }
 
         async function logoutApp() {
@@ -1430,6 +1958,7 @@
             window._manualLogout = true;
             window._loginDone = false;
             currentUser = null;
+            window.currentUser = null;
             currentUserRole = null;
 
             // Tüm yerel verileri temizle
@@ -1454,6 +1983,7 @@
             document.getElementById('main-application-flow').classList.add('hidden');
             document.getElementById('auth-container').classList.remove('hidden');
             toggleAuthTab('login');
+            if (window.LisaniTennisOnline) window.LisaniTennisOnline.stop(false);
             showToast("Çıkış yapıldı.", "info");
         }
 
@@ -1523,7 +2053,7 @@
                 sinif.ogrenciler.forEach(oid => {
                     const o = allUsers.find(u => u.uid === oid) || { name: '(bilinmiyor)', avatar: '🎒', totalScore: 0 };
                     ogrencilerHTML += `<div class="flex items-center gap-2 py-2 border-b theme-border">
-                        <span class="text-xl">${o.avatar || '🎒'}</span>
+                        ${typeof window.avatarSlotHtml === 'function' ? window.avatarSlotHtml(o.avatar) : `<span class="text-xl">${o.avatar || '🎒'}</span>`}
                         <div class="flex-1"><div class="text-xs font-bold theme-text-main">${o.name}</div></div>
                         <span class="text-xs font-bold text-amber-400">${o.totalScore || 0} XP</span>
                     </div>`;
@@ -1539,9 +2069,6 @@
                     odevlerHTML += `<div class="py-1.5 border-b theme-border"><p class="text-xs theme-text-main">${lbl}</p><p class="text-[10px] theme-text-muted">${o.tarih}</p></div>`;
                 });
             }
-
-            const odevLevelOpts = [1,2,3].map(l => `<option value="${l}">Seviye ${l}</option>`).join('');
-            const odevTestOpts = ['Test 1','Test 2','Test 3','Genel'].map(t => `<option value="${t}">${t}</option>`).join('');
 
             let panel = document.getElementById('hoca-panel-modal');
             if (!panel) { panel = document.createElement('div'); panel.id = 'hoca-panel-modal'; panel.className = 'fixed inset-0 z-50 flex items-end justify-center'; document.body.appendChild(panel); }
@@ -1559,17 +2086,19 @@
                 <div class="mb-4">${ogrencilerHTML}</div>
                 ${odevlerHTML ? `<h3 class="text-xs font-bold theme-text-main mb-2">📋 Son Ödevler</h3><div class="mb-4">${odevlerHTML}</div>` : ''}
                 <h3 class="text-xs font-bold theme-text-main mb-2">📝 Yeni Test Ödevi</h3>
-                <select id="odev-level" class="w-full mb-2 p-2.5 rounded-xl border theme-border bg-stone-900 theme-text-main text-xs">${odevLevelOpts}</select>
-                <select id="odev-test" class="w-full mb-2 p-2.5 rounded-xl border theme-border bg-stone-900 theme-text-main text-xs">${odevTestOpts}</select>
-                <button onclick="odevVer('${uid}')" class="w-full py-2.5 theme-primary-btn rounded-xl text-xs font-bold">Test Ödevi Gönder</button>
+                <p class="text-[10px] theme-text-muted mb-3">Aşağıdan seviye ve test seçerek ödev gönderin.</p>
+                <div id="odev-test-picker" data-hoca-uid="${uid}"></div>
             </div>`;
+            if (typeof window.initOdevTestPicker === 'function') {
+                window.initOdevTestPicker(uid);
+            }
         }
 
-        function odevVer(hocaUid) {
+        function odevVer(hocaUid, levelArg, testArg) {
             const levelEl = document.getElementById('odev-level');
             const testEl = document.getElementById('odev-test');
-            const level = levelEl ? parseInt(levelEl.value, 10) : 0;
-            const test = testEl ? testEl.value : '';
+            const level = levelArg || (levelEl ? parseInt(levelEl.value, 10) : 0);
+            const test = testArg || (testEl ? testEl.value : '');
             if (!level || !test) { showToast("Lütfen seviye ve test seçin.", "error"); return; }
             const sinif = _getLocalSinif(hocaUid) || _initSinif(hocaUid);
             sinif.odevler.push({
@@ -1653,7 +2182,7 @@
                 </div>
                 <p class="text-xs theme-text-muted mb-3">Hocanızdan aldığınız 8 haneli sınıf kodunu girin:</p>
                 <input id="sinif-kod-input" type="text" maxlength="8" placeholder="ÖRN: AB1C2D3E" class="w-full p-3 rounded-xl border theme-border theme-card-bg theme-text-main text-sm font-mono font-bold uppercase focus:outline-none mb-3">
-                <button onclick="sinifaKatil(document.getElementById('sinif-kod-input').value)" class="w-full py-3 theme-primary-btn rounded-xl text-xs font-bold">Katıl</button>
+                <button onclick="sinifaKatil(document.getElementById('sinif-kod-input').value)" class="lisani-glass-action lisani-glass-action--primary w-full py-3 rounded-xl text-xs font-bold">Katıl</button>
             </div>`;
         }
 
@@ -1718,11 +2247,24 @@
 
         let currentActiveScreen = 'home';
         function switchTab(screenId) {
+            if (!screenId || screenId === currentActiveScreen) return;
+
+            if (screenId === 'ai' && canTrackStudents()) {
+                if (typeof window.openHocaDashboard === 'function') {
+                    window.openHocaDashboard();
+                    return;
+                }
+            }
+
+            if (screenId === 'tests' && canTrackStudents()) {
+                screenId = 'hoca-dashboard';
+            }
+
             playClickSound();
             currentActiveScreen = screenId;
-            
+
             const screens = document.querySelectorAll('.screen');
-            screens.forEach(screen => {
+            screens.forEach((screen) => {
                 screen.classList.remove('active');
             });
 
@@ -1732,10 +2274,26 @@
             }
 
             if (screenId === 'ai') {
+                updateGelisimScreenForRole();
                 renderProgressChart();
                 renderQuizHistoryList();
                 if (testHistory.length > 0) {
                     showTrialDetail(testHistory[testHistory.length - 1].id);
+                }
+                if (typeof window.loadProgressFromServer === 'function') {
+                    window.loadProgressFromServer();
+                }
+            }
+
+            if (screenId === 'hoca-dashboard') {
+                if (canTrackStudents()) {
+                    if (typeof window.loadHocaDashboard === 'function') {
+                        window.loadHocaDashboard(true);
+                    } else if (typeof window.loadHocaProgressView === 'function') {
+                        window.loadHocaProgressView(true);
+                    }
+                } else if (typeof switchTab === 'function') {
+                    switchTab('home');
                 }
             }
 
@@ -1744,14 +2302,21 @@
                 document.getElementById('quiz-active-view').classList.add('hidden');
                 document.getElementById('quiz-result-view').classList.add('hidden');
                 document.getElementById('level-selection-view').classList.remove('hidden');
+                updateTestsTabForRole();
             }
 
             if (screenId === 'settings') {
                 updateLearningStats();
             }
 
-            const tabIds = ['ai', 'tests', 'home', 'letters', 'settings'];
-            tabIds.forEach(id => {
+            const screensContainer = document.getElementById('screens-container');
+            if (screensContainer) {
+                screensContainer.classList.toggle('lisani-screens--letters-only', screenId === 'letters');
+                screensContainer.classList.toggle('lisani-screens--hoca-dash', screenId === 'hoca-dashboard');
+            }
+
+            const tabIds = ['ai', 'tests', 'hoca-dashboard', 'home', 'letters', 'settings'];
+            tabIds.forEach((id) => {
                 const tabBtn = document.getElementById(`tab-${id}`);
                 if (!tabBtn) return;
 
@@ -1789,6 +2354,8 @@
                 }
             }
         }
+
+        window.switchTab = switchTab;
 
         // GÜNÜN HADİSLERİ VERİ TABANI
         const hadisList = [
@@ -1830,7 +2397,7 @@
 
         // Detay analizi kartına geçmiş sınavı yükler
         function showTrialDetail(id) {
-            const deneme = testHistory.find(d => d.id === id);
+            const deneme = getDisplayProgressHistory().find((d) => d.id === id);
             if (!deneme) return;
 
             const detailCard = document.getElementById('selected-trial-detail-card');
@@ -1859,16 +2426,18 @@
             const detailCard = document.getElementById('selected-trial-detail-card');
             if (!listEl) return;
 
+            const history = getDisplayProgressHistory();
             listEl.innerHTML = '';
-            countEl.innerText = `Toplam: ${testHistory.length} Sınav`;
+            countEl.innerText = `Toplam: ${history.length} Sınav`;
 
             // Hiç test çözülmemişse boş durum mesajı göster ve detay kartını gizle
-            if (testHistory.length === 0) {
+            if (history.length === 0) {
                 if (detailCard) detailCard.classList.add('hidden');
+                const emptyMsg = 'Henüz çözülen sınav yok';
                 listEl.innerHTML = `
                     <div class="flex flex-col items-center justify-center py-8 text-center space-y-2">
                         <i data-lucide="clipboard-list" class="w-8 h-8 theme-text-muted opacity-50"></i>
-                        <p class="text-[11px] theme-text-muted font-bold">Henüz çözülen sınav yok</p>
+                        <p class="text-[11px] theme-text-muted font-bold">${emptyMsg}</p>
                         <p class="text-[10px] theme-text-muted opacity-70">Test çözdükçe sonuçların burada listelenecek</p>
                     </div>
                 `;
@@ -1876,9 +2445,9 @@
                 return;
             }
 
-            testHistory.slice().reverse().forEach(record => {
+            history.slice().reverse().forEach(record => {
                 const row = document.createElement('div');
-                row.className = "flex items-center justify-between p-3.5 theme-light-bg border theme-border rounded-xl cursor-pointer hover:opacity-90 active:scale-[0.99] transition-all";
+                row.className = "lisani-glass-panel lisani-glass-history-row";
                 row.onclick = () => {
                     playClickSound();
                     showTrialDetail(record.id);
@@ -1904,6 +2473,7 @@
         function renderProgressChart() {
             const svg = document.getElementById('progress-svg-chart');
             if (!svg) return;
+            const history = getDisplayProgressHistory();
             svg.innerHTML = `
                 <defs>
                     <linearGradient id="chart-area-grad" x1="0" y1="0" x2="0" y2="1">
@@ -1913,12 +2483,13 @@
                 </defs>
             `;
 
-            if (testHistory.length === 0) {
-                svg.innerHTML += `<text x="250" y="130" fill="var(--theme-text-muted)" font-size="14" font-weight="bold" text-anchor="middle">Henüz tamamlanan test yok</text>`;
+            if (history.length === 0) {
+                const emptyText = 'Henüz tamamlanan test yok';
+                svg.innerHTML += `<text x="250" y="130" fill="var(--theme-text-muted)" font-size="14" font-weight="bold" text-anchor="middle">${emptyText}</text>`;
                 return;
             }
 
-            const pointsCount = testHistory.length;
+            const pointsCount = history.length;
             const maxScore = 100; 
             const width = 500; 
             const height = 260; 
@@ -1960,7 +2531,7 @@
             });
 
             let pointsArray = [];
-            testHistory.forEach((record, idx) => {
+            history.forEach((record, idx) => {
                 const x = pointsCount > 1 ? marginL + (idx / (pointsCount - 1)) * usableW : marginL + usableW / 2;
                 const percent = record.score / maxScore;
                 const y = bottomY - percent * usableH;
@@ -2066,41 +2637,133 @@
         // --- HARFLER KILAVUZU MODÜLÜ ---
         const alphabet = [
             { name: 'Elif', ar: 'ا', sounds: 'A, E, I, İ', desc: 'Kelime başında ince seslilerde E, kalın seslilerde A sesi verir. Kendisinden sonraki harfe birleşmez.', f1: 'ا', f2: 'اـ', f3: 'ـاـ', f4: 'ـا' },
-            { name: 'Be', ar: 'ب', sounds: 'B', desc: 'Türkçe kelimelerde bazen P sesine dönüşebilir.', f1: 'ب', f2: 'بـ', f3: 'ـbـ', f4: 'ـب' },
-            { name: 'Pe', ar: 'پ', sounds: 'P', desc: 'Osmanlıca ve Farsçaya özgü üç noktalı harftir.', f1: 'پ', f2: 'پـ', f3: 'ـpـ', f4: 'ـp' },
-            { name: 'Te', ar: 'ت', sounds: 'T', desc: 'Yumuşak t sesini verir.', f1: 'ت', f2: 'تـ', f3: 'ـtـ', f4: 'ـت' },
+            { name: 'Be', ar: 'ب', sounds: 'B', desc: 'Türkçe kelimelerde bazen P sesine dönüşebilir.', f1: 'ب', f2: 'بـ', f3: 'ـبـ', f4: 'ـب' },
+            { name: 'Pe', ar: 'پ', sounds: 'P', desc: 'Osmanlıca ve Farsçaya özgü üç noktalı harftir.', f1: 'پ', f2: 'پـ', f3: 'ـپـ', f4: 'ـپ' },
+            { name: 'Te', ar: 'ت', sounds: 'T', desc: 'Yumuşak t sesini verir.', f1: 'ت', f2: 'تـ', f3: 'ـتـ', f4: 'ـت' },
             { name: 'Se', ar: 'ث', sounds: 'S (Pelte)', desc: 'Arapça kökenli kelimelerde peltek "S" sesini temsil eder.', f1: 'ث', f2: 'ثـ', f3: 'ـثـ', f4: 'ـث' },
             { name: 'Cim', ar: 'ج', sounds: 'C', desc: 'Standart c sesini karşılar.', f1: 'ج', f2: 'جـ', f3: 'ـجـ', f4: 'ـج' },
             { name: 'Çim', ar: 'چ', sounds: 'Ç', desc: 'Türkçe ve Farsça kelimeler için üretilen üç noktalı Ç harfidir.', f1: 'چ', f2: 'چـ', f3: 'ـچـ', f4: 'ـچ' },
-            { name: 'Ha', ar: 'ح', sounds: 'H', desc: 'Boğazdan çıkarılan kalın "H" sesidir.', f1: 'ح', h2: 'حـ', f3: 'ـحـ', f4: 'ـح' },
+            { name: 'Ha', ar: 'ح', sounds: 'H', desc: 'Boğazdan çıkarılan kalın "H" sesidir.', f1: 'ح', f2: 'حـ', f3: 'ـحـ', f4: 'ـح' },
             { name: 'Hı', ar: 'خ', sounds: 'H (Hırıltılı)', desc: 'Gırtlaktan hırıldatılarak okunan kalın h sesidir.', f1: 'خ', f2: 'خـ', f3: 'ـخـ', f4: 'ـخ' },
-            { name: 'Dal', ar: 'د', sounds: 'D', desc: 'Kendinden sonraki harfle birleşmez.', f1: 'د', f2: 'د', f3: 'ـd', f4: 'ـd' },
+            { name: 'Dal', ar: 'د', sounds: 'D', desc: 'Kendinden sonraki harfle birleşmez.', f1: 'د', f2: 'د', f3: 'ـد', f4: 'ـد' },
             { name: 'Zel', ar: 'ذ', sounds: 'Z (Pelte)', desc: 'Peltek Z sesidir. Kendisinden sonraki harfe birleşmez.', f1: 'ذ', f2: 'ذ', f3: 'ـذ', f4: 'ـذ' },
-            { name: 'Rı', ar: 'ر', sounds: 'R', desc: 'Standart r sesidir. Kendisinden sonraki harfe birleşmez.', f1: 'ر', f2: 'ر', f3: 'ـr', f4: 'ـr' },
-            { name: 'Ze', ar: 'ز', sounds: 'Z', desc: 'Sert z sesidir. Kendisinden sonraki harfe birleşmez.', f1: 'ز', f2: 'ز', f3: 'ـz', f4: 'ـz' },
+            { name: 'Rı', ar: 'ر', sounds: 'R', desc: 'Standart r sesidir. Kendisinden sonraki harfe birleşmez.', f1: 'ر', f2: 'ر', f3: 'ـر', f4: 'ـر' },
+            { name: 'Ze', ar: 'ز', sounds: 'Z', desc: 'Sert z sesidir. Kendisinden sonraki harfe birleşmez.', f1: 'ز', f2: 'ز', f3: 'ـز', f4: 'ـز' },
             { name: 'Je', ar: 'ژ', sounds: 'J', desc: 'Üç noktalı rı harfidir. Kendisinden sonraki harfe birleşmez.', f1: 'ژ', f2: 'ژ', f3: 'ـژ', f4: 'ـژ' },
-            { name: 'Sin', ar: 'س', sounds: 'S', desc: 'İnce sesli kelimelerde S sesini karşılar.', f1: 'س', f2: 'سـ', f3: 'ـsـ', f4: 'ـs' },
-            { name: 'Şın', ar: 'ش', sounds: 'Ş', desc: 'Standart ş sesini karşılar.', f1: 'ش', f2: 'شـ', f3: 'ـşـ', f4: 'ـş' },
+            { name: 'Sin', ar: 'س', sounds: 'S', desc: 'İnce sesli kelimelerde S sesini karşılar.', f1: 'س', f2: 'سـ', f3: 'ـسـ', f4: 'ـس' },
+            { name: 'Şın', ar: 'ش', sounds: 'Ş', desc: 'Standart ş sesini karşılar.', f1: 'ش', f2: 'شـ', f3: 'ـشـ', f4: 'ـش' },
             { name: 'Sad', ar: 'ص', sounds: 'S (Kalın)', desc: 'Kalın sesli kelimelerde "S" sesini temsil eder.', f1: 'ص', f2: 'صـ', f3: 'ـصـ', f4: 'ـص' },
             { name: 'Dad', ar: 'ض', sounds: 'D, Z', desc: 'Arapça kökenli kelimelere özel kalın bir sestir.', f1: 'ض', f2: 'ضـ', f3: 'ـضـ', f4: 'ـض' },
             { name: 'Tı', ar: 'ط', sounds: 'T (Kalın)', desc: 'Kalın sesli kelimelerde "T" ve bazen "D" sesini verir.', f1: 'ط', f2: 'طـ', f3: 'ـطـ', f4: 'ـط' },
-            { name: 'Zı', ar: 'ظ', sounds: 'Z (Kalın)', desc: 'Kalın sesli kelimelerde kalın ve tok "Z" sesini temsil eder.', f1: 'ظ', f2: 'ظـ', f3: 'ـطـ', f4: 'ـط' },
+            { name: 'Zı', ar: 'ظ', sounds: 'Z (Kalın)', desc: 'Kalın sesli kelimelerde kalın ve tok "Z" sesini temsil eder.', f1: 'ظ', f2: 'ظـ', f3: 'ـظـ', f4: 'ـظ' },
             { name: 'Ayın', ar: 'ع', sounds: 'A, E, I, İ, O, Ö, U, Ü', desc: 'Boğazdan gelen bir gırtlak sesidir.', f1: 'ع', f2: 'عـ', f3: 'ـعـ', f4: 'ـع' },
             { name: 'Gayın', ar: 'غ', sounds: 'Ğ, G', desc: 'Kalın sesli kelimelerde yumuşak g veya kalın g sesini verir.', f1: 'غ', f2: 'غـ', f3: 'ـغـ', f4: 'ـغ' },
-            { name: 'Fe', ar: 'ف', sounds: 'F', desc: 'Standart f sesini karşılar.', f1: 'ف', f2: 'فـ', f3: 'ـfـ', f4: 'ـf' },
+            { name: 'Fe', ar: 'ف', sounds: 'F', desc: 'Standart f sesini karşılar.', f1: 'ف', f2: 'فـ', f3: 'ـفـ', f4: 'ـف' },
             { name: 'Kaf', ar: 'ق', sounds: 'K (Kalın)', desc: 'Kalın sesli kelimelerde gırtlaktan çıkan tok K sesini verir.', f1: 'ق', f2: 'قـ', f3: 'ـقـ', f4: 'ـق' },
             { name: 'Kef', ar: 'ك', sounds: 'K (İnce)', desc: 'İnce sesli kelimelerde ince K sesini karşılar.', f1: 'ك', f2: 'كـ', f3: 'ـكـ', f4: 'ـك' },
             { name: 'Gef', ar: 'گ', sounds: 'G', desc: 'Türkçe ve Farsçadaki yumuşak G/G sesleri için kullanılır.', f1: 'گ', f2: 'گـ', f3: 'ـگـ', f4: 'ـگ' },
             { name: 'Nef (Sağır Nun)', ar: 'ڭ', sounds: 'N, Ñ', desc: 'Genizden çıkan n (nazal n) sesidir. Türkçeye özeldir.', f1: 'ڭ', f2: 'ڭـ', f3: 'ـڭـ', f4: 'ـڭ' },
-            { name: 'Lam', ar: 'ل', sounds: 'L', desc: 'Standart l sesini temsil eder.', f1: 'ل', f2: 'لـ', f3: 'ـllـ', f4: 'ـل' },
-            { name: 'Mim', ar: 'م', sounds: 'M', desc: 'Standart m sesini temsil eder.', f1: 'م', f2: 'مـ', f3: 'ـmـ', f4: 'ـm' },
-            { name: 'Nun', ar: 'ن', sounds: 'N', desc: 'Standart n sesini temsil eder.', f1: 'ن', f2: 'نـ', f3: 'ـnـ', f4: 'ـn' },
+            { name: 'Lam', ar: 'ل', sounds: 'L', desc: 'Standart l sesini temsil eder.', f1: 'ل', f2: 'لـ', f3: 'ـلـ', f4: 'ـل' },
+            { name: 'Mim', ar: 'م', sounds: 'M', desc: 'Standart m sesini temsil eder.', f1: 'م', f2: 'مـ', f3: 'ـمـ', f4: 'ـم' },
+            { name: 'Nun', ar: 'ن', sounds: 'N', desc: 'Standart n sesini temsil eder.', f1: 'ن', f2: 'نـ', f3: 'ـنـ', f4: 'ـن' },
             { name: 'Vav', ar: 'و', sounds: 'V, O, Ö, U, Ü', desc: 'Hem ünsüz hem ünlü harf görevindedir. Birleşmez.', f1: 'و', f2: 'و', f3: 'ـو', f4: 'ـو' },
             { name: 'He', ar: 'ه', sounds: 'H, E, A', desc: 'Kelime sonunda gelince e veya a sesi verir.', f1: 'ه', f2: 'هـ', f3: 'ـهـ', f4: 'ـه' },
-            { name: 'Lamelif', ar: 'لا', sounds: 'La', desc: 'Lam ve Elif harflerinin birleşiminden oluşan özel harf.', f1: 'لا', f2: 'لا', f3: 'ـla', f4: 'ـla' },
+            { name: 'Lamelif', ar: 'لا', sounds: 'La', desc: 'Lam ve Elif harflerinin birleşiminden oluşan özel harf.', f1: 'لا', f2: 'لا', f3: 'ـلاـ', f4: 'ـلا' },
             { name: 'Ye', ar: 'ي', sounds: 'Y, I, İ', desc: 'Hem ünsüz hem ünlü harf görevindedir.', f1: 'ي', f2: 'يـ', f3: 'ـيـ', f4: 'ـي' },
             { name: 'Hemze', ar: 'ء', sounds: 'A, E, I, İ', desc: 'Kelime içinde es, kesinti veya ek ünlü seslerini karşılar.', f1: 'ء', f2: 'ء', f3: 'ء', f4: 'ء' }
         ];
+
+        const LETTER_FORM_LABELS = { f1: 'Yalın', f2: 'Başta', f3: 'Ortada', f4: 'Sonda' };
+
+        const LETTER_FORM_EXAMPLES = {
+            Elif: { f1: { ar: 'ا', tr: 'Elif — yalın hal' }, f2: { ar: 'اسم', tr: 'ism — ad' }, f3: { ar: 'دنيا', tr: 'dünyâ — dünya' }, f4: { ar: 'قمرا', tr: 'kamer — ay' } },
+            Be: { f1: { ar: 'ب', tr: 'Be — yalın hal' }, f2: { ar: 'باب', tr: 'bâb — kapı' }, f3: { ar: 'كتاب', tr: 'kitâb — kitap' }, f4: { ar: 'حب', tr: 'hub — sevgi' } },
+            Pe: { f1: { ar: 'پ', tr: 'Pe — yalın hal' }, f2: { ar: 'پدر', tr: 'pedar — baba (Farsça)' }, f3: { ar: 'چپ', tr: 'çep — sol' }, f4: { ar: 'آب', tr: 'âb — su' } },
+            Te: { f1: { ar: 'ت', tr: 'Te — yalın hal' }, f2: { ar: 'تاج', tr: 'tâc — taç' }, f3: { ar: 'كتاب', tr: 'kitâb — kitap' }, f4: { ar: 'بيت', tr: 'beyt — ev, mısra' } },
+            Se: { f1: { ar: 'ث', tr: 'Se — yalın hal' }, f2: { ar: 'ثواب', tr: 'sevâb — ecir' }, f3: { ar: 'مثال', tr: 'mesâl — örnek' }, f4: { ar: 'حارث', tr: 'hâris — çiftçi' } },
+            Cim: { f1: { ar: 'ج', tr: 'Cim — yalın hal' }, f2: { ar: 'جمال', tr: 'cemâl — güzellik' }, f3: { ar: 'مجلس', tr: 'meclis — meclis' }, f4: { ar: 'فرج', tr: 'ferc — ara, fırsat' } },
+            Çim: { f1: { ar: 'چ', tr: 'Çim — yalın hal' }, f2: { ar: 'چراغ', tr: 'çirâğ — lamba' }, f3: { ar: 'آچق', tr: 'açıq — açık' }, f4: { ar: 'گوج', tr: 'göç — göç' } },
+            Ha: { f1: { ar: 'ح', tr: 'Ha — yalın hal' }, f2: { ar: 'حكم', tr: 'hüküm — hüküm' }, f3: { ar: 'صحت', tr: 'sıhhat — sağlık' }, f4: { ar: 'صبح', tr: 'sabah — sabah' } },
+            Hı: { f1: { ar: 'خ', tr: 'Hı — yalın hal' }, f2: { ar: 'خبر', tr: 'haber — haber' }, f3: { ar: 'مخزن', tr: 'mahzen — depo' }, f4: { ar: 'فلخ', tr: 'felah — kurtuluş' } },
+            Dal: { f1: { ar: 'د', tr: 'Dal — yalın hal' }, f2: { ar: 'دين', tr: 'din — din' }, f3: { ar: 'مدرسه', tr: 'medrese — okul' }, f4: { ar: 'سعاد', tr: 'saâdet — mutluluk' } },
+            Zel: { f1: { ar: 'ذ', tr: 'Zel — yalın hal' }, f2: { ar: 'ذهب', tr: 'zeheb — altın' }, f3: { ar: 'تذكر', tr: 'tezekkür — anma' }, f4: { ar: 'عذر', tr: 'ozr — mazeret' } },
+            Rı: { f1: { ar: 'ر', tr: 'Rı — yalın hal' }, f2: { ar: 'رحمت', tr: 'rahmet — merhamet' }, f3: { ar: 'قرآن', tr: 'Kur\'ân — Kur\'an' }, f4: { ar: 'نور', tr: 'nûr — nur' } },
+            Ze: { f1: { ar: 'ز', tr: 'Ze — yalın hal' }, f2: { ar: 'زمان', tr: 'zamân — zaman' }, f3: { ar: 'مزاج', tr: 'mizâc — mizaç' }, f4: { ar: 'عز', tr: 'izz — izzet' } },
+            Je: { f1: { ar: 'ژ', tr: 'Je — yalın hal' }, f2: { ar: 'ژاله', tr: 'jâle — çiğ' }, f3: { ar: 'پژمرده', tr: 'pürmüre — solmuş' }, f4: { ar: 'مرژ', tr: 'marj — sınır' } },
+            Sin: { f1: { ar: 'س', tr: 'Sin — yalın hal' }, f2: { ar: 'سلام', tr: 'selâm — selam' }, f3: { ar: 'مسجد', tr: 'mescid — cami' }, f4: { ar: 'نفس', tr: 'nefs — nefis' } },
+            Şın: { f1: { ar: 'ش', tr: 'Şın — yalın hal' }, f2: { ar: 'شكر', tr: 'şükr — şükür' }, f3: { ar: 'مشكل', tr: 'müşkül — güç' }, f4: { ar: 'عشق', tr: 'aşk — aşk' } },
+            Sad: { f1: { ar: 'ص', tr: 'Sad — yalın hal' }, f2: { ar: 'صبر', tr: 'sabr — sabır' }, f3: { ar: 'مصطفى', tr: 'Mustafâ — Mustafa' }, f4: { ar: 'ناصر', tr: 'nâsır — yardımcı' } },
+            Dad: { f1: { ar: 'ض', tr: 'Dad — yalın hal' }, f2: { ar: 'ضيف', tr: 'daif — misafir' }, f3: { ar: 'مضمون', tr: 'mezmûn — konu' }, f4: { ar: 'فرض', tr: 'farz — farz' } },
+            Tı: { f1: { ar: 'ط', tr: 'Tı — yalın hal' }, f2: { ar: 'طلب', tr: 'talab — istek' }, f3: { ar: 'مطلوب', tr: 'matlûb — aranan' }, f4: { ar: 'خط', tr: 'hatt — çizgi' } },
+            Zı: { f1: { ar: 'ظ', tr: 'Zı — yalın hal' }, f2: { ar: 'ظهر', tr: 'zuhur — zuhur' }, f3: { ar: 'منظور', tr: 'menzûr — görünür' }, f4: { ar: 'حفظ', tr: 'hıfz — ezber' } },
+            Ayın: { f1: { ar: 'ع', tr: 'Ayın — yalın hal' }, f2: { ar: 'علم', tr: 'ilm — ilim' }, f3: { ar: 'معنی', tr: 'ma\'nâ — anlam' }, f4: { ar: 'سمع', tr: 'sem\' — işitme' } },
+            Gayın: { f1: { ar: 'غ', tr: 'Gayın — yalın hal' }, f2: { ar: 'غلام', tr: 'gulâm — delikanlı' }, f3: { ar: 'مغفر', tr: 'mağfur — bağışlanmış' }, f4: { ar: 'فراغ', tr: 'ferâğ — boşluk' } },
+            Fe: { f1: { ar: 'ف', tr: 'Fe — yalın hal' }, f2: { ar: 'فكر', tr: 'fikr — düşünce' }, f3: { ar: 'مفتاح', tr: 'miftâh — anahtar' }, f4: { ar: 'حرف', tr: 'harf — harf' } },
+            Kaf: { f1: { ar: 'ق', tr: 'Kaf — yalın hal' }, f2: { ar: 'قلم', tr: 'kalem — kalem' }, f3: { ar: 'مقام', tr: 'makâm — makam' }, f4: { ar: 'حق', tr: 'hak — hak' } },
+            Kef: { f1: { ar: 'ك', tr: 'Kef — yalın hal' }, f2: { ar: 'كتاب', tr: 'kitâb — kitap' }, f3: { ar: 'مكتب', tr: 'makteb — yazı odası' }, f4: { ar: 'ملك', tr: 'melik — hükümdar' } },
+            Gef: { f1: { ar: 'گ', tr: 'Gef — yalın hal' }, f2: { ar: 'گل', tr: 'gül — gül' }, f3: { ar: 'آغاج', tr: 'ağaç — ağaç' }, f4: { ar: 'دوست', tr: 'dost — dost' } },
+            'Nef (Sağır Nun)': { f1: { ar: 'ڭ', tr: 'Nef — yalın hal' }, f2: { ar: 'ڭوزل', tr: 'güzel — güzel' }, f3: { ar: 'آڭ', tr: 'an — an' }, f4: { ar: 'قونڭ', tr: 'könüng — hükümdar' } },
+            Lam: { f1: { ar: 'ل', tr: 'Lam — yalın hal' }, f2: { ar: 'ليل', tr: 'leyl — gece' }, f3: { ar: 'علم', tr: 'ilm — ilim' }, f4: { ar: 'جمال', tr: 'cemâl — güzellik' } },
+            Mim: { f1: { ar: 'م', tr: 'Mim — yalın hal' }, f2: { ar: 'مدرسه', tr: 'medrese — okul' }, f3: { ar: 'محمد', tr: 'Muhammed — Muhammed' }, f4: { ar: 'علم', tr: 'ilm — ilim' } },
+            Nun: { f1: { ar: 'ن', tr: 'Nun — yalın hal' }, f2: { ar: 'نور', tr: 'nûr — nur' }, f3: { ar: 'منظر', tr: 'menzara — manzara' }, f4: { ar: 'حسن', tr: 'husn — güzellik' } },
+            Vav: { f1: { ar: 'و', tr: 'Vav — yalın hal' }, f2: { ar: 'ورد', tr: 'verd — gül' }, f3: { ar: 'دنيا', tr: 'dünyâ — dünya' }, f4: { ar: 'هنو', tr: 'henüz — henüz' } },
+            He: { f1: { ar: 'ه', tr: 'He — yalın hal' }, f2: { ar: 'هوا', tr: 'havâ — hava' }, f3: { ar: 'محبه', tr: 'muhabbet — sevgi' }, f4: { ar: 'پاره', tr: 'pâre — parça' } },
+            Lamelif: { f1: { ar: 'لا', tr: 'Lâm-Elif — birleşik harf' }, f2: { ar: 'لاب', tr: 'lâb — kap' }, f3: { ar: 'صلاح', tr: 'salâh — iyilik' }, f4: { ar: 'مولا', tr: 'mevlâ — efendi' } },
+            Ye: { f1: { ar: 'ي', tr: 'Ye — yalın hal' }, f2: { ar: 'يوم', tr: 'yevm — gün' }, f3: { ar: 'حيات', tr: 'hayât — hayat' }, f4: { ar: 'على', tr: 'alâ — üzerine' } },
+            Hemze: { f1: { ar: 'ء', tr: 'Hemze — yalın hal' }, f2: { ar: 'أمة', tr: 'ümmet — ümmet' }, f3: { ar: 'مسئله', tr: 'mesele — mesele' }, f4: { ar: 'قراء', tr: 'kurâ — okuyucular' } },
+        };
+
+        let _letterDetailCurrent = null;
+        let _letterFormHandlersReady = false;
+
+        function getLetterFormExample(letterName, formKey) {
+            const custom = LETTER_FORM_EXAMPLES[letterName]?.[formKey];
+            if (custom) return custom;
+            const letter = alphabet.find((l) => l.name === letterName);
+            if (!letter) return { ar: '—', tr: 'Örnek bulunamadı' };
+            const formChar = letter[formKey] || letter.f1 || letter.ar;
+            return {
+                ar: formChar,
+                tr: `${letter.name} harfi (${LETTER_FORM_LABELS[formKey] || formKey})`,
+            };
+        }
+
+        function showLetterFormExample(letter, formKey, cellEl) {
+            const example = getLetterFormExample(letter.name, formKey);
+            const box = document.getElementById('letter-form-example');
+            const arEl = document.getElementById('letter-example-ar');
+            const trEl = document.getElementById('letter-example-tr');
+            const labelEl = document.getElementById('letter-example-label');
+            if (!box || !arEl || !trEl) return;
+
+            document.querySelectorAll('.lisani-letters-form-cell').forEach((c) => c.classList.remove('is-selected'));
+            if (cellEl) cellEl.classList.add('is-selected');
+
+            if (labelEl) labelEl.textContent = LETTER_FORM_LABELS[formKey] || formKey;
+            arEl.textContent = example.ar;
+            trEl.textContent = example.tr;
+            box.classList.remove('hidden');
+        }
+
+        function initLetterFormHandlers() {
+            if (_letterFormHandlersReady) return;
+            _letterFormHandlersReady = true;
+
+            document.querySelectorAll('.lisani-letters-form-cell[data-form]').forEach((cell) => {
+                const activate = () => {
+                    if (!_letterDetailCurrent) return;
+                    playClickSound();
+                    showLetterFormExample(_letterDetailCurrent, cell.dataset.form, cell);
+                };
+                cell.addEventListener('click', activate);
+                cell.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        activate();
+                    }
+                });
+            });
+        }
 
         // Harfleri filtreleme (YENİ EK ÖZELLİK)
         function handleLettersSearch(event) {
@@ -2123,6 +2786,20 @@
             initLettersGrid();
         }
 
+        function initRememberMeCheckbox() {
+            const cb = document.getElementById('login-remember-me');
+            if (!cb) return;
+            const pref = localStorage.getItem('lisani_remember_me_pref');
+            const activeSession = localStorage.getItem('lisani_remember_me') === 'true';
+            cb.checked = pref !== 'false' || activeSession;
+            if (!cb.dataset.bound) {
+                cb.dataset.bound = '1';
+                cb.addEventListener('change', () => {
+                    localStorage.setItem('lisani_remember_me_pref', cb.checked ? 'true' : 'false');
+                });
+            }
+        }
+
 
         function initLettersGrid(filterQuery = "") {
             const grid = document.getElementById('letters-grid');
@@ -2136,7 +2813,7 @@
 
             if (filteredAlphabet.length === 0) {
                 grid.innerHTML = `
-                    <div class="lisani-letters-empty text-center py-8">
+                    <div class="lisani-letters-empty lisani-glass-panel rounded-2xl text-center py-8">
                         <p class="text-xs theme-text-muted font-bold">Aradığınız harf bulunamadı.</p>
                     </div>
                 `;
@@ -2145,7 +2822,7 @@
             
             filteredAlphabet.forEach((letter) => {
                 const card = document.createElement('div');
-                card.className = "lisani-letter-card theme-card-bg hover:opacity-90 border theme-border rounded-xl p-2 sm:p-2.5 text-center cursor-pointer transition transform hover:-translate-y-0.5 active:scale-95 flex flex-col items-center justify-center gap-0.5 shadow-sm min-h-0";
+                card.className = "lisani-letter-card lisani-glass-panel lisani-glass-card rounded-xl p-2 sm:p-2.5 text-center cursor-pointer transition flex flex-col items-center justify-center gap-0.5 min-h-0";
                 card.onclick = () => {
                     playClickSound();
                     showLetterDetail(letter);
@@ -2161,15 +2838,21 @@
         }
 
         function showLetterDetail(letter) {
+            _letterDetailCurrent = letter;
+            initLetterFormHandlers();
             document.getElementById('letter-detail-card').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
             document.getElementById('detail-title').innerText = `${letter.name} (${letter.ar})`;
             document.getElementById('detail-desc').innerText = letter.desc;
             document.getElementById('detail-arabic').innerText = letter.ar;
-            
+
             document.getElementById('detail-f1').innerText = letter.f1;
             document.getElementById('detail-f2').innerText = letter.f2 || letter.f1;
             document.getElementById('detail-f3').innerText = letter.f3 || letter.f1;
             document.getElementById('detail-f4').innerText = letter.f4 || letter.f1;
+
+            document.querySelectorAll('.lisani-letters-form-cell').forEach((c) => c.classList.remove('is-selected'));
+            const exampleBox = document.getElementById('letter-form-example');
+            if (exampleBox) exampleBox.classList.add('hidden');
         }
 
         // ================= DOKUNMATİK SEKMELER ARASI KAYDIRMA MOTORU (SWIPE) =================
@@ -2178,51 +2861,54 @@
         let touchEndX = 0;
         let touchEndY = 0;
 
+        function isSwipeGestureBlocked() {
+            return (
+                !document.getElementById('quiz-active-view').classList.contains('hidden') ||
+                !document.getElementById('kariyer-modal-container').classList.contains('hidden') ||
+                !document.getElementById('edit-profile-container').classList.contains('hidden') ||
+                !!document.getElementById('wa-mesajlar-overlay')
+            );
+        }
+
+        function getSwipeTabOrder() {
+            return canTrackStudents()
+                ? ['hoca-dashboard', 'home', 'letters', 'settings']
+                : ['ai', 'tests', 'home', 'letters', 'settings'];
+        }
+
         function initSwipeGestures() {
             const container = document.getElementById('screens-container');
-            const tabOrder = ['ai', 'tests', 'home', 'letters', 'settings'];
+            if (!container) return;
 
             container.addEventListener('touchstart', (e) => {
-                // Aktif bir test, kariyer modu, tenis oyunu veya profil düzenleme modalı açıksa kaydırmayı engelle
-                if (!document.getElementById('quiz-active-view').classList.contains('hidden') ||
-                    !document.getElementById('kariyer-modal-container').classList.contains('hidden') ||
-                    !document.getElementById('edit-profile-container').classList.contains('hidden')) {
-                    return;
-                }
-                
+                if (isSwipeGestureBlocked()) return;
+
                 touchStartX = e.changedTouches[0].screenX;
                 touchStartY = e.changedTouches[0].screenY;
             }, { passive: true });
 
             container.addEventListener('touchend', (e) => {
-                if (!document.getElementById('quiz-active-view').classList.contains('hidden') ||
-                    !document.getElementById('kariyer-modal-container').classList.contains('hidden') ||
-                    !document.getElementById('edit-profile-container').classList.contains('hidden')) {
-                    return;
-                }
+                if (isSwipeGestureBlocked()) return;
 
                 touchEndX = e.changedTouches[0].screenX;
                 touchEndY = e.changedTouches[0].screenY;
-                handleSwipeGesture(tabOrder);
+                handleSwipeGesture(getSwipeTabOrder());
             }, { passive: true });
         }
 
         function handleSwipeGesture(tabOrder) {
             const deltaX = touchEndX - touchStartX;
             const deltaY = touchEndY - touchStartY;
-            
-            // Kullanıcının dikey olarak kaydırma niyetinde olmadığını doğrula (Yanlış tetiklemeyi önler)
+
             if (Math.abs(deltaX) > Math.abs(deltaY) * 1.5) {
-                const swipeThreshold = 55; // Piksel cinsinden kaydırma hassasiyeti
+                const swipeThreshold = 55;
                 const currentIdx = tabOrder.indexOf(currentActiveScreen);
 
                 if (deltaX < -swipeThreshold) {
-                    // Sola Kaydırma -> Sonraki Sekme (Örn: home -> letters)
                     if (currentIdx < tabOrder.length - 1) {
                         switchTab(tabOrder[currentIdx + 1]);
                     }
                 } else if (deltaX > swipeThreshold) {
-                    // Sağa Kaydırma -> Önceki Sekme (Örn: home -> tests)
                     if (currentIdx > 0) {
                         switchTab(tabOrder[currentIdx - 1]);
                     }
@@ -2230,279 +2916,762 @@
             }
         }
 
+        function getTennisSurfaceEl() {
+            if (tennisCanvas && !tennisCanvas.classList.contains('hidden')) {
+                return tennisCanvas;
+            }
+            return document.getElementById('tennis-scene-host')
+                || document.getElementById('tennis-canvas');
+        }
+
+        function buildTennisCourtCache() {
+            const off = document.createElement('canvas');
+            off.width = TENNIS_W;
+            off.height = TENNIS_H;
+            const c = off.getContext('2d');
+            if (!c) return null;
+
+            const W = TENNIS_W;
+            const H = TENNIS_H;
+            const margin = 12;
+            const courtW = W - margin * 2;
+            const courtH = H - margin * 2;
+
+            const bg = c.createLinearGradient(0, 0, 0, H);
+            bg.addColorStop(0, '#0f766e');
+            bg.addColorStop(0.35, '#14b8a6');
+            bg.addColorStop(0.65, '#0d9488');
+            bg.addColorStop(1, '#115e59');
+            c.fillStyle = bg;
+            c.fillRect(0, 0, W, H);
+
+            for (let i = 0; i < 14; i++) {
+                c.fillStyle = i % 2 === 0 ? 'rgba(0,0,0,0.04)' : 'rgba(255,255,255,0.03)';
+                c.fillRect(margin, margin + (courtH / 14) * i, courtW, courtH / 14);
+            }
+
+            c.fillStyle = '#134e4a';
+            c.fillRect(margin - 3, margin - 3, courtW + 6, courtH + 6);
+
+            c.strokeStyle = 'rgba(255,255,255,0.92)';
+            c.lineWidth = 2;
+            c.strokeRect(margin, margin, courtW, courtH);
+
+            const midY = H / 2;
+            c.beginPath();
+            c.moveTo(margin, midY);
+            c.lineTo(W - margin, midY);
+            c.stroke();
+
+            const serviceW = courtW * 0.22;
+            c.beginPath();
+            c.moveTo(margin + serviceW, margin);
+            c.lineTo(margin + serviceW, H - margin);
+            c.moveTo(W - margin - serviceW, margin);
+            c.lineTo(W - margin - serviceW, H - margin);
+            c.stroke();
+
+            c.beginPath();
+            c.moveTo(margin, midY - courtH * 0.18);
+            c.lineTo(W - margin, midY - courtH * 0.18);
+            c.moveTo(margin, midY + courtH * 0.18);
+            c.lineTo(W - margin, midY + courtH * 0.18);
+            c.stroke();
+
+            c.fillStyle = 'rgba(255,255,255,0.95)';
+            c.fillRect(W / 2 - 1.5, margin, 3, courtH);
+
+            const netH = 18;
+            c.fillStyle = 'rgba(255,255,255,0.55)';
+            c.fillRect(margin, midY - netH / 2, courtW, 2);
+            c.strokeStyle = 'rgba(255,255,255,0.25)';
+            c.lineWidth = 1;
+            for (let x = margin + 4; x < W - margin; x += 7) {
+                c.beginPath();
+                c.moveTo(x, midY - netH / 2);
+                c.lineTo(x, midY + netH / 2);
+                c.stroke();
+            }
+            c.fillStyle = '#e2e8f0';
+            c.fillRect(margin - 4, midY - netH / 2 - 2, 5, netH + 4);
+            c.fillRect(W - margin - 1, midY - netH / 2 - 2, 5, netH + 4);
+
+            return off;
+        }
+
+        function spawnTennisHitParticles(x, y, color) {
+            for (let i = 0; i < 10; i++) {
+                const angle = (Math.PI * 2 * i) / 10 + Math.random() * 0.4;
+                const speed = 1.2 + Math.random() * 2.8;
+                tennisHitParticles.push({
+                    x,
+                    y,
+                    vx: Math.cos(angle) * speed,
+                    vy: Math.sin(angle) * speed,
+                    life: 1,
+                    color,
+                });
+            }
+        }
+
+        function updateTennisHitParticles(dt) {
+            tennisHitParticles = tennisHitParticles.filter((p) => {
+                p.x += p.vx * dt;
+                p.y += p.vy * dt;
+                p.life -= 0.04 * dt;
+                return p.life > 0;
+            });
+        }
+
+        function drawTennisRacket(ctx, x, y, w, h, fill, accent, isPlayer) {
+            ctx.save();
+            const cx = x + w / 2;
+            const headY = isPlayer ? y : y;
+            const headW = w;
+            const headH = h + 6;
+
+            ctx.fillStyle = 'rgba(0,0,0,0.22)';
+            ctx.beginPath();
+            ctx.ellipse(cx, headY + headH + 3, headW * 0.42, 4, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            const grad = ctx.createLinearGradient(x, y, x + w, y + h);
+            grad.addColorStop(0, fill);
+            grad.addColorStop(0.5, accent);
+            grad.addColorStop(1, fill);
+            ctx.fillStyle = grad;
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = accent;
+
+            if (ctx.roundRect) {
+                ctx.beginPath();
+                ctx.roundRect(x + w * 0.08, headY, headW * 0.84, headH, 10);
+                ctx.fill();
+            } else {
+                ctx.fillRect(x + w * 0.08, headY, headW * 0.84, headH);
+            }
+            ctx.shadowBlur = 0;
+
+            ctx.strokeStyle = 'rgba(255,255,255,0.35)';
+            ctx.lineWidth = 1;
+            for (let i = 1; i < 4; i++) {
+                const lx = x + (w / 4) * i;
+                ctx.beginPath();
+                ctx.moveTo(lx, headY + 3);
+                ctx.lineTo(lx, headY + headH - 3);
+                ctx.stroke();
+            }
+            for (let j = 1; j < 3; j++) {
+                const ly = headY + (headH / 3) * j;
+                ctx.beginPath();
+                ctx.moveTo(x + w * 0.12, ly);
+                ctx.lineTo(x + w * 0.88, ly);
+                ctx.stroke();
+            }
+
+            const handleY = isPlayer ? y + headH : y + headH;
+            ctx.fillStyle = '#78716c';
+            ctx.fillRect(cx - 3, handleY, 6, paddleHandleH);
+            ctx.fillStyle = 'rgba(255,255,255,0.15)';
+            ctx.fillRect(cx - 1, handleY + 1, 2, paddleHandleH - 2);
+            ctx.restore();
+        }
+
         // --- TENİS OYUNU FİZİK VE ÇİZİM MOTORU ---
         function initTennisGameEngine() {
+            const sceneHost = document.getElementById('tennis-scene-host');
             tennisCanvas = document.getElementById('tennis-canvas');
             if (!tennisCanvas) return;
-            
-            tennisCtx = tennisCanvas.getContext('2d');
-            
-            // Canvas piksel boyutlarını sabitleyip css ile esnetelim
-            tennisCanvas.width = 320;
-            tennisCanvas.height = 240;
 
-            // Oyun değişkenlerini sıfırla
+            if (window.LisaniTennis3D?.dispose) {
+                window.LisaniTennis3D.dispose();
+            }
+
+            tennisCtx = tennisCanvas.getContext('2d');
+            if (!tennisCtx) return;
+
+            const dpr = Math.min(window.devicePixelRatio || 1, 2);
+            tennisCanvas.width = TENNIS_W * dpr;
+            tennisCanvas.height = TENNIS_H * dpr;
+            tennisCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            tennisCanvas.classList.remove('hidden');
+            if (sceneHost) {
+                sceneHost.classList.add('hidden');
+                sceneHost.innerHTML = '';
+            }
+
+            tennisCourtCache = buildTennisCourtCache();
             tennisPlayerScore = 0;
             tennisComputerScore = 0;
+            tennisMatchOver = false;
+            tennisPaused = false;
+            tennisRallyHits = 0;
+            tennisBallSpin = 0;
+            tennisBallRotation = 0;
+            tennisHitParticles = [];
+            tennisBotTargetX = null;
+            tennisBotReaction = 0;
+            ballTrail = [];
+            hideTennisOverlay();
+
+            playerPaddleX = (TENNIS_W - paddleWidth) / 2;
+            computerPaddleX = (TENNIS_W - paddleWidth) / 2;
             updateTennisScoreboard();
-
-            ballX = tennisCanvas.width / 2;
-            ballY = tennisCanvas.height / 2;
-            ballSpeedX = 2;
-            ballSpeedY = -2;
-
-            playerPaddleX = (tennisCanvas.width - paddleWidth) / 2;
-            computerPaddleX = (tennisCanvas.width - paddleWidth) / 2;
+            updateTennisPauseBtn();
 
             isTennisRunning = true;
-
-            // Kontrol dinleyicilerini kur
+            tennisLastTime = performance.now();
             setupTennisControls();
+            startTennisServeCountdown();
 
-            // Oyun döngüsünü başlat
             if (tennisLoopId) cancelAnimationFrame(tennisLoopId);
-            tennisLoop();
+            tennisLoop(tennisLastTime);
         }
 
         function setupTennisControls() {
-            // Klavye Dinleyicileri (Bilgisayar)
             window.removeEventListener('keydown', handleTennisKeyDown);
             window.removeEventListener('keyup', handleTennisKeyUp);
             window.addEventListener('keydown', handleTennisKeyDown);
             window.addEventListener('keyup', handleTennisKeyUp);
 
-            // Mobil Ekran Altındaki Sol / Sağ Buton Dokunuşları
             const btnLeft = document.getElementById('btn-paddle-left');
             const btnRight = document.getElementById('btn-paddle-right');
 
             if (btnLeft && btnRight) {
-                // Dokunma (Touch) ve Tıklama (Mouse) Dinleyicileri
                 btnLeft.onmousedown = () => { keyLeftPressed = true; };
                 btnLeft.onmouseup = () => { keyLeftPressed = false; };
+                btnLeft.onmouseleave = () => { keyLeftPressed = false; };
                 btnLeft.ontouchstart = (e) => { e.preventDefault(); keyLeftPressed = true; };
                 btnLeft.ontouchend = (e) => { e.preventDefault(); keyLeftPressed = false; };
+                btnLeft.ontouchcancel = () => { keyLeftPressed = false; };
 
                 btnRight.onmousedown = () => { keyRightPressed = true; };
                 btnRight.onmouseup = () => { keyRightPressed = false; };
+                btnRight.onmouseleave = () => { keyRightPressed = false; };
                 btnRight.ontouchstart = (e) => { e.preventDefault(); keyRightPressed = true; };
                 btnRight.ontouchend = (e) => { e.preventDefault(); keyRightPressed = false; };
+                btnRight.ontouchcancel = () => { keyRightPressed = false; };
             }
 
-            // Canvas Doğrudan Parmağı Sürükleyerek Oynatma (Touch Sürükleme)
-            tennisCanvas.ontouchmove = (e) => {
-                if (!isTennisRunning) return;
+            const movePaddleFromClientX = (clientX) => {
+                if (!isTennisRunning || tennisMatchOver) return;
+                const surface = getTennisSurfaceEl();
+                if (!surface) return;
+                const rect = surface.getBoundingClientRect();
+                const x = ((clientX - rect.left) / rect.width) * TENNIS_W;
+                playerPaddleX = Math.max(0, Math.min(TENNIS_W - paddleWidth, x - paddleWidth / 2));
+            };
+
+            const surface = getTennisSurfaceEl();
+            if (!surface) return;
+
+            surface.onmousedown = (e) => {
+                tennisPointerActive = true;
+                movePaddleFromClientX(e.clientX);
+            };
+            surface.onmouseup = () => { tennisPointerActive = false; };
+            surface.onmouseleave = () => { tennisPointerActive = false; };
+            surface.onmousemove = (e) => {
+                if (tennisPointerActive) movePaddleFromClientX(e.clientX);
+            };
+
+            surface.ontouchstart = (e) => {
                 e.preventDefault();
-                const rect = tennisCanvas.getBoundingClientRect();
-                const touchX = e.touches[0].clientX - rect.left;
-                // Dokunulan X koordinatını canvas ölçeğine dönüştür
-                const canvasTouchX = (touchX / rect.width) * tennisCanvas.width;
-                playerPaddleX = canvasTouchX - (paddleWidth / 2);
-                
-                // Sınırlamalar
-                if (playerPaddleX < 0) playerPaddleX = 0;
-                if (playerPaddleX > tennisCanvas.width - paddleWidth) playerPaddleX = tennisCanvas.width - paddleWidth;
+                tennisPointerActive = true;
+                if (e.touches[0]) movePaddleFromClientX(e.touches[0].clientX);
             };
-
-            // Fare ile Sürükleme (Masaüstü için alternatif)
-            tennisCanvas.onmousemove = (e) => {
-                if (!isTennisRunning) return;
-                const rect = tennisCanvas.getBoundingClientRect();
-                const mouseX = e.clientX - rect.left;
-                const canvasMouseX = (mouseX / rect.width) * tennisCanvas.width;
-                playerPaddleX = canvasMouseX - (paddleWidth / 2);
-
-                if (playerPaddleX < 0) playerPaddleX = 0;
-                if (playerPaddleX > tennisCanvas.width - paddleWidth) playerPaddleX = tennisCanvas.width - paddleWidth;
+            surface.ontouchmove = (e) => {
+                e.preventDefault();
+                if (e.touches[0]) movePaddleFromClientX(e.touches[0].clientX);
             };
+            surface.ontouchend = () => { tennisPointerActive = false; };
         }
 
         function handleTennisKeyDown(e) {
-            if (e.key === "ArrowLeft" || e.key === "Left") {
-                keyLeftPressed = true;
-            } else if (e.key === "ArrowRight" || e.key === "Right") {
-                keyRightPressed = true;
+            if (e.key === 'ArrowLeft') keyLeftPressed = true;
+            else if (e.key === 'ArrowRight') keyRightPressed = true;
+            else if (e.key === ' ' || e.key === 'Spacebar') {
+                e.preventDefault();
+                toggleTennisPause();
             }
         }
 
         function handleTennisKeyUp(e) {
-            if (e.key === "ArrowLeft" || e.key === "Left") {
-                keyLeftPressed = false;
-            } else if (e.key === "ArrowRight" || e.key === "Right") {
-                keyRightPressed = false;
+            if (e.key === 'ArrowLeft') keyLeftPressed = false;
+            else if (e.key === 'ArrowRight') keyRightPressed = false;
+        }
+
+        function toggleTennisPause() {
+            if (!isTennisRunning || tennisMatchOver || tennisCountdown > 0) return;
+            tennisPaused = !tennisPaused;
+            updateTennisPauseBtn();
+            if (!tennisPaused) {
+                tennisLastTime = performance.now();
+                tennisLoop(tennisLastTime);
             }
         }
 
-        function tennisLoop() {
+        function updateTennisPauseBtn() {
+            const btn = document.getElementById('btn-tennis-pause');
+            if (btn) btn.textContent = tennisPaused ? 'Devam' : 'Duraklat';
+        }
+
+        function startTennisServeCountdown() {
+            tennisServeReady = false;
+            ballSpeedX = 0;
+            ballSpeedY = 0;
+            tennisBallSpin = 0;
+            ballX = TENNIS_W / 2;
+            ballY = TENNIS_H * 0.68;
+            tennisCountdown = 3;
+            tennisBotTargetX = null;
+            tennisBotReaction = 0;
+        }
+
+        function launchServe() {
+            tennisServeReady = true;
+            tennisRallyHits = 0;
+            ballTrail = [];
+            const aim = ((playerPaddleX + paddleWidth / 2) / TENNIS_W - 0.5) * 2.2;
+            const base = 2.6 + Math.min(tennisPlayerScore + tennisComputerScore, 6) * 0.1;
+            ballSpeedX = aim + (Math.random() - 0.5) * 0.6;
+            ballSpeedY = -base;
+            tennisBallSpin = aim * 0.35;
+        }
+
+        function tennisLoop(now) {
             if (!isTennisRunning) return;
+            const dt = Math.min((now - tennisLastTime) / 16.67, 2.5);
+            tennisLastTime = now;
 
-            updateTennisGamePhysics();
+            if (!tennisPaused && !tennisMatchOver) {
+                if (tennisCountdown > 0) {
+                    tennisCountdown -= dt * 0.035;
+                    if (tennisCountdown <= 0) {
+                        tennisCountdown = 0;
+                        launchServe();
+                    }
+                } else if (tennisServeReady) {
+                    if (!tennisOnlineMode || tennisOnlineRole === 'host') {
+                        updateTennisGamePhysics(dt);
+                    }
+                }
+            }
+
             drawTennisGameScene();
-
             tennisLoopId = requestAnimationFrame(tennisLoop);
         }
 
-        function updateTennisGamePhysics() {
-            // 1. Oyuncu Raketi Klavye/Buton Hareketi
-            const paddleSpeed = 4.5;
+        function getTennisBotSpeed() {
+            return 2.4 + Math.min(tennisComputerScore, 5) * 0.18;
+        }
+
+        function predictBotTargetX() {
+            if (ballSpeedY >= -0.05) return ballX;
+            const dist = Math.abs(ballY - (paddleHeight + 6));
+            const t = dist / Math.max(Math.abs(ballSpeedY), 0.5);
+            let px = ballX + ballSpeedX * t + tennisBallSpin * t * 0.35;
+            const err = (Math.random() - 0.5) * (28 - Math.min(tennisRallyHits, 8) * 2);
+            return px + err;
+        }
+
+        function applyPaddleHit(isPlayer) {
+            const paddleX = isPlayer ? playerPaddleX : computerPaddleX;
+            const hit = (ballX - (paddleX + paddleWidth / 2)) / (paddleWidth / 2);
+            const sweet = 1 - Math.min(Math.abs(hit), 1) * 0.35;
+            const speedMul = 1.04 + sweet * 0.06;
+            const spin = hit * (isPlayer ? 0.9 : 0.75);
+            tennisBallSpin = spin;
+            ballSpeedX = hit * (isPlayer ? 3.8 : 3.4) + tennisBallSpin * 0.25;
+            ballSpeedY = isPlayer
+                ? -Math.abs(ballSpeedY) * speedMul
+                : Math.abs(ballSpeedY) * speedMul;
+            tennisRallyHits++;
+            increaseBallSpeed();
+            spawnTennisHitParticles(ballX, ballY, isPlayer ? '#22d3ee' : '#f87171');
+            playTennisBeep(isPlayer ? 220 + sweet * 80 : 260, 0.08);
+        }
+
+        function updateTennisGamePhysics(dt) {
+            const paddleSpeed = 5.8 * dt;
             if (keyLeftPressed) {
-                playerPaddleX -= paddleSpeed;
-                if (playerPaddleX < 0) playerPaddleX = 0;
+                playerPaddleX = Math.max(0, playerPaddleX - paddleSpeed);
             }
             if (keyRightPressed) {
-                playerPaddleX += paddleSpeed;
-                if (playerPaddleX > tennisCanvas.width - paddleWidth) playerPaddleX = tennisCanvas.width - paddleWidth;
+                playerPaddleX = Math.min(TENNIS_W - paddleWidth, playerPaddleX + paddleSpeed);
             }
 
-            // 2. Akıllı Yapay Zeka (Bot Raket) Hareketi
-            const computerSpeed = 2.4; // Dengeli bot hızı
-            const computerPaddleCenter = computerPaddleX + (paddleWidth / 2);
-            if (computerPaddleCenter < ballX - 10) {
-                computerPaddleX += computerSpeed;
-            } else if (computerPaddleCenter > ballX + 10) {
-                computerPaddleX -= computerSpeed;
+            if (tennisOnlineMode) {
+                computerPaddleX = tennisRemotePaddleX;
+            } else if (ballSpeedY < 0) {
+                tennisBotReaction -= dt;
+                if (tennisBotReaction <= 0) {
+                    tennisBotTargetX = predictBotTargetX();
+                    tennisBotReaction = 4 + Math.random() * 6;
+                }
+                const botSpeed = getTennisBotSpeed() * dt;
+                const target = (tennisBotTargetX ?? ballX) - paddleWidth / 2;
+                const diff = target - computerPaddleX;
+                if (Math.abs(diff) > 6) {
+                    computerPaddleX += Math.sign(diff) * Math.min(Math.abs(diff), botSpeed);
+                }
             }
+            computerPaddleX = Math.max(0, Math.min(TENNIS_W - paddleWidth, computerPaddleX));
 
-            if (computerPaddleX < 0) computerPaddleX = 0;
-            if (computerPaddleX > tennisCanvas.width - paddleWidth) computerPaddleX = tennisCanvas.width - paddleWidth;
+            updateTennisHitParticles(dt);
 
-            // 3. Topun Hareketi
-            ballX += ballSpeedX;
-            ballY += ballSpeedY;
+            ballTrail.push({ x: ballX, y: ballY });
+            if (ballTrail.length > 12) ballTrail.shift();
 
-            // Sağ-Sol Duvar Çarpması
-            if (ballX - ballRadius < 0) {
-                ballX = ballRadius;
-                ballSpeedX = -ballSpeedX;
+            ballSpeedX += tennisBallSpin * 0.018 * dt;
+            ballX += ballSpeedX * dt;
+            ballY += ballSpeedY * dt;
+            tennisBallRotation += (ballSpeedX * 0.08 + Math.abs(ballSpeedY) * 0.04) * dt;
+
+            if (ballX - ballRadius < 12) {
+                ballX = 12 + ballRadius;
+                ballSpeedX = Math.abs(ballSpeedX);
+                tennisBallSpin *= -0.6;
                 playTennisBeep(150, 0.05);
             }
-            if (ballX + ballRadius > tennisCanvas.width) {
-                ballX = tennisCanvas.width - ballRadius;
-                ballSpeedX = -ballSpeedX;
+            if (ballX + ballRadius > TENNIS_W - 12) {
+                ballX = TENNIS_W - 12 - ballRadius;
+                ballSpeedX = -Math.abs(ballSpeedX);
+                tennisBallSpin *= -0.6;
                 playTennisBeep(150, 0.05);
             }
 
-            // Üst Raket (Bot) Çarpışma Kontrolü
-            if (ballY - ballRadius <= paddleHeight) {
-                if (ballX >= computerPaddleX && ballX <= computerPaddleX + paddleWidth) {
-                    ballSpeedY = -ballSpeedY;
-                    ballY = paddleHeight + ballRadius; // Sıkışmayı engelle
-                    
-                    // Topa vurulan noktaya göre hız değişimi
-                    const hitPoint = ballX - (computerPaddleX + paddleWidth / 2);
-                    ballSpeedX = hitPoint * 0.08;
-                    
-                    // Topu hafifçe hızlandır
-                    increaseBallSpeed();
-                    playTennisBeep(260, 0.08);
-                } else if (ballY < 0) {
-                    // Sayı Oyuncuya (Siz)
-                    tennisPlayerScore++;
-                    updateTennisScoreboard();
-                    playTennisBeep(440, 0.2); // Zafer sesi
-                    showToast("Sayı kazandınız! 🎾", "success");
-                    resetBall();
+            const botY = paddleHeight + 8;
+            const botHitZone = botY + paddleHeight + 4;
+            if (ballSpeedY < 0 && ballY - ballRadius <= botHitZone) {
+                if (ballX >= computerPaddleX + 4 && ballX <= computerPaddleX + paddleWidth - 4) {
+                    ballY = botHitZone + ballRadius;
+                    applyPaddleHit(false);
+                } else if (ballY < 8) {
+                    awardTennisPoint('player');
                 }
             }
 
-            // Alt Raket (Oyuncu) Çarpışma Kontrolü
-            const playerPaddleY = tennisCanvas.height - paddleHeight;
-            if (ballY + ballRadius >= playerPaddleY) {
-                if (ballX >= playerPaddleX && ballX <= playerPaddleX + paddleWidth) {
-                    ballSpeedY = -ballSpeedY;
-                    ballY = playerPaddleY - ballRadius; // Sıkışmayı engelle
-                    
-                    const hitPoint = ballX - (playerPaddleX + paddleWidth / 2);
-                    ballSpeedX = hitPoint * 0.08;
-                    
-                    increaseBallSpeed();
-                    playTennisBeep(220, 0.08);
-                } else if (ballY > tennisCanvas.height) {
-                    // Sayı Bota
-                    tennisComputerScore++;
-                    updateTennisScoreboard();
-                    playTennisBeep(110, 0.25); // Kaybetme sesi
-                    showToast("Bot sayı kazandı.", "error");
-                    resetBall();
+            const playerY = TENNIS_H - paddleHeight - paddleHandleH - 8;
+            const playerHitZone = playerY;
+            if (ballSpeedY > 0 && ballY + ballRadius >= playerHitZone) {
+                if (ballX >= playerPaddleX + 4 && ballX <= playerPaddleX + paddleWidth - 4) {
+                    ballY = playerHitZone - ballRadius;
+                    applyPaddleHit(true);
+                } else if (ballY > TENNIS_H - 4) {
+                    awardTennisPoint('bot');
                 }
             }
+        }
+
+        function awardTennisPoint(who) {
+            if (tennisMatchOver) return;
+            tennisServeReady = false;
+            if (who === 'player') {
+                tennisPlayerScore++;
+                playTennisBeep(440, 0.18);
+                showToast(tennisOnlineMode ? 'Sayı kazandınız! 🎾' : 'Sayı kazandınız! 🎾', 'success');
+            } else {
+                tennisComputerScore++;
+                playTennisBeep(110, 0.22);
+                const msg = tennisOnlineMode
+                    ? (tennisOpponentName ? `${tennisOpponentName} sayı kazandı.` : 'Rakip sayı kazandı.')
+                    : 'Bot sayı kazandı.';
+                showToast(msg, 'error');
+            }
+            updateTennisScoreboard();
+            if (tennisPlayerScore >= TENNIS_WIN || tennisComputerScore >= TENNIS_WIN) {
+                endTennisMatch();
+                return;
+            }
+            startTennisServeCountdown();
+        }
+
+        function endTennisMatch() {
+            tennisMatchOver = true;
+            tennisServeReady = false;
+            const won = tennisPlayerScore >= TENNIS_WIN;
+            const opp = tennisOpponentName || 'Rakip';
+            showTennisOverlay(
+                won ? 'Kazandınız! 🏆' : 'Kaybettiniz',
+                tennisOnlineMode
+                    ? (won
+                        ? `${tennisPlayerScore} - ${tennisComputerScore} · ${opp} yenildi!`
+                        : `${tennisPlayerScore} - ${tennisComputerScore} · ${opp} kazandı.`)
+                    : (won
+                        ? `${tennisPlayerScore} - ${tennisComputerScore} · Harika oyun!`
+                        : `${tennisPlayerScore} - ${tennisComputerScore} · Bir daha dene.`)
+            );
+            playTennisBeep(won ? 520 : 90, won ? 0.35 : 0.4);
+            if (won) showToast('Tenis maçını kazandınız! 🏆', 'success');
+        }
+
+        function showTennisOverlay(title, sub) {
+            const el = document.getElementById('tennis-overlay');
+            const t = document.getElementById('tennis-overlay-title');
+            const s = document.getElementById('tennis-overlay-sub');
+            if (t) t.textContent = title;
+            if (s) s.textContent = sub;
+            if (el) el.classList.remove('hidden');
+        }
+
+        function hideTennisOverlay() {
+            const el = document.getElementById('tennis-overlay');
+            if (el) el.classList.add('hidden');
         }
 
         function increaseBallSpeed() {
-            // Maksimum hız kontrolü
-            const maxSpeed = 5.5;
-            if (Math.abs(ballSpeedY) < maxSpeed) {
-                ballSpeedY = (ballSpeedY > 0 ? ballSpeedY + 0.15 : ballSpeedY - 0.15);
+            const cap = 7;
+            const boost = 1 + tennisRallyHits * 0.018;
+            if (Math.abs(ballSpeedY) < cap) {
+                ballSpeedY = ballSpeedY > 0
+                    ? Math.min(cap, Math.abs(ballSpeedY) * 1.055 * boost)
+                    : -Math.min(cap, Math.abs(ballSpeedY) * 1.055 * boost);
             }
-        }
-
-        function resetBall() {
-            ballX = tennisCanvas.width / 2;
-            ballY = tennisCanvas.height / 2;
-            // Yönü tersine çevir
-            ballSpeedY = (ballSpeedY > 0 ? -2 : 2);
-            ballSpeedX = (Math.random() > 0.5 ? 2 : -2);
         }
 
         function updateTennisScoreboard() {
             const scoreboard = document.getElementById('tennis-score');
             if (scoreboard) {
-                scoreboard.innerText = `Siz: ${tennisPlayerScore} | Bot: ${tennisComputerScore}`;
+                if (tennisOnlineMode && tennisOpponentName) {
+                    scoreboard.textContent = `${tennisPlayerScore} - ${tennisComputerScore}`;
+                } else {
+                    scoreboard.textContent = `${tennisPlayerScore} - ${tennisComputerScore}`;
+                }
+            }
+            const info = document.getElementById('tennis-match-info');
+            if (info) {
+                if (tennisOnlineMode) {
+                    info.textContent = tennisOpponentName ? `Online · ${tennisOpponentName}` : 'Online maç';
+                } else {
+                    info.textContent = 'İlk 7 sayı';
+                }
             }
         }
 
         function resetTennisGame() {
             playClickSound();
+            hideTennisOverlay();
             tennisPlayerScore = 0;
             tennisComputerScore = 0;
+            tennisMatchOver = false;
+            tennisPaused = false;
+            tennisRallyHits = 0;
+            tennisBallSpin = 0;
+            tennisBallRotation = 0;
+            tennisHitParticles = [];
+            tennisBotTargetX = null;
+            tennisBotReaction = 0;
+            ballTrail = [];
             updateTennisScoreboard();
-            resetBall();
-            showToast("Skor sıfırlandı.", "success");
+            updateTennisPauseBtn();
+            playerPaddleX = (TENNIS_W - paddleWidth) / 2;
+            computerPaddleX = (TENNIS_W - paddleWidth) / 2;
+            startTennisServeCountdown();
+            showToast('Yeni maç başladı.', 'success');
         }
 
         function stopTennisGame() {
             isTennisRunning = false;
+            tennisPointerActive = false;
             if (tennisLoopId) cancelAnimationFrame(tennisLoopId);
             window.removeEventListener('keydown', handleTennisKeyDown);
             window.removeEventListener('keyup', handleTennisKeyUp);
+            if (window.LisaniTennis3D?.dispose) {
+                window.LisaniTennis3D.dispose();
+            }
+            tennisCtx = null;
+            if (tennisOnlineMode && typeof window.LisaniTennisOnline?.stop === 'function') {
+                window.LisaniTennisOnline.stop(false);
+            }
+        }
+
+        function drawTennisBall(ctx, x, y) {
+            const speed = Math.hypot(ballSpeedX, ballSpeedY);
+            ctx.save();
+            ctx.fillStyle = 'rgba(0,0,0,0.2)';
+            ctx.beginPath();
+            ctx.ellipse(x, y + ballRadius + 5, ballRadius * 0.9, ballRadius * 0.35, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            if (speed > 4) {
+                ctx.strokeStyle = `rgba(255,255,255,${Math.min(0.35, (speed - 4) * 0.08)})`;
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(x - ballSpeedX * 2.5, y - ballSpeedY * 2.5);
+                ctx.lineTo(x, y);
+                ctx.stroke();
+            }
+
+            ctx.translate(x, y);
+            ctx.rotate(tennisBallRotation);
+            const ballGrad = ctx.createRadialGradient(-2, -2, 1, 0, 0, ballRadius);
+            ballGrad.addColorStop(0, '#fef9c3');
+            ballGrad.addColorStop(0.55, '#facc15');
+            ballGrad.addColorStop(1, '#ca8a04');
+            ctx.fillStyle = ballGrad;
+            ctx.shadowBlur = 14;
+            ctx.shadowColor = 'rgba(250, 204, 21, 0.55)';
+            ctx.beginPath();
+            ctx.arc(0, 0, ballRadius, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.shadowBlur = 0;
+            ctx.strokeStyle = 'rgba(255,255,255,0.75)';
+            ctx.lineWidth = 1.2;
+            ctx.beginPath();
+            ctx.arc(0, 0, ballRadius - 1, -0.6, 0.9);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.arc(0, 0, ballRadius - 1, 2.1, 3.6);
+            ctx.stroke();
+            ctx.restore();
         }
 
         function drawTennisGameScene() {
-            // Arka planı temizle
-            tennisCtx.fillStyle = '#05070a';
-            tennisCtx.fillRect(0, 0, tennisCanvas.width, tennisCanvas.height);
+            const flipOnlineGuest = tennisOnlineMode && tennisOnlineRole === 'guest';
 
-            // Sahadaki orta çizgiyi çiz
-            tennisCtx.strokeStyle = 'rgba(6, 182, 212, 0.15)';
-            tennisCtx.setLineDash([4, 4]);
-            tennisCtx.beginPath();
-            tennisCtx.moveTo(0, tennisCanvas.height / 2);
-            tennisCtx.lineTo(tennisCanvas.width, tennisCanvas.height / 2);
-            tennisCtx.stroke();
-            tennisCtx.setLineDash([]); // Sıfırla
+            const ctx = tennisCtx;
+            const W = TENNIS_W;
+            const H = TENNIS_H;
+            if (!ctx) return;
 
-            // Bot Raket (Üst) - Temaya uygun Cyan rengi
-            tennisCtx.fillStyle = '#ef4444'; // Kırmızı Raket (Bot)
-            tennisCtx.beginPath();
-            tennisCtx.roundRect(computerPaddleX, 2, paddleWidth, paddleHeight, 4);
-            tennisCtx.fill();
+            ctx.clearRect(0, 0, W, H);
 
-            // Oyuncu Raket (Alt) - Temaya uygun birincil altın rengi
-            tennisCtx.fillStyle = '#06b6d4'; // Cyan Raket (Oyuncu)
-            tennisCtx.beginPath();
-            tennisCtx.roundRect(playerPaddleX, tennisCanvas.height - paddleHeight - 2, paddleWidth, paddleHeight, 4);
-            tennisCtx.fill();
+            if (flipOnlineGuest) {
+                ctx.save();
+                ctx.translate(0, H);
+                ctx.scale(1, -1);
+            }
 
-            // Parlayan Top
-            tennisCtx.fillStyle = '#22c55e'; // Parlak Yeşil Top
-            tennisCtx.shadowBlur = 10;
-            tennisCtx.shadowColor = '#22c55e';
-            tennisCtx.beginPath();
-            tennisCtx.arc(ballX, ballY, ballRadius, 0, Math.PI * 2);
-            tennisCtx.fill();
-            
-            // Gölge etkisini diğer çizimler için sıfırla
-            tennisCtx.shadowBlur = 0;
+            if (tennisCourtCache) {
+                ctx.drawImage(tennisCourtCache, 0, 0, W, H);
+            } else {
+                ctx.fillStyle = '#0d9488';
+                ctx.fillRect(0, 0, W, H);
+            }
+
+            ballTrail.forEach((p, i) => {
+                const a = (i + 1) / ballTrail.length * 0.4;
+                ctx.fillStyle = `rgba(250, 204, 21, ${a})`;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, ballRadius * (0.35 + i * 0.03), 0, Math.PI * 2);
+                ctx.fill();
+            });
+
+            tennisHitParticles.forEach((p) => {
+                ctx.globalAlpha = Math.max(0, p.life);
+                ctx.fillStyle = p.color;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, 2 + p.life * 2, 0, Math.PI * 2);
+                ctx.fill();
+            });
+            ctx.globalAlpha = 1;
+
+            const botRacketY = 6;
+            const playerRacketY = H - paddleHeight - paddleHandleH - 6;
+            drawTennisRacket(ctx, computerPaddleX, botRacketY, paddleWidth, paddleHeight, '#dc2626', '#f87171', false);
+            drawTennisRacket(ctx, playerPaddleX, playerRacketY, paddleWidth, paddleHeight, '#0891b2', '#22d3ee', true);
+
+            drawTennisBall(ctx, ballX, ballY);
+
+            if (tennisRallyHits > 0 && tennisServeReady && !tennisMatchOver) {
+                ctx.fillStyle = 'rgba(0,0,0,0.35)';
+                ctx.font = 'bold 10px sans-serif';
+                ctx.textAlign = 'left';
+                ctx.fillText(`Rally: ${tennisRallyHits}`, 16, 22);
+            }
+
+            if (tennisCountdown > 0) {
+                const n = Math.ceil(tennisCountdown);
+                const pulse = 1 + (tennisCountdown - Math.floor(tennisCountdown)) * 0.15;
+                ctx.fillStyle = 'rgba(0,0,0,0.42)';
+                ctx.fillRect(0, 0, W, H);
+                ctx.fillStyle = '#fff';
+                ctx.font = `bold ${Math.round(46 * pulse)}px sans-serif`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(String(n), W / 2, H / 2);
+                ctx.font = '11px sans-serif';
+                ctx.fillStyle = 'rgba(224,242,254,0.85)';
+                ctx.fillText('Raketi hareket ettirerek servis yönünü seç', W / 2, H / 2 + 38);
+            }
+
+            if (tennisPaused && !tennisMatchOver) {
+                ctx.fillStyle = 'rgba(0,0,0,0.5)';
+                ctx.fillRect(0, 0, W, H);
+                ctx.fillStyle = '#e0f2fe';
+                ctx.font = 'bold 16px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText('DURAKLATILDI', W / 2, H / 2);
+            }
+
+            if (flipOnlineGuest) {
+                ctx.restore();
+            }
         }
+
+        window.LisaniTennis = {
+            setOnlineMode(enabled, role, roomCode, opponentName) {
+                tennisOnlineMode = !!enabled;
+                tennisOnlineRole = role || null;
+                tennisOnlineRoomCode = roomCode || '';
+                tennisOpponentName = opponentName || '';
+                tennisRemotePaddleX = (TENNIS_W - paddleWidth) / 2;
+                updateTennisScoreboard();
+            },
+            isOnline() { return tennisOnlineMode; },
+            getRole() { return tennisOnlineRole; },
+            getRoomCode() { return tennisOnlineRoomCode; },
+            setRemotePaddleX(x) {
+                tennisRemotePaddleX = Math.max(0, Math.min(TENNIS_W - paddleWidth, x));
+            },
+            getLocalPaddleX() {
+                return playerPaddleX;
+            },
+            exportState() {
+                return {
+                    ballX, ballY, ballSpeedX, ballSpeedY,
+                    ballSpin: tennisBallSpin,
+                    ballTrail: ballTrail.slice(-12),
+                    serveReady: tennisServeReady,
+                    countdown: tennisCountdown,
+                    rallyHits: tennisRallyHits,
+                    hostScore: tennisPlayerScore,
+                    guestScore: tennisComputerScore,
+                    matchOver: tennisMatchOver,
+                    hostPaddleX: playerPaddleX,
+                    guestPaddleX: computerPaddleX,
+                };
+            },
+            importState(state) {
+                if (!state) return;
+                ballX = state.ballX ?? ballX;
+                ballY = state.ballY ?? ballY;
+                ballSpeedX = state.ballSpeedX ?? ballSpeedX;
+                ballSpeedY = state.ballSpeedY ?? ballSpeedY;
+                tennisBallSpin = state.ballSpin ?? tennisBallSpin;
+                ballTrail = Array.isArray(state.ballTrail) ? state.ballTrail : [];
+                tennisServeReady = !!state.serveReady;
+                tennisCountdown = state.countdown ?? 0;
+                tennisRallyHits = state.rallyHits ?? 0;
+                tennisPlayerScore = state.hostScore ?? 0;
+                tennisComputerScore = state.guestScore ?? 0;
+                tennisMatchOver = !!state.matchOver;
+                if (tennisOnlineRole === 'host') {
+                    computerPaddleX = state.guestPaddleX ?? computerPaddleX;
+                } else if (tennisOnlineRole === 'guest') {
+                    playerPaddleX = state.guestPaddleX ?? playerPaddleX;
+                    computerPaddleX = state.hostPaddleX ?? computerPaddleX;
+                }
+                updateTennisScoreboard();
+                if (state.matchOver && !tennisMatchOver) {
+                    endTennisMatch();
+                }
+            },
+            startEngine: initTennisGameEngine,
+            reset: resetTennisGame,
+            stop: stopTennisGame,
+        };
 
         // Service Worker inline olarak gömülü (ayrı sw.js dosyası gerekmez)
         async function registerInlineSW() {
@@ -2685,10 +3854,18 @@ self.addEventListener('notificationclick', e => {
             updateLearningStats();
             initSwipeGestures();
             initToastSwipe();
+            initRememberMeCheckbox();
 
-            if (tennisUnlocked) {
-                const badge = document.getElementById('tennis-unlock-badge');
-                if (badge) badge.classList.remove('hidden');
+            try {
+                const savedSession = localStorage.getItem('lisani_session_user');
+                if (savedSession) {
+                    const u = JSON.parse(savedSession);
+                    syncTennisUnlockFromUser(u);
+                } else {
+                    applyTennisUnlockUI(false);
+                }
+            } catch (e) {
+                applyTennisUnlockUI(false);
             }
 
             const firstHadis = hadisList[0];
@@ -2710,13 +3887,6 @@ self.addEventListener('notificationclick', e => {
             // App hazır eventi gönder (Firebase onAuthStateChanged için)
             document.dispatchEvent(new Event('appReady'));
             window._appReady = true;
-
-            // Sunucu oturumu ile otomatik giriş (sadece localStorage yeterli değil)
-            setTimeout(() => {
-                if (!window._manualLogout && typeof window.restoreServerSession === 'function') {
-                    window.restoreServerSession();
-                }
-            }, 800);
 
             // Bildirim
             try {

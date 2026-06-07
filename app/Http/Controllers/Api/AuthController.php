@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Sinif;
 use App\Models\User;
+use App\Support\AvatarHelper;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -36,7 +37,7 @@ class AuthController extends Controller
             'name' => $validated['name'],
             'email' => $email,
             'password' => $validated['password'],
-            'avatar' => $validated['avatar'] ?? '🐱',
+            'avatar' => $validated['avatar'] ?? AvatarHelper::defaultHtml(),
             'role' => $validated['role'],
             'sinif_adi' => $validated['role'] === 'hoca' ? ($validated['sinif'] ?? null) : null,
         ]);
@@ -121,7 +122,6 @@ class AuthController extends Controller
             'name' => ['sometimes', 'string', 'min:2', 'max:80', 'unique:users,name,'.$user->id],
             'email' => ['sometimes', 'email', 'unique:users,email,'.$user->id],
             'avatar' => ['sometimes', 'string', 'max:500'],
-            'birthdate' => ['sometimes', 'nullable', 'date'],
             'total_score' => ['sometimes', 'integer', 'min:0'],
             'sinif_kodu' => ['sometimes', 'nullable', 'string', 'min:4', 'max:20'],
         ]);
@@ -132,6 +132,18 @@ class AuthController extends Controller
         if ($user->role === 'ogrenci' && array_key_exists('sinif_kodu', $validated) && $validated['sinif_kodu']) {
             Sinif::joinUser($user, $validated['sinif_kodu']);
         }
+
+        return response()->json([
+            'success' => true,
+            'user' => $user->fresh()->toFrontendArray(),
+        ]);
+    }
+
+    public function unlockTennis(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        $user->tennis_unlocked = true;
+        $user->save();
 
         return response()->json([
             'success' => true,

@@ -66,7 +66,9 @@
                 throw new Error('Oturum süresi doldu. Sayfayı yenileyip (Ctrl+F5) tekrar giriş yapın.');
             }
             if (res.status === 401) {
-                window._loginDone = false;
+                if (!options.authProbe) {
+                    window._loginDone = false;
+                }
                 throw new Error('Oturumunuz yok veya süresi doldu. Lütfen tekrar giriş yapın.');
             }
             const errValues = data.errors ? Object.values(data.errors).flat() : [];
@@ -80,17 +82,23 @@
         return data;
     }
 
+    window.apiFetch = apiFetch;
+
     function userFromApi(u) {
+        const avatar =
+            typeof window.normalizeAvatarValue === 'function'
+                ? window.normalizeAvatarValue(u.avatar, u.uid)
+                : u.avatar || '';
         return {
             uid: u.uid,
             name: u.name,
             email: u.email,
-            avatar: u.avatar || '🐱',
+            avatar: avatar,
             role: u.role || 'ogrenci',
             sinif: u.sinif,
             sinifKodu: u.sinifKodu,
-            birthdate: u.birthdate || '',
             totalScore: u.totalScore || 0,
+            tennisUnlocked: !!u.tennisUnlocked,
             password: '',
         };
     }
@@ -106,11 +114,59 @@
             const saved = localStorage.getItem('lisani_all_users');
             const users = saved ? JSON.parse(saved) : [];
             const idx = users.findIndex((u) => u.name.toLowerCase() === user.name.toLowerCase());
-            if (idx >= 0) users[idx] = { ...users[idx], ...user };
-            else users.push(user);
+            const merged = idx >= 0 ? { ...users[idx], ...user } : { ...user };
+            if (!merged.password && idx >= 0 && users[idx].password) {
+                merged.password = users[idx].password;
+            }
+            if (idx >= 0) users[idx] = merged;
+            else users.push(merged);
             localStorage.setItem('lisani_all_users', JSON.stringify(users));
         } catch (e) {}
     };
+
+    function readSavedSessionUser() {
+        try {
+            const raw = localStorage.getItem('lisani_session_user');
+            return raw ? JSON.parse(raw) : null;
+        } catch (e) {
+            return null;
+        }
+    }
+
+    function resolveStoredPassword(userName, savedUser) {
+        if (savedUser?.password) return savedUser.password;
+        try {
+            const all = JSON.parse(localStorage.getItem('lisani_all_users') || '[]');
+            const found = all.find(
+                (u) => u.name && u.name.toLowerCase() === (userName || '').toLowerCase()
+            );
+            return found?.password || '';
+        } catch (e) {
+            return '';
+        }
+    }
+
+    async function reauthWithStoredCredentials(savedUser) {
+        const password = resolveStoredPassword(savedUser?.name, savedUser);
+        if (!savedUser?.name || !password) return false;
+
+        const data = await apiFetch('/api/login', {
+            method: 'POST',
+            body: JSON.stringify({
+                name: savedUser.name,
+                password,
+                remember: true,
+            }),
+        });
+        const user = userFromApi(data.user);
+        user.password = password;
+        window._loginDone = true;
+        currentUserRole = user.role;
+        applyCsrfToken(data.csrf_token);
+        _saveUserLocally(user);
+        loginSuccess(user, true, true);
+        return true;
+    }
 
     const origSubmitLogin = window.submitLogin;
     window.submitLogin = async function () {
@@ -133,7 +189,7 @@
                 body: JSON.stringify({
                     name: usernameInput,
                     password: passwordInput,
-                    remember: rememberMe,
+                    remember: rememberMe || localStorage.getItem('lisani_remember_me_pref') !== 'false',
                 }),
             });
             const user = userFromApi(data.user);
@@ -143,7 +199,16 @@
             _saveUserLocally(user);
             applyCsrfToken(data.csrf_token);
             hideLoading();
-            loginSuccess(user, rememberMe);
+            const keepOpen = rememberMe || localStorage.getItem('lisani_remember_me_pref') !== 'false';
+            loginSuccess(user, keepOpen);
+            if (keepOpen && passwordInput) {
+                try {
+                    const sessionRaw = localStorage.getItem('lisani_session_user');
+                    const session = sessionRaw ? JSON.parse(sessionRaw) : { ...user };
+                    session.password = passwordInput;
+                    localStorage.setItem('lisani_session_user', JSON.stringify(session));
+                } catch (e) {}
+            }
         } catch (e) {
             hideLoading();
             if (!window._loginDone) showToast(e.message, 'error');
@@ -193,7 +258,7 @@
                     role,
                     sinif,
                     sinif_kodu: sinifKodu || null,
-                    avatar: typeof selectedAvatarValue !== 'undefined' ? selectedAvatarValue : '🐱',
+                    avatar: typeof selectedAvatarValue !== 'undefined' ? selectedAvatarValue : (typeof window.DEFAULT_AVATAR !== 'undefined' ? window.DEFAULT_AVATAR : ''),
                     remember: true,
                 }),
             });
@@ -222,7 +287,9 @@
         playClickSound();
         window._manualLogout = true;
         window._loginDone = false;
+        _sessionRestorePromise = null;
         currentUser = null;
+        window.currentUser = null;
         currentUserRole = null;
 
         try {
@@ -263,7 +330,7 @@
             _saveLocalSinif(kod, sd);
             _saveUserLocally(data.user);
             currentUser = userFromApi(data.user);
-            loadOgrenciOdevler();
+            window.currentUser = currentUser;
             hideLoading();
             refreshMesajBadge();
             showToast('✅ ' + sd.sinifAdi + ' sınıfına katıldınız!', 'success');
@@ -294,24 +361,95 @@
     }
 
     function odevPickerHtml(hocaUid) {
-        const levelOpts = [1, 2, 3]
-            .map((l) => `<option value="${l}">${ODEV_LEVEL_LABELS[l]}</option>`)
-            .join('');
-        const testOpts = ODEV_TEST_OPTIONS.map((t) => `<option value="${t}">${t}</option>`).join('');
         return `
-            <p class="text-[10px] theme-text-muted mb-3">Öğrenciler Testler sekmesindeki seçtiğiniz teste yönlendirilir.</p>
-            <label class="text-[9px] font-bold theme-text-muted uppercase tracking-wide block mb-1">Seviye</label>
-            <select id="odev-level" class="w-full mb-2.5 p-2.5 rounded-xl border theme-border theme-card-bg theme-text-main text-xs focus:outline-none">${levelOpts}</select>
-            <label class="text-[9px] font-bold theme-text-muted uppercase tracking-wide block mb-1">Test</label>
-            <select id="odev-test" class="w-full mb-3 p-2.5 rounded-xl border theme-border theme-card-bg theme-text-main text-xs focus:outline-none">${testOpts}</select>
-            <button type="button" onclick="odevVer('${hocaUid}')" class="w-full py-2.5 theme-primary-btn rounded-xl text-xs font-bold">Test Ödevi Gönder</button>`;
+            <p class="text-[10px] theme-text-muted mb-3">Aşağıdan seviye ve test seçerek ödev gönderin.</p>
+            <div id="odev-test-picker" data-hoca-uid="${hocaUid}"></div>`;
     }
 
-    window.odevVer = function (hocaUid) {
+    function renderOdevPickerLevelCards() {
+        return [1, 2, 3]
+            .map(
+                (l) => `
+            <button type="button" onclick="selectOdevPickerLevel(${l})" class="lisani-glass-panel lisani-test-btn lisani-test-level-card rounded-2xl p-3.5 text-left flex items-center justify-between w-full min-w-0">
+                <div class="flex items-center gap-3 min-w-0">
+                    <div class="w-10 h-10 rounded-2xl lisani-level-badge--${l} flex items-center justify-center font-black text-sm border shrink-0">${l}</div>
+                    <div class="min-w-0">
+                        <h4 class="text-xs font-extrabold theme-text-main leading-snug">${ODEV_LEVEL_LABELS[l]}</h4>
+                    </div>
+                </div>
+                <i data-lucide="chevron-right" class="w-4 h-4 theme-text-muted shrink-0"></i>
+            </button>`
+            )
+            .join('');
+    }
+
+    function renderOdevPickerTestCards(level) {
+        const cards = ODEV_TEST_OPTIONS.map(
+            (testName) => `
+            <button type="button" onclick="odevVerFromTest(${level}, '${testName.replace(/'/g, "\\'")}')" class="lisani-glass-panel lisani-test-btn lisani-test-list-card rounded-2xl p-3.5 text-left flex items-center justify-between w-full min-w-0">
+                <div class="flex items-center gap-3 min-w-0">
+                    <div class="lisani-test-list-icon w-10 h-10 rounded-xl flex items-center justify-center shrink-0">
+                        <i data-lucide="${testName === 'Genel' ? 'award' : 'file-question'}" class="w-4 h-4"></i>
+                    </div>
+                    <div class="min-w-0">
+                        <h4 class="text-xs font-extrabold theme-text-main">${testName === 'Genel' ? 'Genel Değerlendirme 🏆' : testName}</h4>
+                        <p class="text-[10px] theme-text-muted mt-0.5">${ODEV_LEVEL_LABELS[level]}</p>
+                    </div>
+                </div>
+                <span class="lisani-test-go-chip shrink-0 ml-2">Ödev Ver</span>
+            </button>`
+        );
+        return cards.join('');
+    }
+
+    window.backOdevPickerLevels = function () {
+        const levels = document.getElementById('odev-picker-levels');
+        const tests = document.getElementById('odev-picker-tests');
+        if (levels) levels.classList.remove('hidden');
+        if (tests) tests.classList.add('hidden');
+    };
+
+    window.selectOdevPickerLevel = function (level) {
+        const levels = document.getElementById('odev-picker-levels');
+        const tests = document.getElementById('odev-picker-tests');
+        const list = document.getElementById('odev-picker-tests-list');
+        if (!levels || !tests || !list) return;
+        list.innerHTML = renderOdevPickerTestCards(level);
+        levels.classList.add('hidden');
+        tests.classList.remove('hidden');
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+    };
+
+    window.initOdevTestPicker = function () {
+        const root = document.getElementById('odev-test-picker');
+        if (!root) return;
+        root.innerHTML = `
+            <div id="odev-picker-levels" class="grid grid-cols-1 gap-2">${renderOdevPickerLevelCards()}</div>
+            <div id="odev-picker-tests" class="hidden space-y-2">
+                <button type="button" onclick="backOdevPickerLevels()" class="lisani-glass-action lisani-glass-action--compact flex items-center gap-2 text-xs font-bold w-fit">
+                    <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                    <span>Seviyelere dön</span>
+                </button>
+                <div id="odev-picker-tests-list" class="grid grid-cols-1 gap-2"></div>
+            </div>`;
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+    };
+
+    window.odevVerFromTest = function (level, test) {
+        const user = currentUser || window.currentUser;
+        const uid = user?.id || user?.uid;
+        if (!uid) {
+            showToast('Giriş gerekli.', 'error');
+            return;
+        }
+        window.odevVer(uid, level, test);
+    };
+
+    window.odevVer = function (hocaUid, levelArg, testArg) {
         const levelEl = document.getElementById('odev-level');
         const testEl = document.getElementById('odev-test');
-        const level = levelEl ? parseInt(levelEl.value, 10) : 0;
-        const test = testEl ? testEl.value : '';
+        const level = levelArg || (levelEl ? parseInt(levelEl.value, 10) : 0);
+        const test = testArg || (testEl ? testEl.value : '');
         if (!level || !test) {
             showToast('Lütfen seviye ve test seçin.', 'error');
             return;
@@ -419,9 +557,9 @@
                     ? `<p class="text-[9px] theme-text-muted mt-1 truncate">Son: ${o.lastTestLabel}${o.lastTestPercent != null ? ' · %' + o.lastTestPercent : ''}</p>`
                     : '<p class="text-[9px] theme-text-muted mt-1">Henüz sınav çözmedi</p>';
                 ogrencilerHTML += `
-                <div class="glass-card-interactive rounded-2xl p-3.5 mb-2.5 border theme-border">
+                <div class="lisani-glass-panel rounded-2xl p-3.5 mb-2.5 border theme-border">
                     <div class="flex items-start gap-3">
-                        <span class="text-2xl flex-shrink-0">${o.avatar || '🎒'}</span>
+                        ${typeof window.avatarSlotHtml === 'function' ? window.avatarSlotHtml(o.avatar) : `<span class="text-2xl flex-shrink-0">${o.avatar || '🎒'}</span>`}
                         <div class="flex-1 min-w-0">
                             <div class="flex items-center justify-between gap-2">
                                 <span class="text-xs font-extrabold theme-text-main truncate">${o.name}</span>
@@ -439,7 +577,7 @@
                                 <span class="text-emerald-400">✓ ${analiz.toplamDogru ?? 0}</span>
                                 <span class="text-red-400">✗ ${analiz.toplamYanlis ?? 0}</span>
                             </div>
-                            <button type="button" onclick="toggleOgrenciRapor('${o.uid}')" class="mt-2 w-full py-1.5 rounded-lg text-[9px] font-bold border theme-border theme-light-bg theme-text-main hover:opacity-90 flex items-center justify-center gap-1">
+                            <button type="button" onclick="toggleOgrenciRapor('${o.uid}')" class="mt-2 w-full py-1.5 lisani-glass-action rounded-lg text-[9px] font-bold theme-text-main flex items-center justify-center gap-1">
                                 <i data-lucide="file-bar-chart" class="w-3 h-3"></i>
                                 Analiz Raporu
                             </button>
@@ -539,12 +677,14 @@
             </div>
         </div>`;
         if (typeof lucide !== 'undefined') lucide.createIcons();
+        initOdevTestPicker();
     };
 
     window.forceAuthScreen = function () {
         window._loginDone = false;
         window._manualLogout = false;
         currentUser = null;
+        window.currentUser = null;
         currentUserRole = null;
         const auth = document.getElementById('auth-container');
         const main = document.getElementById('main-application-flow');
@@ -554,12 +694,28 @@
     };
 
     async function ensureServerSession() {
+        if (window._loginDone && (currentUser || window.currentUser)) {
+            const local = currentUser || window.currentUser;
+            try {
+                const data = await apiFetch('/api/user');
+                if (data.user) {
+                    const user = userFromApi(data.user);
+                    window._loginDone = true;
+                    currentUser = user;
+                    window.currentUser = user;
+                    currentUserRole = user.role;
+                    return user;
+                }
+            } catch (e) {}
+            return local;
+        }
         try {
             const data = await apiFetch('/api/user');
             if (data.user) {
                 const user = userFromApi(data.user);
                 window._loginDone = true;
                 currentUser = user;
+                window.currentUser = user;
                 currentUserRole = user.role;
                 return user;
             }
@@ -609,6 +765,131 @@
         loadHocaPanel(user.uid);
     };
 
+    function renderYoneticiPanel(data) {
+        const ozet = data.ozet || {};
+        const hocalar = data.hocalar || [];
+        const siniflar = data.siniflar || [];
+
+        let hocalarHTML = '';
+        if (hocalar.length > 0) {
+            hocalarHTML = hocalar
+                .map(
+                    (h) => `
+                <div class="lisani-glass-panel rounded-xl p-3 border theme-border mb-2">
+                    <div class="flex items-center gap-3">
+                        ${typeof window.avatarSlotHtml === 'function' ? window.avatarSlotHtml(h.avatar) : `<span class="text-xl">${h.avatar || '📚'}</span>`}
+                        <div class="flex-1 min-w-0">
+                            <p class="text-xs font-extrabold theme-text-main truncate">${escapeHtml(h.name)}</p>
+                            <p class="text-[9px] theme-text-muted truncate">${escapeHtml(h.sinifAdi || 'Sınıf yok')}${h.kisaKod ? ' · ' + escapeHtml(h.kisaKod) : ''}</p>
+                            <p class="text-[9px] theme-text-muted mt-0.5">${h.ogrenciSayisi ?? 0} öğrenci · ${h.odevSayisi ?? 0} ödev</p>
+                        </div>
+                    </div>
+                </div>`
+                )
+                .join('');
+        } else {
+            hocalarHTML =
+                '<p class="text-[10px] theme-text-muted text-center py-4">Henüz kayıtlı hoca yok.</p>';
+        }
+
+        let siniflarHTML = '';
+        if (siniflar.length > 0) {
+            siniflarHTML = siniflar
+                .map(
+                    (s) => `
+                <div class="lisani-glass-panel rounded-xl p-3 border theme-border mb-2">
+                    <p class="text-xs font-extrabold theme-text-main">${escapeHtml(s.sinifAdi || '—')}</p>
+                    <p class="text-[9px] theme-text-muted font-mono">${escapeHtml(s.kisaKod || '—')}</p>
+                    <p class="text-[9px] theme-text-muted mt-1">${escapeHtml(s.hocaAdi || 'Hoca atanmamış')} · ${s.ogrenciSayisi ?? 0} öğrenci · ${s.odevSayisi ?? 0} ödev</p>
+                </div>`
+                )
+                .join('');
+        } else {
+            siniflarHTML =
+                '<p class="text-[10px] theme-text-muted text-center py-4">Henüz sınıf oluşturulmamış.</p>';
+        }
+
+        let panel = document.getElementById('yonetici-panel-modal');
+        if (!panel) {
+            panel = document.createElement('div');
+            panel.id = 'yonetici-panel-modal';
+            panel.className = 'lisani-panel-overlay absolute inset-0 z-50 flex flex-col theme-bg-phone';
+            const host = document.getElementById('app-container') || document.body;
+            host.appendChild(panel);
+        }
+
+        panel.innerHTML = `
+        <div class="flex flex-col h-full w-full max-w-none lg:max-w-4xl lg:mx-auto">
+            <div class="flex items-center justify-between px-5 pt-5 pb-3 border-b theme-border">
+                <div>
+                    <h2 class="text-sm font-extrabold theme-text-main">👑 Uygulama Yönetimi</h2>
+                    <p class="text-[10px] theme-text-muted">Tüm hocalar, sınıflar ve kullanıcı özeti</p>
+                </div>
+                <button onclick="document.getElementById('yonetici-panel-modal').remove()" class="w-9 h-9 rounded-full theme-light-bg flex items-center justify-center theme-text-muted hover:opacity-80">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <div class="flex-1 overflow-y-auto px-5 py-4 space-y-4">
+                <div class="grid grid-cols-2 gap-2">
+                    <div class="glass-card rounded-xl p-3 text-center">
+                        <p class="text-[9px] theme-text-muted uppercase font-bold">Öğrenci</p>
+                        <p class="text-lg font-black text-amber-400">${ozet.ogrenciSayisi ?? 0}</p>
+                    </div>
+                    <div class="glass-card rounded-xl p-3 text-center">
+                        <p class="text-[9px] theme-text-muted uppercase font-bold">Hoca</p>
+                        <p class="text-lg font-black text-violet-400">${ozet.hocaSayisi ?? 0}</p>
+                    </div>
+                    <div class="glass-card rounded-xl p-3 text-center">
+                        <p class="text-[9px] theme-text-muted uppercase font-bold">Sınıf</p>
+                        <p class="text-lg font-black text-blue-400">${ozet.sinifSayisi ?? 0}</p>
+                    </div>
+                    <div class="glass-card rounded-xl p-3 text-center">
+                        <p class="text-[9px] theme-text-muted uppercase font-bold">Toplam Kullanıcı</p>
+                        <p class="text-lg font-black theme-primary-color">${ozet.kullaniciSayisi ?? 0}</p>
+                    </div>
+                </div>
+                <button type="button" onclick="document.getElementById('yonetici-panel-modal')?.remove(); if(typeof openHocaDashboard==='function') openHocaDashboard();" class="lisani-glass-action w-full py-2.5 rounded-xl text-xs font-bold">Performans Dashboard'a Git</button>
+                <div>
+                    <h3 class="text-xs font-extrabold theme-text-main mb-2 flex items-center gap-2">
+                        <i data-lucide="graduation-cap" class="w-4 h-4 text-violet-400"></i>
+                        Hocalar
+                    </h3>
+                    ${hocalarHTML}
+                </div>
+                <div>
+                    <h3 class="text-xs font-extrabold theme-text-main mb-2 flex items-center gap-2">
+                        <i data-lucide="school" class="w-4 h-4 text-blue-400"></i>
+                        Sınıflar
+                    </h3>
+                    ${siniflarHTML}
+                </div>
+            </div>
+        </div>`;
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    window.showYoneticiPanel = async function () {
+        const user = await ensureServerSession();
+        if (!user || user.role !== 'yonetici') {
+            if (currentUserRole === 'yonetici' && !user) {
+                showToast('Lütfen çıkış yapıp yönetici hesabıyla tekrar giriş yapın.', 'error');
+                forceAuthScreen();
+                return;
+            }
+            showToast('Bu ekran sadece uygulama yöneticileri içindir.', 'error');
+            return;
+        }
+        showLoading('Yönetim paneli yükleniyor...');
+        try {
+            const data = await apiFetch('/api/yonetici/overview');
+            hideLoading();
+            renderYoneticiPanel(data);
+        } catch (e) {
+            hideLoading();
+            showToast(e.message || 'Panel yüklenemedi.', 'error');
+        }
+    };
+
     const origInitSinif = window._initSinif;
     window._initSinif = function (hocaUid) {
         let sinif = _getLocalSinif(hocaUid);
@@ -633,21 +914,33 @@
     function applyProfileToUI(user, avatarHtml) {
         const avatar = avatarHtml ?? user.avatar;
         document.getElementById('settings-profile-name').innerText = user.name;
-        const roleBadge = (user.role || currentUserRole) === 'hoca' ? '📚 Hoca' : '🎒 Öğrenci';
+        const roleBadge =
+            typeof window.getSettingsRoleBadgeHtml === 'function'
+                ? window.getSettingsRoleBadgeHtml(user.role || currentUserRole)
+                : (user.role || currentUserRole) === 'yonetici'
+                  ? '👑 Yönetici'
+                  : (user.role || currentUserRole) === 'hoca'
+                    ? '📚 Hoca'
+                    : '🎒 Öğrenci';
         document.getElementById('settings-profile-sub').innerHTML = roleBadge;
         document.getElementById('home-welcome-text').innerText = `Hoş Geldin, ${user.name}! 👋`;
+        if (typeof window.updateHomeRoleBadge === 'function') {
+            window.updateHomeRoleBadge(user.role || currentUserRole);
+        }
 
         const avatarContainers = [
             document.getElementById('home-avatar-display'),
             document.getElementById('settings-avatar-container'),
         ];
         avatarContainers.forEach((container) => {
-            if (!container) return;
-            container.innerHTML = avatar;
-            if (avatar && avatar.includes('<img')) {
-                container.classList.remove('text-lg');
-            } else {
-                container.classList.add('text-lg');
+            if (typeof window.applyAvatarToContainer === 'function') {
+                const normalized =
+                    typeof window.normalizeAvatarValue === 'function'
+                        ? window.normalizeAvatarValue(avatar)
+                        : avatar;
+                window.applyAvatarToContainer(container, normalized);
+            } else if (container) {
+                container.innerHTML = avatar;
             }
         });
     }
@@ -656,18 +949,14 @@
         playClickSound();
 
         const nameInput = document.getElementById('edit-profile-username').value.trim();
-        const birthdateInput = document.getElementById('edit-profile-birthdate').value;
         const emailInput = document.getElementById('edit-profile-email').value.trim();
         const avatar =
             typeof editAvatarValue !== 'undefined' ? editAvatarValue : currentUser?.avatar || '🐱';
 
-        if (!nameInput || !birthdateInput) {
+        if (!nameInput) {
             showToast('Lütfen tüm alanları doldurun.', 'error');
             return;
         }
-
-        const birthYear = new Date(birthdateInput).getFullYear();
-        const age = new Date().getFullYear() - birthYear;
 
         showLoading('Profil kaydediliyor...');
         try {
@@ -675,17 +964,16 @@
                 method: 'POST',
                 body: JSON.stringify({
                     name: nameInput,
-                    birthdate: birthdateInput,
                     email: emailInput || currentUser?.email,
                     avatar,
                 }),
             });
 
             const user = userFromApi(data.user);
-            user.age = age;
             if (currentUser?.password) user.password = currentUser.password;
 
             currentUser = user;
+            window.currentUser = user;
             _saveUserLocally(user);
 
             try {
@@ -704,72 +992,117 @@
         }
     };
 
+    let _sessionRestorePromise = null;
+    let _mesajBadgeTimer = null;
+    let _mesajBadgeInFlight = null;
+
+    function shouldKeepSessionOpen() {
+        if (localStorage.getItem('lisani_remember_me_pref') === 'false') return false;
+        if (localStorage.getItem('lisani_remember_me') === 'true') return true;
+        return localStorage.getItem('lisani_remember_me_pref') !== 'false';
+    }
+
     async function trySessionRestore() {
         if (window._manualLogout) return;
+        if (_sessionRestorePromise) return _sessionRestorePromise;
 
-        try {
-            const data = await apiFetch('/api/user');
-            if (data.user) {
-                const user = userFromApi(data.user);
+        _sessionRestorePromise = (async () => {
+            const keepOpen = shouldKeepSessionOpen();
+            const savedUser = keepOpen ? readSavedSessionUser() : null;
+
+            if (keepOpen && savedUser?.name && !window._loginDone) {
+                try {
+                    loginSuccess(savedUser, true, true);
+                } catch (e) {}
+            }
+
+            let serverUser = null;
+            try {
+                const data = await apiFetch('/api/user', { authProbe: true });
+                serverUser = data.user || null;
+            } catch (e) {}
+
+            if (serverUser) {
+                const user = userFromApi(serverUser);
+                user.password = resolveStoredPassword(user.name, savedUser);
                 window._loginDone = true;
                 currentUserRole = user.role;
-                const remember = localStorage.getItem('lisani_remember_me') === 'true';
-                loginSuccess(user, remember);
+                if (user.password) _saveUserLocally(user);
+                loginSuccess(user, keepOpen || !!savedUser, true);
                 return;
             }
-        } catch (e) {}
 
-        if (window._loginDone) return;
+            if (!keepOpen || !savedUser?.name) {
+                if (!window._loginDone) return;
+                return;
+            }
 
-        const rememberMe = localStorage.getItem('lisani_remember_me') === 'true';
-        const savedSession = localStorage.getItem('lisani_session_user');
-        if (!rememberMe || !savedSession) return;
+            try {
+                const ok = await reauthWithStoredCredentials(savedUser);
+                if (!ok && !window._loginDone) {
+                    document.getElementById('auth-container')?.classList.remove('hidden');
+                    document.getElementById('main-application-flow')?.classList.add('hidden');
+                }
+            } catch (e) {
+                if (!window._loginDone) {
+                    document.getElementById('auth-container')?.classList.remove('hidden');
+                    document.getElementById('main-application-flow')?.classList.add('hidden');
+                }
+            }
+        })();
 
-        try {
-            const savedUser = JSON.parse(savedSession);
-            const all = JSON.parse(localStorage.getItem('lisani_all_users') || '[]');
-            const found = all.find(
-                (u) => u.name && u.name.toLowerCase() === (savedUser.name || '').toLowerCase()
-            );
-            if (!found?.password) return;
-
-            const data = await apiFetch('/api/login', {
-                method: 'POST',
-                body: JSON.stringify({
-                    name: found.name,
-                    password: found.password,
-                    remember: true,
-                }),
-            });
-            const user = userFromApi(data.user);
-            user.password = found.password;
-            window._loginDone = true;
-            currentUserRole = user.role;
-            applyCsrfToken(data.csrf_token);
-            _saveUserLocally(user);
-            loginSuccess(user, true);
-        } catch (e) {}
+        return _sessionRestorePromise;
     }
 
     window.restoreServerSession = trySessionRestore;
+    window._resolveStoredPassword = resolveStoredPassword;
+
+    window.loadProgressFromServer = async function () {
+        if (currentUserRole === 'yonetici' || currentUserRole === 'hoca' || !window._loginDone) {
+            return null;
+        }
+        document.querySelectorAll('.lisani-stats-refresh-btn, .lisani-odev-refresh-btn').forEach((btn) => {
+            btn.classList.add('is-spinning');
+        });
+        try {
+            const data = await apiFetch('/api/progress');
+            if (typeof window.hydrateProgressFromServer === 'function') {
+                window.hydrateProgressFromServer(data);
+            }
+            return data;
+        } catch (e) {
+            return null;
+        } finally {
+            document.querySelectorAll('.lisani-stats-refresh-btn, .lisani-odev-refresh-btn').forEach((btn) => {
+                btn.classList.remove('is-spinning');
+            });
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        }
+    };
 
     window.syncProgressToServer = async function () {
-        if (!currentUser || currentUserRole === 'hoca') return;
-        if (typeof testHistory === 'undefined') return;
+        if (!currentUser || currentUserRole === 'hoca' || currentUserRole === 'yonetici') return;
+        const snap =
+            typeof window.getLisaniProgress === 'function'
+                ? window.getLisaniProgress()
+                : null;
+        if (!snap) return;
 
-        const solvedCount = testHistory.length;
+        const history = snap.testHistory || [];
+        const xp = snap.totalScore || 0;
+        const solvedCount = history.length;
         let totalSuccess = 0;
-        testHistory.forEach((r) => {
+        history.forEach((r) => {
             totalSuccess += r.percent;
         });
         const avgSuccess = solvedCount > 0 ? Math.round(totalSuccess / solvedCount) : 0;
-        const last = testHistory[testHistory.length - 1];
+        const last = history[history.length - 1];
 
         try {
             await apiFetch('/api/progress/sync', {
                 method: 'POST',
                 body: JSON.stringify({
-                    total_xp: typeof totalScore !== 'undefined' ? totalScore : 0,
+                    total_xp: xp,
                     tests_count: solvedCount,
                     avg_success: avgSuccess,
                     last_test: last
@@ -782,7 +1115,7 @@
                               percent: last.percent,
                           }
                         : null,
-                    recent_tests: testHistory.map((r) => ({
+                    recent_tests: history.map((r) => ({
                         date: r.date,
                         level: r.level,
                         test: r.test,
@@ -793,6 +1126,509 @@
                 }),
             });
         } catch (e) {}
+    };
+
+    function hocaDashStatCard(label, value, colorClass, trend, trendUp, sub) {
+        const trendCls = trendUp ? 'is-up' : 'is-down';
+        const arrow = trendUp ? '↑' : '↓';
+        return `
+        <div class="hoca-dash__stat hoca-dash__stat--${colorClass}">
+            <p class="hoca-dash__stat-label">${escapeHtml(label)}</p>
+            <p class="hoca-dash__stat-value">${value}</p>
+            ${trend ? `<span class="hoca-dash__stat-trend ${trendCls}">${arrow} ${trend}</span>` : ''}
+            ${sub ? `<p class="hoca-dash__stat-sub">${escapeHtml(sub)}</p>` : ''}
+        </div>`;
+    }
+
+    function buildHocaDashTrendPoints(ogrenciler) {
+        const buckets = {};
+        (ogrenciler || []).forEach((o) => {
+            (o.recentTests || o.analiz?.sinavlar || []).forEach((t) => {
+                const key = t.date || '—';
+                if (!buckets[key]) buckets[key] = { sum: 0, count: 0 };
+                buckets[key].sum += t.percent ?? 0;
+                buckets[key].count += 1;
+            });
+        });
+        return Object.entries(buckets)
+            .map(([date, v]) => ({ date, avg: Math.round(v.sum / v.count) }))
+            .slice(-12);
+    }
+
+    function renderHocaDashLineChart(ogrenciler) {
+        const svg = document.getElementById('hoca-dash-line-svg');
+        if (!svg) return;
+        const points = buildHocaDashTrendPoints(ogrenciler);
+        const w = 520;
+        const h = 220;
+        const mL = 36;
+        const mR = 16;
+        const mT = 24;
+        const mB = 32;
+        const uW = w - mL - mR;
+        const uH = h - mT - mB;
+        const bottom = h - mB;
+
+        if (!points.length) {
+            svg.innerHTML = `<text x="${w / 2}" y="${h / 2}" fill="#94a3b8" font-size="12" font-weight="600" text-anchor="middle">Henüz test verisi yok</text>`;
+            return;
+        }
+
+        let html = `<defs>
+            <linearGradient id="hd-line-grad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#7c5cfc" stop-opacity="0.45"/>
+                <stop offset="100%" stop-color="#7c5cfc" stop-opacity="0"/>
+            </linearGradient>
+            <linearGradient id="hd-line-grad2" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#e056a0" stop-opacity="0.35"/>
+                <stop offset="100%" stop-color="#e056a0" stop-opacity="0"/>
+            </linearGradient>
+        </defs>`;
+
+        [0, 50, 100].forEach((lvl) => {
+            const gy = bottom - (lvl / 100) * uH;
+            html += `<line x1="${mL}" y1="${gy}" x2="${w - mR}" y2="${gy}" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>`;
+            html += `<text x="${mL - 6}" y="${gy + 4}" fill="#64748b" font-size="9" text-anchor="end">%${lvl}</text>`;
+        });
+
+        const coords = points.map((p, i) => {
+            const x = points.length > 1 ? mL + (i / (points.length - 1)) * uW : mL + uW / 2;
+            const y = bottom - (p.avg / 100) * uH;
+            return { x, y, ...p };
+        });
+
+        let path1 = '';
+        coords.forEach((c, i) => {
+            if (i === 0) path1 = `M ${c.x} ${c.y}`;
+            else {
+                const p0 = coords[i - 1];
+                const cpX = p0.x + (c.x - p0.x) / 2;
+                path1 += ` C ${cpX} ${p0.y}, ${cpX} ${c.y}, ${c.x} ${c.y}`;
+            }
+        });
+
+        const area1 = `${path1} L ${coords[coords.length - 1].x} ${bottom} L ${coords[0].x} ${bottom} Z`;
+        html += `<path d="${area1}" fill="url(#hd-line-grad)"/>`;
+        html += `<path d="${path1}" fill="none" stroke="#7c5cfc" stroke-width="2.5" stroke-linecap="round"/>`;
+
+        const path2Coords = coords.map((c, i) => ({
+            x: c.x,
+            y: bottom - (Math.max(0, c.avg - 8 + (i % 3) * 3) / 100) * uH,
+        }));
+        let path2 = '';
+        path2Coords.forEach((c, i) => {
+            if (i === 0) path2 = `M ${c.x} ${c.y}`;
+            else {
+                const p0 = path2Coords[i - 1];
+                const cpX = p0.x + (c.x - p0.x) / 2;
+                path2 += ` C ${cpX} ${p0.y}, ${cpX} ${c.y}, ${c.x} ${c.y}`;
+            }
+        });
+        html += `<path d="${path2}" fill="none" stroke="#e056a0" stroke-width="2" stroke-linecap="round" opacity="0.85"/>`;
+
+        coords.forEach((c) => {
+            html += `<circle cx="${c.x}" cy="${c.y}" r="4" fill="#7c5cfc" stroke="#0c0f1f" stroke-width="2"/>`;
+            html += `<text x="${c.x}" y="${bottom + 14}" fill="#64748b" font-size="8" text-anchor="middle">${escapeHtml(String(c.date).slice(0, 5))}</text>`;
+        });
+
+        svg.innerHTML = html;
+    }
+
+    function renderHocaDashPie(svgId, legendId, slices) {
+        const svg = document.getElementById(svgId);
+        const legend = document.getElementById(legendId);
+        if (!svg) return;
+        const total = slices.reduce((s, x) => s + x.value, 0);
+        if (!total) {
+            svg.innerHTML = `<circle cx="50" cy="50" r="38" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.08)"/>`;
+            if (legend) legend.innerHTML = '<span class="hoca-dash__legend-item">Veri yok</span>';
+            return;
+        }
+        let angle = -Math.PI / 2;
+        let paths = '';
+        slices.forEach((sl) => {
+            if (!sl.value) return;
+            const sweep = (sl.value / total) * Math.PI * 2;
+            const x1 = 50 + 38 * Math.cos(angle);
+            const y1 = 50 + 38 * Math.sin(angle);
+            angle += sweep;
+            const x2 = 50 + 38 * Math.cos(angle);
+            const y2 = 50 + 38 * Math.sin(angle);
+            const large = sweep > Math.PI ? 1 : 0;
+            paths += `<path d="M 50 50 L ${x1} ${y1} A 38 38 0 ${large} 1 ${x2} ${y2} Z" fill="${sl.color}"/>`;
+        });
+        paths += `<circle cx="50" cy="50" r="20" fill="#171c35"/>`;
+        svg.innerHTML = paths;
+        if (legend) {
+            legend.innerHTML = slices
+                .filter((s) => s.value)
+                .map(
+                    (s) => `
+                <div class="hoca-dash__legend-item">
+                    <span class="hoca-dash__legend-dot" style="background:${s.color}"></span>
+                    <span>${escapeHtml(s.label)}</span>
+                    <strong style="margin-left:auto;color:#eef2ff">${s.value}</strong>
+                </div>`
+                )
+                .join('');
+        }
+    }
+
+    function renderHocaDashDoughnut(pct) {
+        const svg = document.getElementById('hoca-dash-doughnut');
+        const pctEl = document.getElementById('hoca-dash-donut-pct');
+        if (pctEl) pctEl.textContent = `%${pct}`;
+        if (!svg) return;
+        const r = 46;
+        const c = 2 * Math.PI * r;
+        const filled = (Math.min(100, Math.max(0, pct)) / 100) * c;
+        svg.innerHTML = `
+            <defs>
+                <linearGradient id="hd-donut-grad" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stop-color="#7c5cfc"/>
+                    <stop offset="100%" stop-color="#e056a0"/>
+                </linearGradient>
+            </defs>
+            <circle cx="60" cy="60" r="${r}" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="12"/>
+            <circle cx="60" cy="60" r="${r}" fill="none" stroke="url(#hd-donut-grad)" stroke-width="12"
+                stroke-dasharray="${filled} ${c - filled}" stroke-linecap="round"
+                transform="rotate(-90 60 60)"/>`;
+    }
+
+    function renderHocaDashSparklines(ozet) {
+        const el = document.getElementById('hoca-dash-sparklines');
+        if (!el) return;
+        const items = [
+            { label: 'Doğru', val: ozet.toplamDogru ?? 0, color: '#34d399' },
+            { label: 'Yanlış', val: ozet.toplamYanlis ?? 0, color: '#f87171' },
+            { label: 'Sınav', val: ozet.toplamSinav ?? 0, color: '#7c5cfc' },
+            { label: 'XP', val: ozet.toplamXp ?? 0, color: '#fbbf24' },
+        ];
+        el.innerHTML = items
+            .map((it) => {
+                const pts = [40, 55, 35, 60, 45, 70, 50];
+                const path = pts.map((p, i) => `${i === 0 ? 'M' : 'L'} ${4 + i * 8} ${24 - (p / 100) * 18}`).join(' ');
+                return `
+            <div class="hoca-dash__spark">
+                <p class="hoca-dash__spark-label">${escapeHtml(it.label)}</p>
+                <p class="hoca-dash__spark-val" style="color:${it.color}">${it.val}</p>
+                <svg viewBox="0 0 56 24"><path d="${path}" fill="none" stroke="${it.color}" stroke-width="1.5" opacity="0.8"/></svg>
+            </div>`;
+            })
+            .join('');
+    }
+
+    function renderHocaDashRecent(ogrenciler) {
+        const el = document.getElementById('hoca-dash-recent');
+        if (!el) return;
+        const events = [];
+        (ogrenciler || []).forEach((o) => {
+            const tests = o.recentTests || o.analiz?.sinavlar || [];
+            tests.slice(-3).forEach((t) => {
+                events.push({
+                    name: o.name,
+                    avatar: o.avatar,
+                    date: t.date,
+                    label: `S${t.level} · ${t.test || 'Test'}`,
+                    percent: t.percent ?? 0,
+                });
+            });
+        });
+        events.sort((a, b) => String(b.date).localeCompare(String(a.date)));
+        const top = events.slice(0, 8);
+        if (!top.length) {
+            el.innerHTML = '<p class="hoca-dash__card-sub text-center py-4">Henüz aktivite yok</p>';
+            return;
+        }
+        el.innerHTML = top
+            .map((e) => {
+                const cls = e.percent >= 80 ? 'is-good' : e.percent >= 60 ? 'is-mid' : 'is-low';
+                const av =
+                    typeof window.avatarSlotHtml === 'function'
+                        ? window.avatarSlotHtml(e.avatar, 'sm')
+                        : `<span>${e.avatar || '🎒'}</span>`;
+                return `
+            <div class="hoca-dash__recent-item">
+                <div class="hoca-dash__recent-avatar">${av}</div>
+                <div class="hoca-dash__recent-body">
+                    <p class="hoca-dash__recent-name">${escapeHtml(e.name)}</p>
+                    <p class="hoca-dash__recent-meta">${escapeHtml(e.label)} · ${escapeHtml(e.date || '')}</p>
+                </div>
+                <span class="hoca-dash__recent-score ${cls}">%${e.percent}</span>
+            </div>`;
+            })
+            .join('');
+    }
+
+    function renderHocaDashboardOzet(ozet, ogrenciler) {
+        const el = document.getElementById('hoca-dash-ozet');
+        if (!el) return;
+        const isYonetici = currentUserRole === 'yonetici';
+        const total = ozet.ogrenciSayisi || 0;
+        const aktifPct = total ? Math.round(((ozet.aktifOgrenci || 0) / total) * 100) : 0;
+        const pasif = Math.max(0, total - (ozet.aktifOgrenci || 0));
+
+        el.innerHTML = isYonetici
+            ? [
+                  hocaDashStatCard('Öğrenci', ozet.ogrenciSayisi ?? 0, 'purple', `${aktifPct}%`, aktifPct >= 50, 'Toplam kayıtlı'),
+                  hocaDashStatCard('Aktif', ozet.aktifOgrenci ?? 0, 'teal', `${aktifPct}%`, true, 'Son 7 gün'),
+                  hocaDashStatCard('Ort. Başarı', `%${ozet.ortalamaBasari ?? 0}`, 'pink', `${ozet.hocaSayisi ?? 0} hoca`, true, 'Tüm uygulama'),
+                  hocaDashStatCard('Sınav', ozet.toplamSinav ?? 0, 'yellow', `${ozet.sinifSayisi ?? 0} sınıf`, true, 'Toplam çözülen'),
+              ].join('')
+            : [
+                  hocaDashStatCard('Öğrenci', ozet.ogrenciSayisi ?? 0, 'purple', `${aktifPct}%`, aktifPct >= 40, 'Sınıfınızda'),
+                  hocaDashStatCard('Aktif', ozet.aktifOgrenci ?? 0, 'teal', pasif ? `${pasif} pasif` : 'Hepsi aktif', (ozet.aktifOgrenci || 0) >= pasif, 'Son 7 gün'),
+                  hocaDashStatCard('Ort. Başarı', `%${ozet.ortalamaBasari ?? 0}`, 'pink', `${ozet.toplamDogru ?? 0} doğru`, (ozet.ortalamaBasari || 0) >= 60, 'Sınıf ortalaması'),
+                  hocaDashStatCard('Toplam XP', ozet.toplamXp ?? 0, 'yellow', `${ozet.toplamSinav ?? 0} sınav`, true, 'Birikimli puan'),
+              ].join('');
+
+        renderHocaDashLineChart(ogrenciler || []);
+        renderHocaDashDoughnut(ozet.ortalamaBasari ?? 0);
+        renderHocaDashSparklines(ozet);
+
+        const gradeBuckets = { yuksek: 0, orta: 0, dusuk: 0, yok: 0 };
+        const activityCounts = { aktif: 0, orta: 0, pasif: 0 };
+        (ogrenciler || []).forEach((o) => {
+            const a = o.avgSuccess || 0;
+            if (!o.testsCount) gradeBuckets.yok += 1;
+            else if (a >= 80) gradeBuckets.yuksek += 1;
+            else if (a >= 60) gradeBuckets.orta += 1;
+            else gradeBuckets.dusuk += 1;
+            const st = o.activityStatus || 'pasif';
+            activityCounts[st] = (activityCounts[st] || 0) + 1;
+        });
+        renderHocaDashPie('hoca-dash-pie-activity', 'hoca-dash-pie-activity-legend', [
+            { label: 'Aktif', value: activityCounts.aktif, color: '#34d399' },
+            { label: 'Orta', value: activityCounts.orta, color: '#fbbf24' },
+            { label: 'Pasif', value: activityCounts.pasif, color: '#64748b' },
+        ]);
+        renderHocaDashPie('hoca-dash-pie-grades', 'hoca-dash-pie-grades-legend', [
+            { label: '≥ %80', value: gradeBuckets.yuksek, color: '#7c5cfc' },
+            { label: '%60–79', value: gradeBuckets.orta, color: '#e056a0' },
+            { label: '< %60', value: gradeBuckets.dusuk, color: '#f87171' },
+            { label: 'Veri yok', value: gradeBuckets.yok, color: '#475569' },
+        ]);
+        renderHocaDashRecent(ogrenciler || []);
+        const countEl = document.getElementById('hoca-dash-student-count');
+        if (countEl) countEl.textContent = `${(ogrenciler || []).length} öğrenci`;
+    }
+
+    function renderHocaDashboardStudents(ogrenciler, filter) {
+        const list = document.getElementById('hoca-dash-students');
+        if (!list) return;
+
+        const q = (filter || '').trim().toLowerCase();
+        const filtered = q
+            ? (ogrenciler || []).filter((o) => (o.name || '').toLowerCase().includes(q))
+            : ogrenciler || [];
+
+        if (!filtered.length) {
+            list.innerHTML = q
+                ? '<p class="hoca-dash__card-sub text-center py-8">Arama sonucu bulunamadı</p>'
+                : '<div class="text-center py-8"><p class="text-3xl mb-2">👥</p><p class="hoca-dash__card-sub">Henüz öğrenci yok.<br>Sınıf kodunu öğrencilerinize verin.</p></div>';
+            return;
+        }
+
+        list.innerHTML = filtered
+            .map((o) => {
+                const barW = Math.min(100, o.avgSuccess || 0);
+                const analiz = o.analiz || {};
+                const lastTest = o.lastTestLabel
+                    ? `<p class="hoca-dash__recent-meta mt-1 truncate">Son: ${escapeHtml(o.lastTestLabel)}${o.lastTestPercent != null ? ' · %' + o.lastTestPercent : ''}</p>`
+                    : '<p class="hoca-dash__recent-meta mt-1">Henüz sınav çözmedi</p>';
+                const sinifLine =
+                    currentUserRole === 'yonetici' && (o.sinifAdi || o.hocaAdi)
+                        ? `<p class="hoca-dash__recent-meta truncate">${escapeHtml(o.sinifAdi || '—')}${o.hocaAdi ? ' · ' + escapeHtml(o.hocaAdi) : ''}</p>`
+                        : '';
+                const scoreCls = (o.avgSuccess || 0) >= 80 ? 'is-good' : (o.avgSuccess || 0) >= 60 ? 'is-mid' : 'is-low';
+                return `
+            <div class="hoca-dash-student-card" data-student-uid="${o.uid}">
+                <div class="flex items-start gap-3">
+                    ${typeof window.avatarSlotHtml === 'function' ? window.avatarSlotHtml(o.avatar) : `<span class="text-2xl flex-shrink-0">${o.avatar || ''}</span>`}
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center justify-between gap-2">
+                            <span class="hoca-dash__recent-name">${escapeHtml(o.name)}</span>
+                            <span class="hoca-dash__recent-score ${scoreCls}">%${o.avgSuccess || 0}</span>
+                        </div>
+                        ${sinifLine}
+                        <div class="flex items-center gap-2 mt-0.5">
+                            ${statusBadge(o.activityStatus)}
+                            <span class="hoca-dash__recent-meta">${formatLastActive(o.lastActiveAt)}</span>
+                        </div>
+                        ${lastTest}
+                        <div class="mt-2 h-1.5 rounded-full bg-black/30 overflow-hidden">
+                            <div class="h-full rounded-full" style="width:${barW}%;background:linear-gradient(90deg,#7c5cfc,#e056a0)"></div>
+                        </div>
+                        <div class="flex flex-wrap gap-x-3 gap-y-1 mt-2 text-[9px] font-bold">
+                            <span style="color:#fbbf24">${o.totalXp || 0} XP</span>
+                            <span class="hoca-dash__recent-meta">${o.testsCount || 0} sınav</span>
+                            <span style="color:#34d399">✓ ${analiz.toplamDogru ?? 0}</span>
+                            <span style="color:#f87171">✗ ${analiz.toplamYanlis ?? 0}</span>
+                        </div>
+                        <button type="button" onclick="toggleOgrenciRapor('${o.uid}')" class="hoca-dash__link-btn w-full mt-2 py-1.5" style="background:rgba(224,86,160,0.15);color:#e056a0">
+                            Analiz Raporu
+                        </button>
+                        <div id="ogrenci-rapor-${o.uid}" class="hidden mt-2">
+                            ${renderOgrenciAnalizTable(analiz)}
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+            })
+            .join('');
+    }
+
+    function renderHocaDashboardSinif(data) {
+        const isHoca = currentUserRole === 'hoca';
+        const isYonetici = currentUserRole === 'yonetici';
+
+        ['hoca-dash-nav-odev', 'hoca-dash-nav-kod', 'hoca-dash-mob-odev', 'hoca-dash-mob-kod'].forEach((id) => {
+            const el = document.getElementById(id);
+            if (el) el.classList.toggle('hidden', isYonetici);
+        });
+
+        const title = document.getElementById('hoca-dash-title');
+        const subtitle = document.getElementById('hoca-dash-subtitle');
+        const meta = document.getElementById('hoca-dash-list-meta');
+        const userName = document.getElementById('hoca-dash-user-name');
+        const userRole = document.getElementById('hoca-dash-user-role');
+        const userAvatar = document.getElementById('hoca-dash-user-avatar');
+        const cu = window.currentUser || currentUser;
+
+        if (userName && cu?.name) userName.textContent = cu.name;
+        if (userRole) userRole.textContent = isYonetici ? 'Uygulama Yöneticisi' : 'Sınıf Hocası';
+        if (userAvatar) {
+            if (typeof window.avatarSlotHtml === 'function' && cu?.avatar) {
+                userAvatar.innerHTML = window.avatarSlotHtml(cu.avatar);
+            } else {
+                userAvatar.textContent = cu?.avatar || (isYonetici ? '👑' : '📚');
+            }
+        }
+
+        if (isYonetici) {
+            if (title) title.textContent = 'Dashboard';
+            if (subtitle) {
+                subtitle.textContent = `Tüm uygulama · ${data.ozet?.hocaSayisi ?? 0} hoca · ${data.ozet?.sinifSayisi ?? 0} sınıf`;
+            }
+            if (meta) meta.textContent = 'Tüm sınıflardan öğrenciler · XP sırasına göre';
+        } else {
+            if (title) title.textContent = 'Dashboard';
+            const sinif = data.sinif || {};
+            if (subtitle) {
+                subtitle.textContent = sinif.sinifAdi
+                    ? `${sinif.sinifAdi} · Kod: ${sinif.kisaKod || '—'}`
+                    : 'Sınıf bilgisi yükleniyor...';
+            }
+            if (meta) meta.textContent = sinif.sinifAdi ? `${sinif.sinifAdi} öğrencileri` : 'Öğrenci listesi';
+
+            const adEl = document.getElementById('hoca-dash-sinif-adi');
+            const kodEl = document.getElementById('hoca-dash-sinif-kod');
+            if (adEl) adEl.textContent = sinif.sinifAdi || '—';
+            if (kodEl) kodEl.textContent = sinif.kisaKod || '———';
+            window._hocaDashSinifKod = sinif.kisaKod || '';
+
+            const odevlerEl = document.getElementById('hoca-dash-odevler');
+            if (odevlerEl) {
+                const odevler = sinif.odevler || [];
+                if (!odevler.length) {
+                    odevlerEl.innerHTML = '<p class="hoca-dash__card-sub text-center py-3">Henüz ödev atanmadı.</p>';
+                } else {
+                    odevlerEl.innerHTML = odevler
+                        .slice(-8)
+                        .reverse()
+                        .map(
+                            (o) => `
+                        <div class="hoca-dash__recent-item">
+                            <div class="hoca-dash__recent-avatar"><i data-lucide="clipboard-list" class="w-3.5 h-3.5"></i></div>
+                            <div class="hoca-dash__recent-body">
+                                <p class="hoca-dash__recent-name">${escapeHtml(formatOdevLabel(o))}</p>
+                                <p class="hoca-dash__recent-meta">${escapeHtml(o.tarih || '')}</p>
+                            </div>
+                        </div>`
+                        )
+                        .join('');
+                }
+            }
+        }
+    }
+
+    function renderHocaDashboard(data) {
+        if (!data) return;
+        window._hocaDashCache = data;
+        renderHocaDashboardOzet(data.ozet || {}, data.ogrenciler || []);
+        renderHocaDashboardSinif(data);
+        const search = document.getElementById('hoca-dash-search');
+        renderHocaDashboardStudents(data.ogrenciler || [], search ? search.value : '');
+    }
+
+    window.hocaDashSwitchPanel = function (panelId) {
+        document.querySelectorAll('.hoca-dash__panel').forEach((p) => p.classList.remove('is-active'));
+        document.querySelectorAll('[data-hoca-dash-panel]').forEach((btn) => {
+            btn.classList.toggle('is-active', btn.getAttribute('data-hoca-dash-panel') === panelId);
+        });
+        const panel = document.getElementById(`hoca-dash-panel-${panelId}`);
+        if (panel) panel.classList.add('is-active');
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+    };
+
+    window.hocaDashFilterStudents = function (query) {
+        const data = window._hocaDashCache || window._hocaProgressCache;
+        if (!data) return;
+        if (query && query.trim()) hocaDashSwitchPanel('students');
+        renderHocaDashboardStudents(data.ogrenciler || [], query);
+    };
+
+    window.openHocaDashboard = function () {
+        if (currentUserRole !== 'hoca' && currentUserRole !== 'yonetici') {
+            showToast('Bu ekran sadece hoca ve yönetici hesapları içindir.', 'error');
+            return;
+        }
+        if (typeof hocaDashSwitchPanel === 'function') hocaDashSwitchPanel('overview');
+        if (typeof switchTab === 'function') switchTab('hoca-dashboard');
+    };
+
+    window.loadHocaDashboard = function (forceRefresh) {
+        return window.loadHocaProgressView(forceRefresh);
+    };
+
+    window.copyHocaDashSinifKodu = function () {
+        const kod = window._hocaDashSinifKod || '';
+        if (!kod) {
+            showToast('Sınıf kodu henüz yüklenmedi.', 'error');
+            return;
+        }
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(kod).then(
+                () => showToast('Sınıf kodu kopyalandı: ' + kod, 'success'),
+                () => showToast('Kopyalanamadı. Kod: ' + kod, 'error')
+            );
+        } else {
+            showToast('Sınıf kodu: ' + kod, 'success');
+        }
+    };
+
+    window.loadHocaProgressView = async function (forceRefresh) {
+        if ((currentUserRole !== 'hoca' && currentUserRole !== 'yonetici') || !window._loginDone) return null;
+
+        const endpoint =
+            currentUserRole === 'yonetici' ? '/api/yonetici/takip' : '/api/hoca/ogrenci-takip';
+
+        document.querySelectorAll('.lisani-stats-refresh-btn').forEach((btn) => btn.classList.add('is-spinning'));
+        try {
+            const data = await apiFetch(endpoint);
+            window._hocaProgressCache = data;
+            renderHocaDashboard(data);
+            return data;
+        } catch (e) {
+            const dashList = document.getElementById('hoca-dash-students');
+            if (dashList) {
+                dashList.innerHTML = `<p class="text-[10px] text-red-400 text-center py-4">${escapeHtml(e.message || 'Veri yüklenemedi')}</p>`;
+            }
+            return null;
+        } finally {
+            document.querySelectorAll('.lisani-stats-refresh-btn').forEach((btn) => btn.classList.remove('is-spinning'));
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        }
     };
 
     function renderOdevlerList(containerId, data) {
@@ -827,7 +1663,7 @@
                     ? '<span class="text-[8px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full bg-[rgba(127,168,138,0.15)] text-[#7fa88a] border border-[rgba(127,168,138,0.25)]">Test</span>'
                     : '';
                 return `
-            <div class="glass-card-interactive rounded-xl p-3 border theme-border${interactive}"
+            <div class="lisani-glass-panel lisani-glass-card rounded-xl p-3 border theme-border${interactive}"
                 ${testOdev ? `data-odev-index="${idx}" role="button" tabindex="0"` : ''}>
                 <div class="flex items-start justify-between gap-2">
                     <div class="flex-1 min-w-0">
@@ -888,8 +1724,8 @@
                 <p class="text-xs theme-text-muted text-center mt-2 leading-relaxed">${escapeHtml(label || `Seviye ${level} — ${test}`)}</p>
                 <p class="text-[10px] theme-text-muted text-center mt-1 opacity-80">Evet derseniz test hemen başlar.</p>
                 <div class="flex gap-2.5 mt-5">
-                    <button type="button" class="flex-1 py-2.5 rounded-xl text-xs font-semibold border theme-border theme-text-muted hover:opacity-90 transition-all" data-odev-dismiss>Hayır</button>
-                    <button type="button" class="flex-1 py-2.5 theme-primary-btn rounded-xl text-xs font-bold" id="odev-confirm-yes">Evet</button>
+                    <button type="button" class="flex-1 py-2.5 lisani-glass-action rounded-xl text-xs font-bold theme-text-muted" data-odev-dismiss>Hayır</button>
+                    <button type="button" class="flex-1 py-2.5 lisani-glass-action lisani-glass-action--primary rounded-xl text-xs font-bold" id="odev-confirm-yes">Evet</button>
                 </div>
             </div>`;
         modal.classList.remove('hidden');
@@ -920,17 +1756,37 @@
     };
 
     window.loadOgrenciOdevler = async function () {
-        if (currentUserRole === 'hoca' || !window._loginDone) return;
+        if (currentUserRole === 'hoca' || currentUserRole === 'yonetici' || !window._loginDone) return;
         try {
             const data = await apiFetch('/api/odevler');
             renderOdevlerList('home-odevler-list', data);
             renderOdevlerList('settings-odevler-list', data);
+            return data;
         } catch (e) {
-            const msg = `<p class="text-[10px] text-red-400 text-center py-2">${e.message}</p>`;
+            const msg = `<p class="text-[10px] text-red-400 text-center py-2">${escapeHtml(e.message)}</p>`;
             const h = document.getElementById('home-odevler-list');
             const s = document.getElementById('settings-odevler-list');
             if (h) h.innerHTML = msg;
             if (s) s.innerHTML = msg;
+            throw e;
+        }
+    };
+
+    window.refreshOdevler = async function () {
+        if (currentUserRole === 'hoca' || !window._loginDone) {
+            showToast('Ödevleri görmek için öğrenci olarak giriş yapın.', 'error');
+            return;
+        }
+        playClickSound();
+        document.querySelectorAll('.lisani-odev-refresh-btn').forEach((btn) => btn.classList.add('is-spinning'));
+        try {
+            await window.loadOgrenciOdevler();
+            showToast('Ödevler güncellendi.', 'success');
+        } catch (e) {
+            showToast(e.message || 'Ödevler yenilenemedi.', 'error');
+        } finally {
+            document.querySelectorAll('.lisani-odev-refresh-btn').forEach((btn) => btn.classList.remove('is-spinning'));
+            if (typeof lucide !== 'undefined') lucide.createIcons();
         }
     };
 
@@ -968,6 +1824,7 @@
             });
             const user = userFromApi(data.user);
             currentUser = user;
+            window.currentUser = user;
             _saveUserLocally(user);
             updateOgrenciSinifUI(user);
             loadOgrenciOdevler();
@@ -981,29 +1838,62 @@
     };
 
     function updateRoleBasedUI(user) {
-        const isHoca = (user?.role || currentUserRole) === 'hoca';
-        const isOgrenci = !isHoca;
+        const role = user?.role || currentUserRole;
+        const isYonetici = role === 'yonetici';
+        const isHoca = role === 'hoca';
+        const isOgrenci = role === 'ogrenci';
+        const yoneticiCard = document.getElementById('home-yonetici-card');
+        const yoneticiRow = document.getElementById('settings-yonetici-row');
         const hocaCard = document.getElementById('home-hoca-takip-card');
         const hocaRow = document.getElementById('settings-hoca-takip-row');
+        const hocaCardTitle = document.getElementById('home-hoca-takip-title');
+        const hocaCardSub = document.getElementById('home-hoca-takip-sub');
         const odevCard = document.getElementById('home-odevler-card');
         const odevSettings = document.getElementById('settings-odevler-block');
         const mesajCard = document.getElementById('home-mesajlar-card');
         const mesajRow = document.getElementById('settings-mesajlar-row');
-        if (hocaCard) hocaCard.classList.toggle('hidden', !isHoca);
-        if (hocaRow) hocaRow.classList.toggle('hidden', !isHoca);
+        if (yoneticiCard) yoneticiCard.classList.toggle('hidden', !isYonetici);
+        if (yoneticiRow) yoneticiRow.classList.toggle('hidden', !isYonetici);
+        if (hocaCard) hocaCard.classList.toggle('hidden', !(isHoca || isYonetici));
+        if (hocaRow) hocaRow.classList.toggle('hidden', !(isHoca || isYonetici));
+        if (hocaCardTitle) {
+            hocaCardTitle.textContent = isYonetici ? 'Öğrenci Performans Dashboard' : 'Öğrenci Dashboard';
+        }
+        if (hocaCardSub) {
+            hocaCardSub.textContent = isYonetici
+                ? 'Tüm sınıfların performans özeti'
+                : 'Sınıf performanslarını tablo halinde izleyin';
+        }
         if (odevCard) odevCard.classList.toggle('hidden', !isOgrenci);
         if (odevSettings) odevSettings.classList.toggle('hidden', !isOgrenci);
-        if (mesajCard) mesajCard.classList.remove('hidden');
-        if (mesajRow) mesajRow.classList.remove('hidden');
+        if (mesajCard) mesajCard.classList.toggle('hidden', isYonetici);
+        if (mesajRow) mesajRow.classList.toggle('hidden', isYonetici);
         const sub = document.getElementById('home-mesajlar-sub');
         if (sub) {
             sub.textContent = isHoca
                 ? 'Öğrencilerinizle yazışın'
-                : user?.sinifKodu
-                  ? 'Hocanızla yazışın'
-                  : 'Önce sınıfa katılın (Ayarlar)';
+                : isYonetici
+                  ? 'Yönetici hesabında mesajlaşma kapalı'
+                  : user?.sinifKodu
+                    ? 'Hocanızla yazışın'
+                    : 'Önce sınıfa katılın (Ayarlar)';
         }
         updateOgrenciSinifUI(user);
+        const testsHocaHint = document.getElementById('tests-hoca-hint');
+        const testsStudentHint = document.getElementById('tests-student-hint');
+        if (testsHocaHint) testsHocaHint.classList.toggle('hidden', !isHoca);
+        if (testsStudentHint) testsStudentHint.classList.toggle('hidden', isHoca || isYonetici);
+        const tabAi = document.getElementById('tab-ai');
+        const tabTests = document.getElementById('tab-tests');
+        const tabHocaDash = document.getElementById('tab-hoca-dashboard');
+        if (tabAi) tabAi.classList.toggle('hidden', isHoca || isYonetici);
+        if (tabTests) tabTests.classList.toggle('hidden', isHoca || isYonetici);
+        if (tabHocaDash) tabHocaDash.classList.toggle('hidden', !(isHoca || isYonetici));
+        if (typeof updateTestsTabForRole === 'function') updateTestsTabForRole();
+        if (typeof updateGelisimScreenForRole === 'function') updateGelisimScreenForRole();
+        if ((isHoca || isYonetici) && typeof window.loadHocaProgressView === 'function') {
+            setTimeout(() => window.loadHocaProgressView(), 500);
+        }
         if (isOgrenci) {
             setTimeout(() => window.loadOgrenciOdevler(), 400);
         }
@@ -1024,8 +1914,27 @@
     }
 
     function formatAvatarHtml(avatar) {
-        if (avatar && avatar.includes('<img')) return avatar;
-        return `<span class="text-2xl">${escapeHtml(avatar || '🐱')}</span>`;
+        if (typeof window.formatAvatarForDisplay === 'function') {
+            return window.formatAvatarForDisplay(avatar);
+        }
+        if (avatar && avatar.includes('<img')) {
+            const srcMatch = avatar.match(/src="([^"]+)"/);
+            if (srcMatch) {
+                return `<img src="${srcMatch[1]}" class="lisani-avatar-img" alt="" />`;
+            }
+            return avatar;
+        }
+        if (typeof window.resolveLegacyAvatar === 'function') {
+            const resolved = window.resolveLegacyAvatar(avatar, null);
+            if (resolved && resolved.includes('<img')) {
+                const srcMatch = resolved.match(/src="([^"]+)"/);
+                if (srcMatch) {
+                    return `<img src="${srcMatch[1]}" class="lisani-avatar-img object-cover" alt="" />`;
+                }
+                return resolved;
+            }
+        }
+        return `<span class="text-lg leading-none">${escapeHtml(avatar || '')}</span>`;
     }
 
     function formatWaDateLabel(dateStr) {
@@ -1078,15 +1987,32 @@
         });
     }
 
-    window.refreshMesajBadge = async function () {
-        if (!window._loginDone) return;
-        try {
-            const data = await apiFetch('/api/messages/unread-count');
-            updateMesajBadges(data.unreadTotal || 0);
-            const contactsData = await apiFetch('/api/messages/contacts');
-            _waContactsCache = contactsData.contacts || [];
-            updateMesajHomePreview(_waContactsCache);
-        } catch (e) {}
+    window.refreshMesajBadge = function () {
+        if (!window._loginDone) return Promise.resolve();
+        if (_mesajBadgeTimer) clearTimeout(_mesajBadgeTimer);
+        return new Promise((resolve) => {
+            _mesajBadgeTimer = setTimeout(async () => {
+                if (_mesajBadgeInFlight) {
+                    resolve(await _mesajBadgeInFlight);
+                    return;
+                }
+                _mesajBadgeInFlight = (async () => {
+                    try {
+                        const data = await apiFetch('/api/messages/unread-count');
+                        updateMesajBadges(data.unreadTotal || 0);
+                        const contactsData = await apiFetch('/api/messages/contacts');
+                        _waContactsCache = contactsData.contacts || [];
+                        updateMesajHomePreview(_waContactsCache);
+                    } catch (e) {}
+                })();
+                try {
+                    await _mesajBadgeInFlight;
+                } finally {
+                    _mesajBadgeInFlight = null;
+                }
+                resolve();
+            }, 500);
+        });
     };
 
     function stopWaPolling() {
@@ -1136,10 +2062,18 @@
         }
     }
 
+    function waGlassBlobsHtml() {
+        return `<div class="lisani-glass-blobs" aria-hidden="true">
+            <span class="lisani-glass-blob lisani-glass-blob--1"></span>
+            <span class="lisani-glass-blob lisani-glass-blob--2"></span>
+            <span class="lisani-glass-blob lisani-glass-blob--3"></span>
+        </div>`;
+    }
+
     function renderWaList(contacts) {
         if (!contacts.length) {
             return `<div class="flex flex-col items-center justify-center flex-1 px-6 text-center wa-empty-state">
-                <div class="w-16 h-16 rounded-full flex items-center justify-center mb-4" style="background:rgba(127,168,138,0.12);border:1px solid rgba(127,168,138,0.25)">
+                <div class="w-16 h-16 rounded-full lisani-glass-panel flex items-center justify-center mb-4">
                     <i data-lucide="message-circle" class="w-8 h-8 home-accent-text"></i>
                 </div>
                 <p class="text-sm font-semibold theme-text-main">Henüz sohbet yok</p>
@@ -1158,7 +2092,7 @@
                     : '<span class="italic opacity-60">Mesaj yok — sohbeti başlatın</span>';
                 const roleLabel = c.role === 'hoca' ? 'Hoca' : 'Öğrenci';
                 const unreadCls = c.unreadCount > 0 ? ' wa-list-item--unread' : '';
-                return `<button type="button" data-wa-partner="${c.uid}" data-wa-name="${escapeHtml(c.name)}" class="wa-list-item wa-contact-btn w-full flex items-center gap-3 px-4 py-3.5 text-left${unreadCls}">
+                return `<button type="button" data-wa-partner="${c.uid}" data-wa-name="${escapeHtml(c.name)}" class="wa-contact-btn wa-contact-card w-full flex items-center gap-3 px-4 py-3.5 text-left rounded-2xl${unreadCls}">
                     <div class="w-12 h-12 rounded-full wa-contact-avatar flex items-center justify-center flex-shrink-0 overflow-hidden">${formatAvatarHtml(c.avatar)}</div>
                     <div class="flex-1 min-w-0">
                         <div class="flex justify-between items-center gap-2 mb-0.5">
@@ -1188,7 +2122,7 @@
             const dateLabel = formatWaDateLabel(m.date);
             if (dateLabel !== lastDate) {
                 lastDate = dateLabel;
-                html += `<div class="text-center my-3"><span class="wa-date-chip">${escapeHtml(dateLabel)}</span></div>`;
+                html += `<div class="text-center my-3"><span class="wa-date-chip lisani-glass-panel">${escapeHtml(dateLabel)}</span></div>`;
             }
             html += renderWaBubble(m.body, m.isMine, m.time, m.read, false);
         });
@@ -1200,8 +2134,8 @@
 
     function renderWaBubble(body, isMine, time, read, pending) {
         const cls = isMine
-            ? 'wa-bubble-sent ml-auto' + (pending ? ' wa-bubble--pending' : '')
-            : 'wa-bubble-received mr-auto';
+            ? 'wa-bubble-sent wa-bubble-glass wa-bubble-glass--sent lisani-glass-panel ml-auto' + (pending ? ' wa-bubble--pending' : '')
+            : 'wa-bubble-received wa-bubble-glass lisani-glass-panel mr-auto';
         const tick = isMine && !pending
             ? read
                 ? '<span class="wa-tick-read ml-1">✓✓</span>'
@@ -1216,9 +2150,11 @@
     }
 
     function waSearchBarHtml() {
-        return `<div class="wa-search-wrap relative">
-            <i data-lucide="search" class="w-4 h-4 absolute left-7 top-1/2 -translate-y-1/2 wa-empty-state pointer-events-none"></i>
-            <input type="search" id="wa-search-input" class="wa-search-input" placeholder="Kişi veya mesaj ara..." autocomplete="off" />
+        return `<div class="wa-search-wrap px-3 pt-2 pb-2 flex-shrink-0">
+            <div class="relative lisani-glass-panel rounded-xl px-3 py-2 flex items-center gap-2">
+                <i data-lucide="search" class="w-4 h-4 theme-text-muted shrink-0 pointer-events-none"></i>
+                <input type="search" id="wa-search-input" class="wa-search-input flex-1 min-w-0 bg-transparent border-0 outline-none text-xs theme-text-main" placeholder="Kişi veya mesaj ara..." autocomplete="off" />
+            </div>
         </div>`;
     }
 
@@ -1297,9 +2233,14 @@
         if (el) return el;
         el = document.createElement('div');
         el.id = 'wa-mesajlar-overlay';
+        el.className = 'lisani-wa-overlay';
         el.setAttribute('role', 'dialog');
         el.setAttribute('aria-modal', 'true');
-        const host = document.getElementById('app-container') || document.body;
+        el.setAttribute('aria-label', 'Mesajlar');
+        const host =
+            document.getElementById('main-application-flow') ||
+            document.getElementById('app-container') ||
+            document.body;
         host.appendChild(el);
         document.addEventListener('keydown', onWaEscapeKey);
         return el;
@@ -1308,10 +2249,15 @@
     function renderWaShell(innerHtml, headerHtml, headerMode) {
         const el = ensureWaOverlay();
         el.innerHTML = `
-            <div class="wa-overlay-inner">
-                <div class="wa-header flex items-center gap-2 px-3 py-3">${headerHtml}</div>
-                <div class="wa-body">${innerHtml}</div>
+            <div class="wa-overlay-inner lisani-wa-glass">
+                <div class="wa-header wa-glass-header lisani-glass-panel flex items-center gap-2 px-3 py-3">${headerHtml}</div>
+                <div class="wa-body wa-glass-body lisani-glass-scene">
+                    ${waGlassBlobsHtml()}
+                    <div class="lisani-glass-scene__content lisani-wa-scene-content flex flex-col flex-1 min-h-0">${innerHtml}</div>
+                </div>
             </div>`;
+        el.style.display = 'flex';
+        el.setAttribute('aria-hidden', 'false');
         bindWaHeaderButtons(headerMode || 'list');
         el.querySelectorAll('.wa-contact-btn').forEach((btn) => {
             btn.addEventListener('click', () => {
@@ -1325,7 +2271,7 @@
     function waListHeaderHtml() {
         const count = _waContactsCache.length;
         return `
-            <button type="button" id="wa-btn-close" aria-label="Kapat" class="wa-header-btn w-10 h-10 rounded-full flex items-center justify-center">
+            <button type="button" id="wa-btn-close" aria-label="Kapat" class="wa-header-btn lisani-glass-action lisani-glass-action--icon !w-10 !h-10 !p-0 !min-w-0 flex items-center justify-center">
                 <i data-lucide="x" class="w-5 h-5"></i>
             </button>
             <div class="flex-1 min-w-0 px-1">
@@ -1336,22 +2282,22 @@
 
     function waChatHeaderHtml(p) {
         return `
-            <button type="button" id="wa-btn-back" aria-label="Geri" class="wa-header-btn w-10 h-10 rounded-full flex items-center justify-center">
+            <button type="button" id="wa-btn-back" aria-label="Geri" class="wa-header-btn lisani-glass-action lisani-glass-action--icon !w-10 !h-10 !p-0 !min-w-0 flex items-center justify-center">
                 <i data-lucide="arrow-left" class="w-5 h-5"></i>
             </button>
-            <div class="w-10 h-10 rounded-full wa-contact-avatar flex items-center justify-center overflow-hidden flex-shrink-0">${formatAvatarHtml(p.avatar)}</div>
+            <div class="w-10 h-10 rounded-full wa-contact-avatar lisani-glass-panel !p-0 flex items-center justify-center overflow-hidden flex-shrink-0">${formatAvatarHtml(p.avatar)}</div>
             <div class="flex-1 min-w-0">
                 <h2 class="text-sm font-bold theme-text-main truncate">${escapeHtml(p.name)}</h2>
                 <p class="text-[10px] theme-text-muted">${p.role === 'hoca' ? 'Hoca · Çevrimiçi' : 'Öğrenci · Sınıf sohbeti'}</p>
             </div>
-            <button type="button" id="wa-btn-close" aria-label="Kapat" class="wa-header-btn w-10 h-10 rounded-full flex items-center justify-center">
+            <button type="button" id="wa-btn-close" aria-label="Kapat" class="wa-header-btn lisani-glass-action lisani-glass-action--icon !w-10 !h-10 !p-0 !min-w-0 flex items-center justify-center">
                 <i data-lucide="x" class="w-5 h-5"></i>
             </button>`;
     }
 
     function waQuickRepliesHtml() {
         return getWaQuickReplies()
-            .map((t) => `<button type="button" class="wa-quick-reply">${escapeHtml(t)}</button>`)
+            .map((t) => `<button type="button" class="wa-quick-reply lisani-glass-action lisani-glass-action--compact !w-auto !inline-flex shrink-0">${escapeHtml(t)}</button>`)
             .join('');
     }
 
@@ -1362,7 +2308,7 @@
         updateMesajHomePreview(_waContactsCache);
         const listHtml = renderWaList(_waContactsCache);
         renderWaShell(
-            `${waSearchBarHtml()}<div id="wa-contacts-list" class="flex-1 overflow-y-auto min-h-0">${listHtml}</div>`,
+            `${waSearchBarHtml()}<div id="wa-contacts-list" class="wa-contacts-scene flex-1 overflow-y-auto min-h-0 px-3 pb-3 space-y-2">${listHtml}</div>`,
             waListHeaderHtml(),
             'list'
         );
@@ -1371,7 +2317,15 @@
 
     window.showMesajlar = async function () {
         playClickSound();
-        const user = await ensureServerSession();
+        if (!window._loginDone) {
+            showToast('Mesajlar için giriş yapın.', 'error');
+            forceAuthScreen();
+            return;
+        }
+        let user = currentUser || window.currentUser;
+        if (!user) {
+            user = await ensureServerSession();
+        }
         if (!user) {
             showToast('Mesajlar için giriş yapın.', 'error');
             forceAuthScreen();
@@ -1386,6 +2340,16 @@
             hideLoading();
         } catch (e) {
             hideLoading();
+            renderWaShell(
+                `<div class="flex flex-1 items-center justify-center px-6 py-10 text-center wa-empty-state">
+                    <div>
+                        <p class="text-sm font-semibold theme-text-main mb-1">Mesajlar açılamadı</p>
+                        <p class="text-[11px] leading-relaxed">${escapeHtml(e.message || 'Bağlantı hatası. Tekrar deneyin.')}</p>
+                    </div>
+                </div>`,
+                waListHeaderHtml(),
+                'list'
+            );
             showToast(e.message || 'Mesajlar yüklenemedi.', 'error');
         }
     };
@@ -1416,10 +2380,10 @@
             renderWaShell(
                 `<div class="flex flex-col flex-1 min-h-0 h-full">
                     <div id="wa-messages-box" class="wa-chat-bg flex-1 min-h-0 overflow-y-auto px-3 py-4">${renderWaMessages(data.messages || [])}</div>
-                    <div class="wa-quick-replies">${waQuickRepliesHtml()}</div>
-                    <div class="wa-input-bar flex items-end gap-2 px-3 py-2">
-                        <textarea id="wa-message-input" rows="1" maxlength="2000" placeholder="Mesaj yazın..." class="wa-message-input"></textarea>
-                        <button type="button" id="wa-send-btn" class="wa-send-btn wa-header-btn w-11 h-11 rounded-full flex items-center justify-center flex-shrink-0">
+                    <div class="wa-quick-replies px-3">${waQuickRepliesHtml()}</div>
+                    <div class="wa-input-bar wa-glass-input-bar lisani-glass-panel flex items-end gap-2 px-3 py-2 mx-3 mb-3 rounded-2xl">
+                        <textarea id="wa-message-input" rows="1" maxlength="2000" placeholder="Mesaj yazın..." class="wa-message-input flex-1 min-w-0 bg-transparent border-0 outline-none resize-none max-h-24 text-xs theme-text-main"></textarea>
+                        <button type="button" id="wa-send-btn" class="wa-send-btn lisani-glass-action lisani-glass-action--primary !w-11 !h-11 !p-0 !min-w-0 !justify-center rounded-full flex items-center justify-center flex-shrink-0">
                             <i data-lucide="send" class="w-5 h-5"></i>
                         </button>
                     </div>
@@ -1501,17 +2465,20 @@
         }
     };
 
-    window.onLoginSuccessHook = function (user) {
+    window.onLoginSuccessHook = async function (user) {
         updateRoleBasedUI(user);
-        setTimeout(() => window.refreshMesajBadge(), 600);
-        if (user.role !== 'hoca') {
-            setTimeout(() => window.syncProgressToServer(), 800);
+        if (user.role === 'hoca' || user.role === 'yonetici') {
+            await window.loadHocaProgressView();
+        } else {
+            await window.loadProgressFromServer();
+            await window.syncProgressToServer();
         }
     };
 
     document.addEventListener('appReady', () => {
-        setTimeout(trySessionRestore, 300);
-        if (currentUser) updateRoleBasedUI(currentUser);
+        trySessionRestore();
     });
-    document.addEventListener('DOMContentLoaded', () => setTimeout(trySessionRestore, 2000));
+    if (window._appReady) {
+        trySessionRestore();
+    }
 })();

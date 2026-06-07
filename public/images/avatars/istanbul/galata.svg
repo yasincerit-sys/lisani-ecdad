@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1e3a5f"/>
+      <stop offset="55%" stop-color="#e07a5f"/>
+      <stop offset="100%" stop-color="#f4a261"/>
+    </linearGradient>
+    <linearGradient id="sea" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#264653"/>
+      <stop offset="100%" stop-color="#1d3557"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="400" fill="url(#sky)"/>
+  <rect y="260" width="400" height="140" fill="url(#sea)"/>
+  <ellipse cx="320" cy="90" rx="42" ry="42" fill="#ffd166" opacity="0.95"/>
+  <path d="M0 260 L60 240 L110 255 L170 220 L230 245 L290 210 L360 235 L400 225 L400 400 L0 400 Z" fill="#14213d"/>
+  <rect x="188" y="120" width="24" height="140" fill="#1b263b"/>
+  <path d="M200 70 L230 120 L170 120 Z" fill="#415a77"/>
+  <rect x="196" y="95" width="8" height="18" fill="#ffd166" opacity="0.8"/>
+  <circle cx="80" cy="200" r="6" fill="#ffd166" opacity="0.5"/>
+  <circle cx="310" cy="180" r="4" fill="#ffd166" opacity="0.4"/>
+</svg>

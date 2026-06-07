@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Message;
 use App\Models\Sinif;
 use App\Models\User;
+use App\Support\AvatarHelper;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -36,7 +37,7 @@ class MessageController extends Controller
             return [
                 'uid' => (string) $partner->id,
                 'name' => $partner->name,
-                'avatar' => $partner->avatar ?? '🐱',
+                'avatar' => AvatarHelper::resolve($partner->avatar, $partner->id),
                 'role' => $partner->role,
                 'lastMessage' => $last ? mb_strimwidth($last->body, 0, 80, '…') : null,
                 'lastIsMine' => $last ? (int) $last->sender_id === $user->id : false,
@@ -95,7 +96,7 @@ class MessageController extends Controller
             'partner' => [
                 'uid' => (string) $partner->id,
                 'name' => $partner->name,
-                'avatar' => $partner->avatar ?? '🐱',
+                'avatar' => AvatarHelper::resolve($partner->avatar, $partner->id),
                 'role' => $partner->role,
             ],
             'messages' => $messages,
