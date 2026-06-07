@@ -11,6 +11,7 @@
     let missingNotified = false;
     let callStatusTimer = null;
     let audioLoopActive = false;
+    let playGeneration = 0;
 
     function getSrc() {
         return window.LISANI_ASSETS?.gokhanAudio || '';
@@ -82,12 +83,20 @@
     }
 
     function stopAudio() {
+        playGeneration += 1;
         audioLoopActive = false;
         const media = getMediaEl();
         if (!media) return;
-        media.pause();
+        media.loop = false;
+        media.removeAttribute('loop');
+        try {
+            media.pause();
+        } catch (_) { /* ignore */ }
         try {
             media.currentTime = 0;
+        } catch (_) { /* ignore */ }
+        try {
+            media.load();
         } catch (_) { /* ignore */ }
         showHint(false);
     }
@@ -95,6 +104,8 @@
     function playGokhanSound(onFail) {
         const media = prepareMedia();
         const src = getSrc();
+        const gen = ++playGeneration;
+        audioLoopActive = true;
         if (!media || !src) {
             notifyMissingOnce();
             if (onFail) onFail();
@@ -102,6 +113,8 @@
         }
 
         checkSourceAvailable().then((ok) => {
+            if (gen !== playGeneration) return;
+
             if (!ok) {
                 notifyMissingOnce();
                 showHint(true);
@@ -109,16 +122,25 @@
                 return;
             }
 
+            if (gen !== playGeneration) return;
+
             try {
                 media.currentTime = 0;
             } catch (_) { /* ignore */ }
+            media.loop = true;
             media.load();
-            audioLoopActive = true;
             const attempt = media.play();
             if (attempt && typeof attempt.then === 'function') {
                 attempt
-                    .then(() => showHint(false))
+                    .then(() => {
+                        if (gen !== playGeneration) {
+                            stopAudio();
+                            return;
+                        }
+                        showHint(false);
+                    })
                     .catch(() => {
+                        if (gen !== playGeneration) return;
                         showHint(true);
                         if (onFail) onFail();
                     });
@@ -182,13 +204,14 @@
     }
 
     function rejectVideoCall() {
+        stopAudio();
         clearCallStatusTimer();
         resetCallOverlay();
-        stopAudio();
         toast('Görüntülü arama reddedildi.', 'info');
     }
 
     function acceptVideoCall() {
+        stopAudio();
         clearCallStatusTimer();
         const actions = el('gokhan-call-actions');
         const connected = el('gokhan-call-connected');
@@ -206,14 +229,14 @@
     }
 
     function endVideoCall() {
-        resetCallOverlay();
         stopAudio();
+        resetCallOverlay();
         toast('Görüşme sonlandırıldı.', 'info');
     }
 
     function stopAll() {
-        resetCallOverlay();
         stopAudio();
+        resetCallOverlay();
     }
 
     window.LisaniGokhanEaster = {
