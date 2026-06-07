@@ -4,7 +4,9 @@
  */
 (function () {
     const CHANNEL_ID = 'lisani-hadis';
+    const MSG_CHANNEL_ID = 'lisani-messages';
     const ID_BASE = 1001;
+    const MSG_NOTIF_ID_BASE = 3000;
     const DAYS_AHEAD = 14;
     const TEST_NOTIF_ID = 1999;
 
@@ -20,24 +22,25 @@
         );
     }
 
-    function formatHadisNotificationTitle() {
-        return 'Günün Hadisi · حديث اليوم 📖';
-    }
-
-    window.formatHadisNotificationBody = function (hadis) {
-        if (!hadis) return '';
+    window.getHadisNotificationContent = function (hadis) {
+        if (!hadis) return { title: 'Günün Hadisi · حديث اليوم 📖', body: '' };
         const ar = (hadis.osmanli || '').trim();
         const tr = (hadis.turkce || '').trim();
         const kaynak = (hadis.kaynak || '').trim();
-        const parts = [];
-        if (ar) parts.push(ar);
-        if (tr) parts.push(tr);
-        let body = parts.join('\n\n');
-        if (kaynak) body += (body ? '\n' : '') + '— ' + kaynak;
-        return body;
+        const title = ar || 'Günün Hadisi · حديث اليوم 📖';
+        const bodyLines = [];
+        if (tr) bodyLines.push(tr);
+        if (kaynak) bodyLines.push('— ' + kaynak);
+        return { title, body: bodyLines.join('\n') };
     };
 
-    window.formatHadisNotificationTitle = formatHadisNotificationTitle;
+    window.formatHadisNotificationTitle = function (hadis) {
+        return window.getHadisNotificationContent(hadis).title;
+    };
+
+    window.formatHadisNotificationBody = function (hadis) {
+        return window.getHadisNotificationContent(hadis).body;
+    };
 
     async function ensureChannel(LocalNotifications) {
         try {
@@ -51,6 +54,65 @@
             });
         } catch (e) {}
     }
+
+    async function ensureMessageChannel(LocalNotifications) {
+        try {
+            await LocalNotifications.createChannel({
+                id: MSG_CHANNEL_ID,
+                name: 'Mesajlar',
+                description: 'Yeni mesaj bildirimleri',
+                importance: 5,
+                visibility: 1,
+                vibration: true,
+            });
+        } catch (e) {}
+    }
+
+    window.showMessageNotification = async function (senderName, body, partnerId) {
+        const title = senderName || 'Yeni mesaj';
+        const text = (body || '').trim().slice(0, 200) || 'Yeni bir mesajınız var.';
+        const tag = partnerId ? 'msg-' + partnerId : 'msg';
+
+        const LN = getPlugin();
+        if (isNative() && LN) {
+            if (!(await window.checkNativeHadisPermission())) {
+                return false;
+            }
+            await ensureMessageChannel(LN);
+            const id = MSG_NOTIF_ID_BASE + (parseInt(partnerId, 10) % 500 || 0);
+            try {
+                await LN.cancel({ notifications: [{ id }] });
+            } catch (e) {}
+            await LN.schedule({
+                notifications: [
+                    {
+                        id,
+                        title,
+                        body: text,
+                        schedule: { at: new Date(Date.now() + 250) },
+                        channelId: MSG_CHANNEL_ID,
+                        smallIcon: 'ic_launcher',
+                        extra: { partnerId: String(partnerId || '') },
+                    },
+                ],
+            });
+            return true;
+        }
+
+        if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
+            const n = new Notification(title, { body: text, tag, renotify: true });
+            n.onclick = () => {
+                n.close();
+                window.focus();
+                if (typeof window.showMesajlar === 'function') {
+                    window.showMesajlar();
+                }
+            };
+            return true;
+        }
+
+        return false;
+    };
 
     window.isNativeHadisNotifications = function () {
         return isNative() && !!getPlugin();
@@ -103,10 +165,11 @@
             if (target <= now) continue;
 
             const hadis = getHadisForDate(target);
+            const content = window.getHadisNotificationContent(hadis);
             notifications.push({
                 id: ID_BASE + scheduled,
-                title: formatHadisNotificationTitle(),
-                body: window.formatHadisNotificationBody(hadis),
+                title: content.title,
+                body: content.body,
                 schedule: { at: target },
                 channelId: CHANNEL_ID,
                 smallIcon: 'ic_launcher',
@@ -128,6 +191,8 @@
         const hadis = typeof getHadisForDate === 'function' ? getHadisForDate(new Date()) : { osmanli: 'يَسِّرُوا وَلَا تُعَسِّرُوا', turkce: 'Test', kaynak: '' };
         const at = new Date(Date.now() + 4000);
 
+        const content = window.getHadisNotificationContent(hadis);
+
         try {
             await LN.cancel({ notifications: [{ id: TEST_NOTIF_ID }] });
         } catch (e) {}
@@ -136,8 +201,8 @@
             notifications: [
                 {
                     id: TEST_NOTIF_ID,
-                    title: formatHadisNotificationTitle(),
-                    body: window.formatHadisNotificationBody(hadis),
+                    title: content.title,
+                    body: content.body,
                     schedule: { at },
                     channelId: CHANNEL_ID,
                     smallIcon: 'ic_launcher',

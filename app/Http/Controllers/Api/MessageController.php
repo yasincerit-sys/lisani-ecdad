@@ -7,6 +7,8 @@ use App\Models\Message;
 use App\Models\Sinif;
 use App\Models\User;
 use App\Support\AvatarHelper;
+use App\Support\AiBotRegistry;
+use App\Support\BotReplyService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -47,7 +49,20 @@ class MessageController extends Controller
                 'unreadCount' => $unread,
             ];
         })
-            ->sortByDesc('lastTimestamp')
+            ->sort(function (array $a, array $b) {
+                $aBot = ($a['role'] ?? '') === 'bot';
+                $bBot = ($b['role'] ?? '') === 'bot';
+                if ($aBot !== $bBot) {
+                    return $aBot ? -1 : 1;
+                }
+                $ta = (int) ($a['lastTimestamp'] ?? 0);
+                $tb = (int) ($b['lastTimestamp'] ?? 0);
+                if ($ta !== $tb) {
+                    return $tb <=> $ta;
+                }
+
+                return strcasecmp($a['name'] ?? '', $b['name'] ?? '');
+            })
             ->values()
             ->all();
 
@@ -103,7 +118,7 @@ class MessageController extends Controller
         ]);
     }
 
-    public function send(Request $request): JsonResponse
+    public function send(Request $request, BotReplyService $botReplyService): JsonResponse
     {
         $user = $request->user();
 
@@ -124,10 +139,21 @@ class MessageController extends Controller
             'body' => trim($validated['body']),
         ]);
 
-        return response()->json([
+        $payload = [
             'success' => true,
             'message' => $message->toFrontendArray($user->id),
-        ]);
+        ];
+
+        if ($partner->role === 'bot') {
+            $reply = Message::create([
+                'sender_id' => $partner->id,
+                'receiver_id' => $user->id,
+                'body' => $botReplyService->reply($partner, trim($validated['body'])),
+            ]);
+            $payload['botReply'] = $reply->toFrontendArray($user->id);
+        }
+
+        return response()->json($payload);
     }
 
     public function unreadCount(Request $request): JsonResponse
@@ -150,11 +176,21 @@ class MessageController extends Controller
             $sinif = $user->sinifAsHoca;
             $ids = $sinif?->ogrenciler ?? [];
 
-            return User::whereIn('id', $ids)->where('role', 'ogrenci')->get();
+            $students = User::whereIn('id', $ids)->where('role', 'ogrenci')->get();
+
+            return $students
+                ->merge($this->yoneticiUsers())
+                ->merge($this->botUsers())
+                ->unique('id')
+                ->sortBy('name')
+                ->values();
         }
 
         if ($user->role === 'yonetici') {
-            return User::where('role', 'ogrenci')->orderBy('name')->get();
+            return User::query()
+                ->where('id', '!=', $user->id)
+                ->orderBy('name')
+                ->get();
         }
 
         if ($user->role === 'ogrenci') {
@@ -172,16 +208,39 @@ class MessageController extends Controller
 
             $yoneticiler = User::where('role', 'yonetici')->orderBy('name')->get();
 
-            return $partners->merge($yoneticiler)->unique('id')->values();
+            return $partners
+                ->merge($yoneticiler)
+                ->merge($this->botUsers())
+                ->unique('id')
+                ->sortBy('name')
+                ->values();
         }
 
         return collect();
+    }
+
+    private function yoneticiUsers()
+    {
+        return User::where('role', 'yonetici')->orderBy('name')->get();
+    }
+
+    private function botUsers()
+    {
+        if (User::where('role', 'bot')->count() < count(AiBotRegistry::BOTS)) {
+            AiBotRegistry::ensureBotsExist();
+        }
+
+        return User::where('role', 'bot')->orderBy('name')->get();
     }
 
     private function canMessage(User $a, User $b): bool
     {
         if ($a->id === $b->id) {
             return false;
+        }
+
+        if ($a->role === 'yonetici' || $b->role === 'yonetici') {
+            return true;
         }
 
         return $this->allowedPartners($a)->contains('id', $b->id);

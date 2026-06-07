@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Sinif;
 use App\Models\User;
+use App\Support\AiBotRegistry;
 use App\Support\AvatarHelper;
 use Illuminate\Database\Seeder;
 
@@ -57,10 +58,13 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
+        AiBotRegistry::ensureBotsExist();
+
         $this->command?->info('Demo hoca oluşturuldu.');
         $this->command?->info('  Giriş: Demo Hoca / hoca123');
         $this->command?->info('  Sınıf kodu (öğrencilere verin): DEMO01');
         $this->command?->info('Demo öğrenci: Demo Öğrenci / ogrenci123 (DEMO01 sınıfında)');
         $this->command?->info('Uygulama yöneticisi: Kerem Cerit / es26ma45');
+        $this->command?->info('Yapay zeka asistanları: Elif, Lügat, Tercüme, Hikmet (Mesajlar sekmesinde)');
     }
 }

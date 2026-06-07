@@ -76,7 +76,13 @@ class AuthController extends Controller
 
         $user = User::whereRaw('LOWER(name) = ?', [Str::lower($validated['name'])])->first();
 
-        if (! $user || ! Auth::validate(['email' => $user->email, 'password' => $validated['password']])) {
+        if (! $user || $user->role === 'bot') {
+            throw ValidationException::withMessages([
+                'name' => ['İsim veya şifre hatalı.'],
+            ]);
+        }
+
+        if (! Auth::validate(['email' => $user->email, 'password' => $validated['password']])) {
             throw ValidationException::withMessages([
                 'name' => ['İsim veya şifre hatalı.'],
             ]);

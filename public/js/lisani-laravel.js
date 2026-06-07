@@ -288,6 +288,9 @@
         window._manualLogout = true;
         window._loginDone = false;
         _sessionRestorePromise = null;
+        if (typeof window.stopMesajNotificationPoll === 'function') {
+            window.stopMesajNotificationPoll();
+        }
         currentUser = null;
         window.currentUser = null;
         currentUserRole = null;
@@ -995,6 +998,69 @@
     let _sessionRestorePromise = null;
     let _mesajBadgeTimer = null;
     let _mesajBadgeInFlight = null;
+    let _mesajNotifyPollTimer = null;
+    let _knownMesajUnreadByPartner = {};
+    let _lastMesajUnreadTotal = 0;
+    let _mesajNotifyInitialized = false;
+
+    function shouldSkipMessageNotification(partnerId) {
+        if (!partnerId) return true;
+        if (document.visibilityState !== 'visible') return false;
+        if (!document.getElementById('wa-mesajlar-overlay')) return false;
+        return _waView === 'chat' && String(_waActivePartnerId) === String(partnerId);
+    }
+
+    function notifyNewMessages(contacts, unreadTotal) {
+        if (!Array.isArray(contacts)) return;
+
+        if (!_mesajNotifyInitialized) {
+            contacts.forEach((c) => {
+                _knownMesajUnreadByPartner[c.uid] = c.unreadCount || 0;
+            });
+            _mesajNotifyInitialized = true;
+            _lastMesajUnreadTotal = unreadTotal || 0;
+            return;
+        }
+        contacts.forEach((c) => {
+            const unread = c.unreadCount || 0;
+            if (unread <= 0) return;
+
+            const prev = _knownMesajUnreadByPartner[c.uid] || 0;
+            if (unread <= prev) return;
+            if (shouldSkipMessageNotification(c.uid)) {
+                _knownMesajUnreadByPartner[c.uid] = unread;
+                return;
+            }
+
+            const preview = c.lastMessage || 'Yeni mesaj';
+            if (typeof window.showMessageNotification === 'function') {
+                window.showMessageNotification(c.name, preview, c.uid);
+            }
+            _knownMesajUnreadByPartner[c.uid] = unread;
+        });
+
+        _lastMesajUnreadTotal = unreadTotal || 0;
+    }
+
+    window.startMesajNotificationPoll = function () {
+        if (_mesajNotifyPollTimer) clearInterval(_mesajNotifyPollTimer);
+        if (!window._loginDone) return;
+        _mesajNotifyPollTimer = setInterval(() => {
+            if (window._loginDone) {
+                refreshMesajBadge();
+            }
+        }, 12000);
+    };
+
+    window.stopMesajNotificationPoll = function () {
+        if (_mesajNotifyPollTimer) {
+            clearInterval(_mesajNotifyPollTimer);
+            _mesajNotifyPollTimer = null;
+        }
+        _knownMesajUnreadByPartner = {};
+        _lastMesajUnreadTotal = 0;
+        _mesajNotifyInitialized = false;
+    };
 
     function shouldKeepSessionOpen() {
         if (localStorage.getItem('lisani_remember_me_pref') === 'false') return false;
@@ -1873,10 +1939,10 @@
             sub.textContent = isHoca
                 ? 'Öğrencilerinizle yazışın'
                 : isYonetici
-                  ? 'Tüm öğrencilerle yazışın'
+                  ? 'Kullanıcılar ve yapay zeka asistanları ile yazışın'
                   : user?.sinifKodu
-                    ? 'Hocanız ve yönetici ile yazışın'
-                    : 'Yönetici ile yazışın veya sınıfa katılın (Ayarlar)';
+                    ? 'Hocanız, yönetici ve asistanlarla yazışın'
+                    : 'Yapay zeka asistanları ile yazışın (Ayarlar → sınıf kodu)';
         }
         updateOgrenciSinifUI(user);
         const testsHocaHint = document.getElementById('tests-hoca-hint');
@@ -1999,9 +2065,11 @@
                 _mesajBadgeInFlight = (async () => {
                     try {
                         const data = await apiFetch('/api/messages/unread-count');
-                        updateMesajBadges(data.unreadTotal || 0);
+                        const unreadTotal = data.unreadTotal || 0;
+                        updateMesajBadges(unreadTotal);
                         const contactsData = await apiFetch('/api/messages/contacts');
                         _waContactsCache = contactsData.contacts || [];
+                        notifyNewMessages(_waContactsCache, unreadTotal);
                         updateMesajHomePreview(_waContactsCache);
                     } catch (e) {}
                 })();
@@ -2079,10 +2147,10 @@
                 <p class="text-sm font-semibold theme-text-main">Henüz sohbet yok</p>
                 <p class="text-[11px] mt-2 leading-relaxed max-w-[240px]">${
                     currentUserRole === 'hoca'
-                        ? 'Sınıfınıza öğrenci katıldığında burada görünür.'
+                        ? 'Öğrencileriniz ve yapay zeka asistanları burada görünür.'
                         : currentUserRole === 'yonetici'
-                          ? 'Kayıtlı öğrenciler burada listelenir.'
-                          : 'Ayarlar → Sınıf kodunu girerek hocanıza ulaşın.'
+                          ? 'Hoca, öğrenci ve asistanlar burada listelenir.'
+                          : 'Elif, Lügat, Tercüme ve Hikmet ile yazışabilirsiniz.'
                 }</p>
             </div>`;
         }
@@ -2097,7 +2165,14 @@
                     ? prefix + escapeHtml(c.lastMessage)
                     : '<span class="italic opacity-60">Mesaj yok — sohbeti başlatın</span>';
                 const roleLabel =
-                    c.role === 'hoca' ? 'Hoca' : c.role === 'yonetici' ? 'Yönetici' : 'Öğrenci';
+                    c.role === 'bot'
+                        ? 'Asistan'
+                        : c.role === 'hoca'
+                          ? 'Hoca'
+                          : c.role === 'yonetici'
+                            ? 'Yönetici'
+                            : 'Öğrenci';
+                const rolePillCls = c.role === 'bot' ? 'wa-role-pill wa-role-pill--bot' : 'wa-role-pill';
                 const unreadCls = c.unreadCount > 0 ? ' wa-list-item--unread' : '';
                 return `<button type="button" data-wa-partner="${c.uid}" data-wa-name="${escapeHtml(c.name)}" class="wa-contact-btn wa-contact-card w-full flex items-center gap-3 px-4 py-3.5 text-left rounded-2xl${unreadCls}">
                     <div class="w-12 h-12 rounded-full wa-contact-avatar flex items-center justify-center flex-shrink-0 overflow-hidden">${formatAvatarHtml(c.avatar)}</div>
@@ -2107,7 +2182,7 @@
                             ${unread}
                         </div>
                         <div class="flex items-center gap-1.5">
-                            <span class="wa-role-pill">${roleLabel}</span>
+                            <span class="${rolePillCls}">${roleLabel}</span>
                             <p class="text-[12px] theme-text-muted truncate flex-1">${preview}</p>
                         </div>
                     </div>
@@ -2462,6 +2537,7 @@
                 }),
             });
             await loadWaThread(_waActivePartnerId, true);
+            await refreshMesajBadge();
             scrollWaToBottom(true);
         } catch (e) {
             showToast(e.message || 'Gönderilemedi.', 'error');
@@ -2474,6 +2550,10 @@
 
     window.onLoginSuccessHook = async function (user) {
         updateRoleBasedUI(user);
+        if (typeof window.startMesajNotificationPoll === 'function') {
+            window.startMesajNotificationPoll();
+        }
+        await refreshMesajBadge();
         if (user.role === 'hoca' || user.role === 'yonetici') {
             await window.loadHocaProgressView();
         } else {

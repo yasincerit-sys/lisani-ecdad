@@ -336,6 +336,11 @@
             color: var(--ph-primary, #c69c6d);
             border: 1px solid rgba(var(--theme-primary-rgb, 198, 156, 109), 0.22);
         }
+        .wa-role-pill--bot {
+            background: rgba(139, 92, 246, 0.18);
+            color: #c4b5fd;
+            border-color: rgba(139, 92, 246, 0.35);
+        }
         .wa-chat-bg {
             background-color: var(--wa-bg, #120d0a);
             background-image:
