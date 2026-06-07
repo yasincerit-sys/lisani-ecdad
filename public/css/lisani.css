@@ -824,7 +824,7 @@
             white-space: nowrap;
         }
 
-        @media (min-width: 380px) {
+        @media (min-width: 640px) and (max-width: 1023.98px) {
             .lisani-letters-grid {
                 grid-template-columns: repeat(4, minmax(0, 1fr));
                 gap: 0.5rem;
@@ -865,7 +865,7 @@
             }
         }
 
-        @media (min-width: 768px) {
+        @media (min-width: 768px) and (max-width: 1023.98px) {
             .lisani-letters-grid {
                 grid-template-columns: repeat(6, minmax(0, 1fr));
             }

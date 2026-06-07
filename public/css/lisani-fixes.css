@@ -1024,21 +1024,21 @@ html.preline-ui[class*="theme-"] .theme-pick-btn.is-active {
     border-color: rgba(var(--theme-primary-rgb, 90, 143, 212), 0.55) !important;
 }
 
-/* Mobil — harf kartları daha geniş/uzun, alt yazılar web gibi görünsün */
+/* Mobil — 3 sütun, harf + alt yazılar */
 @media (max-width: 1023.98px) {
     #screen-letters .lisani-letters-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-        gap: 0.65rem !important;
+        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+        gap: 0.5rem !important;
     }
 
     #screen-letters .lisani-letter-card.lisani-glass-panel {
-        min-height: 6.25rem !important;
-        padding: 0.7rem 0.55rem !important;
+        min-height: 5.5rem !important;
+        padding: 0.55rem 0.35rem !important;
     }
 
     #screen-letters .lisani-letter-card__ar {
-        font-size: clamp(1.9rem, 9vw, 2.5rem) !important;
-        margin-bottom: 0.15rem;
+        font-size: clamp(1.55rem, 7vw, 2rem) !important;
+        margin-bottom: 0.1rem;
     }
 
     #screen-letters .lisani-letter-card__name,
@@ -1049,29 +1049,19 @@ html.preline-ui[class*="theme-"] .theme-pick-btn.is-active {
         white-space: normal !important;
         overflow: visible !important;
         text-overflow: unset !important;
-        line-height: 1.25 !important;
+        line-height: 1.2 !important;
         text-align: center;
     }
 
     #screen-letters .lisani-letter-card__name {
-        font-size: 0.6875rem !important;
+        font-size: 0.625rem !important;
         font-weight: 700 !important;
     }
 
     #screen-letters .lisani-letter-card__sound {
-        font-size: 0.625rem !important;
+        font-size: 0.5625rem !important;
         font-weight: 600 !important;
-        margin-top: 0.1rem;
-    }
-}
-
-@media (min-width: 480px) and (max-width: 1023.98px) {
-    #screen-letters .lisani-letters-grid {
-        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-    }
-
-    #screen-letters .lisani-letter-card.lisani-glass-panel {
-        min-height: 5.85rem !important;
+        margin-top: 0.05rem;
     }
 }
 
