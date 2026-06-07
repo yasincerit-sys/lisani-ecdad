@@ -1351,7 +1351,7 @@
                         </button>
                     </div>
                     <p id="gokhan-abi-audio-hint" class="hidden shrink-0 text-center text-[9px] text-amber-200/90 px-3 py-1.5 bg-black/40">Sesi açmak için kamera ikonuna tekrar dokun.</p>
-                    <video id="gokhan-abi-media" playsinline preload="auto" class="hidden w-0 h-0 pointer-events-none" aria-hidden="true">
+                    <video id="gokhan-abi-media" playsinline preload="auto" loop class="hidden w-0 h-0 pointer-events-none" aria-hidden="true">
                         <source src="{{ asset('audio/gokhan-abi-call.mp4') }}" type="video/mp4">
                     </video>
 

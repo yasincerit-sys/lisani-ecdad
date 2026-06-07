@@ -10,6 +10,7 @@
     let mediaEl = null;
     let missingNotified = false;
     let callStatusTimer = null;
+    let audioLoopActive = false;
 
     function getSrc() {
         return window.LISANI_ASSETS?.gokhanAudio || '';
@@ -50,13 +51,27 @@
         toast('Gökhan Abi ses dosyası bulunamadı (public/audio/gokhan-abi-call.mp4).', 'error');
     }
 
+    function bindLoopHandler(media) {
+        if (media._gokhanLoopBound) return;
+        media._gokhanLoopBound = true;
+        media.addEventListener('ended', () => {
+            if (!audioLoopActive) return;
+            try {
+                media.currentTime = 0;
+                const retry = media.play();
+                if (retry && typeof retry.catch === 'function') retry.catch(() => {});
+            } catch (_) { /* ignore */ }
+        });
+    }
+
     function prepareMedia() {
         const media = getMediaEl();
         const src = getSrc();
         if (!media || !src) return null;
         media.volume = 1;
         media.muted = false;
-        media.loop = false;
+        media.loop = true;
+        bindLoopHandler(media);
         const source = media.querySelector('source');
         if (source && source.src !== src && !source.src.endsWith(AUDIO_FILE)) {
             source.src = src;
@@ -67,6 +82,7 @@
     }
 
     function stopAudio() {
+        audioLoopActive = false;
         const media = getMediaEl();
         if (!media) return;
         media.pause();
@@ -97,6 +113,7 @@
                 media.currentTime = 0;
             } catch (_) { /* ignore */ }
             media.load();
+            audioLoopActive = true;
             const attempt = media.play();
             if (attempt && typeof attempt.then === 'function') {
                 attempt
