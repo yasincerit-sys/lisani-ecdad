@@ -883,38 +883,53 @@
                         </div>
                     </div>
 
-                    <!-- Osmanlıca mini çeviri -->
-                    <div id="letters-osm-translate-block" class="lisani-letters-translate lisani-glass-panel rounded-xl p-3 space-y-2.5 border theme-border shrink-0">
+                    <div class="pb-2 shrink-0"></div>
+                </div>
+
+                <!-- Osmanlıca Çeviri -->
+                <div id="screen-osm-translate" class="screen lisani-screen-osm flex-col space-y-4">
+                    <div class="flex items-center space-x-3 pb-3 border-b theme-border transition-colors">
+                        <div class="w-10 h-10 rounded-full lisani-glass-panel flex items-center justify-center theme-primary-color shrink-0">
+                            <i data-lucide="book-open-text" class="w-5 h-5"></i>
+                        </div>
+                        <div class="min-w-0">
+                            <h2 class="text-lg font-extrabold theme-text-main transition-colors">Osmanlıca Çeviri</h2>
+                            <p class="text-xs theme-text-muted transition-colors">Türkçe ile Osmanlı harfleri arasında çevir</p>
+                        </div>
+                    </div>
+
+                    <div id="osm-translate-page" class="lisani-osm-translate-page lisani-glass-panel rounded-2xl p-4 sm:p-5 space-y-3 border theme-border">
                         <div class="flex items-center justify-between gap-2 flex-wrap">
-                            <div class="flex items-center gap-2">
-                                <i data-lucide="languages" class="w-4 h-4 theme-primary-color shrink-0"></i>
-                                <span class="text-xs font-extrabold theme-text-main">Osmanlıca Çeviri</span>
-                            </div>
+                            <span class="text-[10px] font-bold uppercase tracking-wider theme-text-muted">Çeviri modu</span>
                             <div class="lisani-osm-mode-toggle flex rounded-lg border theme-border overflow-hidden text-[9px] font-bold shrink-0">
                                 <button type="button" id="osm-mode-tr" onclick="setOsmTranslateMode('tr-to-osm')" class="lisani-osm-mode-btn is-active px-2.5 py-1 theme-text-main">TR → عث</button>
                                 <button type="button" id="osm-mode-ar" onclick="setOsmTranslateMode('osm-to-tr')" class="lisani-osm-mode-btn px-2.5 py-1 theme-text-main">عث → TR</button>
                             </div>
                         </div>
-                        <input type="text" id="osm-translate-input" maxlength="160" placeholder="Türkçe yazın: merhaba, kitap" onkeydown="handleOsmTranslateKey(event)" class="w-full p-2.5 rounded-xl border theme-border theme-card-bg theme-text-main text-xs focus:outline-none focus:ring-2 focus:ring-[var(--theme-primary)]">
+                        <input type="text" id="osm-translate-input" maxlength="160" placeholder="Türkçe yazın: merhaba, kitap" onkeydown="handleOsmTranslateKey(event)" class="w-full p-3 rounded-xl border theme-border theme-card-bg theme-text-main text-sm focus:outline-none focus:ring-2 focus:ring-[var(--theme-primary)]">
                         <div class="flex flex-wrap gap-1.5">
                             <button type="button" onclick="osmQuickTranslate('merhaba')" class="lisani-osm-chip">merhaba</button>
                             <button type="button" onclick="osmQuickTranslate('kitap')" class="lisani-osm-chip">kitap</button>
                             <button type="button" onclick="osmQuickTranslate('teşekkürler')" class="lisani-osm-chip">teşekkürler</button>
                             <button type="button" onclick="osmQuickTranslate('güzel gün')" class="lisani-osm-chip">güzel gün</button>
+                            <button type="button" onclick="osmQuickTranslate('allah')" class="lisani-osm-chip">allah</button>
+                            <button type="button" onclick="osmQuickTranslate('dünya')" class="lisani-osm-chip">dünya</button>
                         </div>
-                        <button type="button" onclick="runOsmTranslate()" class="lisani-glass-action lisani-glass-action--primary w-full py-2.5 text-xs font-bold rounded-xl">Çevir</button>
-                        <div id="osm-translate-result" class="hidden lisani-osm-translate-result rounded-xl p-3 border theme-border space-y-2">
-                            <p id="osm-translate-main" class="text-xl font-bold theme-primary-color text-center leading-loose break-words"></p>
-                            <p id="osm-translate-sub" class="text-[10px] theme-text-muted text-center break-words hidden"></p>
-                            <p id="osm-translate-note" class="text-[9px] theme-text-muted text-center"></p>
-                            <button type="button" onclick="copyOsmResult()" class="lisani-glass-action w-full py-2 text-[10px] font-bold rounded-xl flex items-center justify-center gap-1.5">
-                                <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+                        <button type="button" onclick="runOsmTranslate()" class="lisani-glass-action lisani-glass-action--primary w-full py-3 text-sm font-bold rounded-xl">Çevir</button>
+                        <div id="osm-translate-result" class="hidden lisani-osm-translate-result rounded-xl p-4 border theme-border space-y-2">
+                            <p id="osm-translate-main" class="text-2xl font-bold theme-primary-color text-center leading-loose break-words arabic-text"></p>
+                            <p id="osm-translate-sub" class="text-xs theme-text-muted text-center break-words hidden"></p>
+                            <p id="osm-translate-note" class="text-[10px] theme-text-muted text-center"></p>
+                            <button type="button" onclick="copyOsmResult()" class="lisani-glass-action w-full py-2.5 text-xs font-bold rounded-xl flex items-center justify-center gap-1.5">
+                                <i data-lucide="copy" class="w-4 h-4"></i>
                                 Kopyala
                             </button>
                         </div>
                     </div>
 
-                    <div class="pb-2 shrink-0"></div>
+                    <p class="text-[10px] theme-text-muted text-center leading-relaxed px-2 pb-2">
+                        Sözlükte kayıtlı kelimeler çevrilir. Harfler sekmesinden elifba öğrenmeye devam edebilirsin.
+                    </p>
                 </div>
 
                 <!-- 5. SEKME: AYARLAR / PROFİL -->
@@ -1182,7 +1197,13 @@
                     <span class="text-[9px] font-semibold mt-0.5 truncate max-w-full px-0.5 lisani-nav-tab__label">Harfler</span>
                 </button>
 
-                <!-- 5. SEKME: Ayarlar / Profil -->
+                <!-- 5. SEKME: Osmanlıca Çeviri -->
+                <button type="button" onclick="switchTab('osm-translate')" id="tab-osm-translate" class="lisani-nav-tab flex flex-col items-center justify-center flex-1 min-w-0">
+                    <span class="lisani-nav-tab__icon-wrap"><i data-lucide="book-open-text" class="w-5 h-5 shrink-0"></i></span>
+                    <span class="text-[9px] font-semibold mt-0.5 truncate max-w-full px-0.5 lisani-nav-tab__label">Osmanlıca</span>
+                </button>
+
+                <!-- 6. SEKME: Ayarlar / Profil -->
                 <button type="button" onclick="switchTab('settings')" id="tab-settings" class="lisani-nav-tab flex flex-col items-center justify-center flex-1 min-w-0">
                     <span class="lisani-nav-tab__icon-wrap"><i data-lucide="settings" class="w-5 h-5 shrink-0"></i></span>
                     <span class="text-[9px] font-semibold mt-0.5 truncate max-w-full px-0.5 lisani-nav-tab__label">Ayarlar</span>

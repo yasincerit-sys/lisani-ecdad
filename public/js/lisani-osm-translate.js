@@ -1,5 +1,5 @@
 /**
- * Harfler — Osmanlıca mini çeviri (Türkçe ↔ Osmanlı harfleri)
+ * Osmanlıca çeviri sekmesi (Türkçe ↔ Osmanlı harfleri)
  */
 (function () {
     'use strict';

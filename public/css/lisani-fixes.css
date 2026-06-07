@@ -837,7 +837,30 @@ html.preline-ui[class*="theme-"] .theme-pick-btn.is-active {
     border: 1px solid var(--theme-border, rgba(255, 255, 255, 0.08));
 }
 
-/* Harfler — mini Osmanlıca çeviri */
+/* Osmanlıca çeviri — ayrı sekme */
+.lisani-osm-translate-page {
+    margin-top: 0;
+}
+
+.lisani-screen-osm #osm-translate-main {
+    font-family: 'Amiri', 'Noto Naskh Arabic', 'Geeza Pro', 'Traditional Arabic', serif;
+    color: #f2f7ff;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
+}
+
+@media (max-width: 1023.98px) {
+    #bottom-bar.lisani-tab-bar-ios .lisani-nav-tab__label {
+        font-size: 8px;
+        letter-spacing: -0.01em;
+    }
+
+    #bottom-bar.lisani-tab-bar-ios .lisani-nav-tab {
+        padding-left: 0.08rem !important;
+        padding-right: 0.08rem !important;
+    }
+}
+
+/* Harfler — mini Osmanlıca çeviri (kaldırıldı; osm-translate sekmesinde) */
 .lisani-letters-translate {
     margin-top: 0.25rem;
 }

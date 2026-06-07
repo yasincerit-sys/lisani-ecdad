@@ -2309,13 +2309,17 @@
                 updateLearningStats();
             }
 
+            if (screenId === 'osm-translate' && window.lucide) {
+                lucide.createIcons();
+            }
+
             const screensContainer = document.getElementById('screens-container');
             if (screensContainer) {
                 screensContainer.classList.toggle('lisani-screens--letters-only', screenId === 'letters');
                 screensContainer.classList.toggle('lisani-screens--hoca-dash', screenId === 'hoca-dashboard');
             }
 
-            const tabIds = ['ai', 'tests', 'hoca-dashboard', 'home', 'letters', 'settings'];
+            const tabIds = ['ai', 'tests', 'hoca-dashboard', 'home', 'letters', 'osm-translate', 'settings'];
             tabIds.forEach((id) => {
                 const tabBtn = document.getElementById(`tab-${id}`);
                 if (!tabBtn) return;
@@ -2876,8 +2880,8 @@
 
         function getSwipeTabOrder() {
             return canTrackStudents()
-                ? ['hoca-dashboard', 'home', 'letters', 'settings']
-                : ['ai', 'tests', 'home', 'letters', 'settings'];
+                ? ['hoca-dashboard', 'home', 'letters', 'osm-translate', 'settings']
+                : ['ai', 'tests', 'home', 'letters', 'osm-translate', 'settings'];
         }
 
         function initSwipeGestures() {
