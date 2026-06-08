@@ -1970,6 +1970,7 @@
             };
             afterLogin();
         }
+        window.loginSuccess = loginSuccess;
 
         async function logoutApp() {
             playClickSound();

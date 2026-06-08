@@ -2,6 +2,12 @@
  * Laravel + MySQL API köprüsü (Firebase yerine)
  */
 (function () {
+    function apiPath(path) {
+        const base = (window.LISANI_BASE || '').replace(/\/$/, '');
+        const p = path.startsWith('/') ? path : `/${path}`;
+        return base ? `${base}${p}` : p;
+    }
+
     function getXsrfCookie() {
         const match = document.cookie.match(/(?:^|;\s*)XSRF-TOKEN=([^;]*)/);
         return match ? decodeURIComponent(match[1]) : '';
@@ -32,7 +38,7 @@
 
     async function refreshMetaCsrf() {
         try {
-            const res = await fetch('/api/csrf-token', { credentials: 'same-origin' });
+            const res = await fetch(apiPath('/api/csrf-token'), { credentials: 'same-origin' });
             const data = await res.json();
             applyCsrfToken(data.token);
         } catch (e) {}
@@ -53,7 +59,7 @@
             ...(options.headers || {}),
         };
 
-        const res = await fetch(url, {
+        const res = await fetch(apiPath(url), {
             credentials: 'same-origin',
             ...options,
             headers,
@@ -1141,9 +1147,7 @@
             const savedUser = keepOpen ? readSavedSessionUser() : null;
 
             if (keepOpen && savedUser?.name && !window._loginDone) {
-                try {
-                    loginSuccess(savedUser, true, true);
-                } catch (e) {}
+                // Yerel oturumu sunucu doğrulamadan UI'a yansıtma — sahte giriş ekranı kalmasın
             }
 
             let serverUser = null;

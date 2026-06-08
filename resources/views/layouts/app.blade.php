@@ -117,7 +117,8 @@
     <script>window.LISANI_ASSETS = {
         avatars: @json(asset('images/avatars')),
         gokhanAudio: @json(asset('audio/gokhan-abi-call.mp4'))
-    };</script>
+    };
+    window.LISANI_BASE = @json(rtrim(url('/'), '/'));</script>
     <script src="{{ asset('js/preline.js') }}"></script>
     <script src="{{ asset('js/lisani-flappy.js') }}?v={{ @filemtime(public_path('js/lisani-flappy.js')) ?: time() }}" defer></script>
     <script src="{{ asset('js/lisani-gokhan-easter.js') }}?v={{ @filemtime(public_path('js/lisani-gokhan-easter.js')) ?: time() }}" defer></script>
