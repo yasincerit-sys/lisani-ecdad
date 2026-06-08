@@ -1833,3 +1833,11 @@ html.preline-ui[class*="theme-"] #wa-mesajlar-overlay .wa-send-btn.lisani-glass-
     .hoca-dash__grid-main { grid-template-columns: 1.4fr 1fr; }
     .hoca-dash__grid-pies { grid-template-columns: 1fr 1fr; }
 }
+
+#avatar-grid,
+#edit-avatar-grid {
+    max-height: 13.5rem;
+    overflow-y: auto;
+    padding-right: 0.15rem;
+    scrollbar-width: thin;
+}

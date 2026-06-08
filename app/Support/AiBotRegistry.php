@@ -14,7 +14,7 @@ class AiBotRegistry
         [
             'name' => 'Elif',
             'email' => 'bot.elif@lisaniecdad.app',
-            'avatar' => '📜',
+            'avatar_file' => 'istanbul/ayasofya.svg',
             'slug' => 'elif',
             'total_xp' => 420,
             'avg_success' => 88,
@@ -29,7 +29,7 @@ class AiBotRegistry
         [
             'name' => 'Lügat',
             'email' => 'bot.lugat@lisaniecdad.app',
-            'avatar' => '📖',
+            'avatar_file' => 'istanbul/galata.svg',
             'slug' => 'lugat',
             'total_xp' => 380,
             'avg_success' => 76,
@@ -43,7 +43,7 @@ class AiBotRegistry
         [
             'name' => 'Tercüme',
             'email' => 'bot.tercume@lisaniecdad.app',
-            'avatar' => '🔄',
+            'avatar_file' => 'istanbul/kiz-kulesi.svg',
             'slug' => 'tercume',
             'total_xp' => 510,
             'avg_success' => 84,
@@ -58,7 +58,7 @@ class AiBotRegistry
         [
             'name' => 'Hikmet',
             'email' => 'bot.hikmet@lisaniecdad.app',
-            'avatar' => '✨',
+            'avatar_file' => 'saray-kavvesi.svg',
             'slug' => 'hikmet',
             'total_xp' => 290,
             'avg_success' => 72,
@@ -97,7 +97,7 @@ class AiBotRegistry
                 [
                     'name' => $bot['name'],
                     'password' => $password,
-                    'avatar' => $bot['avatar'],
+                    'avatar' => AvatarHelper::teamHtml($bot['avatar_file']),
                     'role' => 'ogrenci',
                     'sinif_adi' => $demoSinif?->sinif_adi ?? 'Osmanlıca AI Grubu',
                     'sinif_kodu' => $demoKod,

@@ -6,16 +6,21 @@ class AvatarHelper
 {
     public const BESIKTAS_FILE = 'besiktas.svg';
 
-    public static function teamPath(string $file = self::BESIKTAS_FILE): string
+    public static function teamPath(string $file): string
     {
-        return '/images/avatars/'.$file;
+        return '/images/avatars/'.ltrim($file, '/');
+    }
+
+    public static function teamHtml(string $file): string
+    {
+        $src = self::teamPath($file);
+
+        return '<span class="avatar-glass-emblem"><img src="'.$src.'" alt="" /></span>';
     }
 
     public static function besiktasHtml(): string
     {
-        $src = self::teamPath(self::BESIKTAS_FILE);
-
-        return '<span class="avatar-glass-emblem"><img src="'.$src.'" alt="" /></span>';
+        return self::teamHtml(self::BESIKTAS_FILE);
     }
 
     public static function defaultHtml(): string
@@ -29,7 +34,9 @@ class AvatarHelper
             return false;
         }
 
-        return str_contains($avatar, 'avatar-glass-emblem') || str_contains($avatar, 'avatars/besiktas');
+        return str_contains($avatar, 'avatar-glass-emblem')
+            || str_contains($avatar, '/images/avatars/')
+            || str_contains($avatar, 'avatars/');
     }
 
     public static function isCustomPhotoAvatar(?string $avatar): bool
@@ -56,7 +63,13 @@ class AvatarHelper
     public static function resolve(?string $avatar, ?int $userId = null): string
     {
         if (self::isTeamAvatar($avatar)) {
-            return $avatar ?? self::defaultHtml();
+            if ($avatar && str_contains($avatar, 'avatar-glass-emblem')) {
+                return $avatar;
+            }
+
+            if (preg_match('#avatars/(.+\.svg)#i', $avatar ?? '', $match)) {
+                return self::teamHtml($match[1]);
+            }
         }
 
         if (self::isCustomPhotoAvatar($avatar)) {

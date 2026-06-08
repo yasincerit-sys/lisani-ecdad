@@ -14,8 +14,8 @@
             "description": "Osmanlıca kolay öğrenim uygulaması",
             "start_url": "{{ url('/') }}",
             "display": "standalone",
-            "background_color": "#f9fafb",
-            "theme_color": "#f9fafb",
+            "background_color": "#08061a",
+            "theme_color": "#08061a",
             "orientation": "portrait",
             "icons": [
                 { "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='36' fill='%232563eb'/%3E%3Ctext x='96' y='130' font-size='110' text-anchor='middle'%3E📖%3C/text%3E%3C/svg%3E", "sizes": "192x192", "type": "image/svg+xml" },
@@ -30,7 +30,7 @@
         document.head.appendChild(link);
     })();
     </script>
-    <meta name="theme-color" content="#f9fafb" id="meta-theme-color">
+    <meta name="theme-color" content="#08061a" id="meta-theme-color">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -91,18 +91,19 @@
     </style>
     <script>
         (function () {
-            const valid = ['kahve-kum', 'zumrut-nane', 'saray-kahvesi', 'derin-mavi'];
+            const valid = ['kahve-kum', 'zumrut-nane', 'saray-kahvesi', 'derin-mavi', 'mavi-mor'];
             const metaMap = {
                 'kahve-kum': '#14100e',
                 'zumrut-nane': '#081210',
                 'saray-kahvesi': '#0f0c0a',
                 'derin-mavi': '#080c14',
+                'mavi-mor': '#08061a',
             };
-            let mode = localStorage.getItem('lisani_color_mode') || 'saray-kahvesi';
+            let mode = localStorage.getItem('lisani_color_mode') || 'mavi-mor';
             if (!valid.includes(mode)) {
                 if (mode === 'light') mode = 'kahve-kum';
                 else if (mode === 'dark') mode = 'derin-mavi';
-                else mode = 'saray-kahvesi';
+                else mode = 'mavi-mor';
             }
             const root = document.documentElement;
             root.classList.add('dark', 'theme-' + mode);

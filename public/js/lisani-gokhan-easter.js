@@ -6,12 +6,15 @@
     'use strict';
 
     const AUDIO_FILE = 'gokhan-abi-call.mp4';
+    const GOKHAN_VOLUME_GAIN = 45;
 
     let mediaEl = null;
     let missingNotified = false;
     let callStatusTimer = null;
     let audioLoopActive = false;
     let playGeneration = 0;
+    let audioContext = null;
+    let gainNode = null;
 
     function getSrc() {
         return window.LISANI_ASSETS?.gokhanAudio || '';
@@ -65,12 +68,43 @@
         });
     }
 
+    function ensureAudioGain(media) {
+        if (!media) return;
+        media.volume = 1;
+        media.muted = false;
+
+        if (gainNode) {
+            gainNode.gain.value = GOKHAN_VOLUME_GAIN;
+            return;
+        }
+
+        if (media._gokhanGainSetup) return;
+
+        try {
+            const Ctx = window.AudioContext || window.webkitAudioContext;
+            if (!Ctx) return;
+
+            audioContext = audioContext || new Ctx();
+            if (audioContext.state === 'suspended') {
+                audioContext.resume().catch(() => {});
+            }
+
+            const source = audioContext.createMediaElementSource(media);
+            gainNode = audioContext.createGain();
+            gainNode.gain.value = GOKHAN_VOLUME_GAIN;
+            source.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            media._gokhanGainSetup = true;
+        } catch (_) {
+            /* MediaElementSource yalnızca bir kez bağlanabilir veya API desteklenmiyor */
+        }
+    }
+
     function prepareMedia() {
         const media = getMediaEl();
         const src = getSrc();
         if (!media || !src) return null;
-        media.volume = 1;
-        media.muted = false;
+        ensureAudioGain(media);
         media.loop = true;
         bindLoopHandler(media);
         const source = media.querySelector('source');
@@ -123,6 +157,11 @@
             }
 
             if (gen !== playGeneration) return;
+
+            ensureAudioGain(media);
+            if (audioContext && audioContext.state === 'suspended') {
+                audioContext.resume().catch(() => {});
+            }
 
             try {
                 media.currentTime = 0;

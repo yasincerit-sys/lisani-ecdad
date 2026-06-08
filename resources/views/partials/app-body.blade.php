@@ -105,7 +105,7 @@
                     <div class="flex items-center justify-center gap-3 mt-1">
                         <div id="avatar-preview-big" class="w-14 h-14 rounded-full lisani-avatar-slot lisani-avatar-slot--md border-2 border-[var(--theme-primary)] flex items-center justify-center shadow-lg overflow-hidden"></div>
                         <div>
-                            <p class="text-[10px] theme-text-muted">Seçilen manzara</p>
+                            <p class="text-[10px] theme-text-muted">Seçilen profil</p>
                             <p class="text-xs font-bold theme-text-main" id="avatar-preview-label">Beşiktaş</p>
                         </div>
                     </div>
@@ -1027,6 +1027,10 @@
                                     </span>
                                 </button>
                                 <p class="theme-pick-section">GEÇİŞLİ (GRADIENT) KOMBİNASYONLAR</p>
+                                <button type="button" onclick="setColorMode('mavi-mor')" data-color-mode="mavi-mor" class="theme-pick-btn lisani-glass-panel">
+                                    <span class="theme-pick-btn__label">Mavi &amp; Mor 💜</span>
+                                    <span class="theme-swatch-gradient" style="background:linear-gradient(90deg,#2563eb,#6366f1,#9333ea)" aria-hidden="true"></span>
+                                </button>
                                 <button type="button" onclick="setColorMode('saray-kahvesi')" data-color-mode="saray-kahvesi" class="theme-pick-btn lisani-glass-panel">
                                     <span class="theme-pick-btn__label">Saray Kahvesi ☕</span>
                                     <span class="theme-swatch-gradient" style="background:linear-gradient(90deg,#9e6c4c,#4a3329)" aria-hidden="true"></span>

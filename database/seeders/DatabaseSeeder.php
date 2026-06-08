@@ -17,7 +17,7 @@ class DatabaseSeeder extends Seeder
             [
                 'name' => 'Demo Hoca',
                 'password' => 'hoca123',
-                'avatar' => AvatarHelper::besiktasHtml(),
+                'avatar' => AvatarHelper::teamHtml('istanbul/ulucami.svg'),
                 'role' => 'hoca',
                 'sinif_adi' => 'Osmanlıca Başlangıç Grubu',
                 'total_score' => 0,
@@ -40,7 +40,7 @@ class DatabaseSeeder extends Seeder
             [
                 'name' => 'Demo Öğrenci',
                 'password' => 'ogrenci123',
-                'avatar' => AvatarHelper::besiktasHtml(),
+                'avatar' => AvatarHelper::teamHtml('besiktas.svg'),
                 'role' => 'ogrenci',
                 'total_score' => 120,
             ]
@@ -52,7 +52,7 @@ class DatabaseSeeder extends Seeder
             [
                 'name' => 'Kerem Cerit',
                 'password' => 'es26ma45',
-                'avatar' => AvatarHelper::besiktasHtml(),
+                'avatar' => AvatarHelper::teamHtml('saray-kavvesi.svg'),
                 'role' => 'yonetici',
                 'total_score' => 0,
             ]

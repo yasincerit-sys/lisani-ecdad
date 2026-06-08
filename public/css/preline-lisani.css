@@ -237,6 +237,110 @@ html.preline-ui.theme-derin-mavi body.lisani-body {
         #080c14;
 }
 
+/* Mavi & Mor — geçişli gradient tema */
+html.preline-ui.theme-mavi-mor {
+    --ph-bg: #08061a;
+    --ph-surface: rgba(24, 20, 52, 0.58);
+    --ph-surface-2: rgba(32, 26, 68, 0.5);
+    --ph-border: rgba(129, 140, 248, 0.2);
+    --ph-text: #eef2ff;
+    --ph-muted: #9499c9;
+    --ph-primary: #818cf8;
+    --ph-primary-hover: #6366f1;
+    --ph-ring: rgba(129, 140, 248, 0.34);
+    --theme-accent: #a78bfa;
+    --theme-accent-soft: rgba(167, 139, 250, 0.12);
+    --theme-accent-border: rgba(129, 140, 248, 0.3);
+    --theme-warn: #c9925a;
+    --theme-bg-phone: #08061a;
+    --theme-card-bg: rgba(24, 20, 52, 0.58);
+    --theme-border: rgba(129, 140, 248, 0.2);
+    --theme-text-main: #eef2ff;
+    --theme-text-muted: #9499c9;
+    --theme-primary: #818cf8;
+    --theme-primary-hover: #6366f1;
+    --theme-secondary: rgba(129, 140, 248, 0.1);
+    --theme-card-gradient-from: #2563eb;
+    --theme-card-gradient-to: #9333ea;
+    --theme-accent-light: rgba(129, 140, 248, 0.08);
+    --theme-button-text: #ffffff;
+    --theme-primary-rgb: 129, 140, 248;
+    --theme-btn-solid: #6366f1;
+    --theme-btn-solid-hover: #4f46e5;
+    --theme-btn-text: #ffffff;
+    --theme-btn-glow: rgba(124, 58, 237, 0.5);
+    --theme-nav-bg: #08061a;
+    --theme-nav-home-bg: #c4b5fd;
+    --theme-nav-home-icon: #08061a;
+    --wa-bg: #08061a;
+    --wa-header: rgba(28, 22, 58, 0.94);
+    --wa-border: rgba(129, 140, 248, 0.14);
+    --wa-text: #eef2ff;
+    --wa-muted: #9499c9;
+    --wa-list-hover: rgba(129, 140, 248, 0.08);
+    --wa-sent: rgba(55, 48, 107, 0.92);
+    --wa-sent-border: rgba(129, 140, 248, 0.32);
+    --wa-received: rgba(255, 255, 255, 0.06);
+}
+
+html.preline-ui.theme-mavi-mor body.lisani-body {
+    background:
+        radial-gradient(ellipse 90% 55% at 50% -8%, rgba(99, 102, 241, 0.38) 0%, transparent 56%),
+        radial-gradient(ellipse 55% 42% at 100% 85%, rgba(168, 85, 247, 0.26) 0%, transparent 52%),
+        radial-gradient(ellipse 48% 38% at 0% 92%, rgba(37, 99, 235, 0.2) 0%, transparent 50%),
+        linear-gradient(165deg, #0b1028 0%, #15082e 38%, #08061a 100%);
+}
+
+html.preline-ui.theme-mavi-mor #app-container,
+html.preline-ui.theme-mavi-mor .theme-bg-phone {
+    background: transparent !important;
+}
+
+html.preline-ui.theme-mavi-mor .theme-gradient-card {
+    background: linear-gradient(135deg, #2563eb 0%, #6366f1 42%, #9333ea 100%) !important;
+    border: 1px solid rgba(167, 139, 250, 0.35) !important;
+    box-shadow:
+        0 12px 32px rgba(67, 56, 202, 0.35),
+        inset 0 1px 0 rgba(255, 255, 255, 0.12) !important;
+}
+
+html.preline-ui.theme-mavi-mor .theme-primary-btn,
+html.preline-ui.theme-mavi-mor .theme-primary-bg,
+html.preline-ui.theme-mavi-mor .lisani-segment-btn.is-active,
+html.preline-ui.theme-mavi-mor .theme-pick-btn.is-active,
+html.preline-ui.theme-mavi-mor .lisani-btn-gradient,
+html.preline-ui.theme-mavi-mor .lisani-glass-action--primary {
+    background: linear-gradient(135deg, #2563eb 0%, #6366f1 48%, #9333ea 100%) !important;
+    border: 1px solid rgba(196, 181, 253, 0.35) !important;
+    box-shadow:
+        0 0 22px rgba(124, 58, 237, 0.45),
+        0 4px 16px rgba(0, 0, 0, 0.34) !important;
+}
+
+html.preline-ui.theme-mavi-mor .theme-primary-btn:hover,
+html.preline-ui.theme-mavi-mor .theme-primary-bg:hover,
+html.preline-ui.theme-mavi-mor .lisani-segment-btn.is-active:hover,
+html.preline-ui.theme-mavi-mor .theme-pick-btn.is-active:hover,
+html.preline-ui.theme-mavi-mor .lisani-btn-gradient:hover,
+html.preline-ui.theme-mavi-mor .lisani-glass-action--primary:hover {
+    background: linear-gradient(135deg, #1d4ed8 0%, #4f46e5 48%, #7e22ce 100%) !important;
+    box-shadow:
+        0 0 28px rgba(124, 58, 237, 0.55),
+        0 6px 20px rgba(0, 0, 0, 0.38) !important;
+}
+
+html.preline-ui.theme-mavi-mor .lisani-glass-blob--1 {
+    background: radial-gradient(circle, rgba(37, 99, 235, 0.45) 0%, transparent 70%);
+}
+
+html.preline-ui.theme-mavi-mor .lisani-glass-blob--2 {
+    background: radial-gradient(circle, rgba(124, 58, 237, 0.42) 0%, transparent 70%);
+}
+
+html.preline-ui.theme-mavi-mor .lisani-glass-blob--3 {
+    background: radial-gradient(circle, rgba(168, 85, 247, 0.35) 0%, transparent 70%);
+}
+
 /* —— Ortak: cam kartlar & yumuşak UI —— */
 html.preline-ui[class*="theme-"] .glass-card,
 html.preline-ui[class*="theme-"] .glass-card-interactive {

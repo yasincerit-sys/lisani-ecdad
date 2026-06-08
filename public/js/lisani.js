@@ -608,6 +608,22 @@
 
         const AVATAR_OPTIONS = [
             { type: 'besiktas', emoji: teamAvatarImg('besiktas.svg'), label: 'Beşiktaş' },
+            { type: 'bursaspor', emoji: teamAvatarImg('bursaspor.svg'), label: 'Bursaspor' },
+            { type: 'goztepe', emoji: teamAvatarImg('goztepe.svg'), label: 'Göztepe' },
+            { type: 'eskisehirspor', emoji: teamAvatarImg('eskisehirspor.svg'), label: 'Eskişehirspor' },
+            { type: 'saray', emoji: teamAvatarImg('saray-kavvesi.svg'), label: 'Saray Kavvesi' },
+            { type: 'ayasofya', emoji: teamAvatarImg('istanbul/ayasofya.svg'), label: 'Ayasofya' },
+            { type: 'ulucami', emoji: teamAvatarImg('istanbul/ulucami.svg'), label: 'Ulu Camii' },
+            { type: 'galata', emoji: teamAvatarImg('istanbul/galata.svg'), label: 'Galata' },
+            { type: 'kizkulesi', emoji: teamAvatarImg('istanbul/kiz-kulesi.svg'), label: 'Kız Kulesi' },
+            { type: 'bogaz', emoji: teamAvatarImg('istanbul/bogaz.svg'), label: 'Boğaz' },
+            { type: 'kopru', emoji: teamAvatarImg('istanbul/kopru.svg'), label: 'Köprü' },
+            { type: 'eminonu', emoji: teamAvatarImg('istanbul/eminonu.svg'), label: 'Eminönü' },
+            { type: 'balat', emoji: teamAvatarImg('istanbul/balat.svg'), label: 'Balat' },
+            { type: 'camii', emoji: teamAvatarImg('istanbul/camii.svg'), label: 'Camii' },
+            { type: 'sokak', emoji: teamAvatarImg('istanbul/sokak.svg'), label: 'Sokak' },
+            { type: 'panorama', emoji: teamAvatarImg('istanbul/panorama.svg'), label: 'Panorama' },
+            { type: 'gunbatimi', emoji: teamAvatarImg('istanbul/gunbatimi.svg'), label: 'Gün Batımı' },
         ];
 
         function isLegacyEmojiAvatar(value) {
@@ -616,7 +632,10 @@
 
         function resolveLegacyAvatar(value) {
             if (!value || isLegacyEmojiAvatar(value)) return DEFAULT_AVATAR;
-            if (typeof value === 'string' && value.includes('istanbul/')) return DEFAULT_AVATAR;
+            if (typeof value === 'string' && value.includes('avatars/')) {
+                const match = value.match(/avatars\/(.+\.svg)/i);
+                if (match) return teamAvatarImg(match[1]);
+            }
             return value;
         }
 
@@ -656,10 +675,9 @@
         function normalizeAvatarValue(value, userId) {
             if (!value || typeof value !== 'string') return DEFAULT_AVATAR;
             if (value.includes('avatar-glass-emblem') || value.includes('lisani-avatar-img') || value.includes('object-cover')) {
-                if (value.includes('istanbul/')) return DEFAULT_AVATAR;
                 return value;
             }
-            const svgMatch = value.match(/avatars\/([^"'?\s]+\.svg)/i);
+            const svgMatch = value.match(/avatars\/(.+\.svg)/i);
             if (svgMatch) return teamAvatarImg(svgMatch[1]);
             return resolveLegacyAvatar(value);
         }
@@ -2196,24 +2214,25 @@
 
         // --- PRELINE UI GÖRÜNÜM / TEMA ---
         const COLOR_MODE_KEY = 'lisani_color_mode';
-        const VALID_THEMES = ['kahve-kum', 'zumrut-nane', 'saray-kahvesi', 'derin-mavi'];
+        const VALID_THEMES = ['kahve-kum', 'zumrut-nane', 'saray-kahvesi', 'derin-mavi', 'mavi-mor'];
         const THEME_CLASS_NAMES = VALID_THEMES.map((t) => 'theme-' + t);
         const THEME_META_COLORS = {
             'kahve-kum': '#14100e',
             'zumrut-nane': '#081210',
             'saray-kahvesi': '#120d0a',
             'derin-mavi': '#080c14',
+            'mavi-mor': '#08061a',
         };
 
         function normalizeColorMode(mode) {
             if (VALID_THEMES.includes(mode)) return mode;
             if (mode === 'light') return 'kahve-kum';
             if (mode === 'dark') return 'derin-mavi';
-            return 'saray-kahvesi';
+            return 'mavi-mor';
         }
 
         function highlightColorModeButtons() {
-            const current = normalizeColorMode(localStorage.getItem(COLOR_MODE_KEY) || 'saray-kahvesi');
+            const current = normalizeColorMode(localStorage.getItem(COLOR_MODE_KEY) || 'mavi-mor');
             document.querySelectorAll('[data-color-mode]').forEach((btn) => {
                 const active = btn.getAttribute('data-color-mode') === current;
                 btn.classList.toggle('is-active', active);
@@ -2241,7 +2260,7 @@
 
         function initPrelineTheme() {
             document.documentElement.classList.add('preline-ui');
-            applyDocumentColorMode(localStorage.getItem(COLOR_MODE_KEY) || 'saray-kahvesi');
+            applyDocumentColorMode(localStorage.getItem(COLOR_MODE_KEY) || 'mavi-mor');
             highlightColorModeButtons();
         }
 
