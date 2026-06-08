@@ -83,6 +83,12 @@ class AuthController extends Controller
             ]);
         }
 
+        if ($user->isBanned()) {
+            throw ValidationException::withMessages([
+                'name' => ['Hesabınız engellenmiştir. Yönetici ile iletişime geçin.'],
+            ]);
+        }
+
         if (! Auth::validate(['email' => $user->email, 'password' => $validated['password']])) {
             throw ValidationException::withMessages([
                 'name' => ['İsim veya şifre hatalı.'],

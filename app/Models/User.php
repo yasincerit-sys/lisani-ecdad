@@ -22,6 +22,7 @@ class User extends Authenticatable
         'sinif_kodu',
         'total_score',
         'tennis_unlocked',
+        'banned_at',
     ];
 
     protected $hidden = [
@@ -36,6 +37,7 @@ class User extends Authenticatable
             'password' => 'hashed',
             'total_score' => 'integer',
             'tennis_unlocked' => 'boolean',
+            'banned_at' => 'datetime',
         ];
     }
 
@@ -47,6 +49,11 @@ class User extends Authenticatable
     public function progress(): HasOne
     {
         return $this->hasOne(UserProgress::class);
+    }
+
+    public function isBanned(): bool
+    {
+        return $this->banned_at !== null;
     }
 
     public function resolvedAvatar(): string

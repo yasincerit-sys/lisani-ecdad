@@ -916,7 +916,6 @@
 
     function applyProfileToUI(user, avatarHtml) {
         const avatar = avatarHtml ?? user.avatar;
-        document.getElementById('settings-profile-name').innerText = user.name;
         const roleBadge =
             typeof window.getSettingsRoleBadgeHtml === 'function'
                 ? window.getSettingsRoleBadgeHtml(user.role || currentUserRole)
@@ -925,7 +924,10 @@
                   : (user.role || currentUserRole) === 'hoca'
                     ? '📚 Hoca'
                     : '🎒 Öğrenci';
-        document.getElementById('settings-profile-sub').innerHTML = roleBadge;
+        const profileName = document.getElementById('profile-screen-name');
+        const profileSub = document.getElementById('profile-screen-sub');
+        if (profileName) profileName.innerText = user.name;
+        if (profileSub) profileSub.innerHTML = roleBadge;
         document.getElementById('home-welcome-text').innerText = `Hoş Geldin, ${user.name}! 👋`;
         if (typeof window.updateHomeRoleBadge === 'function') {
             window.updateHomeRoleBadge(user.role || currentUserRole);
@@ -933,7 +935,7 @@
 
         const avatarContainers = [
             document.getElementById('home-avatar-display'),
-            document.getElementById('settings-avatar-container'),
+            document.getElementById('profile-avatar-container'),
         ];
         avatarContainers.forEach((container) => {
             if (typeof window.applyAvatarToContainer === 'function') {
@@ -1144,6 +1146,97 @@
             });
             if (typeof lucide !== 'undefined') lucide.createIcons();
         }
+    };
+
+    let _leaderboardInFlight = null;
+
+    function renderLeaderboardRow(entry, viewerUid) {
+        const isMe = viewerUid && String(entry.uid) === String(viewerUid);
+        const rank = entry.rank;
+        let rankLabel = `#${rank}`;
+        if (rank === 1) rankLabel = '🥇';
+        else if (rank === 2) rankLabel = '🥈';
+        else if (rank === 3) rankLabel = '🥉';
+
+        const avatarHtml =
+            typeof window.applyAvatarToContainer === 'function'
+                ? null
+                : entry.avatar || '🎒';
+
+        const row = document.createElement('div');
+        row.className =
+            'flex items-center gap-2.5 p-2 rounded-xl border theme-border ' +
+            (isMe ? 'bg-[var(--theme-primary)]/10 border-[var(--theme-primary)]/30' : 'theme-light-bg');
+        row.innerHTML = `
+            <span class="text-xs font-black w-6 text-center shrink-0 ${rank <= 3 ? '' : 'theme-text-muted'}">${rankLabel}</span>
+            <div class="w-8 h-8 rounded-full lisani-avatar-slot lisani-avatar-slot--xs flex items-center justify-center text-sm border theme-border overflow-hidden shrink-0" data-lb-avatar></div>
+            <div class="min-w-0 flex-1">
+                <p class="text-[11px] font-bold theme-text-main truncate">${entry.name}${isMe ? ' <span class="text-[9px] theme-primary-color">(Sen)</span>' : ''}</p>
+                <p class="text-[9px] theme-text-muted">${entry.testsCount || 0} sınav · %${entry.avgSuccess || 0} ort.</p>
+            </div>
+            <span class="text-[11px] font-black text-amber-400 shrink-0">${entry.totalXp || 0} XP</span>
+        `;
+        const avatarSlot = row.querySelector('[data-lb-avatar]');
+        if (avatarSlot && typeof window.applyAvatarToContainer === 'function') {
+            const normalized =
+                typeof window.normalizeAvatarValue === 'function'
+                    ? window.normalizeAvatarValue(entry.avatar, entry.uid)
+                    : entry.avatar;
+            window.applyAvatarToContainer(avatarSlot, normalized);
+        } else if (avatarSlot) {
+            avatarSlot.innerHTML = avatarHtml;
+        }
+        return row;
+    }
+
+    window.loadLeaderboard = async function (force) {
+        const list = document.getElementById('leaderboard-list');
+        const myRankEl = document.getElementById('leaderboard-my-rank');
+        if (!list) return null;
+        if (_leaderboardInFlight && !force) return _leaderboardInFlight;
+
+        const refreshBtn = document.querySelector('#leaderboard-section .lisani-stats-refresh-btn');
+        if (refreshBtn) refreshBtn.classList.add('is-spinning');
+
+        _leaderboardInFlight = (async () => {
+            try {
+                const scope = currentUser?.sinifKodu ? 'sinif' : 'global';
+                const data = await apiFetch(`/api/leaderboard?scope=${scope}&limit=30`);
+                const entries = data.entries || [];
+
+                if (myRankEl) {
+                    if (data.myRank) {
+                        myRankEl.textContent = `Sıralamanız: ${data.myRank}. (${scope === 'sinif' ? 'Sınıf' : 'Genel'} liste)`;
+                        myRankEl.classList.remove('hidden');
+                    } else {
+                        myRankEl.classList.add('hidden');
+                    }
+                }
+
+                list.innerHTML = '';
+                if (!entries.length) {
+                    list.innerHTML =
+                        '<p class="text-[10px] theme-text-muted text-center py-4">Henüz sıralama verisi yok.</p>';
+                    return data;
+                }
+
+                const viewerUid = currentUser?.uid || currentUser?.id;
+                entries.forEach((entry) => {
+                    list.appendChild(renderLeaderboardRow(entry, viewerUid));
+                });
+                return data;
+            } catch (e) {
+                list.innerHTML =
+                    '<p class="text-[10px] text-red-400 text-center py-4">Liderlik tablosu yüklenemedi.</p>';
+                return null;
+            } finally {
+                if (refreshBtn) refreshBtn.classList.remove('is-spinning');
+                _leaderboardInFlight = null;
+                if (typeof lucide !== 'undefined') lucide.createIcons();
+            }
+        })();
+
+        return _leaderboardInFlight;
     };
 
     window.syncProgressToServer = async function () {
@@ -1934,6 +2027,8 @@
         if (odevSettings) odevSettings.classList.toggle('hidden', !isOgrenci);
         if (mesajCard) mesajCard.classList.toggle('hidden', !(isHoca || isYonetici || isOgrenci));
         if (mesajRow) mesajRow.classList.toggle('hidden', !(isHoca || isYonetici || isOgrenci));
+        const profileStats = document.getElementById('profile-stats-section');
+        if (profileStats) profileStats.classList.toggle('hidden', !isOgrenci);
         const sub = document.getElementById('home-mesajlar-sub');
         if (sub) {
             sub.textContent = isHoca
@@ -2025,18 +2120,29 @@
 
     function updateMesajHomePreview(contacts) {
         const preview = document.getElementById('home-mesajlar-preview');
-        if (!preview || !contacts?.length) {
-            if (preview) preview.classList.add('hidden');
-            return;
-        }
-        const top = contacts[0];
-        if (!top.lastMessage) {
+        const sub = document.getElementById('home-mesajlar-sub');
+        if (!preview) return;
+
+        if (!contacts?.length) {
             preview.classList.add('hidden');
+            if (sub) sub.classList.remove('hidden');
             return;
         }
-        const prefix = top.lastIsMine ? 'Sen: ' : '';
-        preview.textContent = prefix + top.lastMessage;
+
+        const withUnread = contacts.find((c) => (c.unreadCount || 0) > 0 && c.lastMessage);
+        const withMessage = contacts.find((c) => c.lastMessage);
+        const top = withUnread || withMessage || contacts[0];
+
+        if (!top?.lastMessage) {
+            preview.classList.add('hidden');
+            if (sub) sub.classList.remove('hidden');
+            return;
+        }
+
+        const who = top.lastIsMine ? 'Sen' : top.name || 'Mesaj';
+        preview.textContent = `${who}: ${top.lastMessage}`;
         preview.classList.remove('hidden');
+        if (sub) sub.classList.add('hidden');
     }
 
     function updateMesajBadges(count) {

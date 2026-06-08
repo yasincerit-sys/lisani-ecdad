@@ -21,12 +21,18 @@ class BotReplyService
             'lugat' => $this->lugatReply($lower, $userMessage),
             'tercume' => $this->tercumeReply($lower, $userMessage),
             'hikmet' => $this->hikmetReply($lower, $userMessage),
-            default => 'Merhaba! Size nasıl yardımcı olabilirim?',
+            default => $this->studentBotReply($bot, $lower),
         };
     }
 
     private function botKey(User $bot): string
     {
+        foreach (AiBotRegistry::BOTS as $entry) {
+            if (($entry['email'] ?? '') === $bot->email) {
+                return $entry['slug'] ?? 'generic';
+            }
+        }
+
         $email = Str::lower($bot->email ?? '');
 
         if (str_contains($email, 'elif')) {
@@ -42,7 +48,26 @@ class BotReplyService
             return 'hikmet';
         }
 
-        return 'elif';
+        return 'generic';
+    }
+
+    private function studentBotReply(User $bot, string $lower): string
+    {
+        $name = $bot->name ?: 'Arkadaş';
+
+        if ($this->isGreeting($lower)) {
+            return "Selam! Ben {$name} 👋\nOsmanlıca çalışıyorum. Sen de test çözdün mü? Birlikte ilerleyelim!";
+        }
+
+        if (preg_match('/(test|sınav|sinav|xp|puan|ödev|odev)/u', $lower)) {
+            return "Ben de test çözüyorum! Gelişim sekmesinden skorlarına bakabilir, liderlik tablosunda sıralamayı görebilirsin 📊";
+        }
+
+        if (preg_match('/(harf|elifba|kelime|tercüme|tercume)/u', $lower)) {
+            return "Harfler ve testler sekmesinden pratik yapıyorum. Elif, Lügat ve Tercüme asistanlarına da sorabilirsin — onlar çok yardımcı oluyor!";
+        }
+
+        return "Merhaba! Ben {$name}.\nOsmanlıca öğreniyoruz — sorularını yaz, sohbet edelim. İyi çalışmalar! 📚";
     }
 
     private function isGreeting(string $lower): bool

@@ -108,16 +108,26 @@ class SinifController extends Controller
     {
         $user = $request->user();
 
-        if ($user->role !== 'hoca') {
+        if (! in_array($user->role, ['hoca', 'yonetici'], true)) {
             return response()->json(['message' => 'Yetkisiz.'], 403);
         }
 
-        $validated = $request->validate([
+        $rules = [
             'level' => ['required', 'integer', 'between:1,3'],
             'test' => ['required', 'string', 'in:Test 1,Test 2,Test 3,Genel'],
-        ]);
+        ];
 
-        $sinif = $user->sinifAsHoca;
+        if ($user->role === 'yonetici') {
+            $rules['kisa_kod'] = ['required', 'string', 'min:4', 'max:20'];
+        }
+
+        $validated = $request->validate($rules);
+
+        if ($user->role === 'hoca') {
+            $sinif = $user->sinifAsHoca;
+        } else {
+            $sinif = Sinif::findByKod($validated['kisa_kod']);
+        }
 
         if (! $sinif) {
             return response()->json(['message' => 'Sınıf bulunamadı.'], 404);
@@ -125,6 +135,7 @@ class SinifController extends Controller
 
         $level = (int) $validated['level'];
         $test = $validated['test'];
+        $verenAdi = $user->role === 'yonetici' ? 'Yönetici · '.$user->name : $user->name;
 
         $odevler = $sinif->odevler ?? [];
         $odevler[] = [
@@ -133,7 +144,7 @@ class SinifController extends Controller
             'test' => $test,
             'label' => "Seviye {$level} — {$test}",
             'tarih' => now()->format('d.m.Y'),
-            'hocaAdi' => $user->name,
+            'hocaAdi' => $verenAdi,
         ];
         $sinif->odevler = $odevler;
         $sinif->save();

@@ -1720,8 +1720,8 @@
             currentUser.email = emailInput;
             currentUser.avatar = editAvatarValue;
 
-            document.getElementById('settings-profile-name').innerText = nameInput;
-            document.getElementById('settings-profile-sub').innerHTML = getSettingsRoleBadgeHtml(currentUserRole);
+            document.getElementById('profile-screen-name').innerText = nameInput;
+            document.getElementById('profile-screen-sub').innerHTML = getSettingsRoleBadgeHtml(currentUserRole);
             document.getElementById('home-welcome-text').innerText = `Hoş Geldin, ${nameInput}! 👋`;
             if (typeof window.updateHomeRoleBadge === 'function') {
                 window.updateHomeRoleBadge(currentUserRole);
@@ -1729,7 +1729,7 @@
 
             const avatarContainers = [
                 document.getElementById('home-avatar-display'),
-                document.getElementById('settings-avatar-container')
+                document.getElementById('profile-avatar-container')
             ];
 
             avatarContainers.forEach(container => {
@@ -1935,15 +1935,17 @@
             }
             try { localStorage.setItem('lisani_registered_users', JSON.stringify(registeredUsers)); } catch(e) {}
             
-            document.getElementById('settings-profile-name').innerText = user.name;
-            document.getElementById('settings-profile-sub').innerHTML = getSettingsRoleBadgeHtml(currentUserRole);
+            const profileName = document.getElementById('profile-screen-name');
+            const profileSub = document.getElementById('profile-screen-sub');
+            if (profileName) profileName.innerText = user.name;
+            if (profileSub) profileSub.innerHTML = getSettingsRoleBadgeHtml(currentUserRole);
             if (typeof window.updateHomeRoleBadge === 'function') {
                 window.updateHomeRoleBadge(currentUserRole);
             }
             
             const avatarContainers = [
                 document.getElementById('home-avatar-display'),
-                document.getElementById('settings-avatar-container')
+                document.getElementById('profile-avatar-container')
             ];
             avatarContainers.forEach(container => {
                 applyAvatarToContainer(container, normalizeAvatarValue(user.avatar, user.uid));
@@ -2268,14 +2270,14 @@
         function switchTab(screenId) {
             if (!screenId || screenId === currentActiveScreen) return;
 
-            if (screenId === 'ai' && canTrackStudents()) {
+            if (screenId === 'ai' && isHocaUser()) {
                 if (typeof window.openHocaDashboard === 'function') {
                     window.openHocaDashboard();
                     return;
                 }
             }
 
-            if (screenId === 'tests' && canTrackStudents()) {
+            if (screenId === 'tests' && isHocaUser()) {
                 screenId = 'hoca-dashboard';
             }
 
@@ -2325,7 +2327,18 @@
             }
 
             if (screenId === 'settings') {
+                if (typeof lucide !== 'undefined') lucide.createIcons();
+            }
+
+            if (screenId === 'profile') {
                 updateLearningStats();
+                if (typeof window.loadProgressFromServer === 'function') {
+                    window.loadProgressFromServer();
+                }
+                if (typeof window.loadLeaderboard === 'function') {
+                    window.loadLeaderboard();
+                }
+                if (typeof lucide !== 'undefined') lucide.createIcons();
             }
 
             if (screenId === 'osm-translate' && window.lucide) {
@@ -2339,6 +2352,7 @@
             }
 
             const tabIds = ['ai', 'tests', 'hoca-dashboard', 'home', 'letters', 'osm-translate', 'settings'];
+            const tabHighlightId = screenId === 'profile' ? 'home' : screenId;
             tabIds.forEach((id) => {
                 const tabBtn = document.getElementById(`tab-${id}`);
                 if (!tabBtn) return;
@@ -2360,7 +2374,7 @@
                 }
             });
 
-            const activeTab = document.getElementById(`tab-${screenId}`);
+            const activeTab = document.getElementById(`tab-${tabHighlightId}`);
             if (activeTab) {
                 activeTab.classList.remove('theme-text-muted');
                 activeTab.classList.add('lisani-tab-active');
@@ -2368,7 +2382,7 @@
                 const activeIcon = activeTab.querySelector('i');
                 if (activeIcon) activeIcon.style.transform = 'scale(1.06)';
 
-                if (screenId === 'home') {
+                if (tabHighlightId === 'home') {
                     const homeText = document.getElementById('tab-home-text');
                     if (homeText) {
                         homeText.classList.remove('theme-text-muted');

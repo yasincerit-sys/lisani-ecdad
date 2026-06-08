@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Sinif;
 use App\Models\User;
 use App\Models\UserProgress;
+use App\Support\AiBotRegistry;
 use App\Support\AvatarHelper;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -45,18 +46,42 @@ class YoneticiController extends Controller
                 'activityStatus' => $p?->activityStatus() ?? 'pasif',
                 'recentTests' => $p?->recent_tests ?? [],
                 'analiz' => $analiz,
+                'isBot' => AiBotRegistry::isBot($o),
+                'banned' => $o->isBanned(),
             ];
         })->sortByDesc('totalXp')->values()->all();
 
         $aktif = collect($liste)->where('activityStatus', 'aktif')->count();
         $ortalamaBasari = collect($liste)->avg('avgSuccess') ?: 0;
 
+        $siniflar = Sinif::orderBy('sinif_adi')->get()->map(fn (Sinif $s) => [
+            'sinifAdi' => $s->sinif_adi,
+            'kisaKod' => $s->kisa_kod,
+            'hocaAdi' => $s->hoca_adi,
+            'ogrenciSayisi' => count($s->ogrenciler ?? []),
+            'odevSayisi' => count($s->odevler ?? []),
+            'odevler' => $s->odevler ?? [],
+        ])->values()->all();
+
+        $recentOdevler = collect($siniflar)
+            ->flatMap(function (array $s) {
+                return collect($s['odevler'] ?? [])->map(fn ($o) => array_merge($o, [
+                    'sinifAdi' => $s['sinifAdi'],
+                    'kisaKod' => $s['kisaKod'],
+                ]));
+            })
+            ->sortByDesc('tarih')
+            ->take(20)
+            ->values()
+            ->all();
+
         return response()->json([
             'sinif' => [
                 'sinifAdi' => 'Tüm Uygulama',
                 'kisaKod' => null,
-                'odevler' => [],
+                'odevler' => $recentOdevler,
             ],
+            'siniflar' => $siniflar,
             'ozet' => [
                 'ogrenciSayisi' => count($liste),
                 'aktifOgrenci' => $aktif,
@@ -112,6 +137,98 @@ class YoneticiController extends Controller
             ],
             'hocalar' => $hocalar,
             'siniflar' => $siniflar,
+        ]);
+    }
+
+    public function users(Request $request): JsonResponse
+    {
+        if ($request->user()->role !== 'yonetici') {
+            return response()->json(['message' => 'Yetkisiz.'], 403);
+        }
+
+        $users = User::whereIn('role', ['ogrenci', 'hoca'])
+            ->orderBy('name')
+            ->get()
+            ->map(fn (User $u) => [
+                'uid' => (string) $u->id,
+                'name' => $u->name,
+                'email' => $u->email,
+                'role' => $u->role,
+                'avatar' => AvatarHelper::resolve($u->avatar, $u->id),
+                'sinifKodu' => $u->sinif_kodu,
+                'sinifAdi' => $u->sinif_adi,
+                'totalXp' => $u->total_score ?? 0,
+                'banned' => $u->isBanned(),
+                'bannedAt' => $u->banned_at?->toIso8601String(),
+                'isBot' => AiBotRegistry::isBot($u),
+            ])
+            ->values()
+            ->all();
+
+        return response()->json(['users' => $users]);
+    }
+
+    public function banUser(Request $request, string $userId): JsonResponse
+    {
+        $admin = $request->user();
+
+        if ($admin->role !== 'yonetici') {
+            return response()->json(['message' => 'Yetkisiz.'], 403);
+        }
+
+        $target = User::find($userId);
+
+        if (! $target) {
+            return response()->json(['message' => 'Kullanıcı bulunamadı.'], 404);
+        }
+
+        if ($target->role === 'yonetici') {
+            return response()->json(['message' => 'Yönetici hesapları engellenemez.'], 403);
+        }
+
+        if ((int) $target->id === (int) $admin->id) {
+            return response()->json(['message' => 'Kendinizi engelleyemezsiniz.'], 403);
+        }
+
+        if (AiBotRegistry::isBot($target)) {
+            return response()->json(['message' => 'Asistan hesapları engellenemez.'], 403);
+        }
+
+        $target->banned_at = now();
+        $target->save();
+
+        return response()->json([
+            'success' => true,
+            'user' => [
+                'uid' => (string) $target->id,
+                'banned' => true,
+            ],
+        ]);
+    }
+
+    public function unbanUser(Request $request, string $userId): JsonResponse
+    {
+        $admin = $request->user();
+
+        if ($admin->role !== 'yonetici') {
+            return response()->json(['message' => 'Yetkisiz.'], 403);
+        }
+
+        $target = User::find($userId);
+
+        if (! $target) {
+            return response()->json(['message' => 'Kullanıcı bulunamadı.'], 404);
+        }
+
+        $target->banned_at = null;
+        $target->save();
+
+        return response()->json([
+            'success' => true,
+            'user' => [
+                'uid' => (string) $target->id,
+                'banned' => false,
+            ],
         ]);
     }
 }
