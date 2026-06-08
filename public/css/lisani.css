@@ -644,7 +644,7 @@
                 box-shadow: none;
             }
 
-            .lisani-main-flow {
+            .lisani-main-flow:not(.hidden) {
                 flex-direction: row !important;
                 align-items: stretch;
             }

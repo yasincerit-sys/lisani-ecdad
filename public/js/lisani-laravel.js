@@ -315,8 +315,12 @@
             window.resetAppShellForLogout();
         }
 
-        document.getElementById('main-application-flow').classList.add('hidden');
-        document.getElementById('auth-container').classList.remove('hidden');
+        if (typeof window.syncAppShellVisibility === 'function') {
+            window.syncAppShellVisibility();
+        } else {
+            document.getElementById('main-application-flow')?.classList.add('hidden');
+            document.getElementById('auth-container')?.classList.remove('hidden');
+        }
         toggleAuthTab('login');
         showToast('Çıkış yapıldı.', 'info');
     };
@@ -721,10 +725,12 @@
         if (typeof window.resetAppShellForLogout === 'function') {
             window.resetAppShellForLogout();
         }
-        const auth = document.getElementById('auth-container');
-        const main = document.getElementById('main-application-flow');
-        if (main) main.classList.add('hidden');
-        if (auth) auth.classList.remove('hidden');
+        if (typeof window.syncAppShellVisibility === 'function') {
+            window.syncAppShellVisibility();
+        } else {
+            document.getElementById('main-application-flow')?.classList.add('hidden');
+            document.getElementById('auth-container')?.classList.remove('hidden');
+        }
         if (typeof toggleAuthTab === 'function') toggleAuthTab('login');
     };
 
@@ -1163,14 +1169,20 @@
             try {
                 const ok = await reauthWithStoredCredentials(savedUser);
                 if (!ok && !window._loginDone) {
-                    document.getElementById('auth-container')?.classList.remove('hidden');
-                    document.getElementById('main-application-flow')?.classList.add('hidden');
+                    if (typeof window.syncAppShellVisibility === 'function') {
+                        window.syncAppShellVisibility();
+                    }
                 }
             } catch (e) {
                 if (!window._loginDone) {
-                    document.getElementById('auth-container')?.classList.remove('hidden');
-                    document.getElementById('main-application-flow')?.classList.add('hidden');
+                    if (typeof window.syncAppShellVisibility === 'function') {
+                        window.syncAppShellVisibility();
+                    }
                 }
+            }
+
+            if (!window._loginDone && typeof window.syncAppShellVisibility === 'function') {
+                window.syncAppShellVisibility();
             }
         })();
 

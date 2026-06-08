@@ -1982,8 +1982,7 @@
             syncTennisUnlockFromUser(user);
 
             document.getElementById('home-welcome-text').innerText = `Hoş Geldin, ${user.name}! 👋`;
-            document.getElementById('auth-container').classList.add('hidden');
-            document.getElementById('main-application-flow').classList.remove('hidden');
+            syncAppShellVisibility();
 
             const afterLogin = async () => {
                 if (typeof window.onLoginSuccessHook === 'function') {
@@ -2029,8 +2028,7 @@
 
             // Giriş ekranına dön
             resetAppShellForLogout();
-            document.getElementById('main-application-flow').classList.add('hidden');
-            document.getElementById('auth-container').classList.remove('hidden');
+            syncAppShellVisibility();
             toggleAuthTab('login');
             if (window.LisaniTennisOnline) window.LisaniTennisOnline.stop(false);
             showToast("Çıkış yapıldı.", "info");
@@ -2305,6 +2303,21 @@
         }
 
         let currentActiveScreen = 'home';
+
+        function syncAppShellVisibility() {
+            const auth = document.getElementById('auth-container');
+            const main = document.getElementById('main-application-flow');
+            const loggedIn =
+                window._loginDone === true && !!(currentUser || window.currentUser);
+            if (loggedIn) {
+                auth?.classList.add('hidden');
+                main?.classList.remove('hidden');
+            } else {
+                main?.classList.add('hidden');
+                auth?.classList.remove('hidden');
+            }
+        }
+        window.syncAppShellVisibility = syncAppShellVisibility;
 
         function resetTabHighlightToHome() {
             const tabIds = ['ai', 'tests', 'hoca-dashboard', 'home', 'letters', 'osm-translate', 'settings'];
@@ -4069,6 +4082,9 @@ self.addEventListener('notificationclick', e => {
             renderQuizHistoryList();
             renderProgressChart();
             initPrelineTheme();
+            if (typeof syncAppShellVisibility === 'function') {
+                syncAppShellVisibility();
+            }
             updateLearningStats();
             initSwipeGestures();
             initToastSwipe();

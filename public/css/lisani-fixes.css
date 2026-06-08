@@ -1192,7 +1192,7 @@ html.preline-ui[class*="theme-"] .theme-pick-btn.is-active {
         flex-direction: column;
     }
 
-    #main-application-flow.lisani-main-flow {
+    #main-application-flow.lisani-main-flow:not(.hidden) {
         flex: 1 1 auto;
         min-height: 0;
         display: flex;
@@ -1621,8 +1621,26 @@ html.preline-ui[class*="theme-"] #wa-mesajlar-overlay .wa-send-btn.lisani-glass-
     position: relative;
 }
 
+/* Tailwind .flex + .hidden ayni elemanda — gizleme bozulmasin */
+#auth-container.hidden,
+#main-application-flow.hidden,
+#edit-profile-container.hidden,
+#notif-settings-panel.hidden,
+#kariyer-modal-container.hidden {
+    display: none !important;
+}
+
 #auth-container:not(.hidden) {
+    display: flex !important;
+    flex-direction: column;
     z-index: 60;
+    background-color: var(--theme-bg-phone, var(--ph-bg, #0f0f12));
+    isolation: isolate;
+}
+
+#main-application-flow.lisani-main-flow:not(.hidden) {
+    display: flex !important;
+    flex-direction: column;
 }
 
 #loading-overlay:not(.hidden),
