@@ -242,38 +242,55 @@ class AiBotRegistry
     public static function ensureBotsExist(): void
     {
         $password = Hash::make(Str::random(32));
-        $demoSinif = Sinif::where('kisa_kod', 'DEMO01')->first();
-        $demoKod = $demoSinif?->kisa_kod;
+        $sinifs = HocaClassRegistry::ensureAll();
+        $botEmails = self::emails();
 
-        foreach (self::BOTS as $bot) {
-            $user = User::updateOrCreate(
-                ['email' => $bot['email']],
-                [
-                    'name' => $bot['name'],
-                    'password' => $password,
-                    'avatar' => AvatarHelper::teamHtml($bot['avatar_file']),
-                    'role' => 'ogrenci',
-                    'sinif_adi' => $demoSinif?->sinif_adi ?? 'Osmanlıca AI Grubu',
-                    'sinif_kodu' => $demoKod,
-                    'total_score' => $bot['total_xp'],
-                ]
-            );
+        foreach (Sinif::all() as $sinif) {
+            $ids = collect($sinif->ogrenciler ?? [])
+                ->map(fn ($id) => (int) $id)
+                ->filter(function (int $id) use ($botEmails) {
+                    $user = User::find($id);
 
-            self::seedProgress($user, $bot);
-
-            if ($demoSinif) {
-                $ids = collect($demoSinif->ogrenciler ?? [])
-                    ->map(fn ($id) => (int) $id)
-                    ->push($user->id)
-                    ->unique()
-                    ->values()
-                    ->all();
-                $demoSinif->ogrenciler = $ids;
-            }
+                    return $user && ! in_array($user->email, $botEmails, true);
+                })
+                ->map(fn (int $id) => (string) $id)
+                ->values()
+                ->all();
+            $sinif->ogrenciler = $ids;
+            $sinif->save();
         }
 
-        if ($demoSinif) {
-            $demoSinif->save();
+        $sinifs = array_map(fn (Sinif $s) => $s->fresh(), $sinifs);
+
+        $bots = self::BOTS;
+        $botCount = count($bots);
+        $classCount = count($sinifs);
+        $base = intdiv($botCount, max($classCount, 1));
+        $extra = $botCount % max($classCount, 1);
+        $offset = 0;
+
+        foreach ($sinifs as $classIndex => $sinif) {
+            $size = $base + ($classIndex < $extra ? 1 : 0);
+            $botChunk = array_slice($bots, $offset, $size);
+            $offset += $size;
+
+            foreach ($botChunk as $bot) {
+                $user = User::updateOrCreate(
+                    ['email' => $bot['email']],
+                    [
+                        'name' => $bot['name'],
+                        'password' => $password,
+                        'avatar' => AvatarHelper::teamHtml($bot['avatar_file']),
+                        'role' => 'ogrenci',
+                        'sinif_adi' => $sinif->sinif_adi,
+                        'sinif_kodu' => $sinif->kisa_kod,
+                        'total_score' => $bot['total_xp'],
+                    ]
+                );
+
+                self::seedProgress($user, $bot);
+                $sinif->addOgrenci($user);
+            }
         }
     }
 

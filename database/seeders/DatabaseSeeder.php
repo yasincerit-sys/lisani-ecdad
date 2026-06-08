@@ -6,6 +6,7 @@ use App\Models\Sinif;
 use App\Models\User;
 use App\Support\AiBotRegistry;
 use App\Support\AvatarHelper;
+use App\Support\HocaClassRegistry;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -65,6 +66,11 @@ class DatabaseSeeder extends Seeder
         $this->command?->info('  Sınıf kodu (öğrencilere verin): DEMO01');
         $this->command?->info('Demo öğrenci: Demo Öğrenci / ogrenci123 (DEMO01 sınıfında)');
         $this->command?->info('Uygulama yöneticisi: Kerem Cerit / es26ma45');
-        $this->command?->info('Yapay zeka asistanları (öğrenci): Elif, Lügat, Tercüme, Hikmet — DEMO01 sınıfında, test geçmişiyle');
+        $this->command?->info('');
+        $this->command?->info('5 hoca sınıfı (botlar bölünmüş):');
+        foreach (HocaClassRegistry::CLASSES as $cfg) {
+            $this->command?->info("  {$cfg['hoca_name']} / hoca123 — {$cfg['kisa_kod']} ({$cfg['sinif_adi']})");
+        }
+        $this->command?->info('  16 yapay zeka botu ECDAD1–ECDAD5 arasında dağıtıldı.');
     }
 }
