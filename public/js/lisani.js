@@ -3017,6 +3017,53 @@
                 : ['ai', 'tests', 'home', 'letters', 'osm-translate', 'settings'];
         }
 
+        function canElementScroll(el, deltaY) {
+            if (!el) return false;
+            const style = window.getComputedStyle(el);
+            const overflowY = style.overflowY;
+            if (overflowY !== 'auto' && overflowY !== 'scroll' && overflowY !== 'overlay') {
+                return false;
+            }
+            if (deltaY > 0) {
+                return el.scrollHeight - el.clientHeight - el.scrollTop > 1;
+            }
+            if (deltaY < 0) {
+                return el.scrollTop > 1;
+            }
+            return false;
+        }
+
+        function findScrollableAncestor(el, deltaY, stopAt) {
+            let node = el;
+            while (node && node !== stopAt && node !== document.body) {
+                if (canElementScroll(node, deltaY)) {
+                    return node;
+                }
+                node = node.parentElement;
+            }
+            return null;
+        }
+
+        function initDesktopWheelScroll() {
+            const appShell = document.getElementById('app-container');
+            const mainFlow = document.getElementById('main-application-flow');
+            const screens = document.getElementById('screens-container');
+            if (!appShell || !mainFlow || !screens) return;
+
+            appShell.addEventListener('wheel', (e) => {
+                if (window.innerWidth < 1024) return;
+                if (mainFlow.classList.contains('hidden')) return;
+                if (isSwipeGestureBlocked()) return;
+
+                const nestedScrollable = findScrollableAncestor(e.target, e.deltaY, appShell);
+                if (nestedScrollable && nestedScrollable !== screens) return;
+                if (screens.scrollHeight <= screens.clientHeight + 1) return;
+
+                screens.scrollTop += e.deltaY;
+                e.preventDefault();
+            }, { passive: false });
+        }
+
         function initSwipeGestures() {
             const container = document.getElementById('screens-container');
             if (!container) return;
@@ -4066,6 +4113,7 @@ self.addEventListener('notificationclick', e => {
             }
             updateLearningStats();
             initSwipeGestures();
+            initDesktopWheelScroll();
             initToastSwipe();
             initRememberMeCheckbox();
 
