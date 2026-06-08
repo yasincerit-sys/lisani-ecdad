@@ -30,14 +30,7 @@
     }
 
     function isTennisUnlocked() {
-        if (typeof window.getTennisUnlocked === 'function') return window.getTennisUnlocked();
-        try {
-            const uid = window.currentUser?.uid;
-            const key = uid ? `lisani_tennis_unlocked_${uid}` : 'lisani_tennis_unlocked';
-            return localStorage.getItem(key) === '1' || localStorage.getItem('lisani_tennis_unlocked') === '1';
-        } catch (e) {
-            return false;
-        }
+        return typeof window.getTennisUnlocked === 'function' && window.getTennisUnlocked();
     }
 
     function showKariyerPanel(panel) {

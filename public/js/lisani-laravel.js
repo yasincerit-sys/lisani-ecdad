@@ -206,6 +206,7 @@
                     const sessionRaw = localStorage.getItem('lisani_session_user');
                     const session = sessionRaw ? JSON.parse(sessionRaw) : { ...user };
                     session.password = passwordInput;
+                    session.tennisUnlocked = false;
                     localStorage.setItem('lisani_session_user', JSON.stringify(session));
                 } catch (e) {}
             }
@@ -1044,7 +1045,7 @@
 
             try {
                 if (localStorage.getItem('lisani_remember_me') === 'true') {
-                    localStorage.setItem('lisani_session_user', JSON.stringify(user));
+                    localStorage.setItem('lisani_session_user', JSON.stringify({ ...user, tennisUnlocked: false }));
                 }
             } catch (e) {}
 

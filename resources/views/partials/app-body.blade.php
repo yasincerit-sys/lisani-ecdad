@@ -1204,8 +1204,8 @@
                             <span class="text-xs font-extrabold theme-text-main">Antik Şifre Girişi 🗝️</span>
                             <span id="tennis-unlock-badge" class="hidden ml-auto text-[8px] font-black px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 uppercase tracking-wider">🎾 Aktif</span>
                         </div>
-                        <p id="tennis-secret-hint" class="text-[10px] theme-text-muted leading-relaxed">Doğru şifreyi girdikten sonra ana sayfadaki <strong class="theme-primary-color">Kariyer Modu</strong> kartına <strong>çift tıklayarak</strong> gizli tenis lobisini açabilirsin.</p>
-                        <p id="tennis-unlocked-msg" class="hidden text-[10px] text-emerald-400 leading-relaxed font-semibold">Tenis aktif! Kariyer Modu kartına çift tıkla — online veya solo oyna. 🎾</p>
+                        <p id="tennis-secret-hint" class="text-[10px] theme-text-muted leading-relaxed">Doğru şifreyi girdikten sonra ana sayfadaki <strong class="theme-primary-color">Kariyer Modu</strong> kartına <strong>çift tıklayarak</strong> gizli tenis lobisini açabilirsin. <strong class="theme-text-main">Her uygulama girişinde şifreyi yeniden girmen gerekir.</strong></p>
+                        <p id="tennis-unlocked-msg" class="hidden text-[10px] text-emerald-400 leading-relaxed font-semibold">Tenis bu oturumda aktif! Kariyer Modu kartına çift tıkla — online veya solo oyna. 🎾</p>
                         <div id="tennis-secret-form" class="space-y-3">
                         <div class="relative flex items-center theme-light-bg border theme-border rounded-xl px-3 py-1.5">
                             <input type="text" id="profile-secret-code" class="w-full bg-transparent text-xs theme-text-main focus:outline-none text-center tracking-widest font-black uppercase" placeholder="ŞİFREYİ GİRİN" />

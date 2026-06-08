@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\MessageController;
 use App\Http\Controllers\Api\ProgressController;
 use App\Http\Controllers\Api\SinifController;
+use App\Http\Controllers\Api\TennisController;
 use App\Http\Controllers\Api\LeaderboardController;
 use App\Http\Controllers\Api\YoneticiController;
 use App\Http\Controllers\AppController;

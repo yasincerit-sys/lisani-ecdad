@@ -12,7 +12,7 @@ class TennisController extends Controller
 {
     private const PADDLE_MIN = 0;
 
-    private const PADDLE_MAX = 248;
+    private const PADDLE_MAX = 396;
 
     public function create(Request $request): JsonResponse
     {

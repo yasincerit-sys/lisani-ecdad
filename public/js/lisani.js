@@ -215,92 +215,92 @@
             },
             3: {
                 "Test 1": [
-                    { word: "Aşağıdakilerden hangisi Türkçe kökenli bir kelimedir?", options: ["Taş", "Mektep", "Pencere", "Kalem"], answer: "Taş" },
-                    { word: "Aşağıdakilerden hangisi Arapça kökenli bir kelimedir?", options: ["Taş", "Mektep", "Pencere", "Dost"], answer: "Mektep" },
-                    { word: "Aşağıdakilerden hangisi Farsça kökenli bir kelimedir?", options: ["Taş", "Mektep", "Pencere", "Televizyon"], answer: "Pencere" },
-                    { word: "Aşağıdakilerden hangisi Türkçe bir kelime olduğunu büyük ünlü uyumu kuralıyla kanıtlar?", options: ["Su", "Mektep", "Kitap", "Kalem"], answer: "Su" },
-                    { word: "Aşağıdakilerden hangisi Batı kökenli bir kelimedir?", options: ["Pencere", "Televizyon", "Mektep", "Taş"], answer: "Televizyon" },
-                    { word: "'Bahçe' kelimesinin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Rumca"], answer: "Farsça" },
-                    { word: "'Kitap' kelimesinin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Fransızca"], answer: "Arapça" },
-                    { word: "'Çiçek' kelimesinin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Rumca"], answer: "Türkçe" },
-                    { word: "'Camii' kelimesinin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Latince"], answer: "Arapça" },
-                    { word: "'Şehir' kelimesinin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Rumca"], answer: "Farsça" },
-                    { word: "'Asker' kelimesinin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "İtalyanca"], answer: "Arapça" },
-                    { word: "'Duman' kelimesinin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Rumca"], answer: "Türkçe" },
-                    { word: "'Padişah' kelimesinin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Moğolca"], answer: "Farsça" },
-                    { word: "'Sultan' kelimesinin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Rumca"], answer: "Arapça" },
-                    { word: "'Ordu' kelimesinin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Moğolca"], answer: "Türkçe" },
-                    { word: "'Derya' kelimesinin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Rumca"], answer: "Farsça" },
-                    { word: "'İlim' kelimesinin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Latince"], answer: "Arapça" },
-                    { word: "'Ata' kelimesinin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Moğolca"], answer: "Türkçe" },
-                    { word: "'Haber' kelimesinin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Rumca"], answer: "Arapça" },
-                    { word: "'Pazar' kelimesinin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Ermenice"], answer: "Farsça" }
+                    { word: "طاش · مكتب · پنجره · قلم\n\nAşağıdakilerden hangisi Türkçe kökenli bir kelimedir?", options: ["طاش", "مكتب", "پنجره", "قلم"], answer: "طاش" },
+                    { word: "طاش · مكتب · پنجره · دوست\n\nAşağıdakilerden hangisi Arapça kökenli bir kelimedir?", options: ["طاش", "مكتب", "پنجره", "دوست"], answer: "مكتب" },
+                    { word: "طاش · مكتب · پنجره · تلفزيون\n\nAşağıdakilerden hangisi Farsça kökenli bir kelimedir?", options: ["طاش", "مكتب", "پنجره", "تلفزيون"], answer: "پنجره" },
+                    { word: "طاش\n\nBu kelimenin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Rumca"], answer: "Türkçe" },
+                    { word: "تلفزيون\n\nBu kelimenin kökeni hangi dildir?", options: ["Farsça", "Batı dili", "Arapça", "Türkçe"], answer: "Batı dili" },
+                    { word: "باغچه\n\nBu kelimenin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Rumca"], answer: "Farsça" },
+                    { word: "كتاب\n\nBu kelimenin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Fransızca"], answer: "Arapça" },
+                    { word: "چیچك\n\nBu kelimenin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Rumca"], answer: "Türkçe" },
+                    { word: "جامع\n\nBu kelimenin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Latince"], answer: "Arapça" },
+                    { word: "شهر\n\nBu kelimenin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Rumca"], answer: "Farsça" },
+                    { word: "عسكر\n\nBu kelimenin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "İtalyanca"], answer: "Arapça" },
+                    { word: "دuman\n\nBu kelimenin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Rumca"], answer: "Türkçe" },
+                    { word: "پادشاه\n\nBu kelimenin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Moğolca"], answer: "Farsça" },
+                    { word: "سلطان\n\nBu kelimenin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Rumca"], answer: "Arapça" },
+                    { word: "اوردو\n\nBu kelimenin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Moğolca"], answer: "Türkçe" },
+                    { word: "دریا\n\nBu kelimenin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Rumca"], answer: "Farsça" },
+                    { word: "علم\n\nBu kelimenin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Latince"], answer: "Arapça" },
+                    { word: "آتا\n\nBu kelimenin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Moğolca"], answer: "Türkçe" },
+                    { word: "خبر\n\nBu kelimenin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Rumca"], answer: "Arapça" },
+                    { word: "بازار\n\nBu kelimenin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Ermenice"], answer: "Farsça" }
                 ],
                 "Test 2": [
-                    { word: "Büyük ünlü uyumu kuralıyla Türkçe kökenli olduğunu doğrudan kanıtlayan kelime hangisidir?", options: ["Sarı", "Kitap", "Defter", "Kalem"], answer: "Sarı" },
-                    { word: "Aşağıdakilerden hangisi Farsça kökenli bir ektir?", options: ["-istan", "-ci/-cı", "-lık/-lik", "-da/-de"], answer: "-istan" },
-                    { word: "Aşağıdakilerden hangisi Türkçe kökenli bir kelimedir?", options: ["Dağ", "Defter", "Pencere", "Bahçe"], answer: "Dağ" },
-                    { word: "Aşağıdakilerden hangisi Arapça kökenli bir ektir?", options: ["-istan", "-ane", "-at (çoğul)", "-lık"], answer: "-at (çoğul)" },
-                    { word: "Aşağıdakilerden hangisi Türkçe kökenli bir ektir?", options: ["-istan", "-ane", "-ci/-cı", "-at"], answer: "-ci/-cı" },
-                    { word: "'Güneş' kelimesi büyük ünlü uyumuna uyar mı?", options: ["Evet, Türkçe kökenlidir", "Hayır, Arapçadan gelir", "Hayır, Farsçadan gelir", "Kısmen uyar"], answer: "Evet, Türkçe kökenlidir" },
-                    { word: "Osmanlıcada Farsça tamlamada iki isim nasıl bağlanır?", options: ["'-in' ekiyle", "İzafet kesresiyle (e sesi)", "Ayrı yazılarak", "Vav harfiyle"], answer: "İzafet kesresiyle (e sesi)" },
-                    { word: "Aşağıdakilerden hangisi Farsça kökenli bir kelimedir?", options: ["Rüzgar", "Asker", "Taş", "El"], answer: "Rüzgar" },
-                    { word: "Aşağıdakilerden hangisi Arapça kökenli bir kelimedir?", options: ["Dağ", "Su", "İlim", "Taş"], answer: "İlim" },
-                    { word: "Aşağıdakilerden hangisi Türkçe kökenli bir kelimedir?", options: ["Kalem", "Göz", "Kitap", "Dost"], answer: "Göz" },
-                    { word: "'Hazine' kelimesinin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "İtalyanca"], answer: "Arapça" },
-                    { word: "'Nişan' kelimesinin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Rumca"], answer: "Farsça" },
-                    { word: "Osmanlıcada Türkçe kelimeler büyük ünlü uyumuna uyarken yabancı kökenli kelimeler ne olur?", options: ["Onlar da uyar", "Genellikle uymaz", "Kısmen uyar", "Her zaman uyar"], answer: "Genellikle uymaz" },
-                    { word: "'-hane' eki hangi dilden gelir?", options: ["Türkçe", "Arapça", "Farsça", "Rumca"], answer: "Farsça" },
-                    { word: "'-dar' eki hangi dilden gelir?", options: ["Türkçe", "Arapça", "Farsça", "Moğolca"], answer: "Farsça" },
-                    { word: "'-iye' eki hangi dilden gelir?", options: ["Türkçe", "Arapça", "Farsça", "Latince"], answer: "Arapça" },
-                    { word: "'-name' eki hangi dilden gelir?", options: ["Türkçe", "Arapça", "Farsça", "Rumca"], answer: "Farsça" },
-                    { word: "'Toprak' kelimesinin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Moğolca"], answer: "Türkçe" },
-                    { word: "'Meydan' kelimesinin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Rumca"], answer: "Arapça" },
-                    { word: "'Çarşı' kelimesinin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Ermenice"], answer: "Farsça" }
+                    { word: "ساری\n\nBu kelime büyük ünlü uyumuna uyduğu için kökeni nedir?", options: ["Türkçe", "Arapça", "Farsça", "Batı dili"], answer: "Türkçe" },
+                    { word: "-ستان · -جی · -لق · -ده\n\nAşağıdaki eklerden hangisi Farsça kökenlidir?", options: ["-istan", "-ci/-cı", "-lık/-lik", "-da/-de"], answer: "-istan" },
+                    { word: "طاغ\n\nBu kelimenin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Rumca"], answer: "Türkçe" },
+                    { word: "-ات · -انه · -جی · -لق\n\nAşağıdaki eklerden hangisi Arapça çoğul ekidir?", options: ["-at (çoğul)", "-ane", "-ci/-cı", "-lık"], answer: "-at (çoğul)" },
+                    { word: "-ستان · -انه · -جی · -ات\n\nAşağıdaki eklerden hangisi Türkçe kökenlidir?", options: ["-istan", "-ane", "-ci/-cı", "-at"], answer: "-ci/-cı" },
+                    { word: "گونش\n\nBu kelimenin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Rumca"], answer: "Türkçe" },
+                    { word: "شهر بيوكدر\n\nOsmanlıcada iki isim tamlamasında bağlantı nasıl kurulur?", options: ["İzafet kesresiyle (e sesi)", "'-in' ekiyle", "Ayrı yazılarak", "Vav harfiyle"], answer: "İzafet kesresiyle (e sesi)" },
+                    { word: "روزگار\n\nBu kelimenin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Rumca"], answer: "Farsça" },
+                    { word: "علم\n\nBu kelimenin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Latince"], answer: "Arapça" },
+                    { word: "گوز\n\nBu kelimenin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Rumca"], answer: "Türkçe" },
+                    { word: "خزینه\n\nBu kelimenin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "İtalyanca"], answer: "Arapça" },
+                    { word: "نیشان\n\nBu kelimenin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Rumca"], answer: "Farsça" },
+                    { word: "Osmanlıcada Türkçe kelimeler büyük ünlü uyumuna uyarken yabancı kökenli kelimeler genellikle ne yapar?", options: ["Uyum kurmaz", "Her zaman uyar", "Kısmen uyar", "Hepsini bozar"], answer: "Uyum kurmaz" },
+                    { word: "-خانه\n\nBu ek hangi dilden gelir?", options: ["Türkçe", "Arapça", "Farsça", "Rumca"], answer: "Farsça" },
+                    { word: "-دار\n\nBu ek hangi dilden gelir?", options: ["Türkçe", "Arapça", "Farsça", "Moğolca"], answer: "Farsça" },
+                    { word: "-iye\n\nBu ek hangi dilden gelir?", options: ["Türkçe", "Arapça", "Farsça", "Latince"], answer: "Arapça" },
+                    { word: "-نامه\n\nBu ek hangi dilden gelir?", options: ["Türkçe", "Arapça", "Farsça", "Rumca"], answer: "Farsça" },
+                    { word: "توپراق\n\nBu kelimenin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Moğolca"], answer: "Türkçe" },
+                    { word: "میدان\n\nBu kelimenin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Rumca"], answer: "Arapça" },
+                    { word: "چارشو\n\nBu kelimenin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Ermenice"], answer: "Farsça" }
                 ],
                 "Test 3": [
-                    { word: "Aşağıdaki kelimelerden hangisi Farsça kökenli DEĞİLDİR?", options: ["Derzi", "Pencere", "Taş", "Bahçe"], answer: "Taş" },
-                    { word: "Arapçadan dilimize geçen 'kalem' kelimesinin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Fransızca"], answer: "Arapça" },
-                    { word: "'Dost' kelimesinin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "İngilizce"], answer: "Farsça" },
-                    { word: "Aşağıdaki kelimelerden hangisi Türkçe kökenlidir?", options: ["Göz", "Saray", "Kalem", "Defter"], answer: "Göz" },
-                    { word: "Osmanlıcada karma kelimeler mümkün müdür?", options: ["Evet", "Hayır", "Sadece eklerde", "Sadece tamlamalarda"], answer: "Evet" },
-                    { word: "'Kale' kelimesinin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Rumca"], answer: "Arapça" },
-                    { word: "'Saray' kelimesinin kökeni hangi dildir?", options: ["Farsça", "Türkçe", "Arapça", "Latince"], answer: "Farsça" },
-                    { word: "'Köy' kelimesinin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Moğolca"], answer: "Türkçe" },
-                    { word: "'Şeker' kelimesinin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Rumca"], answer: "Farsça" },
-                    { word: "'Cevap' kelimesinin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Ermenice"], answer: "Arapça" },
-                    { word: "'Soru' kelimesinin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Rumca"], answer: "Türkçe" },
-                    { word: "'Meclis' kelimesinin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Latince"], answer: "Arapça" },
-                    { word: "'Renk' kelimesinin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Rumca"], answer: "Farsça" },
-                    { word: "'Baş' kelimesinin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Moğolca"], answer: "Türkçe" },
-                    { word: "'Fikir' kelimesinin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Fransızca"], answer: "Arapça" },
-                    { word: "'Mevsim' kelimesinin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Rumca"], answer: "Arapça" },
-                    { word: "'Yıldız' kelimesinin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Moğolca"], answer: "Türkçe" },
-                    { word: "'Nefes' kelimesinin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Rumca"], answer: "Arapça" },
-                    { word: "'Gönül' kelimesinin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Moğolca"], answer: "Türkçe" },
-                    { word: "'Çadır' kelimesinin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Moğolca"], answer: "Farsça" }
+                    { word: "درزی · پنجره · طاش · باغچه\n\nAşağıdaki kelimelerden hangisi Farsça kökenli DEĞİLDİR?", options: ["درزی", "پنجره", "طاش", "باغچه"], answer: "طاش" },
+                    { word: "قلم\n\nBu kelimenin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Fransızca"], answer: "Arapça" },
+                    { word: "دوست\n\nBu kelimenin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "İngilizce"], answer: "Farsça" },
+                    { word: "گوز\n\nBu kelimenin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Rumca"], answer: "Türkçe" },
+                    { word: "Osmanlıcada Türkçe, Arapça ve Farsça kelimeler bir arada kullanılabilir mi?", options: ["Evet", "Hayır", "Sadece eklerde", "Sadece tamlamalarda"], answer: "Evet" },
+                    { word: "قلعه\n\nBu kelimenin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Rumca"], answer: "Arapça" },
+                    { word: "سرای\n\nBu kelimenin kökeni hangi dildir?", options: ["Farsça", "Türkçe", "Arapça", "Latince"], answer: "Farsça" },
+                    { word: "كوى\n\nBu kelimenin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Moğolca"], answer: "Türkçe" },
+                    { word: "شكر\n\nBu kelimenin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Rumca"], answer: "Farsça" },
+                    { word: "جواب\n\nBu kelimenin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Ermenice"], answer: "Arapça" },
+                    { word: "سورو\n\nBu kelimenin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Rumca"], answer: "Türkçe" },
+                    { word: "مجلس\n\nBu kelimenin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Latince"], answer: "Arapça" },
+                    { word: "رنگ\n\nBu kelimenin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Rumca"], answer: "Farsça" },
+                    { word: "باش\n\nBu kelimenin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Moğolca"], answer: "Türkçe" },
+                    { word: "فكر\n\nBu kelimenin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Fransızca"], answer: "Arapça" },
+                    { word: "موسم\n\nBu kelimenin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Rumca"], answer: "Arapça" },
+                    { word: "یلدیز\n\nBu kelimenin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Moğolca"], answer: "Türkçe" },
+                    { word: "نفس\n\nBu kelimenin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Rumca"], answer: "Arapça" },
+                    { word: "گونül\n\nBu kelimenin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Moğolca"], answer: "Türkçe" },
+                    { word: "چادر\n\nBu kelimenin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Moğolca"], answer: "Farsça" }
                 ],
                 "Genel": [
-                    { word: "Türkçe kökenli 'kul' kelimesi büyük ünlü uyumuna uyar mı?", options: ["Uyar", "Uymaz", "Kısmen uyar", "Kuralsızdır"], answer: "Uyar" },
-                    { word: "Farsçadan dilimize geçen 'dergâh' kelimesinin kökeni nedir?", options: ["Farsça", "Arapça", "Türkçe", "Rumca"], answer: "Farsça" },
-                    { word: "Aşağıdaki kelimelerden hangisi Batı (Fransızca) kökenlidir?", options: ["Bilet", "Pencere", "Mektep", "Kuzu"], answer: "Bilet" },
-                    { word: "Arapça kökenli 'kitap' kelimesinin çoğulu (kütüb) hangi tür çoğuldur?", options: ["Arapça kuralsız (mükesser)", "Türkçe -ler ekli", "Farsça -an ekli", "Batı tarzı"], answer: "Arapça kuralsız (mükesser)" },
-                    { word: "'Saray' kelimesinin kökeni hangi dildir?", options: ["Farsça", "Türkçe", "Arapça", "Latince"], answer: "Farsça" },
-                    { word: "Aşağıdakilerden hangisi Farsça kökenli bir kelimedir?", options: ["Pehlivan", "Kalem", "Su", "Taş"], answer: "Pehlivan" },
-                    { word: "Aşağıdakilerden hangisi Arapça kökenli bir kelimedir?", options: ["Dağ", "Su", "Harf", "Çiçek"], answer: "Harf" },
-                    { word: "Aşağıdakilerden hangisi Türkçe kökenli bir kelimedir?", options: ["Kış", "Kalem", "Bahçe", "Dost"], answer: "Kış" },
-                    { word: "Osmanlıca üç ana dil katmanından hangisi değildir?", options: ["Türkçe", "Arapça", "Latince", "Farsça"], answer: "Latince" },
-                    { word: "Osmanlıcada yüksek edebiyat dili ağırlıklı olarak hangi dillerden oluşurdu?", options: ["Türkçe ve Rumca", "Arapça ve Farsça", "Farsça ve Latince", "Türkçe ve Moğolca"], answer: "Arapça ve Farsça" },
-                    { word: "Halk Osmanlıcasında hangi dil daha baskındı?", options: ["Arapça", "Farsça", "Türkçe", "Rumca"], answer: "Türkçe" },
-                    { word: "'Borç' kelimesinin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Moğolca"], answer: "Türkçe" },
-                    { word: "'Tabip' kelimesinin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Rumca"], answer: "Arapça" },
-                    { word: "'Kuş' kelimesinin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Moğolca"], answer: "Türkçe" },
-                    { word: "'Mektup' kelimesinin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Rumca"], answer: "Arapça" },
-                    { word: "'Köprü' kelimesinin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Moğolca"], answer: "Türkçe" },
-                    { word: "'Divan' kelimesinin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Rumca"], answer: "Farsça" },
-                    { word: "Osmanlıca 19. yüzyılda hangi Batı dilleriyle daha fazla temas kurdu?", options: ["İspanyolca ve Portekizce", "Fransızca ve İtalyanca", "Almanca ve İngilizce", "Rusça ve Lehçe"], answer: "Fransızca ve İtalyanca" },
-                    { word: "Osmanlıcada kelime kökenini belirlemede en belirleyici yöntem nedir?", options: ["Büyük ünlü uyumu (Türkçe için)", "Kelime uzunluğu", "Harf sayısı", "Başlangıç harfi"], answer: "Büyük ünlü uyumu (Türkçe için)" },
-                    { word: "'Dergâh' kelimesi '-gâh' ekiyle oluşmuştur. Bu ek hangi dilden gelir?", options: ["Türkçe", "Arapça", "Farsça", "Rumca"], answer: "Farsça" }
+                    { word: "قول\n\nBu Türkçe kökenli kelime büyük ünlü uyumuna uyar mı?", options: ["Uyar", "Uymaz", "Kısmen uyar", "Kuralsızdır"], answer: "Uyar" },
+                    { word: "درگاه\n\nBu kelimenin kökeni hangi dildir?", options: ["Farsça", "Arapça", "Türkçe", "Rumca"], answer: "Farsça" },
+                    { word: "بلیط\n\nBu kelimenin kökeni hangi dildir?", options: ["Batı (Fransızca)", "Farsça", "Arapça", "Türkçe"], answer: "Batı (Fransızca)" },
+                    { word: "كتابların عربجه جمعی كوتوبdur\n\nBu çoğul türü nedir?", options: ["Arapça mükesser çoğul", "Türkçe -ler ekli", "Farsça -an ekli", "Batı tarzı"], answer: "Arapça mükesser çoğul" },
+                    { word: "سرای\n\nBu kelimenin kökeni hangi dildir?", options: ["Farsça", "Türkçe", "Arapça", "Latince"], answer: "Farsça" },
+                    { word: "پهلوان\n\nBu kelimenin kökeni hangi dildir?", options: ["Farsça", "Arapça", "Türkçe", "Rumca"], answer: "Farsça" },
+                    { word: "حرف\n\nBu kelimenin kökeni hangi dildir?", options: ["Arapça", "Türkçe", "Farsça", "Latince"], answer: "Arapça" },
+                    { word: "قیش\n\nBu kelimenin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Rumca"], answer: "Türkçe" },
+                    { word: "Osmanlıcanın üç ana dil katmanından hangisi değildir?\n\nتürkجه · عربجه · فارسجه · ?", options: ["Latince", "Moğolca", "Rumca", "Ermenice"], answer: "Latince" },
+                    { word: "Osmanlıcada yüksek edebiyat dili ağırlıklı olarak hangi dillerden oluşur?", options: ["Arapça ve Farsça", "Türkçe ve Rumca", "Farsça ve Latince", "Türkçe ve Moğolca"], answer: "Arapça ve Farsça" },
+                    { word: "Osmanlıcada halk dili ağırlıklı olarak hangi kökten kelimeler kullanır?", options: ["Türkçe", "Arapça", "Farsça", "Rumca"], answer: "Türkçe" },
+                    { word: "بورچ\n\nBu kelimenin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Moğolca"], answer: "Türkçe" },
+                    { word: "طبیب\n\nBu kelimenin kökeni hangi dildir?", options: ["Arapça", "Türkçe", "Farsça", "Rumca"], answer: "Arapça" },
+                    { word: "قوش\n\nBu kelimenin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Moğolca"], answer: "Türkçe" },
+                    { word: "مكتوب\n\nBu kelimenin kökeni hangi dildir?", options: ["Arapça", "Türkçe", "Farsça", "Rumca"], answer: "Arapça" },
+                    { word: "كوپرو\n\nBu kelimenin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Moğolca"], answer: "Türkçe" },
+                    { word: "دیوان\n\nBu kelimenin kökeni hangi dildir?", options: ["Farsça", "Arapça", "Türkçe", "Rumca"], answer: "Farsça" },
+                    { word: "۱۹. yuzyıl Osmanlıcasının en çok temas ettiği Batı dilleri hangileridir?", options: ["Fransızca ve İtalyanca", "İspanyolca ve Portekizce", "Almanca ve İngilizce", "Rusça ve Lehçe"], answer: "Fransızca ve İtalyanca" },
+                    { word: "Osmanlıcada kelime kökeni belirlemede Türkçe için en belirleyici yöntem nedir?", options: ["Büyük ünlü uyumu", "Kelime uzunluğu", "Harf sayısı", "Başlangıç harfi"], answer: "Büyük ünlü uyumu" },
+                    { word: "درگاه\n\n'-gâh' eki hangi dilden gelir?", options: ["Farsça", "Arapça", "Türkçe", "Rumca"], answer: "Farsça" }
                 ]
             }
         };
@@ -1506,7 +1506,7 @@
             document.getElementById('gokhan-abi-block')?.classList.add('hidden');
         }
 
-        // --- 🎾 GİZLİ TENİS OYUNU KİLİT DURUMU (sunucu + kullanıcı bazlı localStorage) ---
+        // --- 🎾 GİZLİ TENİS OYUNU KİLİT DURUMU (yalnızca oturum içi; her girişte şifre gerekir) ---
         let tennisUnlocked = false;
 
         window.getTennisUnlocked = function () {
@@ -1515,6 +1515,13 @@
 
         function tennisUnlockStorageKey(uid) {
             return uid ? `lisani_tennis_unlocked_${uid}` : 'lisani_tennis_unlocked';
+        }
+
+        function clearTennisUnlockStorage(uid) {
+            try {
+                localStorage.removeItem(tennisUnlockStorageKey(uid));
+                localStorage.removeItem('lisani_tennis_unlocked');
+            } catch (e) {}
         }
 
         function applyTennisUnlockUI(unlocked) {
@@ -1530,42 +1537,18 @@
 
         function setTennisUnlockState(unlocked, uid) {
             tennisUnlocked = !!unlocked;
-            const key = tennisUnlockStorageKey(uid);
-            try {
-                if (unlocked) localStorage.setItem(key, '1');
-                else localStorage.removeItem(key);
-            } catch (e) {}
+            if (!unlocked) {
+                clearTennisUnlockStorage(uid);
+            }
             applyTennisUnlockUI(tennisUnlocked);
             if (currentUser && (!uid || String(currentUser.uid) === String(uid))) {
                 currentUser.tennisUnlocked = tennisUnlocked;
-                try {
-                    if (localStorage.getItem('lisani_remember_me') === 'true') {
-                        localStorage.setItem('lisani_session_user', JSON.stringify(currentUser));
-                    }
-                } catch (e) {}
             }
         }
 
         function syncTennisUnlockFromUser(user) {
-            if (!user?.uid) return;
-            if (user.tennisUnlocked) {
-                setTennisUnlockState(true, user.uid);
-                return;
-            }
-            try {
-                const local = localStorage.getItem(tennisUnlockStorageKey(user.uid)) === '1';
-                const legacy = localStorage.getItem('lisani_tennis_unlocked') === '1';
-                if (local || legacy) {
-                    setTennisUnlockState(true, user.uid);
-                    if (legacy && window._loginDone && typeof window.apiFetch === 'function') {
-                        window.apiFetch('/api/profile/tennis-unlock', { method: 'POST', body: '{}' }).catch(() => {});
-                    }
-                } else {
-                    setTennisUnlockState(false, user.uid);
-                }
-            } catch (e) {
-                setTennisUnlockState(false, user.uid);
-            }
+            clearTennisUnlockStorage(user?.uid);
+            setTennisUnlockState(false, user?.uid);
         }
 
         window.syncTennisUnlockFromUser = syncTennisUnlockFromUser;
@@ -1680,18 +1663,6 @@
 
             if (entered === "264506") {
                 setTennisUnlockState(true, currentUser?.uid);
-                if (window._loginDone && typeof window.apiFetch === 'function') {
-                    window.apiFetch('/api/profile/tennis-unlock', { method: 'POST', body: '{}' })
-                        .then((data) => {
-                            if (data?.user && typeof window.syncTennisUnlockFromUser === 'function') {
-                                window.syncTennisUnlockFromUser({
-                                    uid: data.user.uid,
-                                    tennisUnlocked: !!data.user.tennisUnlocked,
-                                });
-                            }
-                        })
-                        .catch(() => {});
-                }
                 if (codeField) codeField.value = '';
                 showToast("Şifre doğru! Kariyer Modu'na çift tıklayarak tenis oyununu aç. 🎾", "success");
             } else {
@@ -1942,7 +1913,7 @@
 
             if (rememberMe) {
                 try {
-                    const sessionPayload = { ...user };
+                    const sessionPayload = { ...user, tennisUnlocked: false };
                     const storedPwd =
                         user.password ||
                         (typeof window._resolveStoredPassword === 'function'
@@ -2382,6 +2353,8 @@
             if (window.LisaniTennisOnline && typeof window.LisaniTennisOnline.stop === 'function') {
                 window.LisaniTennisOnline.stop(false);
             }
+
+            setTennisUnlockState(false);
 
             document.getElementById('bottom-bar')?.classList.remove('hidden');
             document.getElementById('test-selection-view')?.classList.add('hidden');
@@ -3821,8 +3794,13 @@
                 tennisServeReady = !!state.serveReady;
                 tennisCountdown = state.countdown ?? 0;
                 tennisRallyHits = state.rallyHits ?? 0;
-                tennisPlayerScore = state.hostScore ?? 0;
-                tennisComputerScore = state.guestScore ?? 0;
+                if (tennisOnlineRole === 'guest') {
+                    tennisPlayerScore = state.guestScore ?? 0;
+                    tennisComputerScore = state.hostScore ?? 0;
+                } else {
+                    tennisPlayerScore = state.hostScore ?? 0;
+                    tennisComputerScore = state.guestScore ?? 0;
+                }
                 tennisMatchOver = !!state.matchOver;
                 if (tennisOnlineRole === 'host') {
                     computerPaddleX = state.guestPaddleX ?? computerPaddleX;
