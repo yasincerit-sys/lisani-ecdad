@@ -8,6 +8,7 @@ use App\Models\Sinif;
 use App\Models\User;
 use App\Support\AvatarHelper;
 use App\Support\AiBotRegistry;
+use App\Support\Bot\BotPersonas;
 use App\Support\BotReplyService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -36,18 +37,14 @@ class MessageController extends Controller
                 ->whereNull('read_at')
                 ->count();
 
-            return [
-                'uid' => (string) $partner->id,
-                'name' => $partner->name,
-                'avatar' => AvatarHelper::resolve($partner->avatar, $partner->id),
-                'role' => $partner->role,
+            return array_merge($this->partnerMeta($partner), [
                 'lastMessage' => $last ? mb_strimwidth($last->body, 0, 80, '…') : null,
                 'lastIsMine' => $last ? (int) $last->sender_id === $user->id : false,
                 'lastAt' => $last?->created_at?->format('H:i'),
                 'lastAtLabel' => $this->formatRelativeTime($last?->created_at),
                 'lastTimestamp' => $last?->created_at?->timestamp ?? 0,
                 'unreadCount' => $unread,
-            ];
+            ]);
         })
             ->sort(function (array $a, array $b) {
                 $ta = (int) ($a['lastTimestamp'] ?? 0);
@@ -90,10 +87,11 @@ class MessageController extends Controller
 
         $messages = Message::query()
             ->where(function ($q) use ($user, $partner) {
-                $q->where('sender_id', $user->id)->where('receiver_id', $partner->id);
-            })
-            ->orWhere(function ($q) use ($user, $partner) {
-                $q->where('sender_id', $partner->id)->where('receiver_id', $user->id);
+                $q->where(function ($inner) use ($user, $partner) {
+                    $inner->where('sender_id', $user->id)->where('receiver_id', $partner->id);
+                })->orWhere(function ($inner) use ($user, $partner) {
+                    $inner->where('sender_id', $partner->id)->where('receiver_id', $user->id);
+                });
             })
             ->orderBy('created_at')
             ->limit(200)
@@ -103,12 +101,7 @@ class MessageController extends Controller
             ->all();
 
         return response()->json([
-            'partner' => [
-                'uid' => (string) $partner->id,
-                'name' => $partner->name,
-                'avatar' => AvatarHelper::resolve($partner->avatar, $partner->id),
-                'role' => $partner->role,
-            ],
+            'partner' => $this->partnerMeta($partner),
             'messages' => $messages,
         ]);
     }
@@ -143,7 +136,7 @@ class MessageController extends Controller
             $reply = Message::create([
                 'sender_id' => $partner->id,
                 'receiver_id' => $user->id,
-                'body' => $botReplyService->reply($partner, trim($validated['body'])),
+                'body' => $botReplyService->reply($partner, trim($validated['body']), $user),
             ]);
             $payload['botReply'] = $reply->toFrontendArray($user->id);
         }
@@ -175,7 +168,6 @@ class MessageController extends Controller
 
             return $students
                 ->merge($this->yoneticiUsers())
-                ->merge($this->botUsers())
                 ->unique('id')
                 ->sortBy('name')
                 ->values();
@@ -205,7 +197,7 @@ class MessageController extends Controller
 
             return $partners
                 ->merge($yoneticiler)
-                ->merge($this->botUsers())
+                ->merge($this->botUsers($user))
                 ->unique('id')
                 ->sortBy('name')
                 ->values();
@@ -219,13 +211,38 @@ class MessageController extends Controller
         return User::where('role', 'yonetici')->orderBy('name')->get();
     }
 
-    private function botUsers()
+    private function botUsers(?User $forUser = null)
     {
         if (User::whereIn('email', AiBotRegistry::emails())->count() < count(AiBotRegistry::BOTS)) {
             AiBotRegistry::ensureBotsExist();
         }
 
-        return User::whereIn('email', AiBotRegistry::emails())->orderBy('name')->get();
+        $query = User::whereIn('email', AiBotRegistry::emails());
+
+        if ($forUser?->role === 'ogrenci' && $forUser->sinif_kodu) {
+            $query->where('sinif_kodu', $forUser->sinif_kodu);
+        }
+
+        return $query->orderBy('name')->get();
+    }
+
+    private function partnerMeta(User $partner): array
+    {
+        $isBot = AiBotRegistry::isBot($partner);
+        $meta = [
+            'uid' => (string) $partner->id,
+            'name' => $partner->name,
+            'avatar' => AvatarHelper::resolve($partner->avatar, $partner->id),
+            'role' => $partner->role,
+            'isBot' => $isBot,
+        ];
+
+        if ($isBot) {
+            $slug = BotPersonas::slugFor($partner);
+            $meta['quickReplies'] = BotPersonas::quickReplies($slug);
+        }
+
+        return $meta;
     }
 
     private function canMessage(User $a, User $b): bool

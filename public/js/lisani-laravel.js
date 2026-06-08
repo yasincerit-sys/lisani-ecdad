@@ -1914,7 +1914,7 @@
                     <div class="flex items-center gap-2.5 p-2.5 rounded-xl border theme-border theme-light-bg">
                         <div class="w-9 h-9 rounded-full lisani-avatar-slot flex items-center justify-center text-sm overflow-hidden shrink-0">${formatAvatarHtml(u.avatar)}</div>
                         <div class="min-w-0 flex-1">
-                            <p class="text-[11px] font-bold theme-text-main truncate">${escapeHtml(u.name)}${u.isBot ? ' <span class="text-[8px] text-violet-400">BOT</span>' : ''}</p>
+                            <p class="text-[11px] font-bold theme-text-main truncate">${escapeHtml(u.name)}</p>
                             <p class="text-[9px] theme-text-muted">${roleLabel}${u.sinifAdi ? ' · ' + escapeHtml(u.sinifAdi) : ''}${banned ? ' · <span class="text-red-400">Engelli</span>' : ''}</p>
                         </div>
                         ${u.isBot ? '' : btn}
@@ -2257,10 +2257,10 @@
             sub.textContent = isHoca
                 ? 'Öğrencilerinizle yazışın'
                 : isYonetici
-                  ? 'Kullanıcılar ve yapay zeka asistanları ile yazışın'
+                  ? 'Kullanıcılarla yazışın'
                   : user?.sinifKodu
-                    ? 'Hocanız, yönetici ve asistanlarla yazışın'
-                    : 'Yapay zeka asistanları ile yazışın (Ayarlar → sınıf kodu)';
+                    ? 'Hocanız ve sınıf arkadaşlarınızla yazışın'
+                    : 'Sınıf kodunuzla sınıf arkadaşlarınıza yazışın (Ayarlar)';
         }
         updateOgrenciSinifUI(user);
         const testsHocaHint = document.getElementById('tests-hoca-hint');
@@ -2287,6 +2287,7 @@
 
     let _waPollTimer = null;
     let _waActivePartnerId = null;
+    let _waActivePartner = null;
     let _waView = 'list';
     let _waContactsCache = [];
     let _waThreadMessages = {};
@@ -2334,7 +2335,10 @@
         return dateStr;
     }
 
-    function getWaQuickReplies() {
+    function getWaQuickReplies(partner) {
+        if (partner?.isBot && Array.isArray(partner.quickReplies) && partner.quickReplies.length) {
+            return partner.quickReplies;
+        }
         if (currentUserRole === 'hoca') {
             return ['Merhaba 👋', 'Ödevini kontrol ettim ✅', 'Yarın sınıfta görüşürüz', 'Sorularını bekliyorum'];
         }
@@ -2433,6 +2437,7 @@
         playClickSound();
         stopWaPolling();
         _waActivePartnerId = null;
+        _waActivePartner = null;
         _waView = 'list';
         const el = document.getElementById('wa-mesajlar-overlay');
         if (el) el.remove();
@@ -2443,6 +2448,7 @@
     window.cleanupMessagingForLogout = function () {
         stopWaPolling();
         _waActivePartnerId = null;
+        _waActivePartner = null;
         _waView = 'list';
         document.getElementById('wa-mesajlar-overlay')?.remove();
         document.removeEventListener('keydown', onWaEscapeKey);
@@ -2484,10 +2490,10 @@
                 <p class="text-sm font-semibold theme-text-main">Henüz sohbet yok</p>
                 <p class="text-[11px] mt-2 leading-relaxed max-w-[240px]">${
                     currentUserRole === 'hoca'
-                        ? 'Öğrencileriniz ve yapay zeka asistanları burada görünür.'
+                        ? 'Öğrencileriniz burada görünür.'
                         : currentUserRole === 'yonetici'
-                          ? 'Hoca, öğrenci ve asistanlar burada listelenir.'
-                          : 'Elif, Lügat, Tercüme ve Hikmet ile yazışabilirsiniz.'
+                          ? 'Hoca ve öğrenciler burada listelenir.'
+                          : 'Sınıf arkadaşlarınla yazışabilirsin.'
                 }</p>
             </div>`;
         }
@@ -2698,6 +2704,12 @@
     }
 
     function waChatHeaderHtml(p) {
+        const subtitle =
+            p.role === 'hoca'
+                ? 'Hoca · Çevrimiçi'
+                : p.role === 'yonetici'
+                  ? 'Yönetici · Çevrimiçi'
+                  : 'Öğrenci · Çevrimiçi';
         return `
             <button type="button" id="wa-btn-back" aria-label="Geri" class="wa-header-btn lisani-glass-action lisani-glass-action--icon !w-10 !h-10 !p-0 !min-w-0 flex items-center justify-center">
                 <i data-lucide="arrow-left" class="w-5 h-5"></i>
@@ -2705,7 +2717,7 @@
             <div class="w-10 h-10 rounded-full wa-contact-avatar lisani-glass-panel !p-0 flex items-center justify-center overflow-hidden flex-shrink-0">${formatAvatarHtml(p.avatar)}</div>
             <div class="flex-1 min-w-0">
                 <h2 class="text-sm font-bold theme-text-main truncate">${escapeHtml(p.name)}</h2>
-                <p class="text-[10px] theme-text-muted">${p.role === 'hoca' ? 'Hoca · Çevrimiçi' : 'Öğrenci · Sınıf sohbeti'}</p>
+                <p class="text-[10px] theme-text-muted">${escapeHtml(subtitle)}</p>
             </div>
             <button type="button" id="wa-btn-close" aria-label="Kapat" class="wa-header-btn lisani-glass-action lisani-glass-action--icon !w-10 !h-10 !p-0 !min-w-0 flex items-center justify-center">
                 <i data-lucide="x" class="w-5 h-5"></i>
@@ -2713,9 +2725,17 @@
     }
 
     function waQuickRepliesHtml() {
-        return getWaQuickReplies()
+        return getWaQuickReplies(_waActivePartner)
             .map((t) => `<button type="button" class="wa-quick-reply lisani-glass-action lisani-glass-action--compact !w-auto !inline-flex shrink-0">${escapeHtml(t)}</button>`)
             .join('');
+    }
+
+    function renderWaTypingBubble() {
+        return `<div class="flex justify-start mb-2 px-1 wa-bubble-row wa-typing-row">
+            <div class="wa-bubble-received wa-bubble-glass lisani-glass-panel mr-auto px-3.5 py-2">
+                <p class="text-[12px] theme-text-muted wa-typing-label">Yazıyor…</p>
+            </div>
+        </div>`;
     }
 
     async function loadWaContacts() {
@@ -2750,6 +2770,7 @@
         }
         _waView = 'list';
         _waActivePartnerId = null;
+        _waActivePartner = null;
         stopWaPolling();
         showLoading('Mesajlar yükleniyor...');
         try {
@@ -2792,6 +2813,7 @@
         try {
             const data = await apiFetch('/api/messages/' + encodeURIComponent(partnerId));
             const p = data.partner;
+            _waActivePartner = p;
             _waThreadMessages[partnerId] = data.messages || [];
             hideLoading();
             renderWaShell(
@@ -2839,6 +2861,7 @@
     window.backToWaList = async function () {
         stopWaPolling();
         _waActivePartnerId = null;
+        _waActivePartner = null;
         _waView = 'list';
         try {
             await loadWaContacts();
@@ -2859,18 +2882,28 @@
         }
         const box = document.getElementById('wa-messages-box');
         const existing = _waThreadMessages[_waActivePartnerId] || [];
+        const isBotChat = !!_waActivePartner?.isBot;
         if (box) {
-            box.innerHTML = renderWaMessages(existing, body);
+            box.innerHTML =
+                renderWaMessages(existing, body) + (isBotChat ? renderWaTypingBubble() : '');
             scrollWaToBottom(true);
         }
         try {
-            await apiFetch('/api/messages', {
+            const sendPromise = apiFetch('/api/messages', {
                 method: 'POST',
                 body: JSON.stringify({
                     receiver_id: parseInt(_waActivePartnerId, 10),
                     body,
                 }),
             });
+            if (isBotChat) {
+                await Promise.all([
+                    sendPromise,
+                    new Promise((resolve) => setTimeout(resolve, 700 + Math.random() * 600)),
+                ]);
+            } else {
+                await sendPromise;
+            }
             await loadWaThread(_waActivePartnerId, true);
             await refreshMesajBadge();
             scrollWaToBottom(true);
