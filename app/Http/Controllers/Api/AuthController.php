@@ -142,7 +142,7 @@ class AuthController extends Controller
         $user->fill(collect($validated)->except('sinif_kodu')->all());
         $user->save();
 
-        if ($user->role === 'ogrenci' && array_key_exists('sinif_kodu', $validated) && $validated['sinif_kodu']) {
+        if (in_array($user->role, ['ogrenci', 'yonetici'], true) && array_key_exists('sinif_kodu', $validated) && $validated['sinif_kodu']) {
             Sinif::joinUser($user, $validated['sinif_kodu']);
         }
 

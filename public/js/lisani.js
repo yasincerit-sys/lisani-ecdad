@@ -949,6 +949,17 @@
         }
         window.isYoneticiUser = isYoneticiUser;
 
+        function hasStudentFeatures(role) {
+            const r = role || currentUserRole || (window.currentUser && window.currentUser.role);
+            return r === 'ogrenci' || r === 'yonetici';
+        }
+        function hasTeacherFeatures(role) {
+            const r = role || currentUserRole || (window.currentUser && window.currentUser.role);
+            return r === 'hoca' || r === 'yonetici';
+        }
+        window.hasStudentFeatures = hasStudentFeatures;
+        window.hasTeacherFeatures = hasTeacherFeatures;
+
         function canTrackStudents() {
             return isHocaUser() || isYoneticiUser();
         }
@@ -1063,9 +1074,8 @@
             const hint = document.getElementById('tests-hoca-hint');
             const studentHint = document.getElementById('tests-student-hint');
             const hoca = isHocaUser();
-            const yonetici = isYoneticiUser();
             if (hint) hint.classList.toggle('hidden', !hoca);
-            if (studentHint) studentHint.classList.toggle('hidden', hoca || yonetici);
+            if (studentHint) studentHint.classList.toggle('hidden', hoca);
         }
         window.updateTestsTabForRole = updateTestsTabForRole;
 
@@ -2180,8 +2190,17 @@
         }
 
         function showHocaPanel() {
+            if (isYoneticiUser()) {
+                if (typeof window.openHocaDashboard === 'function') {
+                    window.openHocaDashboard();
+                    if (typeof window.hocaDashSwitchPanel === 'function') {
+                        window.hocaDashSwitchPanel('odev');
+                    }
+                }
+                return;
+            }
             if (!currentUser || currentUserRole !== 'hoca') {
-                showToast("Bu özellik sadece hocalar için.", "error");
+                showToast("Bu özellik sadece hoca ve yönetici hesapları için.", "error");
                 return;
             }
             loadHocaPanel(currentUser.uid);

@@ -26,7 +26,7 @@ class SinifController extends Controller
     {
         $user = $request->user();
 
-        if ($user->role !== 'hoca') {
+        if (! in_array($user->role, ['hoca', 'yonetici'], true)) {
             return response()->json(['message' => 'Yetkisiz.'], 403);
         }
 
@@ -68,8 +68,8 @@ class SinifController extends Controller
     {
         $user = $request->user();
 
-        if ($user->role !== 'ogrenci') {
-            return response()->json(['message' => 'Bu liste sadece öğrenciler içindir.'], 403);
+        if (! in_array($user->role, ['ogrenci', 'yonetici'], true)) {
+            return response()->json(['message' => 'Bu liste sadece öğrenci ve yönetici hesapları içindir.'], 403);
         }
 
         if (! $user->sinif_kodu) {

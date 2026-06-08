@@ -65,9 +65,9 @@ class Sinif extends Model
 
     public static function joinUser(User $user, string $kisaKod): self
     {
-        if ($user->role !== 'ogrenci') {
+        if (! in_array($user->role, ['ogrenci', 'yonetici'], true)) {
             throw ValidationException::withMessages([
-                'sinif_kodu' => ['Sınıfa sadece öğrenciler katılabilir.'],
+                'sinif_kodu' => ['Sınıfa sadece öğrenci ve yönetici hesapları katılabilir.'],
             ]);
         }
 

@@ -17,7 +17,7 @@ class LeaderboardController extends Controller
         $scope = $request->query('scope', 'global');
         $viewer = $request->user();
 
-        $query = User::where('role', 'ogrenci');
+        $query = User::whereIn('role', ['ogrenci', 'yonetici']);
 
         if ($scope === 'sinif' && $viewer->sinif_kodu) {
             $sinif = \App\Models\Sinif::findByKod($viewer->sinif_kodu);
@@ -54,7 +54,7 @@ class LeaderboardController extends Controller
             ->all();
 
         $myRank = null;
-        if ($viewer->role === 'ogrenci') {
+        if (in_array($viewer->role, ['ogrenci', 'yonetici'], true)) {
             foreach ($liste as $row) {
                 if ($row['uid'] === (string) $viewer->id) {
                     $myRank = $row['rank'];

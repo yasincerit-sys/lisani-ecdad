@@ -17,8 +17,8 @@ class ProgressController extends Controller
     {
         $user = $request->user();
 
-        if (in_array($user->role, ['hoca', 'yonetici'], true) || AiBotRegistry::isBot($user)) {
-            return response()->json(['message' => 'Hocalar ve yöneticiler ilerleme kaydı görüntüleyemez.'], 403);
+        if ($user->role === 'hoca' || AiBotRegistry::isBot($user)) {
+            return response()->json(['message' => 'Hocalar ilerleme kaydı görüntüleyemez.'], 403);
         }
 
         $progress = UserProgress::where('user_id', $user->id)->first();
@@ -38,7 +38,7 @@ class ProgressController extends Controller
     {
         $user = $request->user();
 
-        if (in_array($user->role, ['hoca', 'yonetici'], true) || AiBotRegistry::isBot($user)) {
+        if ($user->role === 'hoca' || AiBotRegistry::isBot($user)) {
             return response()->json(['success' => true]);
         }
 

@@ -438,6 +438,12 @@
         if (typeof lucide !== 'undefined') lucide.createIcons();
     };
 
+    window.submitYoneticiOdev = function () {
+        const level = parseInt(document.getElementById('yonetici-odev-level')?.value, 10);
+        const test = document.getElementById('yonetici-odev-test')?.value || '';
+        window.odevVerFromTest(level, test);
+    };
+
     window.odevVerFromTest = function (level, test) {
         const user = currentUser || window.currentUser;
         const uid = user?.id || user?.uid;
@@ -457,14 +463,30 @@
             showToast('Lütfen seviye ve test seçin.', 'error');
             return;
         }
+        const payload = { level, test };
+        if (currentUserRole === 'yonetici') {
+            const sel = document.getElementById('yonetici-odev-sinif-select');
+            const kod = sel ? sel.value : '';
+            if (!kod) {
+                showToast('Lütfen ödev atanacak sınıfı seçin.', 'error');
+                return;
+            }
+            payload.kisa_kod = kod;
+        }
         apiFetch('/api/sinif/odev', {
             method: 'POST',
-            body: JSON.stringify({ level, test }),
+            body: JSON.stringify(payload),
         })
             .then((data) => {
                 _saveLocalSinif(hocaUid, data.sinif);
                 showToast('Test ödevi gönderildi!', 'success');
-                loadHocaPanel(hocaUid);
+                if (currentUserRole === 'yonetici') {
+                    if (typeof window.loadHocaProgressView === 'function') {
+                        window.loadHocaProgressView(true);
+                    }
+                } else {
+                    loadHocaPanel(hocaUid);
+                }
             })
             .catch((e) => showToast(e.message, 'error'));
     };
@@ -736,9 +758,19 @@
                 forceAuthScreen();
                 return;
             }
+            if (sessionUser.role === 'yonetici') {
+                hideLoading();
+                if (typeof window.openHocaDashboard === 'function') {
+                    window.openHocaDashboard();
+                    if (typeof window.hocaDashSwitchPanel === 'function') {
+                        window.hocaDashSwitchPanel('odev');
+                    }
+                }
+                return;
+            }
             if (sessionUser.role !== 'hoca') {
                 hideLoading();
-                showToast('Bu panel sadece hoca hesapları içindir.', 'error');
+                showToast('Bu panel sadece hoca ve yönetici hesapları içindir.', 'error');
                 return;
             }
             const data = await apiFetch('/api/hoca/ogrenci-takip');
@@ -756,13 +788,26 @@
 
     window.showHocaPanel = async function () {
         const user = await ensureServerSession();
-        if (!user || user.role !== 'hoca') {
-            if (currentUserRole === 'hoca' && !user) {
-                showToast('Lütfen çıkış yapıp Demo Hoca ile tekrar giriş yapın.', 'error');
+        if (!user) {
+            if (currentUserRole === 'hoca' || currentUserRole === 'yonetici') {
+                showToast('Lütfen tekrar giriş yapın.', 'error');
                 forceAuthScreen();
-                return;
+            } else {
+                showToast('Bu ekran sadece hoca ve yönetici hesapları içindir.', 'error');
             }
-            showToast('Bu ekran sadece hocalar içindir.', 'error');
+            return;
+        }
+        if (user.role === 'yonetici') {
+            if (typeof window.openHocaDashboard === 'function') {
+                window.openHocaDashboard();
+                if (typeof window.hocaDashSwitchPanel === 'function') {
+                    window.hocaDashSwitchPanel('odev');
+                }
+            }
+            return;
+        }
+        if (user.role !== 'hoca') {
+            showToast('Bu ekran sadece hoca ve yönetici hesapları içindir.', 'error');
             return;
         }
         loadHocaPanel(user.uid);
@@ -1126,7 +1171,7 @@
     window._resolveStoredPassword = resolveStoredPassword;
 
     window.loadProgressFromServer = async function () {
-        if (currentUserRole === 'yonetici' || currentUserRole === 'hoca' || !window._loginDone) {
+        if (currentUserRole === 'hoca' || !window._loginDone) {
             return null;
         }
         document.querySelectorAll('.lisani-stats-refresh-btn, .lisani-odev-refresh-btn').forEach((btn) => {
@@ -1240,7 +1285,7 @@
     };
 
     window.syncProgressToServer = async function () {
-        if (!currentUser || currentUserRole === 'hoca' || currentUserRole === 'yonetici') return;
+        if (!currentUser || currentUserRole === 'hoca') return;
         const snap =
             typeof window.getLisaniProgress === 'function'
                 ? window.getLisaniProgress()
@@ -1637,13 +1682,62 @@
             .join('');
     }
 
+    function renderYoneticiOdevAssign(siniflar) {
+        const block = document.getElementById('yonetici-odev-assign');
+        const select = document.getElementById('yonetici-odev-sinif-select');
+        const picker = document.getElementById('yonetici-odev-test-picker');
+        if (!block || !select) return;
+        block.classList.toggle('hidden', currentUserRole !== 'yonetici');
+        const list = siniflar || [];
+        if (!list.length) {
+            select.innerHTML = '<option value="">Kayıtlı sınıf yok</option>';
+        } else {
+            select.innerHTML = list
+                .map(
+                    (s) =>
+                        `<option value="${escapeHtml(s.kisaKod || '')}">${escapeHtml(s.sinifAdi || 'Sınıf')} · ${escapeHtml(s.kisaKod || '')}</option>`
+                )
+                .join('');
+        }
+        if (picker && !picker.dataset.ready) {
+            picker.innerHTML = `
+                <div class="grid grid-cols-2 gap-2">
+                    <select id="yonetici-odev-level" class="px-3 py-2 rounded-xl border theme-border theme-card-bg theme-text-main text-xs">
+                        <option value="1">Seviye 1</option>
+                        <option value="2">Seviye 2</option>
+                        <option value="3">Seviye 3</option>
+                    </select>
+                    <select id="yonetici-odev-test" class="px-3 py-2 rounded-xl border theme-border theme-card-bg theme-text-main text-xs">
+                        <option value="Test 1">Test 1</option>
+                        <option value="Test 2">Test 2</option>
+                        <option value="Test 3">Test 3</option>
+                        <option value="Genel">Genel</option>
+                    </select>
+                </div>
+                <button type="button" onclick="submitYoneticiOdev()" class="lisani-glass-action lisani-glass-action--primary w-full py-2.5 text-xs font-bold mt-2">Ödevi Gönder</button>`;
+            picker.dataset.ready = '1';
+        }
+    }
+
+    async function loadYoneticiPersonalSinifKod() {
+        try {
+            const data = await apiFetch('/api/sinif');
+            const sinif = data.sinif || {};
+            const adEl = document.getElementById('hoca-dash-sinif-adi');
+            const kodEl = document.getElementById('hoca-dash-sinif-kod');
+            if (adEl) adEl.textContent = sinif.sinifAdi || '—';
+            if (kodEl) kodEl.textContent = sinif.kisaKod || '———';
+            window._hocaDashSinifKod = sinif.kisaKod || '';
+        } catch (e) {}
+    }
+
     function renderHocaDashboardSinif(data) {
         const isHoca = currentUserRole === 'hoca';
         const isYonetici = currentUserRole === 'yonetici';
 
-        ['hoca-dash-nav-odev', 'hoca-dash-nav-kod', 'hoca-dash-mob-odev', 'hoca-dash-mob-kod'].forEach((id) => {
+        ['hoca-dash-nav-users', 'hoca-dash-mob-users'].forEach((id) => {
             const el = document.getElementById(id);
-            if (el) el.classList.toggle('hidden', isYonetici);
+            if (el) el.classList.toggle('hidden', !isYonetici);
         });
 
         const title = document.getElementById('hoca-dash-title');
@@ -1670,6 +1764,30 @@
                 subtitle.textContent = `Tüm uygulama · ${data.ozet?.hocaSayisi ?? 0} hoca · ${data.ozet?.sinifSayisi ?? 0} sınıf`;
             }
             if (meta) meta.textContent = 'Tüm sınıflardan öğrenciler · XP sırasına göre';
+            renderYoneticiOdevAssign(data.siniflar || []);
+            loadYoneticiPersonalSinifKod();
+            const odevlerEl = document.getElementById('hoca-dash-odevler');
+            if (odevlerEl) {
+                const odevler = data.sinif?.odevler || [];
+                if (!odevler.length) {
+                    odevlerEl.innerHTML =
+                        '<p class="hoca-dash__card-sub text-center py-3">Henüz ödev atanmadı.</p>';
+                } else {
+                    odevlerEl.innerHTML = odevler
+                        .slice(0, 12)
+                        .map(
+                            (o) => `
+                        <div class="hoca-dash__recent-item">
+                            <div class="hoca-dash__recent-avatar"><i data-lucide="clipboard-list" class="w-3.5 h-3.5"></i></div>
+                            <div class="hoca-dash__recent-body">
+                                <p class="hoca-dash__recent-name">${escapeHtml(formatOdevLabel(o))}</p>
+                                <p class="hoca-dash__recent-meta">${escapeHtml(o.sinifAdi || '')} · ${escapeHtml(o.tarih || '')}</p>
+                            </div>
+                        </div>`
+                        )
+                        .join('');
+                }
+            }
         } else {
             if (title) title.textContent = 'Dashboard';
             const sinif = data.sinif || {};
@@ -1727,7 +1845,70 @@
         });
         const panel = document.getElementById(`hoca-dash-panel-${panelId}`);
         if (panel) panel.classList.add('is-active');
+        if (panelId === 'users' && currentUserRole === 'yonetici') {
+            window.loadYoneticiUsers();
+        }
+        if (panelId === 'kod' && currentUserRole === 'yonetici') {
+            loadYoneticiPersonalSinifKod();
+        }
         if (typeof lucide !== 'undefined') lucide.createIcons();
+    };
+
+    window.loadYoneticiUsers = async function () {
+        const list = document.getElementById('hoca-dash-users-list');
+        if (!list || currentUserRole !== 'yonetici' || !window._loginDone) return;
+        list.innerHTML = '<p class="hoca-dash__card-sub text-center py-4">Yükleniyor...</p>';
+        try {
+            const data = await apiFetch('/api/yonetici/users');
+            const users = data.users || [];
+            if (!users.length) {
+                list.innerHTML = '<p class="hoca-dash__card-sub text-center py-4">Kullanıcı bulunamadı.</p>';
+                return;
+            }
+            list.innerHTML = users
+                .map((u) => {
+                    const roleLabel = u.role === 'hoca' ? 'Hoca' : 'Öğrenci';
+                    const banned = u.banned;
+                    const btn = banned
+                        ? `<button type="button" class="text-[9px] font-bold px-2 py-1 rounded-lg border border-emerald-500/40 text-emerald-400" onclick="yoneticiUnbanUser('${u.uid}')">Engeli Kaldır</button>`
+                        : `<button type="button" class="text-[9px] font-bold px-2 py-1 rounded-lg border border-red-500/40 text-red-400" onclick="yoneticiBanUser('${u.uid}')">Engelle</button>`;
+                    return `
+                    <div class="flex items-center gap-2.5 p-2.5 rounded-xl border theme-border theme-light-bg">
+                        <div class="w-9 h-9 rounded-full lisani-avatar-slot flex items-center justify-center text-sm overflow-hidden shrink-0">${formatAvatarHtml(u.avatar)}</div>
+                        <div class="min-w-0 flex-1">
+                            <p class="text-[11px] font-bold theme-text-main truncate">${escapeHtml(u.name)}${u.isBot ? ' <span class="text-[8px] text-violet-400">BOT</span>' : ''}</p>
+                            <p class="text-[9px] theme-text-muted">${roleLabel}${u.sinifAdi ? ' · ' + escapeHtml(u.sinifAdi) : ''}${banned ? ' · <span class="text-red-400">Engelli</span>' : ''}</p>
+                        </div>
+                        ${u.isBot ? '' : btn}
+                    </div>`;
+                })
+                .join('');
+        } catch (e) {
+            list.innerHTML = `<p class="text-[10px] text-red-400 text-center py-4">${escapeHtml(e.message || 'Yüklenemedi')}</p>`;
+        }
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+    };
+
+    window.yoneticiBanUser = async function (uid) {
+        if (!uid || currentUserRole !== 'yonetici') return;
+        try {
+            await apiFetch(`/api/yonetici/users/${uid}/ban`, { method: 'POST' });
+            showToast('Kullanıcı engellendi.', 'success');
+            window.loadYoneticiUsers();
+        } catch (e) {
+            showToast(e.message || 'Engellenemedi.', 'error');
+        }
+    };
+
+    window.yoneticiUnbanUser = async function (uid) {
+        if (!uid || currentUserRole !== 'yonetici') return;
+        try {
+            await apiFetch(`/api/yonetici/users/${uid}/unban`, { method: 'POST' });
+            showToast('Engel kaldırıldı.', 'success');
+            window.loadYoneticiUsers();
+        } catch (e) {
+            showToast(e.message || 'İşlem başarısız.', 'error');
+        }
     };
 
     window.hocaDashFilterStudents = function (query) {
@@ -1915,7 +2096,8 @@
     };
 
     window.loadOgrenciOdevler = async function () {
-        if (currentUserRole === 'hoca' || currentUserRole === 'yonetici' || !window._loginDone) return;
+        if (currentUserRole === 'hoca' || !window._loginDone) return;
+        if (typeof window.hasStudentFeatures === 'function' && !window.hasStudentFeatures()) return;
         try {
             const data = await apiFetch('/api/odevler');
             renderOdevlerList('home-odevler-list', data);
@@ -1932,10 +2114,11 @@
     };
 
     window.refreshOdevler = async function () {
-        if (currentUserRole === 'hoca' || !window._loginDone) {
-            showToast('Ödevleri görmek için öğrenci olarak giriş yapın.', 'error');
+        if (!window._loginDone || (typeof window.hasStudentFeatures === 'function' && !window.hasStudentFeatures())) {
+            showToast('Ödevleri görmek için öğrenci veya yönetici olarak giriş yapın.', 'error');
             return;
         }
+        if (currentUserRole === 'hoca') return;
         playClickSound();
         document.querySelectorAll('.lisani-odev-refresh-btn').forEach((btn) => btn.classList.add('is-spinning'));
         try {
@@ -1954,9 +2137,10 @@
         const mevcut = document.getElementById('settings-sinif-mevcut');
         const input = document.getElementById('settings-sinif-kodu');
         if (!block) return;
-        const isOgrenci = (user?.role || currentUserRole) === 'ogrenci';
-        block.classList.toggle('hidden', !isOgrenci);
-        if (!isOgrenci) return;
+        const role = user?.role || currentUserRole;
+        const canJoin = role === 'ogrenci' || role === 'yonetici';
+        block.classList.toggle('hidden', !canJoin);
+        if (!canJoin) return;
         if (user?.sinifKodu || user?.sinif) {
             const ad = user.sinif || 'Sınıf';
             const kod = user.sinifKodu || '';
@@ -2023,12 +2207,13 @@
                 ? 'Tüm sınıfların performans özeti'
                 : 'Sınıf performanslarını tablo halinde izleyin';
         }
-        if (odevCard) odevCard.classList.toggle('hidden', !isOgrenci);
-        if (odevSettings) odevSettings.classList.toggle('hidden', !isOgrenci);
+        const studentLike = isOgrenci || isYonetici;
+        if (odevCard) odevCard.classList.toggle('hidden', !studentLike);
+        if (odevSettings) odevSettings.classList.toggle('hidden', !studentLike);
         if (mesajCard) mesajCard.classList.toggle('hidden', !(isHoca || isYonetici || isOgrenci));
         if (mesajRow) mesajRow.classList.toggle('hidden', !(isHoca || isYonetici || isOgrenci));
         const profileStats = document.getElementById('profile-stats-section');
-        if (profileStats) profileStats.classList.toggle('hidden', !isOgrenci);
+        if (profileStats) profileStats.classList.toggle('hidden', !studentLike);
         const sub = document.getElementById('home-mesajlar-sub');
         if (sub) {
             sub.textContent = isHoca
@@ -2043,19 +2228,19 @@
         const testsHocaHint = document.getElementById('tests-hoca-hint');
         const testsStudentHint = document.getElementById('tests-student-hint');
         if (testsHocaHint) testsHocaHint.classList.toggle('hidden', !isHoca);
-        if (testsStudentHint) testsStudentHint.classList.toggle('hidden', isHoca || isYonetici);
+        if (testsStudentHint) testsStudentHint.classList.toggle('hidden', isHoca);
         const tabAi = document.getElementById('tab-ai');
         const tabTests = document.getElementById('tab-tests');
         const tabHocaDash = document.getElementById('tab-hoca-dashboard');
-        if (tabAi) tabAi.classList.toggle('hidden', isHoca || isYonetici);
-        if (tabTests) tabTests.classList.toggle('hidden', isHoca || isYonetici);
+        if (tabAi) tabAi.classList.toggle('hidden', isHoca);
+        if (tabTests) tabTests.classList.toggle('hidden', isHoca);
         if (tabHocaDash) tabHocaDash.classList.toggle('hidden', !(isHoca || isYonetici));
         if (typeof updateTestsTabForRole === 'function') updateTestsTabForRole();
         if (typeof updateGelisimScreenForRole === 'function') updateGelisimScreenForRole();
         if ((isHoca || isYonetici) && typeof window.loadHocaProgressView === 'function') {
             setTimeout(() => window.loadHocaProgressView(), 500);
         }
-        if (isOgrenci) {
+        if (studentLike) {
             setTimeout(() => window.loadOgrenciOdevler(), 400);
         }
         refreshMesajBadge();
@@ -2660,7 +2845,8 @@
         await refreshMesajBadge();
         if (user.role === 'hoca' || user.role === 'yonetici') {
             await window.loadHocaProgressView();
-        } else {
+        }
+        if (user.role === 'ogrenci' || user.role === 'yonetici') {
             await window.loadProgressFromServer();
             await window.syncProgressToServer();
         }
