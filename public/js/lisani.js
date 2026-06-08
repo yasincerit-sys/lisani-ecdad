@@ -716,12 +716,30 @@
         window.normalizeAvatarValue = normalizeAvatarValue;
         window.formatAvatarForDisplay = formatAvatarForDisplay;
 
+        function resolveAvatarSlotClass(sizeClass) {
+            const map = {
+                xs: 'lisani-avatar-slot--xs',
+                sm: 'lisani-avatar-slot--sm',
+                md: 'lisani-avatar-slot--md',
+                lg: 'lisani-avatar-slot--lg',
+            };
+            if (!sizeClass) return 'lisani-avatar-slot--sm';
+            return map[sizeClass] || sizeClass;
+        }
+
         function avatarSlotHtml(value, sizeClass, userId) {
-            const slotClass = sizeClass || 'lisani-avatar-slot--sm';
+            const slotClass = resolveAvatarSlotClass(sizeClass);
             const normalized = normalizeAvatarValue(value || DEFAULT_AVATAR, userId);
             const content = formatAvatarForDisplay(normalized, userId);
             const isVisual = isTeamAvatar(normalized) || isCustomPhotoAvatar(normalized);
-            const emojiCls = !isVisual ? ' text-xl' : '';
+            const emojiCls =
+                !isVisual
+                    ? slotClass.includes('--xs')
+                        ? ' text-sm'
+                        : slotClass.includes('--lg')
+                          ? ' text-2xl'
+                          : ' text-xl'
+                    : '';
             return `<span class="lisani-avatar-slot ${slotClass} rounded-full inline-flex items-center justify-center flex-shrink-0${emojiCls}">${content}</span>`;
         }
 
@@ -1977,7 +1995,7 @@
                 updateGelisimScreenForRole();
                 if (!silent) {
                     showToast("Giriş yapıldı. İyi çalışmalar!", "success");
-                    switchTab('home');
+                    switchTab('home', true);
                 }
             };
             afterLogin();
@@ -2010,6 +2028,7 @@
             const rpc = document.getElementById('reg-password-confirm'); if(rpc) rpc.value = '';
 
             // Giriş ekranına dön
+            resetAppShellForLogout();
             document.getElementById('main-application-flow').classList.add('hidden');
             document.getElementById('auth-container').classList.remove('hidden');
             toggleAuthTab('login');
@@ -2286,8 +2305,83 @@
         }
 
         let currentActiveScreen = 'home';
-        function switchTab(screenId) {
-            if (!screenId || screenId === currentActiveScreen) return;
+
+        function resetTabHighlightToHome() {
+            const tabIds = ['ai', 'tests', 'hoca-dashboard', 'home', 'letters', 'osm-translate', 'settings'];
+            tabIds.forEach((id) => {
+                const tabBtn = document.getElementById(`tab-${id}`);
+                if (!tabBtn) return;
+                tabBtn.classList.remove('lisani-tab-active', 'font-black', 'theme-primary-color');
+                tabBtn.classList.add('theme-text-muted');
+                const icon = tabBtn.querySelector('i');
+                if (icon) icon.style.transform = '';
+                if (id === 'home') {
+                    const homeText = document.getElementById('tab-home-text');
+                    if (homeText) {
+                        homeText.classList.remove('lisani-tab-label-active', 'font-black', 'theme-primary-color');
+                        homeText.classList.add('theme-text-muted');
+                    }
+                }
+            });
+            const homeTab = document.getElementById('tab-home');
+            if (homeTab) {
+                homeTab.classList.remove('theme-text-muted');
+                homeTab.classList.add('lisani-tab-active');
+                const homeIcon = homeTab.querySelector('i');
+                if (homeIcon) homeIcon.style.transform = 'scale(1.06)';
+                const homeText = document.getElementById('tab-home-text');
+                if (homeText) {
+                    homeText.classList.remove('theme-text-muted');
+                    homeText.classList.add('lisani-tab-label-active');
+                }
+            }
+        }
+
+        function resetAppShellForLogout() {
+            currentActiveScreen = 'home';
+            document.querySelectorAll('.screen').forEach((screen) => screen.classList.remove('active'));
+            document.getElementById('screen-home')?.classList.add('active');
+
+            const screensContainer = document.getElementById('screens-container');
+            if (screensContainer) {
+                screensContainer.classList.remove('lisani-screens--letters-only', 'lisani-screens--hoca-dash');
+            }
+
+            resetTabHighlightToHome();
+            hideLoading();
+
+            [
+                'edit-profile-container',
+                'notif-settings-panel',
+                'kariyer-modal-container',
+                'tennis-overlay',
+                'gokhan-video-call-overlay',
+            ].forEach((id) => document.getElementById(id)?.classList.add('hidden'));
+
+            ['hoca-panel-modal', 'sinif-katil-modal', 'wa-mesajlar-overlay', 'yonetici-panel-modal'].forEach((id) =>
+                document.getElementById(id)?.remove()
+            );
+
+            if (typeof window.cleanupMessagingForLogout === 'function') {
+                window.cleanupMessagingForLogout();
+            }
+
+            if (window.LisaniTennisOnline && typeof window.LisaniTennisOnline.stop === 'function') {
+                window.LisaniTennisOnline.stop(false);
+            }
+
+            document.getElementById('bottom-bar')?.classList.remove('hidden');
+            document.getElementById('test-selection-view')?.classList.add('hidden');
+            document.getElementById('quiz-active-view')?.classList.add('hidden');
+            document.getElementById('quiz-result-view')?.classList.add('hidden');
+            document.getElementById('level-selection-view')?.classList.remove('hidden');
+            document.body.style.overflow = '';
+            document.documentElement.style.overflow = '';
+        }
+        window.resetAppShellForLogout = resetAppShellForLogout;
+
+        function switchTab(screenId, force) {
+            if (!screenId || (!force && screenId === currentActiveScreen)) return;
 
             if (screenId === 'ai' && isHocaUser()) {
                 if (typeof window.openHocaDashboard === 'function') {

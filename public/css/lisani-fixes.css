@@ -1617,6 +1617,25 @@ html.preline-ui[class*="theme-"] #wa-mesajlar-overlay .wa-send-btn.lisani-glass-
     object-fit: contain !important;
 }
 
+.lisani-app-shell {
+    position: relative;
+}
+
+#auth-container:not(.hidden) {
+    z-index: 60;
+}
+
+#loading-overlay:not(.hidden),
+#edit-profile-container:not(.hidden),
+#notif-settings-panel:not(.hidden) {
+    z-index: 70;
+}
+
+.lisani-avatar-slot--xs {
+    width: 1.75rem;
+    height: 1.75rem;
+}
+
 .lisani-avatar-slot--sm {
     width: 3rem;
     height: 3rem;
@@ -1793,8 +1812,41 @@ html.preline-ui[class*="theme-"] #wa-mesajlar-overlay .wa-send-btn.lisani-glass-
     background: rgba(255,255,255,0.03); border: 1px solid var(--hd-border);
 }
 .hoca-dash__recent-avatar {
-    width: 2rem; height: 2rem; border-radius: 0.55rem; background: var(--hd-purple-soft);
-    display: flex; align-items: center; justify-content: center; font-size: 0.9rem; flex-shrink: 0;
+    width: 1.5rem; height: 1.5rem; border-radius: 0.4rem; background: var(--hd-purple-soft);
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    overflow: hidden; position: relative;
+}
+.hoca-dash__recent-avatar-img {
+    width: 78%;
+    height: 78%;
+    object-fit: contain;
+    display: block;
+    pointer-events: none;
+}
+.hoca-dash__recent-avatar-emoji {
+    font-size: 0.72rem;
+    line-height: 1;
+    display: block;
+}
+.hoca-dash__recent-avatar .lisani-avatar-slot,
+.hoca-dash__recent-avatar .avatar-display-glass,
+.hoca-dash__recent-avatar .avatar-glass-emblem {
+    width: 100% !important;
+    height: 100% !important;
+    max-width: 1.5rem !important;
+    max-height: 1.5rem !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    border-radius: inherit;
+}
+.hoca-dash__recent-avatar .lisani-avatar-slot .avatar-glass-emblem img,
+.hoca-dash__recent-avatar .avatar-glass-emblem img,
+.hoca-dash__recent-avatar img {
+    width: 72% !important;
+    height: 72% !important;
+    max-width: 100% !important;
+    max-height: 100% !important;
+    object-fit: contain !important;
 }
 .hoca-dash__recent-body { flex: 1; min-width: 0; }
 .hoca-dash__recent-name { font-size: 0.68rem; font-weight: 700; color: var(--hd-text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

@@ -311,6 +311,10 @@
         const rpc = document.getElementById('reg-password-confirm');
         if (rpc) rpc.value = '';
 
+        if (typeof window.resetAppShellForLogout === 'function') {
+            window.resetAppShellForLogout();
+        }
+
         document.getElementById('main-application-flow').classList.add('hidden');
         document.getElementById('auth-container').classList.remove('hidden');
         toggleAuthTab('login');
@@ -711,6 +715,12 @@
         currentUser = null;
         window.currentUser = null;
         currentUserRole = null;
+        if (typeof window.stopMesajNotificationPoll === 'function') {
+            window.stopMesajNotificationPoll();
+        }
+        if (typeof window.resetAppShellForLogout === 'function') {
+            window.resetAppShellForLogout();
+        }
         const auth = document.getElementById('auth-container');
         const main = document.getElementById('main-application-flow');
         if (main) main.classList.add('hidden');
@@ -1522,6 +1532,24 @@
             .join('');
     }
 
+    function formatDashRecentAvatar(avatar) {
+        let html = avatar || '';
+        if (typeof window.normalizeAvatarValue === 'function') {
+            html = window.normalizeAvatarValue(html);
+        }
+        if (typeof html === 'string' && html.includes('<img')) {
+            const srcMatch = html.match(/src="([^"]+)"/);
+            if (srcMatch) {
+                return `<img src="${srcMatch[1]}" class="hoca-dash__recent-avatar-img" alt="" />`;
+            }
+        }
+        const emoji =
+            typeof html === 'string' && html.length <= 4 && !html.includes('<')
+                ? html
+                : '🎒';
+        return `<span class="hoca-dash__recent-avatar-emoji">${escapeHtml(emoji)}</span>`;
+    }
+
     function renderHocaDashRecent(ogrenciler) {
         const el = document.getElementById('hoca-dash-recent');
         if (!el) return;
@@ -1547,10 +1575,7 @@
         el.innerHTML = top
             .map((e) => {
                 const cls = e.percent >= 80 ? 'is-good' : e.percent >= 60 ? 'is-mid' : 'is-low';
-                const av =
-                    typeof window.avatarSlotHtml === 'function'
-                        ? window.avatarSlotHtml(e.avatar, 'sm')
-                        : `<span>${e.avatar || '🎒'}</span>`;
+                const av = formatDashRecentAvatar(e.avatar);
                 return `
             <div class="hoca-dash__recent-item">
                 <div class="hoca-dash__recent-avatar">${av}</div>
@@ -2400,6 +2425,14 @@
         if (el) el.remove();
         document.removeEventListener('keydown', onWaEscapeKey);
         refreshMesajBadge();
+    };
+
+    window.cleanupMessagingForLogout = function () {
+        stopWaPolling();
+        _waActivePartnerId = null;
+        _waView = 'list';
+        document.getElementById('wa-mesajlar-overlay')?.remove();
+        document.removeEventListener('keydown', onWaEscapeKey);
     };
 
     function bindWaHeaderButtons(mode) {
