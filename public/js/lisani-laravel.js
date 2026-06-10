@@ -480,7 +480,9 @@
         }
         const payload = { level, test };
         if (currentUserRole === 'yonetici') {
-            const sel = document.getElementById('yonetici-odev-sinif-select');
+            const sel =
+                document.getElementById('yonetici-odev-sinif-select') ||
+                document.getElementById('tests-yonetici-sinif-select');
             const kod = sel ? sel.value : '';
             if (!kod) {
                 showToast('Lütfen ödev atanacak sınıfı seçin.', 'error');
@@ -1732,17 +1734,7 @@
         const picker = document.getElementById('yonetici-odev-test-picker');
         if (!block || !select) return;
         block.classList.toggle('hidden', currentUserRole !== 'yonetici');
-        const list = siniflar || [];
-        if (!list.length) {
-            select.innerHTML = '<option value="">Kayıtlı sınıf yok</option>';
-        } else {
-            select.innerHTML = list
-                .map(
-                    (s) =>
-                        `<option value="${escapeHtml(s.kisaKod || '')}">${escapeHtml(s.sinifAdi || 'Sınıf')} · ${escapeHtml(s.kisaKod || '')}</option>`
-                )
-                .join('');
-        }
+        populateYoneticiSinifSelect(select, siniflar);
         if (picker && !picker.dataset.ready) {
             picker.innerHTML = `
                 <div class="grid grid-cols-2 gap-2">
@@ -1762,6 +1754,37 @@
             picker.dataset.ready = '1';
         }
     }
+
+    function populateYoneticiSinifSelect(select, siniflar) {
+        if (!select) return;
+        const list = siniflar || [];
+        if (!list.length) {
+            select.innerHTML = '<option value="">Kayıtlı sınıf yok</option>';
+            return;
+        }
+        select.innerHTML = list
+            .map(
+                (s) =>
+                    `<option value="${escapeHtml(s.kisaKod || '')}">${escapeHtml(s.sinifAdi || 'Sınıf')} · ${escapeHtml(s.kisaKod || '')}</option>`
+            )
+            .join('');
+    }
+
+    window.loadTestsYoneticiSinifSelect = async function () {
+        if (currentUserRole !== 'yonetici') return;
+        const select = document.getElementById('tests-yonetici-sinif-select');
+        if (!select) return;
+        try {
+            const data = await apiFetch('/api/yonetici/takip');
+            populateYoneticiSinifSelect(select, data.siniflar || []);
+            const dashSelect = document.getElementById('yonetici-odev-sinif-select');
+            if (dashSelect && dashSelect.options.length <= 1) {
+                populateYoneticiSinifSelect(dashSelect, data.siniflar || []);
+            }
+        } catch (e) {
+            select.innerHTML = '<option value="">Sınıf listesi yüklenemedi</option>';
+        }
+    };
 
     async function loadYoneticiPersonalSinifKod() {
         try {

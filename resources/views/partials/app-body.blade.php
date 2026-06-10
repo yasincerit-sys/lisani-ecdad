@@ -501,6 +501,10 @@
                             <p id="tests-student-hint" class="lisani-tests-bolum-hint">5 test · tur başına 4 soru · yuvarlaklara dokun</p>
                             <button type="button" id="tests-placement-btn" onclick="startPlacementTest(event)" class="lisani-tests-placement-chip shrink-0">Seviyemi Bul</button>
                             <p id="tests-hoca-hint" class="hidden lisani-tests-bolum-hint lisani-tests-bolum-hint--hoca">Ödev vermek için tur veya test seçin</p>
+                            <div id="tests-yonetici-sinif-bar" class="hidden w-full mt-1">
+                                <label for="tests-yonetici-sinif-select" class="text-[10px] font-bold theme-text-muted uppercase tracking-wide block mb-1">Ödev atanacak sınıf</label>
+                                <select id="tests-yonetici-sinif-select" class="w-full px-3 py-2 rounded-xl border theme-border theme-card-bg theme-text-main text-xs"></select>
+                            </div>
                         </div>
                         <div class="lisani-bolum-scene lisani-tests-path-panel flex-1 min-h-0">
                             <div class="lisani-bolum-dots-row" id="bolum-buttons-container"></div>

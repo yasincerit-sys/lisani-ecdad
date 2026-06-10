@@ -1218,10 +1218,15 @@
             const hint = document.getElementById('tests-hoca-hint');
             const studentHint = document.getElementById('tests-student-hint');
             const placementBtn = document.getElementById('tests-placement-btn');
-            const hoca = isHocaUser();
-            if (hint) hint.classList.toggle('hidden', !hoca);
-            if (studentHint) studentHint.classList.toggle('hidden', hoca);
-            if (placementBtn) placementBtn.classList.toggle('hidden', hoca);
+            const yoneticiBar = document.getElementById('tests-yonetici-sinif-bar');
+            const teacher = hasTeacherFeatures();
+            if (hint) hint.classList.toggle('hidden', !teacher);
+            if (studentHint) studentHint.classList.toggle('hidden', teacher);
+            if (placementBtn) placementBtn.classList.toggle('hidden', teacher);
+            if (yoneticiBar) yoneticiBar.classList.toggle('hidden', !isYoneticiUser());
+            if (isYoneticiUser() && typeof window.loadTestsYoneticiSinifSelect === 'function') {
+                window.loadTestsYoneticiSinifSelect();
+            }
         }
         window.updateTestsTabForRole = updateTestsTabForRole;
 
@@ -1611,7 +1616,7 @@
             const container = document.getElementById('bolum-buttons-container');
             if (!container) return;
             container.innerHTML = '';
-            const assignMode = isHocaUser();
+            const assignMode = hasTeacherFeatures();
             let highlightEl = null;
 
             BOLUMLER.forEach((bolum, index) => {
