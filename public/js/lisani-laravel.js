@@ -1350,6 +1350,8 @@
                         date: r.date,
                         level: r.level,
                         test: r.test,
+                        bolum: r.bolum,
+                        step: r.step,
                         correct: r.correct,
                         wrong: r.wrong,
                         percent: r.percent,
@@ -2272,10 +2274,8 @@
         if (testsHocaHint) testsHocaHint.classList.toggle('hidden', !isHoca);
         if (testsStudentHint) testsStudentHint.classList.toggle('hidden', isHoca);
         const tabAi = document.getElementById('tab-ai');
-        const tabTests = document.getElementById('tab-tests');
         const tabHocaDash = document.getElementById('tab-hoca-dashboard');
         if (tabAi) tabAi.classList.toggle('hidden', isHoca);
-        if (tabTests) tabTests.classList.toggle('hidden', isHoca);
         if (tabHocaDash) tabHocaDash.classList.toggle('hidden', !(isHoca || isYonetici));
         if (typeof updateTestsTabForRole === 'function') updateTestsTabForRole();
         if (typeof updateGelisimScreenForRole === 'function') updateGelisimScreenForRole();
@@ -2286,6 +2286,12 @@
             setTimeout(() => window.loadOgrenciOdevler(), 400);
         }
         refreshMesajBadge();
+        const learnStartCard = document.getElementById('learn-start-home-card');
+        const showStudentHome = isOgrenci || isYonetici;
+        if (learnStartCard) learnStartCard.classList.toggle('hidden', !showStudentHome);
+        if (typeof window.updateDailyGoalUI === 'function') {
+            window.updateDailyGoalUI();
+        }
         if (typeof lucide !== 'undefined') lucide.createIcons();
     }
 

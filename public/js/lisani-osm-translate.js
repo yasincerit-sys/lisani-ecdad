@@ -347,12 +347,12 @@
         input.dir = osmTranslateMode === 'osm-to-tr' ? 'rtl' : 'ltr';
     }
 
-    function renderResult(result) {
-        const box = document.getElementById('osm-translate-result');
-        const mainEl = document.getElementById('osm-translate-main');
-        const subEl = document.getElementById('osm-translate-sub');
-        const noteEl = document.getElementById('osm-translate-note');
-        if (!box || !mainEl || !subEl || !noteEl) return;
+    function renderResultToTargets(result, boxId, mainId, subId, noteId) {
+        const box = document.getElementById(boxId);
+        const mainEl = document.getElementById(mainId);
+        const subEl = document.getElementById(subId);
+        const noteEl = noteId ? document.getElementById(noteId) : null;
+        if (!box || !mainEl || !subEl) return;
 
         mainEl.textContent = result.main;
         mainEl.dir = result.rtl ? 'rtl' : 'ltr';
@@ -364,9 +364,65 @@
         subEl.classList.toggle('arabic-text', !result.rtl);
         subEl.classList.toggle('hidden', !result.sub);
 
-        noteEl.textContent = result.note || '';
+        if (noteEl) noteEl.textContent = result.note || '';
         box.classList.remove('hidden');
     }
+
+    function renderResult(result) {
+        renderResultToTargets(result, 'osm-translate-result', 'osm-translate-main', 'osm-translate-sub', 'osm-translate-note');
+    }
+
+    function renderHomeResult(result) {
+        renderResultToTargets(result, 'home-osm-translate-result', 'home-osm-translate-main', 'home-osm-translate-sub', null);
+    }
+
+    window.runHomeOsmTranslate = function () {
+        if (typeof playClickSound === 'function') playClickSound();
+
+        const input = document.getElementById('home-osm-translate-input');
+        const resultBox = document.getElementById('home-osm-translate-result');
+        if (!input || !resultBox) return;
+
+        const text = input.value.trim();
+        if (!text) {
+            if (typeof showToast === 'function') {
+                showToast('Lütfen çevrilecek bir metin yazın.', 'error');
+            }
+            return;
+        }
+
+        const autoMode = isArabicScript(text) && osmTranslateMode === 'tr-to-osm';
+        const result = autoMode ? translateOsmToTr(text) : translate(text);
+
+        if (!result || !result.main) {
+            resultBox.classList.add('hidden');
+            if (typeof showToast === 'function') {
+                showToast('Bu metin için çeviri üretilemedi.', 'error');
+            }
+            return;
+        }
+
+        renderHomeResult(result);
+        if (window.LisaniDailyTasks && typeof window.LisaniDailyTasks.onTranslate === 'function') {
+            window.LisaniDailyTasks.onTranslate();
+        }
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+    };
+
+    window.homeOsmQuickTranslate = function (word) {
+        const input = document.getElementById('home-osm-translate-input');
+        if (!input) return;
+        input.value = word;
+        window.setOsmTranslateMode('tr-to-osm');
+        window.runHomeOsmTranslate();
+    };
+
+    window.handleHomeOsmTranslateKey = function (event) {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            window.runHomeOsmTranslate();
+        }
+    };
 
     window.setOsmTranslateMode = function (mode) {
         if (mode !== 'tr-to-osm' && mode !== 'osm-to-tr') return;
@@ -454,6 +510,9 @@
         }
 
         renderResult(result);
+        if (window.LisaniDailyTasks && typeof window.LisaniDailyTasks.onTranslate === 'function') {
+            window.LisaniDailyTasks.onTranslate();
+        }
         if (typeof lucide !== 'undefined') lucide.createIcons();
     };
 

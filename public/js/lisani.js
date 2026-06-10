@@ -29,289 +29,192 @@
             updateUIPoints();
             if (typeof renderProgressChart === 'function') renderProgressChart();
             if (typeof renderQuizHistoryList === 'function') renderQuizHistoryList();
+            if (typeof window.updateDailyWheelHomeUI === 'function') window.updateDailyWheelHomeUI();
         };
 
-        // --- SORU BANKASI VERİLERİ (GÜNCELLENDİ: 4 SEVİYE x 20 SORU = TOPLAM 80 SORU) ---
-        const quizBank = {
-            1: {
-                "Test 1": [
-                    { word: "Osmanlı alfabesi kaç harften oluşmaktadır?", options: ["28", "29", "32", "34"], answer: "32" },
-                    { word: "ا\n\nBu harfin adı hangisidir?", options: ["Elif", "Be", "Te", "Cim"], answer: "Elif" },
-                    { word: "ب\n\nBu harfin adı hangisidir?", options: ["Elif", "Be", "Te", "Cim"], answer: "Be" },
-                    { word: "پ\n\nBu harfin adı hangisidir?", options: ["Be", "Pe", "Te", "Cim"], answer: "Pe" },
-                    { word: "ت\n\nBu harfin adı hangisidir?", options: ["Te", "Se", "Pe", "He"], answer: "Te" },
-                    { word: "ث\n\nBu harfin adı hangisidir?", options: ["Te", "Se (Pelte)", "Be", "Sin"], answer: "Se (Pelte)" },
-                    { word: "ج\n\nBu harfin adı hangisidir?", options: ["Cim", "Çim", "Ha", "Hı"], answer: "Cim" },
-                    { word: "چ\n\nBu harfin adı hangisidir?", options: ["Cim", "Çim", "He", "Ha"], answer: "Çim" },
-                    { word: "ح\n\nBu harfin adı hangisidir?", options: ["He", "Ha", "Hı", "Cim"], answer: "Ha" },
-                    { word: "خ\n\nBu harfin adı hangisidir?", options: ["Ha", "Hı", "He", "Kef"], answer: "Hı" },
-                    { word: "د\n\nBu harfin adı hangisidir?", options: ["Dal", "Zel", "Re", "Ze"], answer: "Dal" },
-                    { word: "ذ\n\nBu harfin adı hangisidir?", options: ["Dal", "Zel", "Ze", "Re"], answer: "Zel" },
-                    { word: "ر\n\nBu harfin adı hangisidir?", options: ["Ze", "Re", "Vav", "Nun"], answer: "Re" },
-                    { word: "ز\n\nBu harfin adı hangisidir?", options: ["Re", "Ze", "Sin", "Şın"], answer: "Ze" },
-                    { word: "ژ\n\nBu harfin adı hangisidir?", options: ["Ze", "Je", "Re", "Sin"], answer: "Je" },
-                    { word: "س\n\nBu harfin adı hangisidir?", options: ["Sin", "Şın", "Se", "Sad"], answer: "Sin" },
-                    { word: "ش\n\nBu harfin adı hangisidir?", options: ["Sin", "Şın", "Sad", "Dad"], answer: "Şın" },
-                    { word: "Osmanlı alfabesi hangi alfabeyi temel alır?", options: ["Latin", "Kiril", "Arap", "Yunan"], answer: "Arap" },
-                    { word: "Osmanlıca yazı hangi yönde yazılır?", options: ["Soldan sağa", "Sağdan sola", "Yukarıdan aşağıya", "Aşağıdan yukarıya"], answer: "Sağdan sola" },
-                    { word: "Osmanlıcada sesli harfler nasıl gösterilir?", options: ["Her zaman yazılır", "Genellikle yazılmaz", "Sadece başta yazılır", "Sadece sonda yazılır"], answer: "Genellikle yazılmaz" }
-                ],
-                "Test 2": [
-                    { word: "ص\n\nBu harfin adı hangisidir?", options: ["Sin", "Sad", "Dad", "Tı"], answer: "Sad" },
-                    { word: "ض\n\nBu harfin adı hangisidir?", options: ["Sad", "Dad", "Tı", "Zı"], answer: "Dad" },
-                    { word: "ط\n\nBu harfin adı hangisidir?", options: ["Tı", "Zı", "Te", "Dal"], answer: "Tı" },
-                    { word: "ظ\n\nBu harfin adı hangisidir?", options: ["Tı", "Zı", "Ze", "Zel"], answer: "Zı" },
-                    { word: "ع\n\nBu harfin adı hangisidir?", options: ["Ayn", "Gayn", "Elif", "He"], answer: "Ayn" },
-                    { word: "غ\n\nBu harfin adı hangisidir?", options: ["Ayn", "Gayn", "Kaf", "Kef"], answer: "Gayn" },
-                    { word: "ف\n\nBu harfin adı hangisidir?", options: ["Fe", "Pe", "Kaf", "Vav"], answer: "Fe" },
-                    { word: "ق\n\nBu harfin adı hangisidir?", options: ["Kaf", "Kef", "Gef", "Gayn"], answer: "Kaf" },
-                    { word: "ک\n\nBu harfin adı hangisidir?", options: ["Kaf", "Kef", "Gef", "Gayn"], answer: "Kef" },
-                    { word: "گ\n\nBu harfin adı hangisidir?", options: ["Kef", "Gef", "Gayn", "Kaf"], answer: "Gef" },
-                    { word: "ل\n\nBu harfin adı hangisidir?", options: ["Lam", "Mim", "Nun", "Vav"], answer: "Lam" },
-                    { word: "م\n\nBu harfin adı hangisidir?", options: ["Lam", "Mim", "Nun", "He"], answer: "Mim" },
-                    { word: "ن\n\nBu harfin adı hangisidir?", options: ["Mim", "Nun", "Vav", "He"], answer: "Nun" },
-                    { word: "و\n\nBu harfin adı hangisidir?", options: ["Vav", "He", "Ye", "Nun"], answer: "Vav" },
-                    { word: "ه\n\nBu harfin adı hangisidir?", options: ["Vav", "He", "Ye", "Elif"], answer: "He" },
-                    { word: "ی\n\nBu harfin adı hangisidir?", options: ["Vav", "He", "Ye", "Elif"], answer: "Ye" },
-                    { word: "Yalnızca Farsça kelimelerde kullanılan harf hangisidir?", options: ["Zel (ذ)", "Je (ژ)", "Sad (ص)", "Tı (ط)"], answer: "Je (ژ)" },
-                    { word: "و (Vav) harfi Osmanlıcada kaç farklı ses değeri taşır?", options: ["2", "3", "4", "5"], answer: "4" },
-                    { word: "Hangi harf Arapçaya özgüdür, Türkçe kelimelerde kullanılmaz?", options: ["Sad (ص)", "Be (ب)", "Te (ت)", "Dal (د)"], answer: "Sad (ص)" },
-                    { word: "Osmanlıcada noktalı harflerin noktaları nasıldır?", options: ["Harfin üstünde veya altında", "Her zaman üstünde", "Her zaman altında", "Sağında veya solunda"], answer: "Harfin üstünde veya altında" }
-                ],
-                "Test 3": [
-                    { word: "Osmanlıcada Türkçeye özgü harflerin sayısı kaçtır?", options: ["3", "4", "5", "6"], answer: "5" },
-                    { word: "Aşağıdakilerden hangi harf munfasıldır (kendinden sonrakiyle birleşmeyen)?", options: ["Elif (ا)", "Be (ب)", "Te (ت)", "Cim (ج)"], answer: "Elif (ا)" },
-                    { word: "Osmanlıca harf kurallarında kullanılan 'Muttasıl' terimi ne demektir?", options: ["Uzatılan", "Birleşen", "Okunmayan", "Harekeli"], answer: "Birleşen" },
-                    { word: "Hangi harf munfasıl harfler arasında yer almaz?", options: ["Elif (ا)", "Be (ب)", "Vav (و)", "Dal (د)"], answer: "Be (ب)" },
-                    { word: "Osmanlı Türkçesi yazısının yazım yönü nedir?", options: ["Soldan sağa", "Yukarıdan aşağıya", "Sağdan sola", "Aşağıdan yukarıya"], answer: "Sağdan sola" },
-                    { word: "Aşağıdaki harflerden hangisi munfasıldır?", options: ["Dal (د)", "Be (ب)", "Sin (س)", "Mim (م)"], answer: "Dal (د)" },
-                    { word: "Aşağıdaki harflerden hangisi de munfasıldır?", options: ["Vav (و)", "Nun (ن)", "Lam (ل)", "Fe (ف)"], answer: "Vav (و)" },
-                    { word: "Aşağıdaki harflerden hangisi de munfasıldır?", options: ["Re (ر)", "Be (ب)", "Te (ت)", "Sin (س)"], answer: "Re (ر)" },
-                    { word: "Osmanlıcada kaç munfasıl harf vardır?", options: ["4", "6", "8", "10"], answer: "6" },
-                    { word: "Aşağıdaki Türkçeye özgü harflerden hangisi Osmanlıcada kullanılır?", options: ["Pe (پ)", "Kaf (ق)", "Sad (ص)", "Ayn (ع)"], answer: "Pe (پ)" },
-                    { word: "Osmanlıcada hareke nedir?", options: ["Sesli harfi gösteren işaret", "Harf birleştirme kuralı", "Kelime sonu işareti", "Uzatma çizgisi"], answer: "Sesli harfi gösteren işaret" },
-                    { word: "Aşağıdakilerden hangisi Türkçeye özgü bir Osmanlı harfidir?", options: ["Çim (چ)", "Ha (ح)", "Dad (ض)", "Ayn (ع)"], answer: "Çim (چ)" },
-                    { word: "Osmanlıcada harf yazımında temel kural nedir?", options: ["Her harf ayrı yazılır", "Harfler bitişik yazılabilir ama munfasıllar hariç", "Tüm harfler bitişik yazılır", "Sadece büyük harfler ayrı yazılır"], answer: "Harfler bitişik yazılabilir ama munfasıllar hariç" },
-                    { word: "Osmanlıcada 'medde' işareti ne anlama gelir?", options: ["Kısa ünlü", "Uzun 'a' sesi", "Sessiz harf", "Kelime sonu"], answer: "Uzun 'a' sesi" },
-                    { word: "Aşağıdaki harflerden hangisi hem başta hem ortada hem de sonda farklı şekil alır?", options: ["Be (ب)", "Elif (ا)", "Vav (و)", "Re (ر)"], answer: "Be (ب)" },
-                    { word: "Türkçeye özgü 'Gef (گ)' harfi hangi sesi karşılar?", options: ["G sesi", "K sesi", "J sesi", "Ğ sesi"], answer: "G sesi" },
-                    { word: "Osmanlıcada 'şedde' ne anlama gelir?", options: ["Harfin iki kez okunduğunu gösterir", "Harfin okunmadığını gösterir", "Uzun ünlü işareti", "Kelime başı işareti"], answer: "Harfin iki kez okunduğunu gösterir" },
-                    { word: "Aşağıdakilerden hangisi munfasıl harf değildir?", options: ["Sin (س)", "Elif (ا)", "Dal (د)", "Vav (و)"], answer: "Sin (س)" },
-                    { word: "Osmanlıcada bir kelimenin başındaki Elif harfi ne işlev görür?", options: ["Her zaman 'a' sesi verir", "Sessiz harf taşır ya da uzun ünlüyü gösterir", "Her zaman okunmaz", "Yalnızca süs amaçlıdır"], answer: "Sessiz harf taşır ya da uzun ünlüyü gösterir" },
-                    { word: "Osmanlıcada 'hemze' ne işe yarar?", options: ["Sessiz harfi gösterir", "Elif üzerinde belirli sesleri gösterir", "Kelime başı işaretidir", "Uzun ünlüyü gösterir"], answer: "Elif üzerinde belirli sesleri gösterir" }
-                ],
-                "Genel": [
-                    { word: "Yalnızca Farsça kelimelerde kullanılan harf hangisidir?", options: ["Zel (ذ)", "Je (ژ)", "Sad (ص)", "Tı (ط)"], answer: "Je (ژ)" },
-                    { word: "و (Vav) harfi Osmanlıcada kaç farklı ses değeri taşır?", options: ["2", "3", "4", "5"], answer: "4" },
-                    { word: "Hangi harf Arapçaya özgüdür, Türkçe kelimelerde kullanılmaz?", options: ["Sad (ص)", "Be (ب)", "Te (ت)", "Dal (د)"], answer: "Sad (ص)" },
-                    { word: "ق\n\nBu harfin adı hangisidir?", options: ["Kaf", "Kef", "Gef", "Gayn"], answer: "Kaf" },
-                    { word: "ک\n\nBu harfin adı hangisidir?", options: ["Kaf", "Kef", "Gef", "Gayn"], answer: "Kef" },
-                    { word: "Osmanlıcada kaç harf vardır?", options: ["28", "29", "32", "36"], answer: "32" },
-                    { word: "Osmanlıcada hangi harf 'v' ve 'u/ü' seslerini verebilir?", options: ["Ye (ی)", "Vav (و)", "Elif (ا)", "He (ه)"], answer: "Vav (و)" },
-                    { word: "Osmanlıcada 'Ye (ی)' harfi hangi sesleri karşılayabilir?", options: ["Sadece 'y'", "Sadece 'i'", "'y', 'i' ve 'ı'", "Sadece 'ı'"], answer: "'y', 'i' ve 'ı'" },
-                    { word: "Osmanlıca alfabede Pe (پ) harfi Arapçada var mıdır?", options: ["Evet", "Hayır", "Sadece bazı lehçelerde", "Evet ama farklı şekilde"], answer: "Hayır" },
-                    { word: "Osmanlıcada uzun 'i' sesi hangi harfle gösterilir?", options: ["Elif (ا)", "Vav (و)", "Ye (ی)", "He (ه)"], answer: "Ye (ی)" },
-                    { word: "Osmanlıcada 'Ha (ح)' ve 'Hı (خ)' arasındaki fark nedir?", options: ["Ha boğazdan, Hı damaktan çıkar", "Ha Farsçaya, Hı Arapçaya özgüdür", "Ha Türkçede, Hı Arapçada kullanılır", "Aralarında ses farkı yoktur"], answer: "Ha boğazdan, Hı damaktan çıkar" },
-                    { word: "Osmanlıcada 'Kaf (ق)' ile 'Kef (ک)' arasındaki temel fark nedir?", options: ["Kaf kalın 'k', Kef ince 'k' sesi verir", "Kaf Farsça, Kef Arapça", "Kaf munfasıl, Kef muttasıldır", "Aynı sesi verirler"], answer: "Kaf kalın 'k', Kef ince 'k' sesi verir" },
-                    { word: "Osmanlıcada 'Sin (س)' ile 'Sad (ص)' hangi dile özgü ayrımdır?", options: ["Türkçe", "Farsça", "Arapça", "Osmanlıca"], answer: "Arapça" },
-                    { word: "Osmanlıcada harf sayısının Arapçadan fazla olmasının sebebi nedir?", options: ["Türkçe ve Farsçaya özgü harfler eklenmiştir", "Arapçadan eksik harfler tamamlanmıştır", "Latin alfabesinden bazı harfler alınmıştır", "Osmanlıcaya özgü yeni harfler icat edilmiştir"], answer: "Türkçe ve Farsçaya özgü harfler eklenmiştir" },
-                    { word: "Osmanlıcada 'tenvîn' işareti ne işe yarar?", options: ["Kelimenin sonuna 'n' sesi ekler (Arapça)", "Uzun ünlü gösterir", "Çift okutturur", "Kelime başlangıcını belirtir"], answer: "Kelimenin sonuna 'n' sesi ekler (Arapça)" },
-                    { word: "Osmanlıcada 'Lam-Elif (لا)' birleşimi ne zaman kullanılır?", options: ["'la' hecesini yazmak için zorunlu birleşim", "Sadece süs amaçlı", "Yalnızca Arapça kelimelerde", "İsteğe bağlı bir yazım biçimi"], answer: "'la' hecesini yazmak için zorunlu birleşim" },
-                    { word: "Osmanlıcada 'elif-i maksure' ne demektir?", options: ["Ye harfiyle yazılan uzun 'a'", "Uzun elif", "Sessiz elif", "Başta kullanılan elif"], answer: "Ye harfiyle yazılan uzun 'a'" },
-                    { word: "Osmanlıcada bir harfin kelime sonundaki şekline ne denir?", options: ["Son şekil (son)", "Müstakil şekil", "Başlangıç şekli", "Orta şekil"], answer: "Son şekil (son)" },
-                    { word: "Osmanlıcada 'Nun (ن)' harfi kelime sonunda nasıl yazılır?", options: ["Nokta alta iner, yay uzar", "Nokta yoktur", "Büyük daire şeklinde", "Vav gibi yazılır"], answer: "Nokta alta iner, yay uzar" },
-                    { word: "Osmanlıcada 'medde' işareti ne anlama gelir?", options: ["Kısa ünlü", "Uzun 'a' sesi", "Sessiz harf", "Kelime sonu"], answer: "Uzun 'a' sesi" }
-                ]
-            },
-            2: {
-                "Test 1": [
-                    { word: "شو كوزل طارلالره باق\n\nBu cümlenin doğru okunuşu hangisidir?", options: ["Şu güzel tarlalara bak", "Şu büyük ovalara bak", "Bu güzel dağlara bak", "O güzel tarlalara bak"], answer: "Şu güzel tarlalara bak" },
-                    { word: "بوگون اویه گیتديم\n\nBu cümlenin Türkçe okunuşu hangisidir?", options: ["Bugün eve gittim", "Dün eve gittim", "Bugün işe gittim", "Yarın eve gideceğim"], answer: "Bugün eve gittim" },
-                    { word: "Aşağıdaki harflerden hangisi kelime içinde kendinden sonrakiyle birleşir?", options: ["Be (ب)", "Elif (ا)", "Dal (د)", "Vav (و)"], answer: "Be (ب)" },
-                    { word: "سلطان فرمان ويردی\n\nBu cümlenin Türkçe okunuşu hangisidir?", options: ["Sultan ferman verdi", "Sultan saraya geldi", "Asker fermanı yazdı", "Padişah tahta oturdu"], answer: "Sultan ferman verdi" },
-                    { word: "كتاب\n\nBu kelimenin Türkçe karşılığı nedir?", options: ["Defter", "Kitap", "Kalem", "Mektep"], answer: "Kitap" },
-                    { word: "قلم\n\nBu kelimenin Türkçe karşılığı nedir?", options: ["Kitap", "Defter", "Kalem", "Cetvel"], answer: "Kalem" },
-                    { word: "بابا\n\nBu kelimenin Türkçe okunuşu hangisidir?", options: ["Anne", "Baba", "Dede", "Amca"], answer: "Baba" },
-                    { word: "Osmanlıcada bir kelime yazarken sesli harfler nasıl gösterilir?", options: ["Her zaman yazılır", "Genellikle yazılmaz, zımni kalır", "Sadece kelime başında yazılır", "Sadece uzun sesliler yazılır"], answer: "Genellikle yazılmaz, zımni kalır" },
-                    { word: "سو\n\nBu kelimenin Türkçe anlamı nedir?", options: ["Su", "Süt", "Ses", "Söz"], answer: "Su" },
-                    { word: "يول\n\nBu kelimenin okunuşu hangisidir?", options: ["Yıl", "Yol", "Yel", "Gül"], answer: "Yol" },
-                    { word: "ات\n\nBu kelimenin Türkçe anlamı nedir?", options: ["Et", "At", "Ot", "Ut"], answer: "At" },
-                    { word: "Osmanlıcada 'Kaf (ق)' harfi Türkçede genellikle hangi sesi karşılar?", options: ["Kalın 'k' sesi", "İnce 'k' sesi", "'g' sesi", "'ğ' sesi"], answer: "Kalın 'k' sesi" },
-                    { word: "دنيز\n\nBu kelimenin Türkçe okunuşu hangisidir?", options: ["Deniz", "Nehir", "Göl", "Çay"], answer: "Deniz" },
-                    { word: "داغ\n\nBu kelimenin Türkçe okunuşu hangisidir?", options: ["Dağ", "Taş", "Ova", "Çay"], answer: "Dağ" },
-                    { word: "Osmanlıcada kelime okunurken ne yönde ilerlenir?", options: ["Soldan sağa", "Sağdan sola", "Yukarıdan aşağıya", "Aşağıdan yukarıya"], answer: "Sağdan sola" },
-                    { word: "اوقول\n\nBu kelimenin Türkçe okunuşu hangisidir?", options: ["Okul", "Çocuk", "Büyük", "Küçük"], answer: "Okul" },
-                    { word: "Osmanlıcada 'He (ه)' harfi kelime sonunda okunur mu?", options: ["Her zaman okunur", "Bazen okunmaz (sessiz h)", "Hiçbir zaman okunmaz", "Sadece Arapça kelimelerde okunur"], answer: "Bazen okunmaz (sessiz h)" },
-                    { word: "گوك\n\nBu kelimenin Türkçe okunuşu hangisidir?", options: ["Göz", "Gök", "Söz", "Köy"], answer: "Gök" },
-                    { word: "Osmanlıcada 'Kef (ک)' harfi Türkçede genellikle hangi sesi karşılar?", options: ["Kalın 'k'", "İnce 'k' veya 'g'", "'ğ' sesi", "'h' sesi"], answer: "İnce 'k' veya 'g'" },
-                    { word: "آب\n\nBu kelimenin anlamı nedir? (Farsça)", options: ["Ateş", "Su", "Toprak", "Hava"], answer: "Su" }
-                ],
-                "Test 2": [
-                    { word: "مكتبده اوقويورم\n\nBu cümlenin Türkçe anlamı hangisidir?", options: ["Mektepte okuyorum", "Okula gidiyorum", "Yazı yazıyorum", "Kitap okuyorum"], answer: "Mektepte okuyorum" },
-                    { word: "Osmanlıca hakkında hangi önerme doğrudur?\n\n1. Arap alfabesi temel alınmıştır.\n2. Sadece sarayda konuşulmuştur.", options: ["Yalnız 1", "Yalnız 2", "Her ikisi de", "Hiçbiri"], answer: "Yalnız 1" },
-                    { word: "شهر بيوك در\n\nBu cümlenin Türkçe karşılığı hangisidir?", options: ["Şehir büyüktür", "Köy küçüktür", "Ev çok büyüktür", "Şehir çok güzeldir"], answer: "Şehir büyüktür" },
-                    { word: "سوز\n\nBu kelimenin Türkçe karşılığı nedir?", options: ["Söz", "Saz", "Göz", "Yaz"], answer: "Söz" },
-                    { word: "قولاى\n\nBu kelimenin doğru okunuşu hangisidir?", options: ["Kolay", "Güzel", "Olay", "Kalay"], answer: "Kolay" },
-                    { word: "ياز\n\nBu kelimenin Türkçe okunuşu hangisidir?", options: ["Kış", "Yaz", "Bahar", "Sonbahar"], answer: "Yaz" },
-                    { word: "قيش\n\nBu kelimenin Türkçe okunuşu hangisidir?", options: ["Kış", "Yaz", "İlkbahar", "Güz"], answer: "Kış" },
-                    { word: "Osmanlıcada 'dal (د)' ve 'zel (ذ)' arasındaki fark nedir?", options: ["Dal 'd', Zel 'z' sesini verir", "Dal 'z', Zel 'd' sesini verir", "İkisi de 'd' sesini verir", "İkisi de 'z' sesini verir"], answer: "Dal 'd', Zel 'z' sesini verir" },
-                    { word: "آرسلان\n\nBu kelimenin Türkçe okunuşu hangisidir?", options: ["Aslan", "Kaplan", "Kurt", "Ayı"], answer: "Aslan" },
-                    { word: "قاپى\n\nBu kelimenin Türkçe okunuşu hangisidir?", options: ["Pencere", "Kapı", "Duvar", "Zemin"], answer: "Kapı" },
-                    { word: "Osmanlıcada 'Ta (ط)' ve 'Te (ت)' arasındaki fark nedir?", options: ["Ta Arapçaya özgü kalın 't', Te ince 't'", "Ta ince, Te kalın 't' verir", "İkisi de aynı sesi verir", "Ta Türkçe, Te Farsça"], answer: "Ta Arapçaya özgü kalın 't', Te ince 't'" },
-                    { word: "اوچ\n\nBu kelimenin Türkçe okunuşu hangisidir?", options: ["İki", "Üç", "Dört", "Beş"], answer: "Üç" },
-                    { word: "بش\n\nBu kelimenin Türkçe okunuşu hangisidir?", options: ["Dört", "Altı", "Beş", "Yedi"], answer: "Beş" },
-                    { word: "يدى\n\nBu kelimenin Türkçe okunuşu hangisidir?", options: ["Altı", "Yedi", "Sekiz", "Dokuz"], answer: "Yedi" },
-                    { word: "اون\n\nBu kelimenin Türkçe okunuşu hangisidir?", options: ["Bir", "Beş", "On", "Yüz"], answer: "On" },
-                    { word: "يوز\n\nBu kelimenin Türkçe okunuşu hangisidir?", options: ["On", "Elli", "Yüz", "Bin"], answer: "Yüz" },
-                    { word: "Osmanlıcada rakamlar hangi sistemle yazılırdı?", options: ["Romen rakamları", "Arap-Hint rakamları", "Latin rakamları", "Yunan rakamları"], answer: "Arap-Hint rakamları" },
-                    { word: "گوزل\n\nBu kelimenin Türkçe okunuşu hangisidir?", options: ["Çirkin", "Güzel", "İyi", "Kötü"], answer: "Güzel" },
-                    { word: "بيوك\n\nBu kelimenin Türkçe okunuşu hangisidir?", options: ["Küçük", "Büyük", "Uzun", "Kısa"], answer: "Büyük" },
-                    { word: "قره\n\nBu kelimenin Türkçe okunuşu hangisidir?", options: ["Kara", "Sarı", "Beyaz", "Yeşil"], answer: "Kara" }
-                ],
-                "Test 3": [
-                    { word: "باهار گلدی\n\nBu ifadenin doğru okunuşu hangisidir?", options: ["Bahar geldi", "Bağlar güldü", "Bahar geçti", "Yaz geldi"], answer: "Bahar geldi" },
-                    { word: "عسكر يوريور\n\nBu cümlenin Türkçe karşılığı hangisidir?", options: ["Asker yürüyor", "Asker geliyor", "Ordu savaşıyor", "Asker nöbet tutuyor"], answer: "Asker yürüyor" },
-                    { word: "پادشاه تختنده اوتوردی\n\nBu cümlenin doğru okunuşu hangisidir?", options: ["Padişah tahtında oturdu", "Sultan tahta oturdu", "Hakan sarayda oturdu", "Padişah fermanı okudu"], answer: "Padişah tahtında oturdu" },
-                    { word: "حق يولنده يورييلم\n\nBu ifadenin doğru anlamı hangisidir?", options: ["Hak yolunda yürüyelim", "Doğru yoldan gidelim", "Güzel işler yapalım", "Halka yardım edelim"], answer: "Hak yolunda yürüyelim" },
-                    { word: "اوردو ايله ريه گيتدی\n\nBu cümlenin Türkçe okunuşu hangisidir?", options: ["Ordu ileriye gitti", "Asker geri çekildi", "Savaş kazanıldı", "Ordu şehre girdi"], answer: "Ordu ileriye gitti" },
-                    { word: "آنا بانا باقدی\n\nBu cümlenin Türkçe okunuşu hangisidir?", options: ["Anne bana baktı", "Baba beni gördü", "Kardeş ağladı", "Anne gitti"], answer: "Anne bana baktı" },
-                    { word: "قوش اوچدی\n\nBu ifadenin doğru okunuşu hangisidir?", options: ["Kuş uçtu", "Kaz geçti", "Balık yüzdü", "Kuş ötüyor"], answer: "Kuş uçtu" },
-                    { word: "گون آيدين\n\nBu ifadenin Türkçe karşılığı hangisidir?", options: ["İyi geceler", "Günaydın", "İyi akşamlar", "Hoşça kal"], answer: "Günaydın" },
-                    { word: "Osmanlıcada bir cümledeki yüklem nerede yer alır?", options: ["Başta", "Ortada", "Genellikle sonda", "Öznenin hemen ardında"], answer: "Genellikle sonda" },
-                    { word: "سوغوق سو\n\nBu ifadenin Türkçe okunuşu hangisidir?", options: ["Soğuk su", "Sıcak çay", "Tatlı su", "Acı kahve"], answer: "Soğuk su" },
-                    { word: "ايشيق\n\nBu kelimenin Türkçe okunuşu hangisidir?", options: ["Karanlık", "Işık", "Gölge", "Ateş"], answer: "Işık" },
-                    { word: "Osmanlıcada tamlama nasıl kurulur?", options: ["Tamlanan önce, tamlayan sonra", "Tamlayan önce, tamlanan sonra", "İkisi de olabilir", "Tamlama yoktur"], answer: "Tamlanan önce, tamlayan sonra" },
-                    { word: "يني يول\n\nBu ifadenin Türkçe okunuşu hangisidir?", options: ["Yeni yol", "Eski köy", "Uzun yol", "Dar sokak"], answer: "Yeni yol" },
-                    { word: "قرا گيجه\n\nBu ifadenin Türkçe karşılığı hangisidir?", options: ["Kara gece", "Beyaz gündüz", "Uzun gece", "Kısa gün"], answer: "Kara gece" },
-                    { word: "Osmanlıcada fiiller genellikle nerede biter?", options: ["'-di', '-miş', '-r' gibi eklerle", "'-ler' ekiyle", "'-ki' ekiyle", "Her zaman '-an' ekiyle"], answer: "'-di', '-miş', '-r' gibi eklerle" },
-                    { word: "سويله\n\nBu kelimenin Türkçe okunuşu hangisidir?", options: ["Söyle", "Yürü", "Gel", "Git"], answer: "Söyle" },
-                    { word: "دنيز قيیيسی\n\nBu ifadenin Türkçe okunuşu hangisidir?", options: ["Deniz kıyısı", "Nehir kenarı", "Göl ortası", "Dağ yamacı"], answer: "Deniz kıyısı" },
-                    { word: "Osmanlıcada 'izafet' yapısı ne demektir?", options: ["İki ismin birbirine bağlandığı tamlama", "Fiil çekimi", "Olumsuzluk eki", "Soru yapısı"], answer: "İki ismin birbirine bağlandığı tamlama" },
-                    { word: "طاغ\n\nBu kelimenin Türkçe okunuşu hangisidir?", options: ["Dağ", "Taş", "Tepe", "Ova"], answer: "Dağ" },
-                    { word: "آق\n\nBu kelimenin Türkçe okunuşu hangisidir?", options: ["Kara", "Ak (Beyaz)", "Kırmızı", "Mavi"], answer: "Ak (Beyaz)" }
-                ],
-                "Genel": [
-                    { word: "كتاب\n\nBu kelimenin Türkçe karşılığı nedir?", options: ["Defter", "Kitap", "Kalem", "Mektep"], answer: "Kitap" },
-                    { word: "قولاى\n\nBu kelimenin doğru okunuşu hangisidir?", options: ["Kolay", "Güzel", "Olay", "Kalay"], answer: "Kolay" },
-                    { word: "سوز\n\nBu kelimenin Türkçe karşılığı nedir?", options: ["Söz", "Saz", "Göz", "Yaz"], answer: "Söz" },
-                    { word: "يول\n\nBu kelimenin okunuşu hangisidir?", options: ["Yıl", "Yol", "Yel", "Gül"], answer: "Yol" },
-                    { word: "سو\n\nBu kelimenin Türkçe anlamı nedir?", options: ["Su", "Süt", "Ses", "Söz"], answer: "Su" },
-                    { word: "آت\n\nBu kelimenin Türkçe okunuşu hangisidir?", options: ["At", "It", "Et", "Ot"], answer: "At" },
-                    { word: "قيز\n\nBu kelimenin Türkçe okunuşu hangisidir?", options: ["Kız", "Oğul", "Erkek", "Çocuk"], answer: "Kız" },
-                    { word: "اوغلان\n\nBu kelimenin Türkçe okunuşu hangisidir?", options: ["Kız", "Oğlan", "Baba", "Anne"], answer: "Oğlan" },
-                    { word: "ال\n\nBu kelimenin Türkçe okunuşu hangisidir?", options: ["Kol", "El", "Baş", "Ayak"], answer: "El" },
-                    { word: "باش\n\nBu kelimenin Türkçe okunuşu hangisidir?", options: ["Baş", "Boyun", "Yüz", "Göz"], answer: "Baş" },
-                    { word: "گوز\n\nBu kelimenin Türkçe okunuşu hangisidir?", options: ["Kulak", "Göz", "Burun", "Ağız"], answer: "Göz" },
-                    { word: "Osmanlıcada aynı yazılış birden fazla kelimeyi ifade edebilir mi?", options: ["Evet, bağlama göre değişir", "Hayır, her yazılış tektir", "Sadece yabancı kelimelerde", "Sadece fiillerde"], answer: "Evet, bağlama göre değişir" },
-                    { word: "آق\n\nBu kelimenin Türkçe okunuşu hangisidir?", options: ["Kara", "Ak (Beyaz)", "Kırmızı", "Mavi"], answer: "Ak (Beyaz)" },
-                    { word: "قره\n\nBu kelimenin Türkçe okunuşu hangisidir?", options: ["Kara", "Sarı", "Beyaz", "Yeşil"], answer: "Kara" },
-                    { word: "قوجه\n\nBu kelimenin Türkçe okunuşu hangisidir?", options: ["Genç", "Küçük", "Koca (büyük/yaşlı)", "Zayıf"], answer: "Koca (büyük/yaşlı)" },
-                    { word: "Osmanlıcada 'tamlayan' eki '-in/-ın' nasıl yazılır?", options: ["Genellikle Ye (ی) ile gösterilir", "Hiç yazılmaz", "Elif (ا) ile gösterilir", "Nun (ن) ile gösterilir"], answer: "Genellikle Ye (ی) ile gösterilir" },
-                    { word: "اوی\n\nBu kelimenin Türkçe okunuşu hangisidir?", options: ["Oy", "Ev", "Av", "Üv"], answer: "Ev" },
-                    { word: "Osmanlıcada bir cümle nasıl biter?", options: ["Özneyle", "Yüklemle", "Nesneyle", "Zarfla"], answer: "Yüklemle" },
-                    { word: "طاش\n\nBu kelimenin Türkçe okunuşu hangisidir?", options: ["Taş", "Dağ", "Kaya", "Toprak"], answer: "Taş" },
-                    { word: "دنيز\n\nBu kelimenin Türkçe okunuşu hangisidir?", options: ["Deniz", "Nehir", "Göl", "Çay"], answer: "Deniz" }
-                ]
-            },
-            3: {
-                "Test 1": [
-                    { word: "طاش · مكتب · پنجره · قلم\n\nAşağıdakilerden hangisi Türkçe kökenli bir kelimedir?", options: ["طاش", "مكتب", "پنجره", "قلم"], answer: "طاش" },
-                    { word: "طاش · مكتب · پنجره · دوست\n\nAşağıdakilerden hangisi Arapça kökenli bir kelimedir?", options: ["طاش", "مكتب", "پنجره", "دوست"], answer: "مكتب" },
-                    { word: "طاش · مكتب · پنجره · تلفزيون\n\nAşağıdakilerden hangisi Farsça kökenli bir kelimedir?", options: ["طاش", "مكتب", "پنجره", "تلفزيون"], answer: "پنجره" },
-                    { word: "طاش\n\nBu kelimenin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Rumca"], answer: "Türkçe" },
-                    { word: "تلفزيون\n\nBu kelimenin kökeni hangi dildir?", options: ["Farsça", "Batı dili", "Arapça", "Türkçe"], answer: "Batı dili" },
-                    { word: "باغچه\n\nBu kelimenin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Rumca"], answer: "Farsça" },
-                    { word: "كتاب\n\nBu kelimenin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Fransızca"], answer: "Arapça" },
-                    { word: "چیچك\n\nBu kelimenin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Rumca"], answer: "Türkçe" },
-                    { word: "جامع\n\nBu kelimenin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Latince"], answer: "Arapça" },
-                    { word: "شهر\n\nBu kelimenin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Rumca"], answer: "Farsça" },
-                    { word: "عسكر\n\nBu kelimenin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "İtalyanca"], answer: "Arapça" },
-                    { word: "دuman\n\nBu kelimenin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Rumca"], answer: "Türkçe" },
-                    { word: "پادشاه\n\nBu kelimenin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Moğolca"], answer: "Farsça" },
-                    { word: "سلطان\n\nBu kelimenin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Rumca"], answer: "Arapça" },
-                    { word: "اوردو\n\nBu kelimenin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Moğolca"], answer: "Türkçe" },
-                    { word: "دریا\n\nBu kelimenin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Rumca"], answer: "Farsça" },
-                    { word: "علم\n\nBu kelimenin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Latince"], answer: "Arapça" },
-                    { word: "آتا\n\nBu kelimenin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Moğolca"], answer: "Türkçe" },
-                    { word: "خبر\n\nBu kelimenin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Rumca"], answer: "Arapça" },
-                    { word: "بازار\n\nBu kelimenin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Ermenice"], answer: "Farsça" }
-                ],
-                "Test 2": [
-                    { word: "ساری\n\nBu kelime büyük ünlü uyumuna uyduğu için kökeni nedir?", options: ["Türkçe", "Arapça", "Farsça", "Batı dili"], answer: "Türkçe" },
-                    { word: "-ستان · -جی · -لق · -ده\n\nAşağıdaki eklerden hangisi Farsça kökenlidir?", options: ["-istan", "-ci/-cı", "-lık/-lik", "-da/-de"], answer: "-istan" },
-                    { word: "طاغ\n\nBu kelimenin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Rumca"], answer: "Türkçe" },
-                    { word: "-ات · -انه · -جی · -لق\n\nAşağıdaki eklerden hangisi Arapça çoğul ekidir?", options: ["-at (çoğul)", "-ane", "-ci/-cı", "-lık"], answer: "-at (çoğul)" },
-                    { word: "-ستان · -انه · -جی · -ات\n\nAşağıdaki eklerden hangisi Türkçe kökenlidir?", options: ["-istan", "-ane", "-ci/-cı", "-at"], answer: "-ci/-cı" },
-                    { word: "گونش\n\nBu kelimenin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Rumca"], answer: "Türkçe" },
-                    { word: "شهر بيوكدر\n\nOsmanlıcada iki isim tamlamasında bağlantı nasıl kurulur?", options: ["İzafet kesresiyle (e sesi)", "'-in' ekiyle", "Ayrı yazılarak", "Vav harfiyle"], answer: "İzafet kesresiyle (e sesi)" },
-                    { word: "روزگار\n\nBu kelimenin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Rumca"], answer: "Farsça" },
-                    { word: "علم\n\nBu kelimenin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Latince"], answer: "Arapça" },
-                    { word: "گوز\n\nBu kelimenin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Rumca"], answer: "Türkçe" },
-                    { word: "خزینه\n\nBu kelimenin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "İtalyanca"], answer: "Arapça" },
-                    { word: "نیشان\n\nBu kelimenin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Rumca"], answer: "Farsça" },
-                    { word: "Osmanlıcada Türkçe kelimeler büyük ünlü uyumuna uyarken yabancı kökenli kelimeler genellikle ne yapar?", options: ["Uyum kurmaz", "Her zaman uyar", "Kısmen uyar", "Hepsini bozar"], answer: "Uyum kurmaz" },
-                    { word: "-خانه\n\nBu ek hangi dilden gelir?", options: ["Türkçe", "Arapça", "Farsça", "Rumca"], answer: "Farsça" },
-                    { word: "-دار\n\nBu ek hangi dilden gelir?", options: ["Türkçe", "Arapça", "Farsça", "Moğolca"], answer: "Farsça" },
-                    { word: "-iye\n\nBu ek hangi dilden gelir?", options: ["Türkçe", "Arapça", "Farsça", "Latince"], answer: "Arapça" },
-                    { word: "-نامه\n\nBu ek hangi dilden gelir?", options: ["Türkçe", "Arapça", "Farsça", "Rumca"], answer: "Farsça" },
-                    { word: "توپراق\n\nBu kelimenin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Moğolca"], answer: "Türkçe" },
-                    { word: "میدان\n\nBu kelimenin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Rumca"], answer: "Arapça" },
-                    { word: "چارشو\n\nBu kelimenin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Ermenice"], answer: "Farsça" }
-                ],
-                "Test 3": [
-                    { word: "درزی · پنجره · طاش · باغچه\n\nAşağıdaki kelimelerden hangisi Farsça kökenli DEĞİLDİR?", options: ["درزی", "پنجره", "طاش", "باغچه"], answer: "طاش" },
-                    { word: "قلم\n\nBu kelimenin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Fransızca"], answer: "Arapça" },
-                    { word: "دوست\n\nBu kelimenin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "İngilizce"], answer: "Farsça" },
-                    { word: "گوز\n\nBu kelimenin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Rumca"], answer: "Türkçe" },
-                    { word: "Osmanlıcada Türkçe, Arapça ve Farsça kelimeler bir arada kullanılabilir mi?", options: ["Evet", "Hayır", "Sadece eklerde", "Sadece tamlamalarda"], answer: "Evet" },
-                    { word: "قلعه\n\nBu kelimenin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Rumca"], answer: "Arapça" },
-                    { word: "سرای\n\nBu kelimenin kökeni hangi dildir?", options: ["Farsça", "Türkçe", "Arapça", "Latince"], answer: "Farsça" },
-                    { word: "كوى\n\nBu kelimenin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Moğolca"], answer: "Türkçe" },
-                    { word: "شكر\n\nBu kelimenin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Rumca"], answer: "Farsça" },
-                    { word: "جواب\n\nBu kelimenin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Ermenice"], answer: "Arapça" },
-                    { word: "سورو\n\nBu kelimenin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Rumca"], answer: "Türkçe" },
-                    { word: "مجلس\n\nBu kelimenin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Latince"], answer: "Arapça" },
-                    { word: "رنگ\n\nBu kelimenin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Rumca"], answer: "Farsça" },
-                    { word: "باش\n\nBu kelimenin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Moğolca"], answer: "Türkçe" },
-                    { word: "فكر\n\nBu kelimenin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Fransızca"], answer: "Arapça" },
-                    { word: "موسم\n\nBu kelimenin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Rumca"], answer: "Arapça" },
-                    { word: "یلدیز\n\nBu kelimenin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Moğolca"], answer: "Türkçe" },
-                    { word: "نفس\n\nBu kelimenin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Rumca"], answer: "Arapça" },
-                    { word: "گونül\n\nBu kelimenin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Moğolca"], answer: "Türkçe" },
-                    { word: "چادر\n\nBu kelimenin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Moğolca"], answer: "Farsça" }
-                ],
-                "Genel": [
-                    { word: "قول\n\nBu Türkçe kökenli kelime büyük ünlü uyumuna uyar mı?", options: ["Uyar", "Uymaz", "Kısmen uyar", "Kuralsızdır"], answer: "Uyar" },
-                    { word: "درگاه\n\nBu kelimenin kökeni hangi dildir?", options: ["Farsça", "Arapça", "Türkçe", "Rumca"], answer: "Farsça" },
-                    { word: "بلیط\n\nBu kelimenin kökeni hangi dildir?", options: ["Batı (Fransızca)", "Farsça", "Arapça", "Türkçe"], answer: "Batı (Fransızca)" },
-                    { word: "كتابların عربجه جمعی كوتوبdur\n\nBu çoğul türü nedir?", options: ["Arapça mükesser çoğul", "Türkçe -ler ekli", "Farsça -an ekli", "Batı tarzı"], answer: "Arapça mükesser çoğul" },
-                    { word: "سرای\n\nBu kelimenin kökeni hangi dildir?", options: ["Farsça", "Türkçe", "Arapça", "Latince"], answer: "Farsça" },
-                    { word: "پهلوان\n\nBu kelimenin kökeni hangi dildir?", options: ["Farsça", "Arapça", "Türkçe", "Rumca"], answer: "Farsça" },
-                    { word: "حرف\n\nBu kelimenin kökeni hangi dildir?", options: ["Arapça", "Türkçe", "Farsça", "Latince"], answer: "Arapça" },
-                    { word: "قیش\n\nBu kelimenin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Rumca"], answer: "Türkçe" },
-                    { word: "Osmanlıcanın üç ana dil katmanından hangisi değildir?\n\nتürkجه · عربجه · فارسجه · ?", options: ["Latince", "Moğolca", "Rumca", "Ermenice"], answer: "Latince" },
-                    { word: "Osmanlıcada yüksek edebiyat dili ağırlıklı olarak hangi dillerden oluşur?", options: ["Arapça ve Farsça", "Türkçe ve Rumca", "Farsça ve Latince", "Türkçe ve Moğolca"], answer: "Arapça ve Farsça" },
-                    { word: "Osmanlıcada halk dili ağırlıklı olarak hangi kökten kelimeler kullanır?", options: ["Türkçe", "Arapça", "Farsça", "Rumca"], answer: "Türkçe" },
-                    { word: "بورچ\n\nBu kelimenin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Moğolca"], answer: "Türkçe" },
-                    { word: "طبیب\n\nBu kelimenin kökeni hangi dildir?", options: ["Arapça", "Türkçe", "Farsça", "Rumca"], answer: "Arapça" },
-                    { word: "قوش\n\nBu kelimenin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Moğolca"], answer: "Türkçe" },
-                    { word: "مكتوب\n\nBu kelimenin kökeni hangi dildir?", options: ["Arapça", "Türkçe", "Farsça", "Rumca"], answer: "Arapça" },
-                    { word: "كوپرو\n\nBu kelimenin kökeni hangi dildir?", options: ["Türkçe", "Arapça", "Farsça", "Moğolca"], answer: "Türkçe" },
-                    { word: "دیوان\n\nBu kelimenin kökeni hangi dildir?", options: ["Farsça", "Arapça", "Türkçe", "Rumca"], answer: "Farsça" },
-                    { word: "۱۹. yuzyıl Osmanlıcasının en çok temas ettiği Batı dilleri hangileridir?", options: ["Fransızca ve İtalyanca", "İspanyolca ve Portekizce", "Almanca ve İngilizce", "Rusça ve Lehçe"], answer: "Fransızca ve İtalyanca" },
-                    { word: "Osmanlıcada kelime kökeni belirlemede Türkçe için en belirleyici yöntem nedir?", options: ["Büyük ünlü uyumu", "Kelime uzunluğu", "Harf sayısı", "Başlangıç harfi"], answer: "Büyük ünlü uyumu" },
-                    { word: "درگاه\n\n'-gâh' eki hangi dilden gelir?", options: ["Farsça", "Arapça", "Türkçe", "Rumca"], answer: "Farsça" }
-                ]
+        window.addLisaniXp = function (amount) {
+            const n = Number(amount);
+            if (!n || n <= 0 || Number.isNaN(n)) return;
+            totalScore += n;
+            updateUIPoints();
+            updateLearningStats();
+            try {
+                localStorage.setItem('lisani_total_xp', String(totalScore));
+            } catch (e) {}
+            if (typeof window.syncProgressToServer === 'function') {
+                window.syncProgressToServer();
             }
         };
 
+        // --- BÖLÜM TABANLI SORU BANKASI (lisani-quiz-bank.js) ---
+        const quizBank = window.LISANI_QUIZ_BANK || {};
+        const BOLUMLER = window.LISANI_BOLUMLER || [];
+        const BOLUM_INDEX = window.LISANI_BOLUM_INDEX || {};
+
+        function shuffleQuizPool(arr) {
+            const pool = arr.slice();
+            for (let i = pool.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [pool[i], pool[j]] = [pool[j], pool[i]];
+            }
+            return pool;
+        }
+
+        function shuffleQuestionOptions(q) {
+            const copy = { ...q, options: [...q.options] };
+            for (let i = copy.options.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [copy.options[i], copy.options[j]] = [copy.options[j], copy.options[i]];
+            }
+            return copy;
+        }
+
+        function getBolumMeta(bolumId) {
+            return BOLUMLER.find((b) => b.id === bolumId) || null;
+        }
+
+        function prepareBolumSession(bolumId, stepIndex = 0) {
+            const pools = window.LISANI_POOLS || {};
+            const stepPatterns = window.LISANI_STEP_PATTERNS || [
+                ['card', 'letter', 'card', 'speak'],
+                ['letter', 'card', 'tiles', 'card'],
+                ['speak', 'card', 'letter', 'tiles'],
+                ['tiles', 'letter', 'card', 'speak'],
+                ['card', 'tiles', 'speak', 'letter'],
+            ];
+            const pattern = stepPatterns[stepIndex % stepPatterns.length];
+            const meta = getBolumMeta(bolumId);
+            const size = window.LISANI_QUESTIONS_PER_STEP || meta?.sessionSize || 4;
+            const baseDiff = Math.min(5, (meta?.baseDiff || BOLUM_INDEX[bolumId] || 2) + Math.floor(stepIndex / 2));
+            const bolumUsed = getBolumUsedQuestionKeys(bolumId);
+
+            const picked = [];
+            const usedKeys = new Set();
+
+            function qKey(q) {
+                return `${q.type}|${q.word}|${(q.answerOrder || q.answer || '').toString()}`;
+            }
+
+            function pickFromPool(kind, minD, maxD, slot) {
+                const pool = pools[kind] || [];
+                let candidates = pool.filter((q) => {
+                    const d = q.difficulty || 2;
+                    const key = qKey(q);
+                    return d >= minD && d <= maxD && !usedKeys.has(key) && !bolumUsed.has(key);
+                });
+                if (!candidates.length) {
+                    candidates = pool.filter((q) => {
+                        const key = qKey(q);
+                        return !usedKeys.has(key) && !bolumUsed.has(key);
+                    });
+                }
+                if (!candidates.length) {
+                    candidates = pool.filter((q) => !usedKeys.has(qKey(q)));
+                }
+                if (!candidates.length) return null;
+                const pickIdx = (stepIndex * 7 + slot * 3 + (BOLUM_INDEX[bolumId] || 0)) % candidates.length;
+                const q = JSON.parse(JSON.stringify(candidates[pickIdx]));
+                usedKeys.add(qKey(q));
+                return q;
+            }
+
+            for (let i = 0; i < size; i++) {
+                const kind = pattern[i % pattern.length];
+                const minD = Math.min(5, baseDiff + Math.floor(i / 2));
+                const maxD = Math.min(5, minD + 1);
+                const q = pickFromPool(kind, minD, maxD, i);
+                if (q) picked.push(q);
+            }
+
+            return picked.map((q) =>
+                q.options && (q.type === 'card' || q.type === 'letter') ? shuffleQuestionOptions(q) : q
+            );
+        }
+
+        function loadBolumQuestionUsage() {
+            try {
+                return JSON.parse(localStorage.getItem('lisani_bolum_q_keys') || '{}');
+            } catch (e) {
+                return {};
+            }
+        }
+
+        function getBolumUsedQuestionKeys(bolumId) {
+            const all = loadBolumQuestionUsage();
+            return new Set(all[bolumId] || []);
+        }
+
+        function appendBolumQuestionUsage(bolumId, keys) {
+            if (!bolumId || !keys?.length) return;
+            const all = loadBolumQuestionUsage();
+            const prev = all[bolumId] || [];
+            all[bolumId] = [...new Set([...prev, ...keys])];
+            try {
+                localStorage.setItem('lisani_bolum_q_keys', JSON.stringify(all));
+            } catch (e) {}
+        }
+
+        const BOLUM_STEPS = () => window.LISANI_BOLUM_STEPS || 5;
+
+        function bolumIdFromHint(hint) {
+            if (!hint) return null;
+            if (BOLUMLER.some((b) => b.id === hint)) return hint;
+            const map = { 1: 'kelimeler', 2: 'eslestirme', 3: 'ceviri' };
+            return map[Number(hint)] || null;
+        }
+
+        function getFirstIncompleteBolum() {
+            return BOLUMLER.find((b) => !isBolumCompleted(b.id)) || null;
+        }
+
+        function getNextIncompleteBolum(afterId) {
+            const idx = BOLUMLER.findIndex((b) => b.id === afterId);
+            for (let i = idx + 1; i < BOLUMLER.length; i++) {
+                if (!isBolumCompleted(BOLUMLER[i].id)) return BOLUMLER[i];
+            }
+            return null;
+        }
+
+        let quizAdvanceTimer = null;
+        let speechRecognition = null;
+        let voiceListening = false;
+        let speakListenTimer = null;
+        let speakCountdownTimer = null;
+        let speakListenDeadline = 0;
+        let speakMediaStream = null;
+        let speakAudioCtx = null;
+        let speakAnalyser = null;
+        let speakMeterRaf = null;
+        let tilesSelection = [];
+        const SPEAK_LISTEN_MS = () => (window.LISANI_SPEAK_LISTEN_SEC || 15) * 1000;
+
         // --- AKTİF SINAV PARAMETRELERİ ---
         let activeQuizQuestions = [];
+        let activeBolumId = '';
+        let activeBolumStep = 0;
+        let activeSessionQuestionKeys = [];
+        let pendingStepCompletion = false;
         let activeLevel = 1;
-        let activeTestName = "";
+        let activeTestName = '';
         let activeQuestionIndex = 0;
         let activeCorrects = 0;
         let activeWrongs = 0;
+        let activeWrongQuestions = [];
+        let lastTestWrongQuestions = [];
+        let isWrongReviewSession = false;
+        let lastTestSummary = { correct: 0, wrong: 0, percent: 0 };
+
+        function quizQuestionKey(q) {
+            return `${q.type}|${q.word}|${(q.answerOrder || q.answer || '').toString()}`;
+        }
+
+        function recordWrongQuestion(q) {
+            if (!q) return;
+            const key = quizQuestionKey(q);
+            if (!activeWrongQuestions.some((w) => quizQuestionKey(w) === key)) {
+                activeWrongQuestions.push(JSON.parse(JSON.stringify(q)));
+            }
+        }
 
         // --- GİZLİ TENİS OYUNU (2D) ---
         const TENNIS_W = 480;
@@ -569,6 +472,25 @@
                 osc.start(t);
                 osc.stop(t + 0.08);
             } catch(e) {}
+        }
+
+        function playSuccessSound() {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const t = ctx.currentTime;
+                [523.25, 659.25, 783.99].forEach((freq, i) => {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(freq, t + i * 0.08);
+                    gain.gain.setValueAtTime(0.22, t + i * 0.08);
+                    gain.gain.exponentialRampToValueAtTime(0.01, t + i * 0.08 + 0.18);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start(t + i * 0.08);
+                    osc.stop(t + i * 0.08 + 0.2);
+                });
+            } catch (e) {}
         }
 
         // --- 🔉 TENİS OYUNU GONG SESİ MOTORU ---
@@ -910,6 +832,8 @@
                         id: r.id || i + 1,
                         date: r.date || '',
                         level: r.level,
+                        bolum: r.bolum,
+                        step: r.step,
                         test: r.test || '',
                         correct: r.correct ?? 0,
                         wrong: r.wrong ?? 0,
@@ -1073,280 +997,1255 @@
             }
         };
 
-        const LEVEL_TITLES = {
-            1: 'Seviye 1: Harfler & Sayılar',
-            2: 'Seviye 2: Yazım Kuralları & Okuma',
-            3: 'Seviye 3: Kelime Kökü & Kaynak Dil',
+        function bolumPlacementTier(bolumId) {
+            if (bolumId === 'kelimeler' || bolumId === 'harfler') return 1;
+            if (bolumId === 'eslestirme') return 2;
+            return 3;
+        }
+
+        function nextTestRecordId() {
+            return testHistory.length > 0 ? Math.max(...testHistory.map((h) => h.id)) + 1 : 1;
+        }
+
+        window.applyPlacementStartBolum = function (startBolumId) {
+            const startIdx = BOLUMLER.findIndex((b) => b.id === startBolumId);
+            if (startIdx <= 0) return;
+
+            const today = new Date();
+            const dateStr = `${String(today.getDate()).padStart(2, '0')}.${String(today.getMonth() + 1).padStart(2, '0')}.${today.getFullYear()}`;
+            let nextId = nextTestRecordId();
+
+            for (let i = 0; i < startIdx; i++) {
+                const b = BOLUMLER[i];
+                if (isBolumCompleted(b.id)) continue;
+                testHistory.push({
+                    id: nextId++,
+                    date: dateStr,
+                    level: BOLUM_INDEX[b.id] || i + 1,
+                    bolum: b.id,
+                    test: b.title,
+                    correct: 0,
+                    wrong: 0,
+                    percent: 100,
+                    score: 100,
+                    placementSkip: true,
+                });
+            }
+
+            try {
+                localStorage.setItem('lisani_test_history', JSON.stringify(testHistory));
+            } catch (e) {}
+            if (typeof renderBolumList === 'function') renderBolumList();
         };
 
-        window.odevVerFromTest = function (level, testName) {
+        window.getPlacementQuestionPool = function () {
+            const pools = window.LISANI_POOLS || {};
+            const pool = [];
+            Object.keys(pools).forEach((kind) => {
+                const tier = kind === 'letter' ? 1 : kind === 'card' ? 2 : kind === 'speak' ? 3 : 3;
+                (pools[kind] || []).forEach((q) => {
+                    pool.push({ ...q, tier, level: tier, bolum: kind });
+                });
+            });
+            return pool;
+        };
+
+        let placementState = null;
+        let placementAdvanceTimer = null;
+
+        function recommendStartBolumFromPlacement(answers) {
+            function tierPct(tier) {
+                const rows = answers.filter((a) => a.tier === tier);
+                if (!rows.length) return 0;
+                return rows.filter((a) => a.correct).length / rows.length;
+            }
+            const t1 = tierPct(1);
+            const t2 = tierPct(2);
+            const t3 = tierPct(3);
+            if (t1 < 0.5) return 'kelimeler';
+            if (t2 < 0.5) return 'eslestirme';
+            if (t3 < 0.5) return 'ceviri';
+            return 'ses';
+        }
+
+        function renderPlacementQuestion() {
+            if (!placementState) return;
+            const q = placementState.questions[placementState.index];
+            if (!q) return;
+
+            const total = placementState.questions.length;
+            const current = placementState.index + 1;
+            const progressEl = document.getElementById('placement-progress');
+            if (progressEl) progressEl.textContent = `Soru ${current}/${total}`;
+            const progressFill = document.getElementById('placement-progress-fill');
+            if (progressFill) progressFill.style.width = `${(current / total) * 100}%`;
+
+            const defaultPrompt = window.LISANI_CARD_PROMPT || 'Resme bak · doğru cevabı seç';
+            const box = document.getElementById('placement-question-box');
+            if (!box) return;
+
+            const optionLabels = ['A', 'B', 'C', 'D'];
+            const optionsHtml = q.options
+                .map(
+                    (opt, idx) => `
+                <button type="button" class="lisani-placement-option lisani-glass-panel w-full py-3 px-3.5 rounded-xl text-xs font-bold text-left flex items-center gap-3 cursor-pointer active:scale-[0.98]" data-option="${opt.replace(/"/g, '&quot;')}">
+                    <span class="lisani-quiz-option__letter">${optionLabels[idx] || '•'}</span>
+                    <span class="flex-1 min-w-0 leading-relaxed">${opt}</span>
+                </button>`
+                )
+                .join('');
+
+            box.innerHTML = `
+                <div class="lisani-placement-card lisani-glass-panel rounded-2xl p-5 text-center space-y-3">
+                    <div class="text-4xl leading-none">${q.image || '📖'}</div>
+                    <p class="text-[9px] theme-text-muted uppercase font-bold tracking-[0.2em]">${q.prompt || defaultPrompt}</p>
+                    <h2 class="arabic-text text-2xl font-black theme-text-main lisani-quiz-arabic">${(q.word || '').replace(/\n/g, '<br>')}</h2>
+                </div>
+                <div class="lisani-placement-options space-y-3 mt-4">${optionsHtml}</div>`;
+
+            box.querySelectorAll('.lisani-placement-option').forEach((btn) => {
+                btn.onclick = () => {
+                    if (placementAdvanceTimer) return;
+                    const selected = btn.getAttribute('data-option');
+                    const isCorrect = selected === q.answer;
+                    placementState.answers.push({ tier: q.tier || 1, correct: isCorrect });
+
+                    box.querySelectorAll('.lisani-placement-option').forEach((b) => {
+                        b.disabled = true;
+                        if (b.getAttribute('data-option') === q.answer) {
+                            b.classList.add('lisani-quiz-option--correct');
+                        } else if (b === btn && !isCorrect) {
+                            b.classList.add('lisani-quiz-option--wrong');
+                        }
+                    });
+
+                    placementAdvanceTimer = setTimeout(() => {
+                        placementAdvanceTimer = null;
+                        placementState.index++;
+                        if (placementState.index < placementState.questions.length) {
+                            renderPlacementQuestion();
+                        } else {
+                            finishPlacementQuiz();
+                        }
+                    }, isCorrect ? 550 : 900);
+                };
+            });
+        }
+
+        function finishPlacementQuiz() {
+            const startBolumId = recommendStartBolumFromPlacement(placementState?.answers || []);
+            const meta = getBolumMeta(startBolumId);
+            const startTitle = meta?.title || startBolumId;
+
+            if (window.LisaniDailyTasks?.applyPlacementResult) {
+                window.LisaniDailyTasks.applyPlacementResult(startBolumId);
+            } else if (typeof window.applyPlacementStartBolum === 'function') {
+                window.applyPlacementStartBolum(startBolumId);
+            }
+
+            const qBox = document.getElementById('placement-question-box');
+            const result = document.getElementById('placement-result');
+            if (qBox) qBox.classList.add('hidden');
+            if (result) {
+                result.classList.remove('hidden');
+                result.innerHTML = `
+                    <div class="lisani-glass-panel rounded-2xl p-4 text-center space-y-3">
+                        <p class="text-2xl">🎯</p>
+                        <h4 class="text-sm font-extrabold theme-text-main">Başlangıç bölümün</h4>
+                        <p class="text-xs theme-primary-color font-bold">${startTitle}</p>
+                        <p class="text-[10px] theme-text-muted leading-relaxed">Önceki bölümler atlandı; uygun seviyeden devam edeceksin.</p>
+                        <button type="button" id="placement-start-btn" class="lisani-glass-action lisani-glass-action--primary w-full py-3 rounded-xl text-xs font-bold">Öğrenmeye Devam Et</button>
+                    </div>`;
+                document.getElementById('placement-start-btn')?.addEventListener('click', () => {
+                    window.closePlacementModal();
+                    if (typeof window.openLearnTests === 'function') {
+                        window.openLearnTests(startBolumId);
+                    }
+                });
+            }
+
+            if (typeof showToast === 'function') {
+                showToast(`Seviye belirlendi: ${startTitle}`, 'success');
+            }
+            placementState = null;
+        }
+
+        window.launchPlacementQuiz = function (questions) {
+            if (!questions?.length) return;
+            if (placementAdvanceTimer) clearTimeout(placementAdvanceTimer);
+            placementAdvanceTimer = null;
+
+            placementState = {
+                questions: questions.map(shuffleQuestionOptions),
+                index: 0,
+                answers: [],
+            };
+
+            const modal = document.getElementById('placement-modal');
+            const qBox = document.getElementById('placement-question-box');
+            const result = document.getElementById('placement-result');
+            if (modal) modal.classList.remove('hidden');
+            if (qBox) qBox.classList.remove('hidden');
+            if (result) {
+                result.classList.add('hidden');
+                result.innerHTML = '';
+            }
+            const progressFill = document.getElementById('placement-progress-fill');
+            if (progressFill) progressFill.style.width = `${(1 / questions.length) * 100}%`;
+            renderPlacementQuestion();
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        };
+
+        window.closePlacementModal = function () {
+            if (placementAdvanceTimer) clearTimeout(placementAdvanceTimer);
+            placementAdvanceTimer = null;
+            placementState = null;
+            document.getElementById('placement-modal')?.classList.add('hidden');
+        };
+
+        window.odevVerFromTest = function (bolumId, label) {
             const uid = currentUser?.uid || currentUser?.id;
             if (!uid) {
                 showToast('Giriş gerekli.', 'error');
                 return;
             }
-            odevVer(uid, level, testName);
+            const meta = getBolumMeta(bolumId);
+            const idx = BOLUM_INDEX[bolumId] || 1;
+            odevVer(uid, idx, meta?.title || label || bolumId);
         };
 
         function updateTestsTabForRole() {
             const hint = document.getElementById('tests-hoca-hint');
             const studentHint = document.getElementById('tests-student-hint');
+            const placementBtn = document.getElementById('tests-placement-btn');
             const hoca = isHocaUser();
             if (hint) hint.classList.toggle('hidden', !hoca);
             if (studentHint) studentHint.classList.toggle('hidden', hoca);
+            if (placementBtn) placementBtn.classList.toggle('hidden', hoca);
         }
         window.updateTestsTabForRole = updateTestsTabForRole;
 
-        function isTestAlreadyCompleted(level, testName) {
-            const lv = Number(level);
-            const name = String(testName || '').trim();
-            return testHistory.some((r) => Number(r.level) === lv && String(r.test || '').trim() === name);
+        function hasLegacyBolumComplete(bolumId) {
+            const meta = getBolumMeta(bolumId);
+            const title = meta?.title || bolumId;
+            return testHistory.some(
+                (r) =>
+                    (r.bolum === bolumId || String(r.test || '').trim() === title) &&
+                    (r.step == null || r.step === undefined)
+            );
         }
 
-        function getCompletedTestRecord(level, testName) {
-            const lv = Number(level);
-            const name = String(testName || '').trim();
-            return testHistory.find((r) => Number(r.level) === lv && String(r.test || '').trim() === name);
+        function isBolumStepCompleted(bolumId, stepIndex) {
+            if (hasLegacyBolumComplete(bolumId)) return true;
+            const step = stepIndex + 1;
+            return testHistory.some((r) => r.bolum === bolumId && Number(r.step) === step);
         }
 
-        // --- İNTERAKTİF SINAV ÇALIŞTIRMA MOTORU ---
-        function startLevel(level) {
-            playClickSound();
-            activeLevel = level;
+        function countBolumStepsCompleted(bolumId) {
+            if (hasLegacyBolumComplete(bolumId)) return BOLUM_STEPS();
+            let n = 0;
+            for (let i = 0; i < BOLUM_STEPS(); i++) {
+                if (isBolumStepCompleted(bolumId, i)) n++;
+            }
+            return n;
+        }
 
-            document.getElementById('selected-level-title').innerText = LEVEL_TITLES[level] || `Seviye ${level}`;
-            const testsContainer = document.getElementById('tests-buttons-container');
-            testsContainer.innerHTML = '';
+        function isBolumStepUnlocked(bolumId, stepIndex) {
+            if (stepIndex <= 0) return true;
+            return isBolumStepCompleted(bolumId, stepIndex - 1);
+        }
 
-            const assignMode = isHocaUser();
+        function getNextBolumStepIndex(bolumId) {
+            for (let i = 0; i < BOLUM_STEPS(); i++) {
+                if (!isBolumStepCompleted(bolumId, i)) return i;
+            }
+            return BOLUM_STEPS() - 1;
+        }
 
-            function renderStudentTestBtn(level, testName, isGenel) {
-                const completed = isTestAlreadyCompleted(level, testName);
-                const record = completed ? getCompletedTestRecord(level, testName) : null;
-                const testBtn = document.createElement('button');
-                testBtn.type = 'button';
-                testBtn.className = `lisani-glass-panel lisani-test-btn lisani-test-list-card rounded-2xl p-4 text-left flex items-center justify-between w-full min-w-0${isGenel ? ' lisani-test-btn--genel' : ''}${completed ? ' opacity-70' : ''}`;
-                if (completed) {
-                    testBtn.onclick = () => showToast(`Bu testi zaten çözdünüz (%${record.percent}). Tekrar çözülemez.`, 'info');
-                    testBtn.innerHTML = `
-                    <div class="flex items-center gap-3 min-w-0">
-                        <div class="lisani-test-list-icon${isGenel ? ' lisani-test-list-icon--genel' : ''} w-10 h-10 rounded-xl flex items-center justify-center shrink-0">
-                            <i data-lucide="${isGenel ? 'award' : 'check-circle'}" class="w-4 h-4"></i>
-                        </div>
-                        <div class="min-w-0">
-                            <h4 class="text-xs font-extrabold theme-text-main">${isGenel ? 'Genel Değerlendirme 🏆' : testName}</h4>
-                            <p class="text-[10px] theme-text-muted mt-0.5">Tamamlandı · %${record.percent} başarı</p>
-                        </div>
-                    </div>
-                    <span class="lisani-test-go-chip shrink-0 ml-2 opacity-80">Çözüldü</span>`;
+        function isBolumCompleted(bolumId) {
+            return countBolumStepsCompleted(bolumId) >= BOLUM_STEPS();
+        }
+
+        function isBolumUnlocked(bolumIndex) {
+            if (bolumIndex <= 0) return true;
+            const prev = BOLUMLER[bolumIndex - 1];
+            return prev ? isBolumCompleted(prev.id) : true;
+        }
+
+        function getBolumIndex(bolumId) {
+            return BOLUMLER.findIndex((b) => b.id === bolumId);
+        }
+
+        window.isBolumCompleted = isBolumCompleted;
+        window.isBolumUnlocked = isBolumUnlocked;
+
+        function getCompletedBolumRecord(bolumId) {
+            const stepRecords = testHistory.filter((r) => r.bolum === bolumId && r.step != null);
+            if (stepRecords.length) {
+                return stepRecords.reduce((best, r) => ((r.percent ?? 0) > (best.percent ?? 0) ? r : best));
+            }
+            const meta = getBolumMeta(bolumId);
+            const title = meta?.title || bolumId;
+            return testHistory.find(
+                (r) => r.bolum === bolumId || String(r.test || '').trim() === title
+            );
+        }
+
+        function resetQuizPanels() {
+            stopSpeechListening();
+            if (quizAdvanceTimer) {
+                clearTimeout(quizAdvanceTimer);
+                quizAdvanceTimer = null;
+            }
+            document.getElementById('quiz-options-container')?.classList.remove('hidden');
+            document.getElementById('quiz-match-area')?.classList.add('hidden');
+            document.getElementById('quiz-voice-area')?.classList.add('hidden');
+            document.getElementById('quiz-tiles-area')?.classList.add('hidden');
+            document.getElementById('quiz-next-btn')?.classList.add('hidden');
+            document.getElementById('quiz-feedback-box')?.classList.add('hidden');
+            document.querySelector('#quiz-active-view .lisani-quiz-question')?.classList.remove(
+                'lisani-quiz-flash--ok',
+                'lisani-quiz-flash--bad'
+            );
+            tilesSelection = [];
+        }
+
+        function stopSpeakMeterOnly() {
+            if (speakMeterRaf) {
+                cancelAnimationFrame(speakMeterRaf);
+                speakMeterRaf = null;
+            }
+            if (speakAudioCtx) {
+                speakAudioCtx.close().catch(() => {});
+                speakAudioCtx = null;
+            }
+            speakAnalyser = null;
+            resetSpeakMeterUI();
+        }
+
+        function resetSpeakMeterUI() {
+            document.querySelectorAll('.lisani-speak-meter__bar').forEach((bar) => {
+                bar.style.transform = 'scaleY(0.18)';
+                bar.style.opacity = '0.35';
+            });
+        }
+
+        function updateSpeakMeterUI(level) {
+            const bars = document.querySelectorAll('.lisani-speak-meter__bar');
+            const n = bars.length || 1;
+            bars.forEach((bar, i) => {
+                const dist = Math.abs(i / (n - 1 || 1) - 0.5);
+                const boost = 1.15 - dist * 0.9;
+                const barLevel = Math.max(0, level * boost);
+                const h = 0.18 + Math.min(1, barLevel * 2.6) * 0.82;
+                bar.style.transform = `scaleY(${h.toFixed(3)})`;
+                bar.style.opacity = barLevel > 0.04 ? String(0.45 + barLevel * 0.55) : '0.35';
+            });
+        }
+
+        function startSpeakMeter(stream) {
+            stopSpeakMeterOnly();
+            speakMediaStream = stream;
+            try {
+                const Ctx = window.AudioContext || window.webkitAudioContext;
+                if (!Ctx) return;
+                speakAudioCtx = new Ctx();
+                const src = speakAudioCtx.createMediaStreamSource(stream);
+                speakAnalyser = speakAudioCtx.createAnalyser();
+                speakAnalyser.fftSize = 256;
+                speakAnalyser.smoothingTimeConstant = 0.72;
+                src.connect(speakAnalyser);
+                const buf = new Uint8Array(speakAnalyser.frequencyBinCount);
+                const tick = () => {
+                    if (!speakAnalyser) return;
+                    speakAnalyser.getByteFrequencyData(buf);
+                    let sum = 0;
+                    for (let i = 0; i < buf.length; i++) sum += buf[i];
+                    const level = sum / buf.length / 255;
+                    updateSpeakMeterUI(level);
+                    speakMeterRaf = requestAnimationFrame(tick);
+                };
+                tick();
+            } catch (e) {}
+        }
+
+        function stopSpeechListening() {
+            voiceListening = false;
+            if (speakListenTimer) {
+                clearTimeout(speakListenTimer);
+                speakListenTimer = null;
+            }
+            if (speakCountdownTimer) {
+                clearInterval(speakCountdownTimer);
+                speakCountdownTimer = null;
+            }
+            speakListenDeadline = 0;
+            stopSpeakMeterOnly();
+            if (speakMediaStream) {
+                speakMediaStream.getTracks().forEach((t) => t.stop());
+                speakMediaStream = null;
+            }
+            if (speechRecognition) {
+                try {
+                    speechRecognition.onresult = null;
+                    speechRecognition.onerror = null;
+                    speechRecognition.onend = null;
+                    speechRecognition.stop();
+                } catch (e) {}
+                speechRecognition = null;
+            }
+        }
+
+        function updateSpeakCountdownUI() {
+            const el = document.getElementById('quiz-speak-timer');
+            if (!el || !speakListenDeadline) return;
+            const left = Math.max(0, Math.ceil((speakListenDeadline - Date.now()) / 1000));
+            el.textContent = `${left} sn`;
+            el.style.setProperty('--speak-pct', `${(left / (SPEAK_LISTEN_MS() / 1000)) * 100}%`);
+        }
+
+        function setQuizTypeBadge(type) {
+            const meta = (window.LISANI_QUIZ_META || {})[type] || {};
+            const badge = document.getElementById('quiz-type-badge');
+            const wrap = document.getElementById('quiz-visual-wrap');
+            const imgEl = document.getElementById('quiz-visual-image');
+            if (badge) {
+                if (meta.label) {
+                    badge.textContent = meta.label;
+                    badge.className = `lisani-quiz-type-badge lisani-quiz-type-badge--${type || 'card'}`;
+                    badge.classList.remove('hidden');
                 } else {
-                    testBtn.onclick = () => launchQuizEngine(level, testName);
-                    testBtn.innerHTML = `
-                    <div class="flex items-center gap-3 min-w-0">
-                        <div class="lisani-test-list-icon${isGenel ? ' lisani-test-list-icon--genel' : ''} w-10 h-10 rounded-xl flex items-center justify-center shrink-0">
-                            <i data-lucide="${isGenel ? 'award' : 'file-question'}" class="w-4 h-4"></i>
-                        </div>
-                        <div class="min-w-0">
-                            <h4 class="text-xs font-extrabold theme-text-main">${isGenel ? 'Genel Değerlendirme 🏆' : testName}</h4>
-                            <p class="text-[10px] theme-text-muted mt-0.5">${isGenel ? 'Karma sorular · tüm konular' : '5 soruluk seviye sınavı'}</p>
-                        </div>
-                    </div>
-                    <span class="lisani-test-go-chip${isGenel ? ' lisani-test-go-chip--genel' : ''} shrink-0 ml-2">${isGenel ? 'Sınav' : 'Başla'}</span>`;
+                    badge.classList.add('hidden');
                 }
-                testsContainer.appendChild(testBtn);
+            }
+            if (wrap && imgEl) {
+                if (type === 'card') {
+                    wrap.classList.remove('hidden');
+                } else {
+                    imgEl.textContent = '';
+                    wrap.classList.add('hidden');
+                }
+            }
+        }
+
+        function normalizeSpeechText(s) {
+            return String(s || '')
+                .toLowerCase()
+                .trim()
+                .replace(/[«»"'.,!?;:]/g, ' ')
+                .replace(/\s+/g, ' ')
+                .replace(/ı/g, 'i')
+                .replace(/ğ/g, 'g')
+                .replace(/ü/g, 'u')
+                .replace(/ş/g, 's')
+                .replace(/ö/g, 'o')
+                .replace(/ç/g, 'c');
+        }
+
+        function speechTokens(text) {
+            return normalizeSpeechText(text)
+                .split(' ')
+                .map((t) => t.trim())
+                .filter((t) => t.length > 1);
+        }
+
+        function speechTokenOverlap(spoken, target) {
+            const spokenTokens = speechTokens(spoken);
+            const targetTokens = speechTokens(target);
+            if (!targetTokens.length || !spokenTokens.length) return false;
+            const hits = targetTokens.filter((t) =>
+                spokenTokens.some((s) => s === t || s.includes(t) || t.includes(s))
+            );
+            const need = targetTokens.length === 1 ? 1 : Math.max(2, Math.ceil(targetTokens.length * 0.5));
+            return hits.length >= need;
+        }
+
+        function speechMatchesSpeak(spoken, q) {
+            const n = normalizeSpeechText(spoken);
+            if (!n) return false;
+            const skips = q.skipPhrases || ['su an konusamam', 'suan konusamam'];
+            if (skips.some((p) => n.includes(normalizeSpeechText(p)))) return 'skip';
+            const targets = (q.speakMatch || []).map(normalizeSpeechText);
+            const tokens = speechTokens(n);
+
+            for (const t of targets) {
+                if (!t) continue;
+                if (t.includes(' ') || t.length > 4) {
+                    if (n.includes(t) || t.includes(n)) return true;
+                    if (speechTokenOverlap(n, t)) return true;
+                    continue;
+                }
+                if (n === t || tokens.includes(t)) return true;
             }
 
-            for (let i = 1; i <= 3; i++) {
-                const testName = `Test ${i}`;
-                const testBtn = document.createElement('button');
-                testBtn.type = 'button';
-                testBtn.className = 'lisani-glass-panel lisani-test-btn lisani-test-list-card rounded-2xl p-4 text-left flex items-center justify-between w-full min-w-0';
-                if (assignMode) {
-                    testBtn.onclick = () => window.odevVerFromTest(level, testName);
-                    testBtn.innerHTML = `
-                    <div class="flex items-center gap-3 min-w-0">
-                        <div class="lisani-test-list-icon w-10 h-10 rounded-xl flex items-center justify-center shrink-0">
-                            <i data-lucide="clipboard-list" class="w-4 h-4"></i>
-                        </div>
-                        <div class="min-w-0">
-                            <h4 class="text-xs font-extrabold theme-text-main">${testName}</h4>
-                            <p class="text-[10px] theme-text-muted mt-0.5">5 soruluk seviye sınavı · ödev olarak gönder</p>
-                        </div>
-                    </div>
-                    <span class="lisani-test-go-chip shrink-0 ml-2">Ödev Ver</span>`;
-                    testsContainer.appendChild(testBtn);
-                } else {
-                    renderStudentTestBtn(level, testName, false);
-                }
+            if (q.speakHint) {
+                const hint = normalizeSpeechText(q.speakHint);
+                if (hint && (n === hint || tokens.includes(hint))) return true;
             }
+            return false;
+        }
 
+        function speakSkipLabel() {
+            return window.LISANI_SKIP_SPEAK_LABEL || 'Şuan konuşamam';
+        }
+
+        function bindBolumAction(btn, bolum, stepIndex, assignMode) {
             if (assignMode) {
-                const generalTestBtn = document.createElement('button');
-                generalTestBtn.type = 'button';
-                generalTestBtn.className = 'lisani-glass-panel lisani-test-btn lisani-test-list-card lisani-test-btn--genel rounded-2xl p-4 text-left flex items-center justify-between w-full min-w-0';
-                generalTestBtn.onclick = () => window.odevVerFromTest(level, 'Genel');
-                generalTestBtn.innerHTML = `
-                <div class="flex items-center gap-3 min-w-0">
-                    <div class="lisani-test-list-icon lisani-test-list-icon--genel w-10 h-10 rounded-xl flex items-center justify-center shrink-0">
-                        <i data-lucide="award" class="w-4 h-4"></i>
-                    </div>
-                    <div class="min-w-0">
-                        <h4 class="text-xs font-black theme-text-main">Genel Değerlendirme 🏆</h4>
-                        <p class="text-[10px] theme-text-muted mt-0.5">Karma sorular · ödev olarak gönder</p>
-                    </div>
-                </div>
-                <span class="lisani-test-go-chip lisani-test-go-chip--genel shrink-0 ml-2">Ödev Ver</span>`;
-                testsContainer.appendChild(generalTestBtn);
+                btn.onclick = () => window.odevVerFromTest(bolum.id, bolum.title);
             } else {
-                renderStudentTestBtn(level, 'Genel', true);
+                btn.onclick = () => startBolumStep(bolum.id, stepIndex);
             }
-
-            document.getElementById('level-selection-view').classList.add('hidden');
-            document.getElementById('test-selection-view').classList.remove('hidden');
-            lucide.createIcons();
         }
 
-        function goBackToLevels() {
+        function startBolumStep(bolumId, stepIndex) {
+            const bolumIndex = getBolumIndex(bolumId);
+            if (bolumIndex > 0 && !isBolumUnlocked(bolumIndex) && !isHocaUser()) {
+                showToast('Önce önceki bölümü tamamla.', 'info');
+                return;
+            }
+            if (!isBolumStepUnlocked(bolumId, stepIndex)) {
+                showToast(`${stepIndex + 1}. test için önce ${stepIndex}. testi bitir.`, 'info');
+                return;
+            }
+            launchQuizEngine(bolumId, stepIndex);
+        }
+
+        function createBolumChest(bolum, bolumUnlocked, assignMode) {
+            const chest = document.createElement('button');
+            chest.type = 'button';
+            chest.className = 'lisani-bolum-chest';
+            chest.setAttribute('aria-label', `${bolum.title} sandığı`);
+            const completed = isBolumCompleted(bolum.id);
+            const chestReady =
+                !assignMode &&
+                bolumUnlocked &&
+                completed &&
+                typeof window.canSpinRewardWheel === 'function' &&
+                window.canSpinRewardWheel(bolum.id);
+            const chestClaimed =
+                !assignMode && bolumUnlocked && completed && !chestReady;
+
+            if (!bolumUnlocked || assignMode) {
+                chest.classList.add('is-hidden');
+                chest.disabled = true;
+            } else if (chestReady) {
+                chest.classList.add('is-ready');
+                chest.innerHTML = '<span class="lisani-bolum-chest__icon" aria-hidden="true">🎁</span>';
+                chest.onclick = () => {
+                    if (typeof window.openBolumChestWheel === 'function') {
+                        window.openBolumChestWheel(bolum.id);
+                    }
+                };
+            } else if (chestClaimed) {
+                chest.classList.add('is-opened');
+                chest.innerHTML = '<span class="lisani-bolum-chest__icon" aria-hidden="true">📦</span>';
+                chest.disabled = true;
+            } else {
+                chest.classList.add('is-locked');
+                chest.innerHTML = '<span class="lisani-bolum-chest__icon" aria-hidden="true">🔒</span>';
+                chest.disabled = true;
+            }
+            return chest;
+        }
+
+        function createBolumRoundNode(bolum, turIndex, subIndex, assignMode, bolumUnlocked) {
+            const node = document.createElement('button');
+            node.type = 'button';
+            const turClass = `lisani-bolum-tur--${turIndex + 1}`;
+            const stepDone = isBolumStepCompleted(bolum.id, subIndex);
+            const unlocked = assignMode || (bolumUnlocked && isBolumStepUnlocked(bolum.id, subIndex));
+            let className = `lisani-bolum-node lisani-bolum-node--sub lisani-bolum-path-item--step-${subIndex + 1} ${turClass}`;
+            if (stepDone) className += ' is-path-complete';
+            if (!unlocked) className += ' is-locked';
+            node.className = className;
+            node.setAttribute('aria-label', `${bolum.title} · test ${subIndex + 1}`);
+            node.innerHTML = stepDone
+                ? `<span class="lisani-bolum-node__icon">✓</span>`
+                : `<span class="lisani-bolum-node__num">${subIndex + 1}</span>`;
+            if (!assignMode && !unlocked) node.disabled = true;
+            bindBolumAction(node, bolum, subIndex, assignMode);
+            return node;
+        }
+
+        function createBolumNodeTrack(bolum, turIndex, assignMode, bolumUnlocked) {
+            const wrap = document.createElement('div');
+            wrap.className = 'lisani-bolum-path-wrap';
+            const track = document.createElement('div');
+            track.className = 'lisani-bolum-node-track';
+            for (let subIndex = 0; subIndex < BOLUM_STEPS(); subIndex++) {
+                track.appendChild(createBolumRoundNode(bolum, turIndex, subIndex, assignMode, bolumUnlocked));
+            }
+            wrap.appendChild(track);
+            wrap.appendChild(createBolumChest(bolum, bolumUnlocked, assignMode));
+            return wrap;
+        }
+
+        function updateTestsStepPill(step) {
+            document.querySelectorAll('#screen-tests .lisani-tests-step').forEach((el, i) => {
+                el.classList.toggle('is-active', i + 1 === step);
+            });
+        }
+
+        function setTestsSubview(mode) {
+            const map = { list: 1, quiz: 2, result: 3 };
+            const showId =
+                mode === 'quiz'
+                    ? 'quiz-active-view'
+                    : mode === 'result'
+                      ? 'quiz-result-view'
+                      : 'bolum-selection-view';
+            ['bolum-selection-view', 'test-selection-view', 'quiz-active-view', 'quiz-result-view'].forEach((id) => {
+                const el = document.getElementById(id);
+                if (el) el.classList.toggle('hidden', id !== showId);
+            });
+            updateTestsStepPill(map[mode] || 1);
+        }
+
+        function ensureTestsScreenVisible() {
+            document.querySelectorAll('.screen').forEach((screen) => screen.classList.remove('active'));
+            document.getElementById('screen-tests')?.classList.add('active');
+            currentActiveScreen = 'tests';
+        }
+
+        function renderBolumList(highlightBolumId) {
+            const container = document.getElementById('bolum-buttons-container');
+            if (!container) return;
+            container.innerHTML = '';
+            const assignMode = isHocaUser();
+            let highlightEl = null;
+
+            BOLUMLER.forEach((bolum, index) => {
+                const bolumUnlocked = assignMode || isBolumUnlocked(index);
+                const stepsDone = countBolumStepsCompleted(bolum.id);
+                const completed = stepsDone >= BOLUM_STEPS();
+                const record = completed ? getCompletedBolumRecord(bolum.id) : null;
+                const nextStep = getNextBolumStepIndex(bolum.id);
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                const turClass = `lisani-bolum-tur--${index + 1}`;
+                let btnClass = `lisani-bolum-dot-btn ${turClass}${completed ? ' is-done' : ''}`;
+                if (!bolumUnlocked) btnClass += ' is-bolum-locked';
+                btn.className = btnClass;
+
+                const metaText = assignMode
+                    ? 'Ödev ver'
+                    : !bolumUnlocked
+                      ? 'Önceki bölümü bitir'
+                      : completed
+                        ? `Tamamlandı · %${record?.percent ?? 0}`
+                        : `${stepsDone}/${BOLUM_STEPS()} test · ${bolum.desc}`;
+
+                btn.innerHTML = `
+                    <span class="lisani-bolum-dot-btn__circle">${completed ? '✓' : !bolumUnlocked ? '🔒' : bolum.icon}</span>
+                    <span class="lisani-bolum-dot-btn__text">
+                        <span class="lisani-bolum-dot-btn__label">${bolum.title}</span>
+                        <span class="lisani-bolum-dot-btn__meta">${metaText}</span>
+                    </span>`;
+
+                if (bolumUnlocked) {
+                    bindBolumAction(btn, bolum, nextStep, assignMode);
+                } else {
+                    btn.disabled = true;
+                    btn.onclick = () => showToast('Önce önceki bölümü tamamla.', 'info');
+                }
+
+                const block = document.createElement('div');
+                const blockCurve = index % 2 === 0 ? 'lisani-bolum-tur-block--c-reverse' : 'lisani-bolum-tur-block--c-normal';
+                block.className = `lisani-bolum-tur-block ${blockCurve}${!bolumUnlocked ? ' is-bolum-locked' : ''}`;
+                block.appendChild(btn);
+
+                block.appendChild(createBolumNodeTrack(bolum, index, assignMode, bolumUnlocked));
+
+                if (highlightBolumId && bolum.id === highlightBolumId) {
+                    btn.classList.add('is-highlight');
+                    highlightEl = btn;
+                }
+
+                container.appendChild(block);
+            });
+            if (highlightEl) {
+                setTimeout(() => {
+                    highlightEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }, 120);
+            }
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        }
+
+        function startBolum(bolumId) {
+            startBolumStep(bolumId, getNextBolumStepIndex(bolumId));
+        }
+
+        function goBackToBolumler() {
             playClickSound();
-            document.getElementById('test-selection-view').classList.add('hidden');
-            document.getElementById('quiz-active-view').classList.add('hidden');
-            document.getElementById('quiz-result-view').classList.add('hidden');
-            document.getElementById('level-selection-view').classList.remove('hidden');
-            lucide.createIcons();
+            stopSpeechListening();
+            if (quizAdvanceTimer) clearTimeout(quizAdvanceTimer);
+            quizAdvanceTimer = null;
+            setTestsSubview('list');
+            renderBolumList();
+            if (typeof lucide !== 'undefined') lucide.createIcons();
         }
+
+        window.goBackToLevels = goBackToBolumler;
+        window.goBackToTestList = goBackToBolumler;
 
         function goBackFromQuiz() {
             playClickSound();
+            stopSpeechListening();
+            if (quizAdvanceTimer) clearTimeout(quizAdvanceTimer);
             if (activeQuestionIndex > 0 || activeCorrects > 0 || activeWrongs > 0) {
-                if (!confirm('Sınavdan çıkılsın mı? Bu oturumdaki ilerleme kaydedilmez.')) {
-                    return;
-                }
+                if (!confirm('Bölümden çıkılsın mı? Bu oturumdaki ilerleme kaydedilmez.')) return;
             }
-            document.getElementById('quiz-active-view').classList.add('hidden');
-            document.getElementById('test-selection-view').classList.remove('hidden');
-            lucide.createIcons();
+            goBackToBolumler();
         }
-
-        function goBackToTestList() {
-            playClickSound();
-            document.getElementById('quiz-result-view').classList.add('hidden');
-            document.getElementById('quiz-active-view').classList.add('hidden');
-            document.getElementById('test-selection-view').classList.remove('hidden');
-            lucide.createIcons();
-        }
-
-        window.goBackToLevels = goBackToLevels;
         window.goBackFromQuiz = goBackFromQuiz;
-        window.goBackToTestList = goBackToTestList;
 
-        // Sınavı Başlatır
-        function launchQuizEngine(level, testName) {
-            if (isTestAlreadyCompleted(level, testName)) {
-                const record = getCompletedTestRecord(level, testName);
-                showToast(`Bu testi zaten çözdünüz (%${record?.percent ?? 0}). Tekrar çözülemez.`, 'info');
+        function launchQuizEngine(bolumId, stepIndex = 0) {
+            const meta = getBolumMeta(bolumId);
+            if (!meta) {
+                showToast('Bölüm bulunamadı.', 'error');
                 return false;
             }
-
+            const bolumIndex = getBolumIndex(bolumId);
+            if (bolumIndex > 0 && !isBolumUnlocked(bolumIndex) && !isHocaUser()) {
+                showToast('Önce önceki bölümü tamamla.', 'info');
+                return false;
+            }
+            if (!isBolumStepUnlocked(bolumId, stepIndex)) {
+                showToast(`${stepIndex + 1}. test için önce ${stepIndex}. testi bitir.`, 'info');
+                return false;
+            }
             playClickSound();
-            activeLevel = level;
-            activeTestName = testName;
+            activeBolumId = bolumId;
+            activeBolumStep = stepIndex;
+            activeLevel = BOLUM_INDEX[bolumId] || 1;
+            activeTestName = `${meta.title} ${stepIndex + 1}/${BOLUM_STEPS()}`;
             activeQuestionIndex = 0;
             activeCorrects = 0;
             activeWrongs = 0;
+            activeWrongQuestions = [];
+            isWrongReviewSession = false;
+            pendingStepCompletion = false;
+            activeSessionQuestionKeys = [];
+            if (quizAdvanceTimer) clearTimeout(quizAdvanceTimer);
+            quizAdvanceTimer = null;
 
-            const categoryQuestions = quizBank[level]?.[testName];
-            if (!categoryQuestions || categoryQuestions.length === 0) {
-                showToast("Bu test henüz hazır değil, yakında eklenecek.", "info");
+            const sessionQuestions = prepareBolumSession(bolumId, stepIndex);
+            if (!sessionQuestions.length) {
+                showToast('Bu bölüm henüz hazır değil.', 'info');
                 return false;
             }
 
-            activeQuizQuestions = JSON.parse(JSON.stringify(categoryQuestions)); // Klonla
+            activeQuizQuestions = JSON.parse(JSON.stringify(sessionQuestions));
+            activeSessionQuestionKeys = activeQuizQuestions.map((q) => quizQuestionKey(q));
 
-            document.getElementById('active-quiz-title').innerText = `Seviye ${level} - ${testName}`;
-            document.getElementById('level-selection-view').classList.add('hidden');
-            document.getElementById('test-selection-view').classList.add('hidden');
-            document.getElementById('quiz-result-view').classList.add('hidden');
-            document.getElementById('quiz-active-view').classList.remove('hidden');
+            if (window.LisaniDailyTasks && typeof window.LisaniDailyTasks.onBolumOpen === 'function') {
+                window.LisaniDailyTasks.onBolumOpen(bolumId);
+            }
 
+            document.getElementById('active-quiz-title').innerText = activeTestName;
+            ensureTestsScreenVisible();
+            setTestsSubview('quiz');
             renderQuizQuestion();
+            if (typeof updateTestsTabForRole === 'function') updateTestsTabForRole();
             return true;
         }
 
-        window.startOdevTest = function (level, testName) {
-            if (isTestAlreadyCompleted(level, testName)) {
-                const record = getCompletedTestRecord(level, testName);
-                showToast(`Bu testi zaten çözdünüz (%${record?.percent ?? 0}). Tekrar çözülemez.`, 'info');
-                return;
-            }
-            if (typeof switchTab === 'function') {
-                switchTab('tests');
-            }
-            setTimeout(() => launchQuizEngine(level, testName), 120);
+        window.openLearnTests = function (bolumIdHint) {
+            playClickSound();
+            stopSpeechListening();
+            if (quizAdvanceTimer) clearTimeout(quizAdvanceTimer);
+            quizAdvanceTimer = null;
+            const highlight = bolumIdFromHint(bolumIdHint) || null;
+
+            ensureTestsScreenVisible();
+            setTestsSubview('list');
+            if (typeof switchTab === 'function') switchTab('tests', true, true);
+            renderBolumList(highlight);
+            if (typeof lucide !== 'undefined') lucide.createIcons();
         };
 
-        // Soru Çizer (Cam Şık Butonları Entegre Edildi)
+        window.startLevel = startBolum;
+        window.startBolum = startBolum;
+        window.startBolumStep = startBolumStep;
+        window.renderBolumList = renderBolumList;
+
+        window.startOdevTest = function (level, testName) {
+            const bolum = BOLUMLER.find((b) => (BOLUM_INDEX[b.id] || 0) === Number(level));
+            if (bolum) launchQuizEngine(bolum.id, 0);
+            else if (typeof switchTab === 'function') switchTab('tests', true);
+        };
+
+        function setQuizPrompt(text) {
+            const el = document.getElementById('quiz-prompt-label');
+            if (el) el.textContent = text || 'Soru';
+        }
+
+        function showQuizVisual(image, word, type) {
+            const wrap = document.getElementById('quiz-visual-wrap');
+            const imgEl = document.getElementById('quiz-visual-image');
+            const wordEl = document.getElementById('quiz-display-word');
+            setQuizTypeBadge(type || 'card');
+            if (type === 'card' && wrap) {
+                wrap.classList.remove('hidden');
+                if (imgEl) imgEl.textContent = image || '';
+            }
+            if (wordEl) wordEl.innerHTML = (word || '').replace(/\n/g, '<br>');
+        }
+
+        function animateQuizCard() {
+            const panel = document.querySelector('.lisani-quiz-question');
+            if (!panel) return;
+            panel.classList.remove('is-entering');
+            void panel.offsetWidth;
+            panel.classList.add('is-entering');
+        }
+
+        let speakSessionId = 0;
+
+        function showQuizFeedback(isCorrect, customMsg) {
+            const box = document.getElementById('quiz-feedback-box');
+            const card = document.querySelector('#quiz-active-view .lisani-quiz-question');
+            const msg = customMsg || (isCorrect ? '✓ Harika! Doğru cevap' : '✗ Yanlış — doğrusu bir sonraki soruda');
+            if (box) {
+                box.classList.remove('hidden', 'lisani-quiz-feedback--ok', 'lisani-quiz-feedback--bad');
+                box.classList.add(isCorrect ? 'lisani-quiz-feedback--ok' : 'lisani-quiz-feedback--bad');
+                box.textContent = msg;
+                box.setAttribute('aria-hidden', 'false');
+            }
+            if (card) {
+                card.classList.remove('lisani-quiz-flash--ok', 'lisani-quiz-flash--bad');
+                void card.offsetWidth;
+                card.classList.add(isCorrect ? 'lisani-quiz-flash--ok' : 'lisani-quiz-flash--bad');
+            }
+            const speakPanel = document.querySelector('.lisani-speak-panel');
+            if (speakPanel) {
+                speakPanel.classList.remove('lisani-speak-panel--ok', 'lisani-speak-panel--bad');
+                speakPanel.classList.add(isCorrect ? 'lisani-speak-panel--ok' : 'lisani-speak-panel--bad');
+            }
+            if (isCorrect && typeof playSuccessSound === 'function') playSuccessSound();
+        }
+
+        function scheduleQuizAdvance(isCorrect, feedbackMsg) {
+            showQuizFeedback(isCorrect, feedbackMsg);
+            if (quizAdvanceTimer) clearTimeout(quizAdvanceTimer);
+            const delay = isCorrect ? 900 : 1100;
+            quizAdvanceTimer = setTimeout(() => {
+                quizAdvanceTimer = null;
+                activeQuestionIndex++;
+                if (activeQuestionIndex < activeQuizQuestions.length) {
+                    renderQuizQuestion();
+                } else {
+                    finishQuizEngine();
+                }
+            }, delay);
+        }
+
         function renderQuizQuestion() {
+            stopSpeechListening();
+            resetQuizPanels();
             const q = activeQuizQuestions[activeQuestionIndex];
+            if (!q) return;
+
+            if (q.type === 'speak') {
+                renderSpeakQuestion(q);
+                return;
+            }
+            if (q.type === 'tiles') {
+                renderTilesQuestion(q);
+                return;
+            }
+
             const total = activeQuizQuestions.length;
             const current = activeQuestionIndex + 1;
-            document.getElementById('active-question-counter').innerText = `${current} / ${total}`;
+            const counterEl = document.getElementById('active-question-counter');
+            if (counterEl) counterEl.innerText = `${current} / ${total}`;
 
             const progressBar = document.getElementById('quiz-progress-bar');
-            if (progressBar) {
-                progressBar.style.width = `${(current / total) * 100}%`;
-            }
-            
-            document.getElementById('quiz-display-word').innerHTML = q.word.replace(/\n/g, '<br>');
+            if (progressBar) progressBar.style.width = `${(current / total) * 100}%`;
+
+            const defaultPrompt = window.LISANI_CARD_PROMPT || 'Resme bak · doğru cevabı seç';
+            setQuizPrompt(q.prompt || defaultPrompt);
+            showQuizVisual(q.image, q.word, q.type || 'card');
 
             const container = document.getElementById('quiz-options-container');
+            if (!container || !q.options) return;
             container.innerHTML = '';
 
-            const optionLabels = ['A', 'B', 'C', 'D', 'E', 'F'];
+            const optionLabels = ['A', 'B', 'C', 'D'];
             q.options.forEach((option, idx) => {
                 const btn = document.createElement('button');
                 btn.type = 'button';
-                btn.className = 'lisani-glass-panel lisani-quiz-option w-full py-3 px-3.5 rounded-xl theme-text-main text-xs font-bold transition-all text-left flex items-center gap-3 cursor-pointer active:scale-[0.98]';
+                btn.dataset.option = option;
+                btn.className =
+                    'lisani-quiz-option w-full py-3 px-3.5 rounded-xl theme-text-main text-xs font-bold transition-all text-left flex items-center gap-3 cursor-pointer active:scale-[0.98]';
                 btn.innerHTML = `
                     <span class="lisani-quiz-option__letter">${optionLabels[idx] || '•'}</span>
-                    <span class="flex-1 min-w-0 leading-relaxed">${option}</span>
-                    <i data-lucide="chevron-right" class="w-4 h-4 theme-text-muted shrink-0 opacity-60"></i>`;
+                    <span class="flex-1 min-w-0 leading-relaxed">${option}</span>`;
                 btn.onclick = () => selectQuizOption(option, q.answer, btn);
                 container.appendChild(btn);
             });
 
-            document.getElementById('quiz-feedback-box').classList.add('hidden');
-            document.getElementById('quiz-next-btn').classList.add('hidden');
-            lucide.createIcons();
+            animateQuizCard();
+            if (typeof lucide !== 'undefined') lucide.createIcons();
         }
 
-        // Seçenek Tıklama İşlemi (Zümrüt ve Yakut Parlayan Cam Şıklar)
-        function selectQuizOption(selected, correct, btn) {
+        function renderSpeakQuestion(q) {
+            const total = activeQuizQuestions.length;
+            const current = activeQuestionIndex + 1;
+            const counterEl = document.getElementById('active-question-counter');
+            if (counterEl) counterEl.innerText = `${current} / ${total}`;
+
+            const progressBar = document.getElementById('quiz-progress-bar');
+            if (progressBar) progressBar.style.width = `${(current / total) * 100}%`;
+
+            const speakPrompt = window.LISANI_SPEAK_PROMPT || 'Kelimeyi Türkçe okuyun';
+            setQuizPrompt(q.prompt || speakPrompt);
+            showQuizVisual(null, q.word, 'speak');
+
+            document.getElementById('quiz-options-container')?.classList.add('hidden');
+
+            const voiceArea = document.getElementById('quiz-voice-area');
+            const skipLabel = speakSkipLabel();
+            const listenSec = window.LISANI_SPEAK_LISTEN_SEC || 14;
+            const meterBars = Array.from({ length: 14 }, () => '<span class="lisani-speak-meter__bar"></span>').join('');
+            const session = ++speakSessionId;
+            if (voiceArea) {
+                voiceArea.classList.remove('hidden');
+                voiceArea.innerHTML = `
+                    <div class="lisani-speak-panel lisani-glass-panel rounded-2xl p-4 space-y-3">
+                        <div class="flex items-center justify-center gap-3">
+                            <div class="lisani-speak-timer-ring" aria-hidden="true">
+                                <span id="quiz-speak-timer" class="lisani-speak-timer-ring__label">${listenSec} sn</span>
+                            </div>
+                            <button type="button" id="quiz-voice-mic-btn" class="lisani-voice-mic-btn lisani-voice-mic-btn--pro">
+                                <i data-lucide="mic" class="w-5 h-5"></i>
+                                <span>Dinlemeyi Başlat</span>
+                            </button>
+                        </div>
+                        <p id="quiz-voice-status" class="text-[10px] theme-text-muted text-center lisani-voice-status leading-relaxed">Konuş · ses çubuğu altta yükselir</p>
+                        <div class="lisani-speak-meter" id="quiz-speak-meter" aria-hidden="true">${meterBars}</div>
+                        <button type="button" id="quiz-speak-skip-btn" class="lisani-glass-action w-full py-2.5 rounded-xl text-[11px] font-bold theme-text-muted">${skipLabel}</button>
+                    </div>`;
+                document.getElementById('quiz-voice-mic-btn')?.addEventListener('click', () => startSpeakAnswer(q));
+                document.getElementById('quiz-speak-skip-btn')?.addEventListener('click', () => handleQuizSkip());
+            }
+
+            animateQuizCard();
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+            setTimeout(() => {
+                if (session !== speakSessionId) return;
+                if (activeQuizQuestions[activeQuestionIndex] !== q) return;
+                startSpeakAnswer(q);
+            }, 500);
+        }
+
+        function renderTilesQuestion(q) {
+            const total = activeQuizQuestions.length;
+            const current = activeQuestionIndex + 1;
+            const counterEl = document.getElementById('active-question-counter');
+            if (counterEl) counterEl.innerText = `${current} / ${total}`;
+
+            const progressBar = document.getElementById('quiz-progress-bar');
+            if (progressBar) progressBar.style.width = `${(current / total) * 100}%`;
+
+            const tilesPrompt = window.LISANI_TILES_PROMPT || 'Kelimeleri sırayla seçin';
+            setQuizPrompt(q.prompt || tilesPrompt);
+            showQuizVisual(null, q.word, 'tiles');
+
+            document.getElementById('quiz-options-container')?.classList.add('hidden');
+            document.getElementById('quiz-voice-area')?.classList.add('hidden');
+
+            tilesSelection = [];
+            const area = document.getElementById('quiz-tiles-area');
+            if (!area) return;
+            area.classList.remove('hidden');
+            area.innerHTML = `
+                <div id="quiz-tiles-answer" class="lisani-tiles-answer lisani-glass-panel rounded-xl p-3 min-h-[2.75rem] flex flex-wrap gap-1.5 items-center justify-center"></div>
+                <div id="quiz-tiles-grid" class="lisani-tiles-grid grid grid-cols-2 sm:grid-cols-3 gap-2"></div>
+                <div class="flex gap-2">
+                    <button type="button" id="quiz-tiles-clear-btn" class="lisani-glass-action flex-1 py-2.5 rounded-xl text-[10px] font-bold theme-text-muted">Temizle</button>
+                    <button type="button" id="quiz-tiles-check-btn" class="lisani-glass-action lisani-glass-action--primary flex-1 py-2.5 rounded-xl text-[10px] font-bold">Kontrol Et</button>
+                </div>`;
+
+            const grid = document.getElementById('quiz-tiles-grid');
+            const answerEl = document.getElementById('quiz-tiles-answer');
+            (q.tiles || []).forEach((tile) => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'lisani-tile-chip lisani-glass-panel py-2.5 px-2 rounded-xl text-[11px] font-bold theme-text-main';
+                btn.textContent = tile;
+                btn.dataset.tile = tile;
+                btn.onclick = () => {
+                    if (quizAdvanceTimer || tilesSelection.length >= (q.answerOrder || []).length) return;
+                    if (tilesSelection.includes(tile)) return;
+                    tilesSelection.push(tile);
+                    refreshTilesUI(q, answerEl, grid);
+                };
+                grid.appendChild(btn);
+            });
+
+            document.getElementById('quiz-tiles-clear-btn')?.addEventListener('click', () => {
+                tilesSelection = [];
+                refreshTilesUI(q, answerEl, grid);
+            });
+            document.getElementById('quiz-tiles-check-btn')?.addEventListener('click', () => checkTilesAnswer(q));
+
+            refreshTilesUI(q, answerEl, grid);
+            animateQuizCard();
+        }
+
+        function refreshTilesUI(q, answerEl, grid) {
+            if (answerEl) {
+                answerEl.innerHTML =
+                    tilesSelection.length === 0
+                        ? '<span class="text-[10px] theme-text-muted">Seçilen kelimeler burada görünür</span>'
+                        : tilesSelection
+                              .map(
+                                  (t) =>
+                                      `<span class="lisani-tile-chip lisani-tile-chip--picked inline-flex py-1 px-2 rounded-lg text-[10px] font-bold">${t}</span>`
+                              )
+                              .join('');
+            }
+            grid?.querySelectorAll('button').forEach((btn) => {
+                const t = btn.dataset.tile;
+                const picked = tilesSelection.includes(t);
+                btn.disabled = picked;
+                btn.classList.toggle('opacity-40', picked);
+            });
+        }
+
+        function checkTilesAnswer(q) {
+            if (quizAdvanceTimer) return;
+            const expected = (q.answerOrder || []).map((s) => normalizeSpeechText(s));
+            const got = tilesSelection.map((s) => normalizeSpeechText(s));
+            const isCorrect =
+                got.length === expected.length && got.every((w, i) => w === expected[i]);
+            const grid = document.getElementById('quiz-tiles-grid');
+            const answerEl = document.getElementById('quiz-tiles-answer');
+            if (isCorrect) {
+                answerEl?.classList.add('lisani-tiles-answer--ok');
+                handleQuizAnswer(true, null);
+            } else {
+                answerEl?.classList.add('lisani-tiles-answer--bad');
+                showToast('Sıra yanlış — tekrar dene', 'error');
+                setTimeout(() => {
+                    answerEl?.classList.remove('lisani-tiles-answer--bad');
+                    tilesSelection = [];
+                    refreshTilesUI(q, answerEl, grid);
+                }, 700);
+            }
+        }
+
+        function startSpeakAnswer(q) {
+            if (quizAdvanceTimer || voiceListening) return;
+            const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+            const status = document.getElementById('quiz-voice-status');
+            const micBtn = document.getElementById('quiz-voice-mic-btn');
+
+            if (!SR) {
+                if (status) status.textContent = 'Ses tanıma desteklenmiyor · «Şuan konuşamam» kullanın.';
+                return;
+            }
+
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                if (status) status.textContent = 'Mikrofon desteklenmiyor · atlayabilirsiniz.';
+                return;
+            }
+
+            stopSpeechListening();
+            if (status) status.textContent = 'Mikrofon açılıyor…';
+
+            navigator.mediaDevices
+                .getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } })
+                .then((stream) => {
+                    startSpeakMeter(stream);
+                    beginSpeakListening(q, SR, status, micBtn);
+                })
+                .catch(() => {
+                    if (status) {
+                        status.textContent = 'Mikrofon izni gerekli · tarayıcı ayarlarından izin verin veya atlayın.';
+                    }
+                });
+        }
+
+        function beginSpeakListening(q, SR, status, micBtn) {
+            voiceListening = true;
+            speakListenDeadline = Date.now() + SPEAK_LISTEN_MS();
+            updateSpeakCountdownUI();
+            resetSpeakMeterUI();
+
+            if (speakAudioCtx && speakAudioCtx.state === 'suspended') {
+                speakAudioCtx.resume().catch(() => {});
+            }
+
+            let finalTranscript = '';
+            let resolved = false;
+
+            function bestTranscriptFromResult(result) {
+                let best = result[0]?.transcript || '';
+                for (let i = 1; i < result.length; i++) {
+                    const alt = result[i]?.transcript || '';
+                    if (speechMatchesSpeak(alt, q)) return alt;
+                    if (alt.length > best.length) best = alt;
+                }
+                return best;
+            }
+
+            function finishListen(spoken) {
+                if (resolved) return;
+                resolved = true;
+                stopSpeechListening();
+                if (status) {
+                    status.classList.remove('is-listening');
+                    status.textContent = spoken ? `Duydum: «${spoken.trim()}»` : 'Süre doldu';
+                }
+                if (micBtn) micBtn.classList.remove('is-listening');
+                if (!spoken) {
+                    handleQuizAnswer(false, null);
+                    return;
+                }
+                const match = speechMatchesSpeak(spoken, q);
+                if (match === 'skip') handleQuizSkip();
+                else if (match) handleQuizAnswer(true, null);
+                else handleQuizAnswer(false, null);
+            }
+
+            speechRecognition = new SR();
+            speechRecognition.lang = 'tr-TR';
+            speechRecognition.continuous = true;
+            speechRecognition.interimResults = true;
+            speechRecognition.maxAlternatives = 5;
+
+            if (status) {
+                status.textContent = 'Dinleniyor… metni Türkçe okuyun';
+                status.classList.add('is-listening');
+            }
+            if (micBtn) {
+                micBtn.classList.add('is-listening');
+                const label = micBtn.querySelector('span');
+                if (label) label.textContent = 'Dinleniyor…';
+            }
+
+            speakCountdownTimer = setInterval(updateSpeakCountdownUI, 250);
+            speakListenTimer = setTimeout(() => {
+                finishListen(finalTranscript.trim());
+            }, SPEAK_LISTEN_MS());
+
+            speechRecognition.onresult = (ev) => {
+                let interim = '';
+                for (let i = ev.resultIndex; i < ev.results.length; i++) {
+                    const t = bestTranscriptFromResult(ev.results[i]);
+                    if (ev.results[i].isFinal) finalTranscript += `${t} `;
+                    else interim += t;
+                }
+                const combined = (finalTranscript + interim).trim();
+                if (status && combined) {
+                    status.textContent = `Dinleniyor: «${combined}»`;
+                }
+                const match = speechMatchesSpeak(combined, q);
+                if (match === 'skip') {
+                    finishListen(combined);
+                } else if (match) {
+                    finishListen(combined);
+                }
+            };
+
+            speechRecognition.onerror = (ev) => {
+                if (ev.error === 'no-speech' || ev.error === 'aborted') return;
+                if (ev.error === 'not-allowed') {
+                    voiceListening = false;
+                    if (status) status.textContent = 'Mikrofon izni reddedildi · atlayabilirsiniz.';
+                    return;
+                }
+                if (status) status.textContent = 'Ses hatası · mikrofona tekrar dokunun.';
+            };
+
+            speechRecognition.onend = () => {
+                if (voiceListening && Date.now() < speakListenDeadline && !resolved) {
+                    try {
+                        speechRecognition.start();
+                    } catch (e) {}
+                }
+            };
+
+            try {
+                speechRecognition.start();
+            } catch (e) {
+                voiceListening = false;
+                if (status) status.textContent = 'Mikrofon açılamadı · izin verin veya atlayın.';
+            }
+        }
+
+        function handleQuizSkip() {
+            if (quizAdvanceTimer) return;
             playClickSound();
-            const feedback = document.getElementById('quiz-feedback-box');
-            feedback.classList.remove('hidden');
+            stopSpeechListening();
+            const status = document.getElementById('quiz-voice-status');
+            if (status) status.textContent = 'Atlandı — sorun değil.';
+            scheduleQuizAdvance(true);
+        }
 
-            const allButtons = document.querySelectorAll('#quiz-options-container button');
-            allButtons.forEach(b => b.disabled = true);
-
-            if (selected === correct) {
-                btn.className = 'lisani-quiz-option lisani-quiz-option--correct w-full py-3 px-3.5 rounded-xl text-xs font-black transition-all text-left flex items-center gap-3';
-                
-                feedback.className = 'lisani-quiz-feedback lisani-quiz-feedback--ok rounded-xl p-3.5 text-center text-[11px] font-bold';
-                feedback.innerHTML = 'Harika! 🌿 Doğru cevap · +10 XP';
+        function handleQuizAnswer(isCorrect, correct) {
+            if (quizAdvanceTimer) return;
+            playClickSound();
+            stopSpeechListening();
+            if (correct) {
+                document.querySelectorAll('#quiz-options-container button').forEach((b) => {
+                    b.disabled = true;
+                    if (b.dataset.option === correct) {
+                        b.className =
+                            'lisani-quiz-option lisani-quiz-option--correct w-full py-3 px-3.5 rounded-xl text-xs font-black transition-all text-left flex items-center gap-3';
+                    }
+                });
+            }
+            if (isCorrect) {
                 activeCorrects++;
                 totalScore += 10;
                 updateUIPoints();
                 updateLearningStats();
+                if (window.LisaniDailyTasks?.onQuizCorrect) window.LisaniDailyTasks.onQuizCorrect();
             } else {
-                btn.className = 'lisani-quiz-option lisani-quiz-option--wrong w-full py-3 px-3.5 rounded-xl text-xs font-black transition-all text-left flex items-center gap-3';
-                
-                feedback.className = 'lisani-quiz-feedback lisani-quiz-feedback--bad rounded-xl p-3.5 text-center text-[11px] font-bold';
-                feedback.innerHTML = `Yanlış 📈 Doğru cevap: <strong>${correct}</strong>`;
                 activeWrongs++;
+                recordWrongQuestion(activeQuizQuestions[activeQuestionIndex]);
+            }
+            const q = activeQuizQuestions[activeQuestionIndex];
+            let msg = isCorrect ? '✓ Harika! Doğru cevap' : '✗ Yanlış';
+            scheduleQuizAdvance(isCorrect, msg);
+        }
+
+        function selectQuizOption(selected, correct, btn) {
+            if (quizAdvanceTimer) return;
+            playClickSound();
+            stopSpeechListening();
+
+            document.querySelectorAll('#quiz-options-container button').forEach((b) => {
+                b.disabled = true;
+                if (b.dataset.option === correct) {
+                    b.className =
+                        'lisani-quiz-option lisani-quiz-option--correct w-full py-3 px-3.5 rounded-xl text-xs font-black transition-all text-left flex items-center gap-3';
+                }
+            });
+
+            const isCorrect = selected === correct;
+            if (isCorrect) {
+                btn.className =
+                    'lisani-quiz-option lisani-quiz-option--correct w-full py-3 px-3.5 rounded-xl text-xs font-black transition-all text-left flex items-center gap-3';
+                activeCorrects++;
+                totalScore += 10;
+                updateUIPoints();
+                updateLearningStats();
+                if (window.LisaniDailyTasks?.onQuizCorrect) window.LisaniDailyTasks.onQuizCorrect();
+            } else {
+                btn.className =
+                    'lisani-quiz-option lisani-quiz-option--wrong w-full py-3 px-3.5 rounded-xl text-xs font-black transition-all text-left flex items-center gap-3';
+                activeWrongs++;
+                recordWrongQuestion(activeQuizQuestions[activeQuestionIndex]);
             }
 
-            document.getElementById('quiz-next-btn').classList.remove('hidden');
-            lucide.createIcons();
+            scheduleQuizAdvance(
+                isCorrect,
+                isCorrect ? '✓ Harika! Doğru cevap' : `✗ Yanlış — doğru cevap: «${correct}»`
+            );
         }
 
         // Sonraki Soru veya Sınav Tamamlama
@@ -1360,23 +2259,32 @@
             }
         }
 
-        // Sınav Tamamlama ve Gelişime Ekleme
-        function finishQuizEngine() {
-            const successPercent = Math.round((activeCorrects / activeQuizQuestions.length) * 100);
-            
-            // Yeni Geçmiş Kaydı Oluştur
+        function finalizeStepCompletion() {
+            if (!pendingStepCompletion) return;
+
+            if (activeSessionQuestionKeys.length) {
+                appendBolumQuestionUsage(activeBolumId, activeSessionQuestionKeys);
+            }
+
+            if (isBolumStepCompleted(activeBolumId, activeBolumStep)) {
+                pendingStepCompletion = false;
+                return;
+            }
+
             const today = new Date();
             const dateStr = `${String(today.getDate()).padStart(2, '0')}.${String(today.getMonth() + 1).padStart(2, '0')}.${today.getFullYear()}`;
-            
+
             const newRecord = {
-                id: testHistory.length > 0 ? Math.max(...testHistory.map(h => h.id)) + 1 : 1,
+                id: testHistory.length > 0 ? Math.max(...testHistory.map((h) => h.id)) + 1 : 1,
                 date: dateStr,
                 level: activeLevel,
+                bolum: activeBolumId,
+                step: activeBolumStep + 1,
                 test: activeTestName,
-                correct: activeCorrects,
-                wrong: activeWrongs,
-                percent: successPercent,
-                score: successPercent 
+                correct: lastTestSummary.correct,
+                wrong: lastTestSummary.wrong,
+                percent: lastTestSummary.percent,
+                score: lastTestSummary.percent,
             };
 
             testHistory.push(newRecord);
@@ -1384,13 +2292,104 @@
                 localStorage.setItem('lisani_test_history', JSON.stringify(testHistory));
             } catch (e) {}
 
-            // Sonuçları Sonuç Paneline Çiz
-            document.getElementById('result-correct-count').innerText = String(activeCorrects);
-            document.getElementById('result-wrong-count').innerText = String(activeWrongs);
-            
+            if (isBolumCompleted(activeBolumId)) {
+                if (window.LisaniDailyTasks && typeof window.LisaniDailyTasks.onBolumComplete === 'function') {
+                    window.LisaniDailyTasks.onBolumComplete(activeBolumId);
+                } else if (window.LisaniDailyTasks && typeof window.LisaniDailyTasks.onLevelComplete === 'function') {
+                    window.LisaniDailyTasks.onLevelComplete(activeLevel);
+                }
+            }
+
+            pendingStepCompletion = false;
+        }
+
+        function proceedAfterStepTest(wasBolumCompleteBefore, fromReview) {
+            const stepJustDone = activeBolumStep + 1;
+            const stepsTotal = BOLUM_STEPS();
+            if (stepJustDone < stepsTotal && isBolumStepCompleted(activeBolumId, activeBolumStep)) {
+                showToast(`${activeTestName} tamam · sırada test ${stepJustDone + 1}`, 'success');
+            } else if (isBolumCompleted(activeBolumId)) {
+                const nextBolum = getNextIncompleteBolum(activeBolumId);
+                if (nextBolum) {
+                    showToast(`${activeTestName} tamam · ${nextBolum.title} açıldı!`, 'success');
+                } else {
+                    showToast(`${activeTestName} tamam · tüm bölümler bitti!`, 'success');
+                }
+            }
+            showQuizResultPanel(!!fromReview);
+            renderBolumList(activeBolumId);
+
+            const justCompletedBolum = !wasBolumCompleteBefore && isBolumCompleted(activeBolumId);
+            if (
+                justCompletedBolum &&
+                typeof window.canSpinRewardWheel === 'function' &&
+                window.canSpinRewardWheel(activeBolumId) &&
+                typeof window.openBolumChestWheel === 'function'
+            ) {
+                setTimeout(() => {
+                    showToast('Sandık açıldı! Çark hakkın hazır 🎁', 'success');
+                    window.openBolumChestWheel(activeBolumId);
+                }, 900);
+            }
+        }
+
+        // Sınav Tamamlama ve Gelişime Ekleme
+        function finishQuizEngine() {
+            if (quizAdvanceTimer) {
+                clearTimeout(quizAdvanceTimer);
+                quizAdvanceTimer = null;
+            }
+
+            if (isWrongReviewSession) {
+                isWrongReviewSession = false;
+                const fixed = activeCorrects;
+                lastTestWrongQuestions = activeWrongQuestions.map((q) => JSON.parse(JSON.stringify(q)));
+                const wasBolumCompleteBefore = isBolumCompleted(activeBolumId);
+                finalizeStepCompletion();
+                stopSpeechListening();
+                showToast(
+                    fixed > 0 ? `${fixed} yanlışı düzelttin!` : 'Tekrar turu bitti.',
+                    fixed > 0 ? 'success' : 'info'
+                );
+                proceedAfterStepTest(wasBolumCompleteBefore, true);
+                return;
+            }
+
+            const successPercent = Math.round((activeCorrects / activeQuizQuestions.length) * 100);
+            lastTestSummary = {
+                correct: activeCorrects,
+                wrong: activeWrongs,
+                percent: successPercent,
+            };
+            lastTestWrongQuestions = activeWrongQuestions.map((q) => JSON.parse(JSON.stringify(q)));
+            pendingStepCompletion = true;
+
+            stopSpeechListening();
+
+            if (lastTestWrongQuestions.length > 0) {
+                showToast('Yanlış soruları tekrar çözelim', 'info');
+                setTimeout(() => {
+                    if (typeof window.startWrongQuestionsReview === 'function') {
+                        window.startWrongQuestionsReview();
+                    }
+                }, 650);
+                return;
+            }
+
+            const wasBolumCompleteBefore = isBolumCompleted(activeBolumId);
+            finalizeStepCompletion();
+            proceedAfterStepTest(wasBolumCompleteBefore);
+        }
+
+        function showQuizResultPanel(fromReview = false) {
+            const successPercent = lastTestSummary.percent ?? 0;
+
+            document.getElementById('result-correct-count').innerText = String(lastTestSummary.correct ?? 0);
+            document.getElementById('result-wrong-count').innerText = String(lastTestSummary.wrong ?? 0);
+
             const pctEl = document.getElementById('result-percent');
             pctEl.innerText = `%${successPercent}`;
-            
+
             const ringFill = document.getElementById('result-score-ring-fill');
             if (ringFill) {
                 const circumference = 2 * Math.PI * 42;
@@ -1414,26 +2413,67 @@
                 }
             }
 
-            document.getElementById('quiz-active-view').classList.add('hidden');
-            document.getElementById('quiz-result-view').classList.remove('hidden');
-            
-            // Gelişim Grafiğini ve Sınav Geçmiş Listesini Yenile
+            const subtitle = document.getElementById('quiz-result-subtitle');
+            if (subtitle) {
+                subtitle.textContent =
+                    successPercent === 100
+                        ? 'Tam puan! Sonuç kaydedildi'
+                        : 'Sonucun gelişim grafiğine kaydedildi';
+            }
+
+            const retryBtn = document.getElementById('quiz-retry-wrongs-btn');
+            const retryLabel = document.getElementById('quiz-retry-wrongs-label');
+            const wrongCount = lastTestWrongQuestions.length;
+            if (retryBtn) {
+                retryBtn.classList.toggle('hidden', wrongCount === 0);
+            }
+            if (retryLabel && wrongCount > 0) {
+                retryLabel.textContent = `Yanlış Soruları Tekrar Çöz (${wrongCount})`;
+            }
+
+            setTestsSubview('result');
             renderProgressChart();
             renderQuizHistoryList();
             updateLearningStats();
-
-            if (typeof window.syncProgressToServer === 'function') {
-                window.syncProgressToServer();
+            if (typeof window.syncProgressToServer === 'function') window.syncProgressToServer();
+            if (!fromReview) {
+                showToast('Sınav tamamlandı! Sonuçlar grafiğe eklendi.', 'success');
             }
-            
-            showToast("Sınav tamamlandı! Sonuçlar grafiğe eklendi.", "success");
+            if (typeof lucide !== 'undefined') lucide.createIcons();
         }
+
+        window.startWrongQuestionsReview = function () {
+            if (!lastTestWrongQuestions.length) {
+                showToast('Tekrar çözülecek yanlış soru yok.', 'info');
+                return;
+            }
+            playClickSound();
+            isWrongReviewSession = true;
+            activeQuizQuestions = lastTestWrongQuestions.map((q) => JSON.parse(JSON.stringify(q)));
+            activeQuestionIndex = 0;
+            activeCorrects = 0;
+            activeWrongs = 0;
+            activeWrongQuestions = [];
+            if (quizAdvanceTimer) clearTimeout(quizAdvanceTimer);
+            quizAdvanceTimer = null;
+            setTestsSubview('quiz');
+            renderQuizQuestion();
+        };
+
+        function finishQuizAndGoProgress() {
+            playClickSound();
+            setTestsSubview('list');
+            if (typeof switchTab === 'function') switchTab('ai', true);
+            if (typeof renderProgressChart === 'function') renderProgressChart();
+        }
+        window.finishQuizAndGoProgress = finishQuizAndGoProgress;
 
         function finishQuizAndGoHome() {
             playClickSound();
-            document.getElementById('quiz-result-view').classList.add('hidden');
-            switchTab('ai'); 
+            setTestsSubview('list');
+            if (typeof switchTab === 'function') switchTab('home', true);
         }
+        window.finishQuizAndGoHome = finishQuizAndGoHome;
 
         function openQuizAnalysis() {
             playClickSound();
@@ -1963,6 +3003,7 @@
                 }
                 updateTestsTabForRole();
                 updateGelisimScreenForRole();
+                if (typeof window.updateDailyWheelHomeUI === 'function') window.updateDailyWheelHomeUI();
                 if (!silent) {
                     showToast("Giriş yapıldı. İyi çalışmalar!", "success");
                     switchTab('home', true);
@@ -2224,11 +3265,11 @@
 
         // --- PRELINE UI GÖRÜNÜM / TEMA ---
         const COLOR_MODE_KEY = 'lisani_color_mode';
-        const VALID_THEMES = ['kahve-kum', 'zumrut-nane', 'saray-kahvesi', 'derin-mavi', 'mavi-mor'];
+        const VALID_THEMES = ['renkli-yol', 'duolingo', 'saray-kahvesi', 'derin-mavi', 'mavi-mor'];
         const THEME_CLASS_NAMES = VALID_THEMES.map((t) => 'theme-' + t);
         const THEME_META_COLORS = {
-            'kahve-kum': '#14100e',
-            'zumrut-nane': '#081210',
+            'renkli-yol': '#12191d',
+            duolingo: '#131f24',
             'saray-kahvesi': '#120d0a',
             'derin-mavi': '#080c14',
             'mavi-mor': '#08061a',
@@ -2236,13 +3277,13 @@
 
         function normalizeColorMode(mode) {
             if (VALID_THEMES.includes(mode)) return mode;
-            if (mode === 'light') return 'kahve-kum';
-            if (mode === 'dark') return 'derin-mavi';
-            return 'mavi-mor';
+            if (mode === 'light') return 'renkli-yol';
+            if (mode === 'dark') return 'renkli-yol';
+            return 'renkli-yol';
         }
 
         function highlightColorModeButtons() {
-            const current = normalizeColorMode(localStorage.getItem(COLOR_MODE_KEY) || 'mavi-mor');
+            const current = normalizeColorMode(localStorage.getItem(COLOR_MODE_KEY) || 'renkli-yol');
             document.querySelectorAll('[data-color-mode]').forEach((btn) => {
                 const active = btn.getAttribute('data-color-mode') === current;
                 btn.classList.toggle('is-active', active);
@@ -2270,7 +3311,7 @@
 
         function initPrelineTheme() {
             document.documentElement.classList.add('preline-ui');
-            applyDocumentColorMode(localStorage.getItem(COLOR_MODE_KEY) || 'mavi-mor');
+            applyDocumentColorMode(localStorage.getItem(COLOR_MODE_KEY) || 'renkli-yol');
             highlightColorModeButtons();
         }
 
@@ -2361,13 +3402,13 @@
             document.getElementById('test-selection-view')?.classList.add('hidden');
             document.getElementById('quiz-active-view')?.classList.add('hidden');
             document.getElementById('quiz-result-view')?.classList.add('hidden');
-            document.getElementById('level-selection-view')?.classList.remove('hidden');
+            document.getElementById('bolum-selection-view')?.classList.remove('hidden');
             document.body.style.overflow = '';
             document.documentElement.style.overflow = '';
         }
         window.resetAppShellForLogout = resetAppShellForLogout;
 
-        function switchTab(screenId, force) {
+        function switchTab(screenId, force, preserveTestsSubview) {
             if (!screenId || (!force && screenId === currentActiveScreen)) return;
 
             if (screenId === 'ai' && isHocaUser()) {
@@ -2377,7 +3418,7 @@
                 }
             }
 
-            if (screenId === 'tests' && isHocaUser()) {
+            if (screenId === 'tests' && isHocaUser() && typeof hasStudentFeatures === 'function' && !hasStudentFeatures()) {
                 screenId = 'hoca-dashboard';
             }
 
@@ -2419,10 +3460,12 @@
             }
 
             if (screenId === 'tests') {
-                document.getElementById('test-selection-view').classList.add('hidden');
-                document.getElementById('quiz-active-view').classList.add('hidden');
-                document.getElementById('quiz-result-view').classList.add('hidden');
-                document.getElementById('level-selection-view').classList.remove('hidden');
+                const quizActive = !document.getElementById('quiz-active-view')?.classList.contains('hidden');
+                const quizResult = !document.getElementById('quiz-result-view')?.classList.contains('hidden');
+                if (!preserveTestsSubview && !quizActive && !quizResult) {
+                    setTestsSubview('list');
+                    if (typeof renderBolumList === 'function') renderBolumList();
+                }
                 updateTestsTabForRole();
             }
 
@@ -2451,8 +3494,9 @@
                 screensContainer.classList.toggle('lisani-screens--hoca-dash', screenId === 'hoca-dashboard');
             }
 
-            const tabIds = ['ai', 'tests', 'hoca-dashboard', 'home', 'letters', 'osm-translate', 'settings'];
-            const tabHighlightId = screenId === 'profile' ? 'home' : screenId;
+            const tabIds = ['ai', 'hoca-dashboard', 'home', 'letters', 'osm-translate', 'settings'];
+            const tabHighlightId =
+                screenId === 'profile' || screenId === 'tests' ? 'home' : screenId;
             tabIds.forEach((id) => {
                 const tabBtn = document.getElementById(`tab-${id}`);
                 if (!tabBtn) return;

@@ -53,93 +53,265 @@ html.preline-ui.dark {
     --theme-primary-rgb: 59, 130, 246;
 }
 
-/* ========== TEMA PALETLERİ (yumuşak, cam) ========== */
+/* ========== TEMA PALETLERİ ========== */
 
-/* Kahve & Kum */
-html.preline-ui.theme-kahve-kum {
-    --ph-bg: #14100e;
-    --ph-surface: rgba(32, 26, 22, 0.52);
-    --ph-surface-2: rgba(42, 34, 28, 0.45);
-    --ph-border: rgba(196, 168, 130, 0.14);
-    --ph-text: #ede4d9;
-    --ph-muted: #8f7a68;
-    --ph-primary: #c4a882;
-    --ph-primary-hover: #b0956f;
-    --ph-ring: rgba(196, 168, 130, 0.28);
-    --theme-accent: #c4a882;
-    --theme-accent-soft: rgba(196, 168, 130, 0.1);
-    --theme-accent-border: rgba(196, 168, 130, 0.22);
-    --theme-warn: #c9925a;
-    --theme-bg-phone: #14100e;
-    --theme-card-bg: rgba(32, 26, 22, 0.52);
-    --theme-border: rgba(196, 168, 130, 0.14);
-    --theme-text-main: #ede4d9;
-    --theme-text-muted: #8f7a68;
-    --theme-primary: #c4a882;
-    --theme-primary-hover: #b0956f;
-    --theme-secondary: rgba(196, 168, 130, 0.08);
-    --theme-card-gradient-from: #6b4f38;
-    --theme-card-gradient-to: #3a2a20;
-    --theme-accent-light: rgba(196, 168, 130, 0.06);
-    --theme-button-text: #14100e;
-    --theme-primary-rgb: 196, 168, 130;
-    --theme-btn-solid: #b8956a;
-    --theme-btn-solid-hover: #a6845c;
+/* Renkli Yol — canlı renkler, katı yüzey (cam yok) */
+html.preline-ui.theme-renkli-yol {
+    --ph-bg: #12191d;
+    --ph-surface: #1c2c33;
+    --ph-surface-2: #23363f;
+    --ph-border: rgba(255, 255, 255, 0.1);
+    --ph-text: #ffffff;
+    --ph-muted: #9bb0b8;
+    --ph-primary: #58cc02;
+    --ph-primary-hover: #4cad02;
+    --ph-ring: rgba(88, 204, 2, 0.35);
+    --theme-accent: #1cb0f6;
+    --theme-accent-soft: rgba(28, 176, 246, 0.14);
+    --theme-accent-border: rgba(255, 255, 255, 0.12);
+    --theme-warn: #ffc800;
+    --theme-bg-phone: #12191d;
+    --theme-card-bg: #1c2c33;
+    --theme-border: #37464f;
+    --theme-text-main: #ffffff;
+    --theme-text-muted: #9bb0b8;
+    --theme-primary: #58cc02;
+    --theme-primary-hover: #4cad02;
+    --theme-secondary: #23363f;
+    --theme-card-gradient-from: #58cc02;
+    --theme-card-gradient-to: #1cb0f6;
+    --theme-accent-light: rgba(88, 204, 2, 0.1);
+    --theme-button-text: #ffffff;
+    --theme-primary-rgb: 88, 204, 2;
+    --theme-btn-solid: #58cc02;
+    --theme-btn-solid-hover: #4cad02;
     --theme-btn-text: #ffffff;
-    --theme-btn-glow: rgba(184, 149, 106, 0.42);
-    --theme-nav-bg: #14100e;
-    --theme-nav-home-bg: #e8d4b8;
-    --theme-nav-home-icon: #14100e;
+    --theme-btn-glow: rgba(88, 204, 2, 0.45);
+    --theme-nav-bg: #12191d;
+    --theme-nav-home-bg: #58cc02;
+    --theme-nav-home-icon: #12191d;
+    --duo-correct: #58cc02;
+    --duo-wrong: #ff4b4b;
 }
 
-html.preline-ui.theme-kahve-kum body.lisani-body {
-    background:
-        radial-gradient(ellipse 80% 50% at 50% -5%, rgba(107, 79, 56, 0.14) 0%, transparent 58%),
-        #14100e;
-}
-
-/* Zümrüt & Nane */
-html.preline-ui.theme-zumrut-nane {
-    --ph-bg: #081210;
-    --ph-surface: rgba(14, 28, 24, 0.55);
-    --ph-surface-2: rgba(18, 36, 30, 0.48);
-    --ph-border: rgba(61, 155, 138, 0.16);
-    --ph-text: #e8f3ef;
-    --ph-muted: #6b8f84;
-    --ph-primary: #3d9b8a;
-    --ph-primary-hover: #358678;
-    --ph-ring: rgba(61, 155, 138, 0.28);
-    --theme-accent: #3d9b8a;
-    --theme-accent-soft: rgba(61, 155, 138, 0.1);
-    --theme-accent-border: rgba(61, 155, 138, 0.24);
-    --theme-warn: #c9925a;
-    --theme-bg-phone: #081210;
-    --theme-card-bg: rgba(14, 28, 24, 0.55);
-    --theme-border: rgba(61, 155, 138, 0.16);
-    --theme-text-main: #e8f3ef;
-    --theme-text-muted: #6b8f84;
-    --theme-primary: #3d9b8a;
-    --theme-primary-hover: #358678;
-    --theme-secondary: rgba(61, 155, 138, 0.08);
-    --theme-card-gradient-from: #1f5c50;
-    --theme-card-gradient-to: #0f3028;
-    --theme-accent-light: rgba(61, 155, 138, 0.06);
-    --theme-button-text: #081210;
-    --theme-primary-rgb: 61, 155, 138;
-    --theme-btn-solid: #358678;
-    --theme-btn-solid-hover: #2d7568;
+/* Duolingo — koyu zemin + parlak yeşil */
+html.preline-ui.theme-duolingo {
+    --ph-bg: #131f24;
+    --ph-surface: rgba(28, 44, 51, 0.92);
+    --ph-surface-2: rgba(35, 54, 63, 0.88);
+    --ph-border: rgba(88, 204, 2, 0.22);
+    --ph-text: #ffffff;
+    --ph-muted: #9bb0b8;
+    --ph-primary: #58cc02;
+    --ph-primary-hover: #4cad02;
+    --ph-ring: rgba(88, 204, 2, 0.35);
+    --theme-accent: #58cc02;
+    --theme-accent-soft: rgba(88, 204, 2, 0.14);
+    --theme-accent-border: rgba(88, 204, 2, 0.32);
+    --theme-warn: #ffc800;
+    --theme-bg-phone: #131f24;
+    --theme-card-bg: rgba(28, 44, 51, 0.92);
+    --theme-border: rgba(255, 255, 255, 0.08);
+    --theme-text-main: #ffffff;
+    --theme-text-muted: #9bb0b8;
+    --theme-primary: #58cc02;
+    --theme-primary-hover: #4cad02;
+    --theme-secondary: rgba(88, 204, 2, 0.1);
+    --theme-card-gradient-from: #58cc02;
+    --theme-card-gradient-to: #1a472a;
+    --theme-accent-light: rgba(88, 204, 2, 0.08);
+    --theme-button-text: #ffffff;
+    --theme-primary-rgb: 88, 204, 2;
+    --theme-btn-solid: #58cc02;
+    --theme-btn-solid-hover: #4cad02;
     --theme-btn-text: #ffffff;
-    --theme-btn-glow: rgba(53, 134, 120, 0.42);
-    --theme-nav-bg: #081210;
-    --theme-nav-home-bg: #a8ddd0;
-    --theme-nav-home-icon: #081210;
+    --theme-btn-glow: rgba(88, 204, 2, 0.45);
+    --theme-nav-bg: #131f24;
+    --theme-nav-home-bg: #58cc02;
+    --theme-nav-home-icon: #131f24;
+    --duo-correct: #58cc02;
+    --duo-wrong: #ff4b4b;
 }
 
-html.preline-ui.theme-zumrut-nane body.lisani-body {
+html.preline-ui.theme-duolingo body.lisani-body {
     background:
-        radial-gradient(ellipse 75% 48% at 50% -5%, rgba(31, 92, 80, 0.16) 0%, transparent 58%),
-        radial-gradient(ellipse 50% 35% at 100% 100%, rgba(15, 48, 40, 0.22) 0%, transparent 52%),
-        #081210;
+        radial-gradient(ellipse 70% 45% at 50% -5%, rgba(88, 204, 2, 0.12) 0%, transparent 55%),
+        #131f24;
+}
+
+/* Duolingo — 3D yeşil butonlar & quiz şıkları */
+html.preline-ui.theme-duolingo .lisani-learn-start-cta,
+html.preline-ui.theme-duolingo .lisani-glass-action--primary,
+html.preline-ui.theme-duolingo #auth-container button.lisani-glass-action--primary,
+html.preline-ui.theme-duolingo #screen-tests .lisani-glass-action--primary,
+html.preline-ui.theme-duolingo .theme-primary-btn:not(.lisani-segment-btn) {
+    background: #58cc02 !important;
+    border: none !important;
+    border-bottom: 4px solid #46a302 !important;
+    border-radius: 1rem !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    color: #ffffff !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    transition: filter 0.12s ease, transform 0.12s ease, border-bottom-width 0.12s ease !important;
+}
+
+html.preline-ui.theme-duolingo .lisani-glass-action--primary:hover,
+html.preline-ui.theme-duolingo #auth-container button.lisani-glass-action--primary:hover,
+html.preline-ui.theme-duolingo .theme-primary-btn:not(.lisani-segment-btn):hover {
+    background: #58cc02 !important;
+    filter: brightness(1.05);
+}
+
+html.preline-ui.theme-duolingo .lisani-glass-action--primary:active,
+html.preline-ui.theme-duolingo #auth-container button.lisani-glass-action--primary:active {
+    transform: translateY(2px);
+    border-bottom-width: 2px !important;
+    filter: brightness(0.96);
+}
+
+html.preline-ui.theme-duolingo .lisani-segment-btn.is-active {
+    background: #58cc02 !important;
+    border: none !important;
+    border-bottom: 3px solid #46a302 !important;
+    color: #ffffff !important;
+    box-shadow: none !important;
+}
+
+html.preline-ui.theme-duolingo .lisani-segment-btn:not(.is-active) {
+    background: rgba(35, 54, 63, 0.85) !important;
+    border: 2px solid rgba(255, 255, 255, 0.08) !important;
+    color: #9bb0b8 !important;
+    box-shadow: none !important;
+}
+
+html.preline-ui.theme-duolingo #quiz-options-container .lisani-quiz-option,
+html.preline-ui.theme-duolingo #placement-modal .lisani-placement-option {
+    background: rgba(35, 54, 63, 0.92) !important;
+    border: 2px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: 1rem !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    min-height: 3.25rem;
+}
+
+html.preline-ui.theme-duolingo #quiz-options-container .lisani-quiz-option:hover,
+html.preline-ui.theme-duolingo #placement-modal .lisani-placement-option:hover {
+    background: rgba(45, 64, 73, 0.95) !important;
+    border-color: rgba(255, 255, 255, 0.16) !important;
+}
+
+html.preline-ui.theme-duolingo #quiz-options-container .lisani-quiz-option--correct {
+    background: rgba(88, 204, 2, 0.14) !important;
+    border-color: #58cc02 !important;
+    color: #58cc02 !important;
+}
+
+html.preline-ui.theme-duolingo #quiz-options-container .lisani-quiz-option--wrong {
+    background: rgba(255, 75, 75, 0.12) !important;
+    border-color: #ff4b4b !important;
+    color: #ff4b4b !important;
+}
+
+html.preline-ui.theme-duolingo .lisani-voice-mic-btn--pro {
+    background: #58cc02 !important;
+    border: none !important;
+    border-bottom: 4px solid #46a302 !important;
+    color: #ffffff !important;
+    box-shadow: none !important;
+}
+
+html.preline-ui.theme-duolingo .lisani-glass-action:not(.lisani-glass-action--primary):not(.lisani-glass-action--danger) {
+    background: rgba(35, 54, 63, 0.85) !important;
+    border: 2px solid rgba(255, 255, 255, 0.1) !important;
+    box-shadow: none !important;
+}
+
+/* Duolingo — uygulama kabuğu & tipografi */
+html.preline-ui.theme-duolingo .lisani-app-shell,
+html.preline-ui.theme-duolingo .lisani-main-flow {
+    background: #131f24 !important;
+}
+
+html.preline-ui.theme-duolingo h1,
+html.preline-ui.theme-duolingo h2,
+html.preline-ui.theme-duolingo h3,
+html.preline-ui.theme-duolingo h4,
+html.preline-ui.theme-duolingo .font-extrabold,
+html.preline-ui.theme-duolingo .font-black {
+    letter-spacing: -0.01em;
+}
+
+html.preline-ui.theme-duolingo #screen-tests .lisani-quiz-option,
+html.preline-ui.theme-duolingo #placement-modal .lisani-placement-option {
+    border-bottom: 4px solid #2b3f47 !important;
+}
+
+html.preline-ui.theme-duolingo #screen-tests .lisani-quiz-option:active,
+html.preline-ui.theme-duolingo #placement-modal .lisani-placement-option:active {
+    transform: translateY(2px);
+    border-bottom-width: 2px !important;
+}
+
+html.preline-ui.theme-duolingo .lisani-bolum-dot-btn {
+    box-shadow: 0 5px 0 rgba(0, 0, 0, 0.28);
+}
+
+html.preline-ui.theme-duolingo .theme-pick-btn.is-active {
+    background: #58cc02 !important;
+    border-bottom: 3px solid #46a302 !important;
+    color: #fff !important;
+}
+
+/* Renkli Yol — 3D butonlar (Duolingo ile aynı katı stil) */
+html.preline-ui.theme-renkli-yol .lisani-learn-start-cta,
+html.preline-ui.theme-renkli-yol .lisani-glass-action--primary,
+html.preline-ui.theme-renkli-yol #auth-container button.lisani-glass-action--primary,
+html.preline-ui.theme-renkli-yol #screen-tests .lisani-glass-action--primary,
+html.preline-ui.theme-renkli-yol .theme-primary-btn:not(.lisani-segment-btn) {
+    background: linear-gradient(180deg, #65d806, #58cc02) !important;
+    border: none !important;
+    border-bottom: 4px solid #46a302 !important;
+    border-radius: 1rem !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    color: #ffffff !important;
+    font-weight: 800 !important;
+}
+
+html.preline-ui.theme-renkli-yol #quiz-options-container .lisani-quiz-option,
+html.preline-ui.theme-renkli-yol #placement-modal .lisani-placement-option {
+    background: #23363f !important;
+    border: 2px solid #37464f !important;
+    border-bottom: 4px solid #2b3f47 !important;
+    border-radius: 1rem !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    box-shadow: none !important;
+}
+
+html.preline-ui.theme-renkli-yol .lisani-glass-action:not(.lisani-glass-action--primary):not(.lisani-glass-action--danger) {
+    background: #23363f !important;
+    border: 2px solid #37464f !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+}
+
+html.preline-ui.theme-renkli-yol .lisani-app-shell,
+html.preline-ui.theme-renkli-yol .lisani-main-flow {
+    background: transparent !important;
+}
+
+html.preline-ui.theme-renkli-yol .lisani-segment-btn.is-active {
+    background: #1cb0f6 !important;
+    border: none !important;
+    border-bottom: 3px solid #1899d6 !important;
+    color: #fff !important;
 }
 
 /* Saray Kahvesi — referans palet */

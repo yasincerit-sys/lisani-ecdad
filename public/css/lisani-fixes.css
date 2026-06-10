@@ -141,9 +141,119 @@
     }
 }
 
-/* Test butonları — glass panel */
+/* Test ekranı — düzenli, oturaklı */
 #screen-tests.lisani-tests-screen {
-    gap: 0.75rem;
+    gap: 0.5rem;
+    max-width: 26rem;
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
+}
+
+#screen-tests .lisani-tests-header {
+    margin-bottom: 0.15rem;
+}
+
+#screen-tests .lisani-glass-panel,
+#screen-tests .lisani-glass-action,
+#screen-tests .lisani-quiz-question,
+#screen-tests .lisani-quiz-progress-wrap {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+.lisani-tests-bolum-view {
+    gap: 0.5rem;
+    padding-top: 0.25rem;
+}
+
+.lisani-tests-bolum-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 0.65rem;
+    padding: 0 0.15rem;
+}
+
+.lisani-tests-bolum-hint {
+    flex: 1 1 100%;
+    font-size: 0.625rem;
+    line-height: 1.45;
+    color: var(--theme-text-muted);
+    margin: 0;
+}
+
+.lisani-tests-bolum-hint--hoca {
+    color: var(--theme-primary);
+    font-weight: 700;
+}
+
+.lisani-tests-placement-chip {
+    appearance: none;
+    border: none;
+    padding: 0.4rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.625rem;
+    font-weight: 800;
+    color: var(--theme-text-main);
+    background: rgba(var(--theme-primary-rgb, 198, 156, 109), 0.18);
+    border: 1px solid rgba(var(--theme-primary-rgb, 198, 156, 109), 0.35);
+    cursor: pointer;
+    transition: transform 0.1s ease, filter 0.1s ease;
+}
+
+.lisani-tests-placement-chip:active {
+    transform: scale(0.97);
+}
+
+.lisani-tests-path-panel {
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    border-radius: 1.15rem;
+    background: rgba(0, 0, 0, 0.14);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    padding: 0.65rem 0 1rem;
+}
+
+html.preline-ui.theme-duolingo .lisani-tests-path-panel,
+html.preline-ui.theme-renkli-yol .lisani-tests-path-panel {
+    background: rgba(0, 0, 0, 0.22);
+    border-color: rgba(255, 255, 255, 0.05);
+}
+
+.lisani-tests-quiz-view {
+    gap: 0.65rem;
+    padding-top: 0.35rem;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 0.75rem;
+}
+
+#screen-tests .lisani-quiz-option {
+    min-height: 3rem;
+    border-radius: 1rem !important;
+    border: 2px solid rgba(255, 255, 255, 0.1) !important;
+    border-bottom-width: 4px !important;
+    background: rgba(255, 255, 255, 0.06) !important;
+    box-shadow: none !important;
+    transition: transform 0.1s ease, border-color 0.1s ease, background 0.1s ease;
+}
+
+#screen-tests .lisani-quiz-option:active:not(.lisani-quiz-option--correct):not(.lisani-quiz-option--wrong) {
+    transform: translateY(2px);
+    border-bottom-width: 2px !important;
+}
+
+html.preline-ui.theme-duolingo #screen-tests .lisani-quiz-option,
+html.preline-ui.theme-renkli-yol #screen-tests .lisani-quiz-option {
+    background: #23363f !important;
+    border-color: #37464f !important;
+    border-bottom-color: #1a282e !important;
+}
+
+#screen-tests .lisani-quiz-question__glow {
+    display: none;
 }
 
 #screen-tests .lisani-tests-header {
@@ -293,8 +403,50 @@
         rgba(var(--theme-primary-rgb, 198, 156, 109), 0.55),
         rgba(var(--theme-primary-rgb, 198, 156, 109), 0.95)
     );
-    transition: width 0.35s ease;
+    transition: width 0.45s cubic-bezier(0.16, 1, 0.3, 1);
     box-shadow: 0 0 10px rgba(var(--theme-primary-rgb, 198, 156, 109), 0.45);
+}
+
+.lisani-quiz-question.is-entering {
+    animation: lisaniQuizIn 0.32s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes lisaniQuizIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px) scale(0.98);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+#screen-tests .lisani-quiz-option {
+    transition: transform 0.15s ease, border-color 0.2s ease, background 0.2s ease;
+}
+
+#placement-modal .lisani-placement-option {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    text-align: left;
+    transition: transform 0.15s ease, border-color 0.2s ease, background 0.2s ease;
+}
+
+#placement-modal .lisani-quiz-option__letter {
+    width: 1.65rem;
+    height: 1.65rem;
+    border-radius: 0.5rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 0.625rem;
+    font-weight: 900;
+    color: var(--ph-primary, var(--theme-primary));
+    background: rgba(var(--theme-primary-rgb, 198, 156, 109), 0.14);
+    border: 1px solid rgba(var(--theme-primary-rgb, 198, 156, 109), 0.28);
 }
 
 #screen-tests .lisani-quiz-question__glow {
@@ -329,41 +481,92 @@
 }
 
 #screen-tests .lisani-quiz-option--correct {
-    background: rgba(52, 140, 100, 0.18) !important;
-    border-color: rgba(82, 180, 140, 0.45) !important;
-    color: #7ecfaa !important;
+    background: rgba(88, 204, 2, 0.28) !important;
+    border-color: #58cc02 !important;
+    color: #d7ffb8 !important;
+    box-shadow: 0 0 0 2px rgba(88, 204, 2, 0.35), 0 8px 24px rgba(88, 204, 2, 0.2) !important;
+    transform: scale(1.02);
 }
 
 #screen-tests .lisani-quiz-option--correct .lisani-quiz-option__letter {
-    background: rgba(52, 140, 100, 0.25);
-    border-color: rgba(82, 180, 140, 0.45);
-    color: #9ee8c4;
+    background: #58cc02 !important;
+    border-color: #58cc02 !important;
+    color: #1a472a !important;
 }
 
 #screen-tests .lisani-quiz-option--wrong {
-    background: rgba(180, 70, 70, 0.16) !important;
-    border-color: rgba(220, 100, 100, 0.4) !important;
-    color: #f0a0a0 !important;
+    background: rgba(255, 75, 75, 0.22) !important;
+    border-color: #ff4b4b !important;
+    color: #ffb4b4 !important;
+    box-shadow: 0 0 0 2px rgba(255, 75, 75, 0.3) !important;
 }
 
 #screen-tests .lisani-quiz-option--wrong .lisani-quiz-option__letter {
-    background: rgba(180, 70, 70, 0.22);
-    border-color: rgba(220, 100, 100, 0.4);
-    color: #f0a0a0;
+    background: #ff4b4b !important;
+    border-color: #ff4b4b !important;
+    color: #fff !important;
 }
 
 #screen-tests .lisani-quiz-feedback--ok {
-    background: rgba(52, 140, 100, 0.12) !important;
-    border: 1px solid rgba(82, 180, 140, 0.32) !important;
-    color: #9ee8c4 !important;
-    backdrop-filter: blur(12px);
+    background: #58cc02 !important;
+    border: 2px solid #89e219 !important;
+    color: #1a472a !important;
+    font-size: 0.8125rem !important;
+    font-weight: 900 !important;
+    padding: 0.875rem 1rem !important;
+    box-shadow: 0 8px 28px rgba(88, 204, 2, 0.35) !important;
+    animation: lisani-feedback-pop 0.35s ease-out;
 }
 
 #screen-tests .lisani-quiz-feedback--bad {
-    background: rgba(180, 70, 70, 0.12) !important;
-    border: 1px solid rgba(220, 100, 100, 0.3) !important;
-    color: #f0a0a0 !important;
-    backdrop-filter: blur(12px);
+    background: #ff4b4b !important;
+    border: 2px solid #ff7878 !important;
+    color: #fff !important;
+    font-size: 0.8125rem !important;
+    font-weight: 900 !important;
+    padding: 0.875rem 1rem !important;
+    box-shadow: 0 8px 28px rgba(255, 75, 75, 0.3) !important;
+    animation: lisani-feedback-pop 0.35s ease-out;
+}
+
+#screen-tests .lisani-quiz-question.lisani-quiz-flash--ok {
+    box-shadow: 0 0 0 3px rgba(88, 204, 2, 0.55), 0 12px 40px rgba(88, 204, 2, 0.18) !important;
+    border-color: #58cc02 !important;
+}
+
+#screen-tests .lisani-quiz-question.lisani-quiz-flash--bad {
+    box-shadow: 0 0 0 3px rgba(255, 75, 75, 0.45) !important;
+    border-color: #ff4b4b !important;
+    animation: lisani-shake 0.4s ease;
+}
+
+.lisani-speak-panel--ok {
+    box-shadow: 0 0 0 3px rgba(88, 204, 2, 0.5) !important;
+    border-color: #58cc02 !important;
+}
+
+.lisani-speak-panel--bad {
+    box-shadow: 0 0 0 3px rgba(255, 75, 75, 0.45) !important;
+    border-color: #ff4b4b !important;
+}
+
+@keyframes lisani-feedback-pop {
+    0% { transform: scale(0.92); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes lisani-shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-6px); }
+    75% { transform: translateX(6px); }
+}
+
+#screen-tests .lisani-quiz-feedback--ok {
+    backdrop-filter: none;
+}
+
+#screen-tests .lisani-quiz-feedback--bad {
+    backdrop-filter: none;
 }
 
 /* Sonuç — halka skor */
@@ -601,7 +804,7 @@ html.preline-ui[class*="theme-"] #screen-letters .lisani-letter-card.lisani-glas
 html.preline-ui[class*="theme-"] #screen-letters .lisani-letters-form-cell.lisani-glass-panel,
 html.preline-ui[class*="theme-"] #screen-settings .lisani-glass-action,
 html.preline-ui[class*="theme-"] #screen-settings button.lisani-glass-action:not(.lisani-glass-action--primary):not(.lisani-glass-action--danger),
-html.preline-ui[class*="theme-"] .lisani-glass-panel {
+html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol)[class*="theme-"] .lisani-glass-panel {
     background: rgba(255, 255, 255, 0.07) !important;
     backdrop-filter: blur(18px) saturate(150%) !important;
     -webkit-backdrop-filter: blur(18px) saturate(150%) !important;
@@ -620,7 +823,7 @@ html.preline-ui[class*="theme-"] #screen-settings button.lisani-glass-action:hov
     border-color: var(--theme-accent-border) !important;
 }
 
-html.preline-ui[class*="theme-"] .lisani-glass-action--primary {
+html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol)[class*="theme-"] .lisani-glass-action--primary {
     background: rgba(var(--theme-primary-rgb), 0.18) !important;
     border-color: rgba(var(--theme-primary-rgb), 0.35) !important;
     color: var(--ph-text) !important;
@@ -1253,17 +1456,17 @@ html.preline-ui[class*="theme-"] .theme-pick-btn.is-active {
     }
 }
 
-/* ===== ZORUNLU CAM — Preline solid kartı ezer ===== */
-html.preline-ui[class*="theme-"] #app-container .glass-card,
-html.preline-ui[class*="theme-"] #app-container .glass-card-interactive,
-html.preline-ui[class*="theme-"] #auth-container .glass-card,
-html.preline-ui[class*="theme-"] #edit-profile-container .glass-card,
-html.preline-ui[class*="theme-"] #notif-settings-panel .glass-card,
-html.preline-ui[class*="theme-"] .lisani-glass-panel,
-html.preline-ui[class*="theme-"] .lisani-glass-action,
-html.preline-ui[class*="theme-"] button.lisani-glass-panel,
-html.preline-ui[class*="theme-"] button.lisani-glass-action,
-html.preline-ui[class*="theme-"] div.lisani-glass-action {
+/* ===== ZORUNLU CAM — renkli-yol / duolingo hariç ===== */
+html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol)[class*="theme-"] #app-container .glass-card,
+html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol)[class*="theme-"] #app-container .glass-card-interactive,
+html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol)[class*="theme-"] #auth-container .glass-card,
+html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol)[class*="theme-"] #edit-profile-container .glass-card,
+html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol)[class*="theme-"] #notif-settings-panel .glass-card,
+html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol)[class*="theme-"] .lisani-glass-panel,
+html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol)[class*="theme-"] .lisani-glass-action,
+html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol)[class*="theme-"] button.lisani-glass-panel,
+html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol)[class*="theme-"] button.lisani-glass-action,
+html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol)[class*="theme-"] div.lisani-glass-action {
     background: linear-gradient(
         145deg,
         rgba(255, 255, 255, 0.16) 0%,
@@ -1278,11 +1481,11 @@ html.preline-ui[class*="theme-"] div.lisani-glass-action {
         inset 0 1px 0 rgba(255, 255, 255, 0.18) !important;
 }
 
-html.preline-ui[class*="theme-"] #app-container button.theme-primary-btn:not(.lisani-segment-btn),
-html.preline-ui[class*="theme-"] #auth-container button.theme-primary-btn:not(.lisani-segment-btn),
-html.preline-ui[class*="theme-"] #edit-profile-container button.theme-primary-btn,
-html.preline-ui[class*="theme-"] #notif-settings-panel button.theme-primary-btn,
-html.preline-ui[class*="theme-"] .lisani-glass-action--primary {
+html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol)[class*="theme-"] #app-container button.theme-primary-btn:not(.lisani-segment-btn),
+html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol)[class*="theme-"] #auth-container button.theme-primary-btn:not(.lisani-segment-btn),
+html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol)[class*="theme-"] #edit-profile-container button.theme-primary-btn,
+html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol)[class*="theme-"] #notif-settings-panel button.theme-primary-btn,
+html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol)[class*="theme-"] .lisani-glass-action--primary {
     background: linear-gradient(
         145deg,
         rgba(var(--theme-primary-rgb), 0.38) 0%,
@@ -1633,6 +1836,7 @@ html.preline-ui[class*="theme-"] #wa-mesajlar-overlay .wa-send-btn.lisani-glass-
 #auth-container:not(.hidden) {
     display: flex !important;
     flex-direction: column;
+    align-items: center;
     z-index: 60;
     background-color: var(--theme-bg-phone, var(--ph-bg, #0f0f12));
     isolation: isolate;
@@ -2033,5 +2237,2109 @@ html.preline-ui[class*="theme-"] #wa-mesajlar-overlay .wa-send-btn.lisani-glass-
     .lisani-screens--hoca-dash .hoca-dash__layout,
     .hoca-dash__layout {
         min-height: 100%;
+    }
+
+    /* Ana sayfa — PC: seri profilde, banner gizli, çeviri kartı görünür */
+    .lisani-home-streak-banner {
+        display: none !important;
+    }
+
+    .lisani-home-osm-card {
+        display: block !important;
+    }
+
+    #tab-osm-translate {
+        display: none !important;
+    }
+
+    .lisani-home-profile-card {
+        padding: 1rem 1.25rem !important;
+        overflow: visible !important;
+    }
+
+    .lisani-home-profile-stats {
+        gap: 0.55rem;
+    }
+
+    #home-daily-goal-trigger.home-streak-box--profile {
+        display: flex !important;
+        min-width: 4.25rem;
+        padding: 0.55rem 0.7rem !important;
+        background: rgba(251, 146, 60, 0.12);
+        border: 1px solid rgba(251, 146, 60, 0.35);
+    }
+
+    #home-daily-goal-trigger.home-streak-box--profile .home-warn-icon {
+        width: 1.2rem !important;
+        height: 1.2rem !important;
+        color: #fb923c;
+    }
+
+    #home-letter-streak {
+        font-size: 0.65rem;
+        letter-spacing: 0.02em;
+        color: var(--ph-text, #f8fafc);
+    }
+
+    .home-score-box {
+        min-width: 5.75rem;
+        padding: 0.55rem 0.75rem !important;
+    }
+
+    /* Mesajlar & ödevler — daha ince kart */
+    .lisani-home-mesajlar-card,
+    .lisani-home-odevler-card {
+        padding: 0.75rem 0.9rem !important;
+        border-radius: 1.15rem !important;
+    }
+
+    .lisani-home-mesajlar-card .lisani-home-card-icon {
+        width: 2.25rem !important;
+        height: 2.25rem !important;
+        border-radius: 0.65rem !important;
+    }
+
+    .lisani-home-mesajlar-card .lisani-home-card-icon i,
+    .lisani-home-mesajlar-card .lisani-home-card-icon svg {
+        width: 1rem !important;
+        height: 1rem !important;
+    }
+
+    .lisani-home-card-title {
+        font-size: 0.7rem !important;
+        font-weight: 600 !important;
+    }
+
+    .lisani-home-mesajlar-card p,
+    .lisani-home-odevler-card p,
+    .lisani-home-odevler-card span {
+        font-weight: 500 !important;
+    }
+
+    .lisani-home-odevler-card .lisani-glass-panel.lisani-glass-card {
+        padding: 0.55rem 0.65rem !important;
+        border-radius: 0.85rem !important;
+    }
+
+    .lisani-home-odevler-card .lisani-glass-panel p {
+        font-size: 0.68rem !important;
+        font-weight: 500 !important;
+    }
+
+    .lisani-home-odevler-card #home-odevler-list {
+        max-height: 9.5rem;
+    }
+}
+
+.lisani-home-osm-card {
+    display: none;
+}
+
+.lisani-daily-goal-popover {
+    position: fixed;
+    z-index: 9999;
+    width: min(16rem, calc(100vw - 1.5rem));
+    padding: 0.85rem;
+    border-radius: 1rem;
+    border: 1px solid rgba(var(--theme-primary-rgb, 198, 156, 109), 0.35);
+    background: var(--ph-surface, #16121c);
+    box-shadow: 0 18px 48px rgba(0, 0, 0, 0.55);
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+    pointer-events: auto;
+}
+
+.lisani-daily-goal-popover.hidden {
+    display: none !important;
+}
+
+.lisani-daily-goal-popover__title {
+    font-size: 0.68rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--ph-primary, var(--theme-primary));
+    margin: 0;
+}
+
+.lisani-daily-goal-popover__task-title {
+    font-size: 0.82rem;
+    font-weight: 800;
+    color: var(--ph-text, var(--theme-text-main));
+    margin: 0;
+    line-height: 1.35;
+}
+
+.lisani-daily-goal-popover__text {
+    font-size: 0.68rem;
+    line-height: 1.45;
+    color: var(--ph-muted, #94a3b8);
+    margin: 0;
+}
+
+.lisani-daily-goal-popover__reward {
+    font-size: 0.62rem;
+    font-weight: 700;
+    color: #fbbf24;
+    margin: 0;
+}
+
+.lisani-daily-goal-popover__progress {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.62rem;
+    font-weight: 700;
+    color: var(--ph-muted, #94a3b8);
+    margin: 0;
+    padding: 0.35rem 0.5rem;
+    border-radius: 0.5rem;
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.lisani-daily-goal-popover__btn {
+    display: block;
+    width: 100%;
+    margin-top: 0.15rem;
+    padding: 0.55rem 0.75rem;
+    border: none;
+    border-radius: 0.75rem;
+    font-size: 0.68rem;
+    font-weight: 800;
+    cursor: pointer;
+    color: var(--ph-text, #fff);
+    background: rgba(var(--theme-primary-rgb, 198, 156, 109), 0.22);
+    border: 1px solid rgba(var(--theme-primary-rgb, 198, 156, 109), 0.45);
+    transition: background 0.15s ease, transform 0.12s ease;
+}
+
+.lisani-daily-goal-popover__btn:hover:not(:disabled) {
+    background: rgba(var(--theme-primary-rgb, 198, 156, 109), 0.32);
+}
+
+.lisani-daily-goal-popover__btn:active:not(:disabled) {
+    transform: scale(0.98);
+}
+
+.lisani-daily-goal-popover__btn:disabled {
+    opacity: 0.55;
+    cursor: default;
+}
+
+#home-daily-goal-trigger.home-streak-box--profile {
+    display: flex;
+    min-width: 4rem;
+    padding: 0.5rem 0.65rem;
+    background: rgba(251, 146, 60, 0.12);
+    border: 1px solid rgba(251, 146, 60, 0.35);
+}
+
+#home-daily-goal-trigger.home-streak-box--profile .home-warn-icon {
+    width: 1.15rem;
+    height: 1.15rem;
+    color: #fb923c;
+}
+
+/* ═══ Öğrenmeye Başla — tema uyumlu cam buton ═══ */
+.lisani-learn-start-home {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+    padding: 0.15rem 0;
+}
+
+.lisani-learn-start-cta {
+    position: relative;
+    width: 100%;
+    min-height: 3.75rem;
+    border: 2px solid rgba(var(--theme-primary-rgb, 198, 156, 109), 0.55);
+    border-radius: 1.25rem;
+    padding: 0;
+    cursor: pointer;
+    overflow: hidden;
+    background: linear-gradient(
+        145deg,
+        rgba(var(--theme-primary-rgb, 198, 156, 109), 0.42) 0%,
+        rgba(var(--theme-primary-rgb, 198, 156, 109), 0.2) 50%,
+        rgba(var(--theme-primary-rgb, 198, 156, 109), 0.1) 100%
+    );
+    backdrop-filter: blur(22px) saturate(170%);
+    -webkit-backdrop-filter: blur(22px) saturate(170%);
+    box-shadow:
+        0 14px 40px rgba(0, 0, 0, 0.38),
+        0 0 0 1px rgba(var(--theme-primary-rgb, 198, 156, 109), 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.22);
+    transition: transform 0.12s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.lisani-learn-start-cta:hover {
+    border-color: rgba(var(--theme-primary-rgb, 198, 156, 109), 0.75);
+    box-shadow:
+        0 18px 44px rgba(0, 0, 0, 0.42),
+        0 0 24px rgba(var(--theme-primary-rgb, 198, 156, 109), 0.28),
+        inset 0 1px 0 rgba(255, 255, 255, 0.28);
+}
+
+.lisani-learn-start-cta:active {
+    transform: scale(0.98);
+}
+
+.lisani-learn-start-cta__inner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    padding: 1.15rem 1.35rem;
+    color: var(--ph-text, var(--theme-text-main));
+}
+
+.lisani-learn-start-cta__icon {
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: 999px;
+    background: rgba(var(--theme-primary-rgb, 198, 156, 109), 0.28);
+    border: 1px solid rgba(var(--theme-primary-rgb, 198, 156, 109), 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--ph-primary, var(--theme-primary));
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+.lisani-learn-start-cta__label {
+    font-size: 1.15rem;
+    font-weight: 900;
+    letter-spacing: 0.02em;
+    color: var(--ph-primary, var(--theme-primary));
+    text-shadow: 0 1px 12px rgba(var(--theme-primary-rgb, 198, 156, 109), 0.35);
+}
+
+/* Tam ekran Oyna */
+.lisani-learn-play-screen {
+    background: #131f24;
+}
+
+.lisani-learn-play-screen:not(.hidden) {
+    display: flex;
+}
+
+body.lisani-play-screen-open {
+    overflow: hidden;
+}
+
+.lisani-play-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.65rem 0.85rem;
+    background: #131f24;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.lisani-play-topbar__close {
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 0.65rem;
+    border: none;
+    background: rgba(255, 255, 255, 0.08);
+    color: #94a3b8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.lisani-play-topbar__stats {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    flex: 1;
+    justify-content: flex-end;
+}
+
+.lisani-play-stat {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.78rem;
+    font-weight: 800;
+    color: #e2e8f0;
+}
+
+.lisani-play-stat--level {
+    min-width: 1.85rem;
+    height: 1.85rem;
+    border-radius: 0.5rem;
+    justify-content: center;
+    color: #fff;
+    font-size: 0.72rem;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.lisani-play-stat--lv1 { background: linear-gradient(180deg, #61e002, #58cc02); box-shadow: 0 2px 0 #46a302; }
+.lisani-play-stat--lv2 { background: linear-gradient(180deg, #3dc2ff, #1cb0f6); box-shadow: 0 2px 0 #1899d6; }
+.lisani-play-stat--lv3 { background: linear-gradient(180deg, #d9a3ff, #ce82ff); box-shadow: 0 2px 0 #a855f7; }
+
+.lisani-play-stat--flame {
+    color: #fb923c;
+}
+
+.lisani-play-stat--flame i {
+    color: #fb923c;
+}
+
+.lisani-play-stat--xp {
+    color: #fbbf24;
+}
+
+.lisani-play-stat--xp i {
+    color: #fbbf24;
+}
+
+.lisani-learn-play-scroll {
+    -webkit-overflow-scrolling: touch;
+}
+
+.lisani-play-zone__root {
+    min-height: 100%;
+}
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.lisani-play-wrap {
+    background: #131f24;
+    color: #fff;
+    min-height: 100%;
+    padding-bottom: 1.5rem;
+}
+
+/* Seviye seçici — üstte küçük rozetler */
+.lisani-play-dock {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.65rem 0.75rem 0.35rem;
+    background: #0f181c;
+}
+
+.lisani-play-lv {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 0.55rem;
+    border: 2px solid transparent;
+    opacity: 0.45;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.15s, transform 0.15s, border-color 0.15s;
+}
+
+.lisani-play-lv__num {
+    font-size: 0.72rem;
+    font-weight: 900;
+    color: #fff;
+}
+
+.lisani-play-lv--lv1 { background: linear-gradient(180deg, #61e002, #58cc02); box-shadow: 0 3px 0 #46a302; }
+.lisani-play-lv--lv2 { background: linear-gradient(180deg, #3dc2ff, #1cb0f6); box-shadow: 0 3px 0 #1899d6; }
+.lisani-play-lv--lv3 { background: linear-gradient(180deg, #d9a3ff, #ce82ff); box-shadow: 0 3px 0 #a855f7; }
+
+.lisani-play-lv.is-on {
+    opacity: 1;
+    transform: scale(1.06);
+    border-color: rgba(255, 255, 255, 0.55);
+}
+
+/* Ünite başlık bandı */
+.lisani-play-unit {
+    display: flex;
+    align-items: stretch;
+    margin: 0.5rem 0.75rem 0;
+    border-radius: 1rem;
+    overflow: hidden;
+    min-height: 4.5rem;
+}
+
+.lisani-play-wrap--lv1 .lisani-play-unit { background: #58cc02; box-shadow: 0 5px 0 #46a302; }
+.lisani-play-wrap--lv2 .lisani-play-unit { background: #1cb0f6; box-shadow: 0 5px 0 #1899d6; }
+.lisani-play-wrap--lv3 .lisani-play-unit { background: #ce82ff; box-shadow: 0 5px 0 #a855f7; }
+
+.lisani-play-unit__body {
+    flex: 1;
+    padding: 0.85rem 1rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-width: 0;
+}
+
+.lisani-play-unit__kicker {
+    font-size: 0.62rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin: 0;
+    opacity: 0.95;
+    color: rgba(255, 255, 255, 0.92);
+}
+
+.lisani-play-unit__title {
+    font-size: 1.05rem;
+    font-weight: 800;
+    margin: 0.2rem 0 0;
+    line-height: 1.2;
+    color: #fff;
+}
+
+.lisani-play-unit__divider {
+    width: 2px;
+    background: rgba(0, 0, 0, 0.12);
+    margin: 0.65rem 0;
+    flex-shrink: 0;
+}
+
+.lisani-play-unit__guide {
+    width: 3.5rem;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255, 255, 255, 0.92);
+    background: rgba(0, 0, 0, 0.08);
+    border: none;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.lisani-play-unit__guide:hover {
+    background: rgba(0, 0, 0, 0.14);
+}
+
+/* Yol sahnesi */
+.lisani-play-scene {
+    position: relative;
+    margin-top: 0.35rem;
+    padding: 0.75rem 0.5rem 1rem;
+    background: radial-gradient(ellipse 80% 50% at 50% 0%, rgba(255, 255, 255, 0.03), transparent 70%);
+}
+
+.lisani-play-path {
+    position: relative;
+    min-height: 26rem;
+    height: 26rem;
+    width: 100%;
+}
+
+@media (min-width: 1024px) {
+    .lisani-play-path {
+        min-height: 30rem;
+        height: 30rem;
+    }
+}
+
+/* Yol çizgileri — kalın, Duolingo gibi */
+.lisani-play-trail {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    pointer-events: none;
+    overflow: visible;
+}
+
+.lisani-play-trail__shadow {
+    opacity: 1;
+}
+
+.lisani-play-trail__seg {
+    opacity: 1;
+}
+
+.lisani-play-stop {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    z-index: 2;
+}
+
+.lisani-play-stop__inner {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* 3D ders düğmesi */
+.lisani-play-node {
+    position: relative;
+    z-index: 1;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+
+.lisani-play-node--lesson {
+    width: 4.35rem;
+    height: 4.35rem;
+    border-radius: 999px;
+}
+
+.lisani-play-node--lv1.lisani-play-node--active,
+.lisani-play-node--lv1.lisani-play-node--completed {
+    background: linear-gradient(180deg, #61e002 0%, #58cc02 68%, #4cad02 100%);
+    box-shadow: 0 6px 0 #46a302, 0 10px 20px rgba(0, 0, 0, 0.25);
+}
+
+.lisani-play-node--lv2.lisani-play-node--active,
+.lisani-play-node--lv2.lisani-play-node--completed {
+    background: linear-gradient(180deg, #3dc2ff 0%, #1cb0f6 68%, #14a0e6 100%);
+    box-shadow: 0 6px 0 #1899d6, 0 10px 20px rgba(0, 0, 0, 0.25);
+}
+
+.lisani-play-node--lv3.lisani-play-node--active,
+.lisani-play-node--lv3.lisani-play-node--completed {
+    background: linear-gradient(180deg, #d9a3ff 0%, #ce82ff 68%, #b86ef0 100%);
+    box-shadow: 0 6px 0 #a855f7, 0 10px 20px rgba(0, 0, 0, 0.25);
+}
+
+.lisani-play-node--lesson:active:not(:disabled) {
+    transform: translateY(4px);
+}
+
+.lisani-play-node--lv1.lisani-play-node--lesson:active:not(:disabled) { box-shadow: 0 2px 0 #46a302; }
+.lisani-play-node--lv2.lisani-play-node--lesson:active:not(:disabled) { box-shadow: 0 2px 0 #1899d6; }
+.lisani-play-node--lv3.lisani-play-node--lesson:active:not(:disabled) { box-shadow: 0 2px 0 #a855f7; }
+
+.lisani-play-node--locked {
+    background: #4b4f57 !important;
+    box-shadow: 0 5px 0 #3a3e46 !important;
+    color: #6b7280 !important;
+    cursor: not-allowed;
+    filter: saturate(0.2);
+}
+
+.lisani-play-node.is-current {
+    animation: lisani-play-bounce 2s ease-in-out infinite;
+}
+
+.lisani-play-node__face {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.lisani-play-node__ico {
+    width: 1.65rem !important;
+    height: 1.65rem !important;
+    stroke-width: 2.5px;
+}
+
+.lisani-play-node__ico--star {
+    fill: rgba(255, 255, 255, 0.95);
+    stroke: #fff;
+}
+
+/* İlerleme halkası */
+.lisani-play-ring {
+    position: absolute;
+    width: 5.15rem;
+    height: 5.15rem;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+.lisani-play-ring__track {
+    stroke: rgba(255, 255, 255, 0.2);
+}
+
+.lisani-play-ring__fill--lv1 { stroke: #8ee000; }
+.lisani-play-ring__fill--lv2 { stroke: #7dd3fc; }
+.lisani-play-ring__fill--lv3 { stroke: #e9d5ff; }
+
+/* Boss / ünite sınavı */
+.lisani-play-node--boss {
+    width: 4.75rem;
+    height: 4.25rem;
+    border-radius: 1.1rem;
+    background: #4b4f57;
+    box-shadow: 0 5px 0 #3a3e46;
+}
+
+.lisani-play-node--boss.lisani-play-node--active,
+.lisani-play-node--boss.lisani-play-node--completed {
+    background: linear-gradient(180deg, #61e002, #58cc02);
+    box-shadow: 0 6px 0 #46a302;
+    filter: none;
+}
+
+.lisani-play-wrap--lv2 .lisani-play-node--boss.lisani-play-node--active,
+.lisani-play-wrap--lv2 .lisani-play-node--boss.lisani-play-node--completed {
+    background: linear-gradient(180deg, #3dc2ff, #1cb0f6);
+    box-shadow: 0 6px 0 #1899d6;
+}
+
+.lisani-play-wrap--lv3 .lisani-play-node--boss.lisani-play-node--active,
+.lisani-play-wrap--lv3 .lisani-play-node--boss.lisani-play-node--completed {
+    background: linear-gradient(180deg, #d9a3ff, #ce82ff);
+    box-shadow: 0 6px 0 #a855f7;
+}
+
+.lisani-play-mascot {
+    font-size: 2rem;
+    line-height: 1;
+    filter: grayscale(1) opacity(0.55);
+}
+
+.lisani-play-node--boss.lisani-play-node--active .lisani-play-mascot,
+.lisani-play-node--boss.lisani-play-node--completed .lisani-play-mascot {
+    filter: none;
+}
+
+/* Yıldızlar */
+.lisani-play-stars {
+    display: flex;
+    gap: 0.28rem;
+    margin-top: 0.4rem;
+}
+
+.lisani-play-stars span {
+    width: 0.55rem;
+    height: 0.55rem;
+    clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+    background: #4b5563;
+}
+
+.lisani-play-stars--gold span.is-on {
+    background: #ffc800;
+}
+
+.lisani-play-stars--locked span {
+    background: #374151;
+    opacity: 0.7;
+}
+
+/* Alt ilerleme */
+.lisani-play-footer {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 0.35rem;
+    padding: 0.5rem 0.75rem 0.85rem;
+    background: #0f181c;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.lisani-play-footer__pct {
+    font-size: 0.8rem;
+    font-weight: 900;
+    color: #94a3b8;
+}
+
+.lisani-play-wrap--lv1 .lisani-play-footer__pct { color: #58cc02; }
+.lisani-play-wrap--lv2 .lisani-play-footer__pct { color: #1cb0f6; }
+.lisani-play-wrap--lv3 .lisani-play-footer__pct { color: #ce82ff; }
+
+.lisani-play-footer__label {
+    font-size: 0.62rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #64748b;
+}
+
+/* Onboarding */
+.lisani-play-onboard {
+    padding: 1.25rem 1rem 1.5rem;
+    background: #131f24;
+    text-align: center;
+}
+
+.lisani-play-onboard__hero h4 {
+    font-size: 1rem;
+    font-weight: 800;
+    color: #f8fafc;
+    margin: 0.5rem 0 0.35rem;
+}
+
+.lisani-play-onboard__hero p {
+    font-size: 0.72rem;
+    color: #94a3b8;
+    line-height: 1.45;
+    margin: 0 0 1rem;
+}
+
+.lisani-play-onboard__emoji {
+    font-size: 2.25rem;
+}
+
+.lisani-play-onboard__btn {
+    width: 100%;
+    padding: 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.8rem;
+    font-weight: 800;
+    margin-bottom: 0.5rem;
+    border: 2px solid #374151;
+    background: #1f2937;
+    color: #e2e8f0;
+    box-shadow: 0 4px 0 #111827;
+}
+
+.lisani-play-onboard__btn--primary {
+    background: #58cc02;
+    border-color: #46a302;
+    color: #fff;
+    box-shadow: 0 4px 0 #46a302;
+}
+
+.lisani-play-onboard__btn:active {
+    transform: translateY(2px);
+    box-shadow: 0 2px 0 #111827;
+}
+
+.lisani-play-onboard__btn--primary:active {
+    box-shadow: 0 2px 0 #46a302;
+}
+
+@keyframes lisani-play-bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-3px); }
+}
+
+@media (min-width: 1024px) {
+    .lisani-play-node--lesson {
+        width: 4.85rem;
+        height: 4.85rem;
+    }
+}
+
+.lisani-learn-start-card {
+    border-color: rgba(255, 255, 255, 0.08);
+}
+
+/* Mobil: çeviri kartı gizli; günlük görev profil kartındaki ateşten */
+@media (max-width: 1023.98px) {
+    .lisani-home-osm-card {
+        display: none !important;
+    }
+}
+
+/* ═══ Bölüm tabanlı quiz — görsel, eşleştirme, ses ═══ */
+.lisani-quiz-visual-emoji {
+    font-size: 4.5rem;
+    line-height: 1;
+    margin: 0.25rem auto 0.5rem;
+    filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.25));
+}
+
+.lisani-match-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+}
+
+.lisani-match-grid__col {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.lisani-match-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    min-height: 4.5rem;
+    padding: 0.65rem 0.5rem;
+    border-radius: 1rem;
+    border: 1px solid var(--theme-border);
+    background: rgba(255, 255, 255, 0.04);
+    font-size: 0.7rem;
+    font-weight: 700;
+    transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+}
+
+.lisani-match-card--osm .lisani-match-card__word {
+    font-size: 1.35rem;
+}
+
+.lisani-match-card__emoji {
+    font-size: 1.75rem;
+    line-height: 1;
+}
+
+.lisani-match-card.is-selected {
+    border-color: var(--theme-primary);
+    background: rgba(var(--theme-primary-rgb), 0.12);
+    transform: scale(1.02);
+}
+
+.lisani-match-card.is-matched {
+    opacity: 0.55;
+    border-color: rgba(16, 185, 129, 0.5);
+    pointer-events: none;
+}
+
+.lisani-match-card.is-wrong {
+    animation: lisani-match-shake 0.35s ease;
+    border-color: rgba(239, 68, 68, 0.6);
+}
+
+@keyframes lisani-match-shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-4px); }
+    75% { transform: translateX(4px); }
+}
+
+.lisani-voice-mic-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    width: 100%;
+    max-width: 12rem;
+    margin: 0 auto;
+    padding: 1.25rem 1rem;
+    border-radius: 1.25rem;
+    border: 2px solid rgba(var(--theme-primary-rgb), 0.35);
+    background: rgba(var(--theme-primary-rgb), 0.1);
+    color: var(--theme-primary);
+    font-size: 0.7rem;
+    font-weight: 800;
+}
+
+.lisani-voice-mic-btn:active {
+    transform: scale(0.98);
+}
+
+.lisani-voice-status.is-listening {
+    color: var(--theme-primary);
+    animation: pulse 1.2s ease infinite;
+}
+
+.lisani-voice-mic-btn.is-listening {
+    border-color: rgba(82, 180, 140, 0.65);
+    background: rgba(52, 140, 100, 0.18);
+    animation: pulse 1.2s ease infinite;
+}
+
+/* Quiz — profesyonel tip rozeti & konuşma paneli */
+.lisani-quiz-type-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 0.5rem;
+    padding: 0.25rem 0.65rem;
+    border-radius: 9999px;
+    font-size: 0.5625rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    border: 1px solid rgba(var(--theme-primary-rgb, 198, 156, 109), 0.35);
+    background: rgba(var(--theme-primary-rgb, 198, 156, 109), 0.12);
+    color: var(--theme-primary);
+}
+
+.lisani-quiz-type-badge--speak {
+    border-color: rgba(82, 140, 140, 0.4);
+    background: rgba(52, 120, 120, 0.14);
+    color: #8fd4d4;
+}
+
+.lisani-quiz-type-badge--tiles {
+    border-color: rgba(139, 92, 246, 0.4);
+    background: rgba(139, 92, 246, 0.12);
+    color: #c4b5fd;
+}
+
+.lisani-quiz-type-badge--letter {
+    border-color: rgba(59, 130, 246, 0.35);
+    background: rgba(59, 130, 246, 0.1);
+    color: #93c5fd;
+}
+
+#screen-tests .lisani-quiz-arabic {
+    font-family: 'Noto Naskh Arabic', 'Amiri', 'Scheherazade New', serif;
+    letter-spacing: 0.02em;
+    word-spacing: 0.08em;
+}
+
+.lisani-bolum-scene {
+    min-height: 0;
+    padding: 0;
+    background: transparent;
+}
+
+.lisani-bolum-dots-row {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    width: 100%;
+    max-width: 19.5rem;
+    margin: 0 auto;
+    padding: 0.25rem 0.5rem 0.75rem;
+}
+
+.lisani-bolum-worm-wrap {
+    height: 6.75rem;
+    margin: 0.65rem auto;
+    width: 4.75rem;
+    flex-shrink: 0;
+    align-self: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    color: rgba(255, 255, 255, 0.92);
+    opacity: 1;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.35));
+}
+
+.lisani-bolum-worm-wrap--right,
+.lisani-bolum-worm-wrap--left {
+    transform: none;
+}
+
+.lisani-bolum-worm-wrap--sub {
+    height: 4.25rem;
+    width: 3.25rem;
+    margin: 0.35rem auto;
+}
+
+.lisani-bolum-worm-wrap--tur {
+    height: 6.75rem;
+    width: 4.75rem;
+    margin: 0.65rem auto;
+}
+
+.lisani-bolum-worm {
+    width: 100%;
+    height: 100%;
+    display: block;
+    overflow: visible;
+}
+
+.lisani-bolum-tur-block + .lisani-bolum-worm-wrap--tur {
+    margin-top: 0.75rem;
+    margin-bottom: 0.75rem;
+}
+
+html.preline-ui.theme-duolingo .lisani-bolum-worm-wrap {
+    color: rgba(255, 255, 255, 0.88);
+}
+
+/* Tur bloğu — başlık tam genişlik, yol altta */
+.lisani-bolum-tur-block {
+    --path-w: 100%;
+    --node: 3.85rem;
+    --path-gap: 2.35rem;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    max-width: 19.5rem;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/*
+ * Yuvarlak yolu (1→5):
+ * 1 ortanın biraz solu · 2 sol · 3 sol · 4 solun biraz sağı · 5 orta
+ * Tur 2,4 ayna görüntüsü
+ */
+.lisani-bolum-tur-block--c-reverse {
+    --s1: 42%;
+    --s2: 4%;
+    --s3: 8%;
+    --s4: 26%;
+    --s5: 50%;
+}
+
+.lisani-bolum-tur-block--c-normal {
+    --s1: 58%;
+    --s2: 96%;
+    --s3: 92%;
+    --s4: 74%;
+    --s5: 50%;
+}
+
+.lisani-bolum-tur-block + .lisani-bolum-tur-block {
+    margin-top: 2.25rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.lisani-bolum-node-track {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--path-gap);
+    width: 100%;
+    margin: 0.85rem 0 0;
+    padding-bottom: 0.35rem;
+    position: relative;
+    z-index: 1;
+    background: none;
+}
+
+.lisani-bolum-node-track::before,
+.lisani-bolum-node-track::after {
+    content: none !important;
+    display: none !important;
+}
+
+.lisani-bolum-path-wrap {
+    position: relative;
+    width: 100%;
+}
+
+/* Sandık — yolun sağında (2-3. düğüm hizası) */
+.lisani-bolum-chest {
+    position: absolute;
+    right: 0.15rem;
+    top: 36%;
+    z-index: 3;
+    width: 3.35rem;
+    height: 3.35rem;
+    border: none;
+    border-radius: 0.85rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    padding: 0;
+    background: linear-gradient(180deg, #fbbf24 0%, #d97706 100%);
+    box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.35), 0 5px 0 #b45309, 0 8px 16px rgba(0, 0, 0, 0.28);
+    transition: transform 0.12s ease, filter 0.12s ease;
+}
+
+.lisani-bolum-chest__icon {
+    font-size: 1.45rem;
+    line-height: 1;
+    filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.25));
+}
+
+.lisani-bolum-chest.is-ready {
+    animation: lisaniChestPulse 1.4s ease-in-out infinite;
+}
+
+.lisani-bolum-chest.is-ready:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.06);
+}
+
+.lisani-bolum-chest.is-ready:active {
+    transform: translateY(3px);
+    box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.28), 0 2px 0 #b45309;
+}
+
+.lisani-bolum-chest.is-locked {
+    background: linear-gradient(180deg, #6b7280 0%, #4b5563 100%);
+    box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.12), 0 4px 0 #374151;
+    opacity: 0.72;
+    cursor: default;
+}
+
+.lisani-bolum-chest.is-opened {
+    background: linear-gradient(180deg, #9ca3af 0%, #6b7280 100%);
+    box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.15), 0 3px 0 #4b5563;
+    opacity: 0.55;
+    cursor: default;
+}
+
+.lisani-bolum-chest.is-hidden {
+    display: none;
+}
+
+@keyframes lisaniChestPulse {
+    0%, 100% { filter: brightness(1); }
+    50% { filter: brightness(1.14); }
+}
+
+/* Kilitli bölüm — gri */
+.lisani-bolum-tur-block.is-bolum-locked .lisani-bolum-dot-btn,
+.lisani-bolum-dot-btn.is-bolum-locked {
+    background: #4b4b4b !important;
+    box-shadow: inset 0 3px 0 rgba(255, 255, 255, 0.08), 0 6px 0 #3a3a3a !important;
+    color: rgba(255, 255, 255, 0.55) !important;
+    cursor: not-allowed;
+    filter: saturate(0.35);
+}
+
+.lisani-bolum-tur-block.is-bolum-locked .lisani-bolum-dot-btn__circle {
+    background: rgba(0, 0, 0, 0.22) !important;
+    color: rgba(255, 255, 255, 0.45);
+}
+
+.lisani-bolum-tur-block.is-bolum-locked .lisani-bolum-dot-btn__meta {
+    color: rgba(255, 255, 255, 0.42) !important;
+}
+
+/* Yuvarlak tur düğümleri — S yolu */
+.lisani-bolum-node {
+    position: relative;
+    width: 4.25rem;
+    height: 4.25rem;
+    flex-shrink: 0;
+    margin-top: 0.75rem;
+    margin-bottom: 0.15rem;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    font-size: 1.35rem;
+    font-weight: 900;
+    overflow: hidden;
+    transition: transform 0.14s ease, box-shadow 0.14s ease, filter 0.14s ease;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+.lisani-bolum-node--sub {
+    width: var(--node, 4.25rem);
+    height: var(--node, 4.25rem);
+    font-size: 1.05rem;
+    margin: 0;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 1;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.lisani-bolum-node--sub::before {
+    content: '';
+    position: absolute;
+    top: 0.2rem;
+    left: 14%;
+    right: 14%;
+    height: 42%;
+    border-radius: 50% 50% 42% 42% / 62% 62% 38% 38%;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.38) 0%, rgba(255, 255, 255, 0) 100%);
+    pointer-events: none;
+    z-index: 2;
+}
+
+.lisani-bolum-node__icon {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255, 255, 255, 0.95);
+    pointer-events: none;
+    z-index: 1;
+}
+
+.lisani-bolum-node__icon-svg {
+    width: 52%;
+    height: 52%;
+    display: block;
+    filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.18));
+}
+
+.lisani-bolum-node__num {
+    position: relative;
+    z-index: 1;
+    line-height: 1;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.lisani-bolum-node--sub:hover:not(:disabled) {
+    filter: brightness(1.08);
+    transform: translateY(-3px);
+}
+
+.lisani-bolum-node--sub:active:not(:disabled) {
+    transform: translateY(5px);
+    filter: brightness(0.96);
+}
+
+.lisani-bolum-tur--1.lisani-bolum-node--sub:active:not(:disabled) {
+    box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.22), 0 2px 0 #46a302 !important;
+}
+
+.lisani-bolum-tur--2.lisani-bolum-node--sub:active:not(:disabled) {
+    box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.22), 0 2px 0 #1899d6 !important;
+}
+
+.lisani-bolum-tur--3.lisani-bolum-node--sub:active:not(:disabled) {
+    box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.18), 0 2px 0 #a855f7 !important;
+}
+
+.lisani-bolum-tur--4.lisani-bolum-node--sub:active:not(:disabled) {
+    box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.22), 0 2px 0 #e68600 !important;
+}
+
+.lisani-bolum-tur--5.lisani-bolum-node--sub:active:not(:disabled) {
+    box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.22), 0 2px 0 #ea2b2b !important;
+}
+
+.lisani-bolum-node.is-path-complete {
+    opacity: 0.92;
+}
+
+.lisani-bolum-node.is-locked {
+    background: #4b4b4b !important;
+    box-shadow: inset 0 3px 0 rgba(255, 255, 255, 0.08), 0 8px 0 #3a3a3a !important;
+    cursor: not-allowed;
+    opacity: 0.78;
+    filter: saturate(0.4);
+}
+
+.lisani-bolum-node.is-locked .lisani-bolum-node__num {
+    color: rgba(255, 255, 255, 0.35);
+}
+
+.lisani-bolum-node:disabled {
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.lisani-bolum-node.is-highlight {
+    outline: 3px solid rgba(255, 255, 255, 0.95);
+    outline-offset: 4px;
+    animation: lisaniBolumPulse 1.1s ease-in-out 3;
+}
+
+/* Yuvarlaklar — tur bloğundaki --s1..--s5 ile hizalı */
+.lisani-bolum-tur-block .lisani-bolum-path-item--step-1 {
+    margin-left: max(0px, calc(var(--s1) - var(--node) / 2));
+}
+
+.lisani-bolum-tur-block .lisani-bolum-path-item--step-2 {
+    margin-left: max(0px, calc(var(--s2) - var(--node) / 2));
+}
+
+.lisani-bolum-tur-block .lisani-bolum-path-item--step-3 {
+    margin-left: max(0px, calc(var(--s3) - var(--node) / 2));
+}
+
+.lisani-bolum-tur-block .lisani-bolum-path-item--step-4 {
+    margin-left: max(0px, calc(var(--s4) - var(--node) / 2));
+}
+
+.lisani-bolum-tur-block .lisani-bolum-path-item--step-5 {
+    margin-left: max(0px, calc(var(--s5) - var(--node) / 2));
+}
+
+.lisani-bolum-node--sub:focus-visible {
+    outline: 3px solid rgba(255, 255, 255, 0.85);
+    outline-offset: 3px;
+}
+
+.lisani-bolum-dot-btn:focus-visible {
+    outline: 3px solid rgba(255, 255, 255, 0.85);
+    outline-offset: 3px;
+}
+
+#screen-tests .lisani-bolum-node.lisani-bolum-tur--1 { background: #58cc02 !important; box-shadow: inset 0 3px 0 rgba(255, 255, 255, 0.28), 0 8px 0 #46a302; }
+#screen-tests .lisani-bolum-node.lisani-bolum-tur--2 { background: #1cb0f6 !important; box-shadow: inset 0 3px 0 rgba(255, 255, 255, 0.28), 0 8px 0 #1899d6; }
+#screen-tests .lisani-bolum-node.lisani-bolum-tur--3 { background: #ce82ff !important; box-shadow: inset 0 3px 0 rgba(255, 255, 255, 0.22), 0 8px 0 #a855f7; color: #1a1028; }
+#screen-tests .lisani-bolum-node.lisani-bolum-tur--4 { background: #ff9600 !important; box-shadow: inset 0 3px 0 rgba(255, 255, 255, 0.28), 0 8px 0 #e68600; color: #2a1400; }
+#screen-tests .lisani-bolum-node.lisani-bolum-tur--5 { background: #ff4b4b !important; box-shadow: inset 0 3px 0 rgba(255, 255, 255, 0.28), 0 8px 0 #ea2b2b; }
+
+#screen-tests .lisani-bolum-node--sub.lisani-bolum-tur--1:hover:not(:disabled) { box-shadow: inset 0 3px 0 rgba(255, 255, 255, 0.3), 0 10px 0 #46a302 !important; }
+#screen-tests .lisani-bolum-node--sub.lisani-bolum-tur--2:hover:not(:disabled) { box-shadow: inset 0 3px 0 rgba(255, 255, 255, 0.3), 0 10px 0 #1899d6 !important; }
+#screen-tests .lisani-bolum-node--sub.lisani-bolum-tur--3:hover:not(:disabled) { box-shadow: inset 0 3px 0 rgba(255, 255, 255, 0.24), 0 10px 0 #a855f7 !important; }
+#screen-tests .lisani-bolum-node--sub.lisani-bolum-tur--4:hover:not(:disabled) { box-shadow: inset 0 3px 0 rgba(255, 255, 255, 0.3), 0 10px 0 #e68600 !important; }
+#screen-tests .lisani-bolum-node--sub.lisani-bolum-tur--5:hover:not(:disabled) { box-shadow: inset 0 3px 0 rgba(255, 255, 255, 0.3), 0 10px 0 #ea2b2b !important; }
+
+.lisani-bolum-node.lisani-bolum-tur--1 { background: #58cc02; box-shadow: inset 0 3px 0 rgba(255, 255, 255, 0.28), 0 8px 0 #46a302; }
+.lisani-bolum-node.lisani-bolum-tur--2 { background: #1cb0f6; box-shadow: inset 0 3px 0 rgba(255, 255, 255, 0.28), 0 8px 0 #1899d6; }
+.lisani-bolum-node.lisani-bolum-tur--3 { background: #ce82ff; box-shadow: inset 0 3px 0 rgba(255, 255, 255, 0.22), 0 8px 0 #a855f7; color: #1a1028; }
+.lisani-bolum-node.lisani-bolum-tur--4 { background: #ff9600; box-shadow: inset 0 3px 0 rgba(255, 255, 255, 0.28), 0 8px 0 #e68600; color: #2a1400; }
+.lisani-bolum-node.lisani-bolum-tur--5 { background: #ff4b4b; box-shadow: inset 0 3px 0 rgba(255, 255, 255, 0.28), 0 8px 0 #ea2b2b; }
+
+.lisani-bolum-tur--3 .lisani-bolum-node__icon,
+.lisani-bolum-tur--4 .lisani-bolum-node__icon {
+    color: rgba(255, 255, 255, 0.95);
+}
+
+.lisani-bolum-worm-wrap + .lisani-bolum-tur-block {
+    margin-top: 0.25rem;
+}
+
+.lisani-bolum-dot-btn {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+    min-height: 4.25rem;
+    margin: 0;
+    padding: 0.6rem 0.9rem 0.6rem 0.6rem;
+    border: none;
+    border-radius: 1rem;
+    cursor: pointer;
+    text-align: left;
+    color: #ffffff;
+    box-shadow: 0 5px 0 rgba(0, 0, 0, 0.22);
+    transition: transform 0.12s ease, box-shadow 0.12s ease, filter 0.12s ease;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+}
+
+.lisani-bolum-dot-btn:hover:not(.is-done) {
+    filter: brightness(1.06);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 0 rgba(0, 0, 0, 0.2);
+}
+
+.lisani-bolum-dot-btn:active:not(.is-done) {
+    transform: translateY(4px);
+    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.28);
+    filter: brightness(0.97);
+}
+
+.lisani-bolum-dot-btn.is-done {
+    cursor: default;
+    opacity: 0.62;
+    filter: saturate(0.75);
+    box-shadow: 0 4px 0 rgba(0, 0, 0, 0.18);
+}
+
+.lisani-bolum-tur-block .lisani-bolum-dot-btn {
+    width: 100%;
+    max-width: 100%;
+    flex-direction: row;
+    justify-content: flex-start;
+}
+
+.lisani-bolum-tur-block .lisani-bolum-dot-btn__text {
+    align-items: flex-start;
+    text-align: left;
+    flex: 1;
+}
+
+.lisani-bolum-dot-btn__circle {
+    width: 3.5rem;
+    height: 3.5rem;
+    aspect-ratio: 1 / 1;
+    flex-shrink: 0;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.35rem;
+    font-weight: 900;
+    background: rgba(255, 255, 255, 0.22);
+    border: 2px solid rgba(255, 255, 255, 0.35);
+    color: inherit;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+
+.lisani-bolum-dot-btn__text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    min-width: 0;
+    flex: 1;
+}
+
+.lisani-bolum-dot-btn__label {
+    font-size: 0.95rem;
+    font-weight: 900;
+    line-height: 1.2;
+    color: inherit;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
+    letter-spacing: 0.02em;
+}
+
+.lisani-bolum-dot-btn__meta {
+    font-size: 0.625rem;
+    font-weight: 700;
+    line-height: 1.35;
+    color: rgba(255, 255, 255, 0.88);
+    opacity: 0.95;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    max-width: 100%;
+}
+
+/* Her tur — düz renk, cam yok */
+#screen-tests .lisani-bolum-tur--1 { background: #58cc02 !important; box-shadow: 0 6px 0 #46a302; }
+#screen-tests .lisani-bolum-tur--2 { background: #1cb0f6 !important; box-shadow: 0 6px 0 #1899d6; }
+#screen-tests .lisani-bolum-tur--3 { background: #ce82ff !important; box-shadow: 0 6px 0 #a855f7; color: #1a1028; }
+#screen-tests .lisani-bolum-tur--4 { background: #ff9600 !important; box-shadow: 0 6px 0 #e68600; color: #2a1400; }
+#screen-tests .lisani-bolum-tur--5 { background: #ff4b4b !important; box-shadow: 0 6px 0 #ea2b2b; }
+
+.lisani-bolum-tur--1 { background: #58cc02; box-shadow: 0 6px 0 #46a302; }
+.lisani-bolum-tur--2 { background: #1cb0f6; box-shadow: 0 6px 0 #1899d6; }
+.lisani-bolum-tur--3 { background: #ce82ff; box-shadow: 0 6px 0 #a855f7; color: #1a1028; }
+.lisani-bolum-tur--3 .lisani-bolum-dot-btn__meta { color: rgba(26, 16, 40, 0.75); }
+.lisani-bolum-tur--4 { background: #ff9600; box-shadow: 0 6px 0 #e68600; color: #2a1400; }
+.lisani-bolum-tur--4 .lisani-bolum-dot-btn__meta { color: rgba(42, 20, 0, 0.75); }
+.lisani-bolum-tur--5 { background: #ff4b4b; box-shadow: 0 6px 0 #ea2b2b; }
+
+.lisani-bolum-tur--1:hover:not(.is-done) { box-shadow: 0 8px 0 #46a302; }
+.lisani-bolum-tur--2:hover:not(.is-done) { box-shadow: 0 8px 0 #1899d6; }
+.lisani-bolum-tur--3:hover:not(.is-done) { box-shadow: 0 8px 0 #a855f7; }
+.lisani-bolum-tur--4:hover:not(.is-done) { box-shadow: 0 8px 0 #e68600; }
+.lisani-bolum-tur--5:hover:not(.is-done) { box-shadow: 0 8px 0 #ea2b2b; }
+
+.lisani-bolum-tur--1:active:not(.is-done) { box-shadow: 0 2px 0 #46a302; }
+.lisani-bolum-tur--2:active:not(.is-done) { box-shadow: 0 2px 0 #1899d6; }
+.lisani-bolum-tur--3:active:not(.is-done) { box-shadow: 0 2px 0 #a855f7; }
+.lisani-bolum-tur--4:active:not(.is-done) { box-shadow: 0 2px 0 #e68600; }
+.lisani-bolum-tur--5:active:not(.is-done) { box-shadow: 0 2px 0 #ea2b2b; }
+
+html.preline-ui[class*="theme-"] .lisani-bolum-dot-btn {
+    background-image: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border: none !important;
+}
+
+.lisani-bolum-dot-btn.is-highlight {
+    outline: 3px solid rgba(255, 255, 255, 0.95);
+    outline-offset: 3px;
+    animation: lisaniBolumPulse 1.1s ease-in-out 3;
+}
+
+@keyframes lisaniBolumPulse {
+    0%, 100% { filter: brightness(1); }
+    50% { filter: brightness(1.12); }
+}
+
+.lisani-speak-panel {
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.lisani-speak-meter {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 0.28rem;
+    height: 3.5rem;
+    padding: 0.5rem 0.75rem;
+    border-radius: 1rem;
+    background: rgba(0, 0, 0, 0.22);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.lisani-speak-meter__bar {
+    display: block;
+    flex: 1;
+    max-width: 0.55rem;
+    height: 100%;
+    border-radius: 999px;
+    background: linear-gradient(180deg, var(--theme-primary, #58cc02) 0%, rgba(var(--theme-primary-rgb, 88, 204, 2), 0.55) 100%);
+    transform-origin: bottom center;
+    transform: scaleY(0.18);
+    opacity: 0.35;
+    transition: transform 0.06s ease-out, opacity 0.08s ease-out;
+    box-shadow: 0 0 8px rgba(var(--theme-primary-rgb, 88, 204, 2), 0.35);
+}
+
+html.preline-ui.theme-duolingo .lisani-speak-meter__bar {
+    background: linear-gradient(180deg, #58cc02 0%, #46a302 100%);
+    box-shadow: 0 0 10px rgba(88, 204, 2, 0.45);
+}
+
+.lisani-speak-timer-ring {
+    width: 3.25rem;
+    height: 3.25rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: conic-gradient(
+        rgba(var(--theme-primary-rgb, 198, 156, 109), 0.85) calc(var(--speak-pct, 100) * 1%),
+        rgba(255, 255, 255, 0.08) 0
+    );
+    position: relative;
+}
+
+.lisani-speak-timer-ring::after {
+    content: '';
+    position: absolute;
+    inset: 4px;
+    border-radius: 50%;
+    background: rgba(12, 12, 16, 0.92);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.lisani-speak-timer-ring__label {
+    position: relative;
+    z-index: 1;
+    font-size: 0.625rem;
+    font-weight: 800;
+    color: var(--theme-primary);
+}
+
+.lisani-voice-mic-btn--pro {
+    flex: 1;
+    max-width: none;
+    flex-direction: row;
+    padding: 0.875rem 1rem;
+    border-radius: 1rem;
+    font-size: 0.6875rem;
+    gap: 0.5rem;
+}
+
+#screen-tests .lisani-tiles-grid {
+    gap: 0.5rem;
+}
+
+#screen-tests .lisani-tile-chip {
+    min-height: 2.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.04);
+}
+
+html.preline-ui.theme-duolingo #screen-tests .lisani-tile-chip,
+html.preline-ui.theme-renkli-yol #screen-tests .lisani-tile-chip {
+    background: #23363f !important;
+    border: 2px solid #37464f !important;
+    backdrop-filter: none !important;
+}
+
+#screen-tests .lisani-tiles-answer {
+    min-height: 3rem;
+    background: rgba(0, 0, 0, 0.15);
+}
+
+/* Günlük çarkıfelek — ana sayfa mini + modal */
+#home-daily-wheel-trigger.home-wheel-box {
+    position: relative;
+    min-width: 4rem;
+    padding: 0.45rem 0.55rem;
+    background: rgba(251, 191, 36, 0.1);
+    border: 1px solid rgba(251, 191, 36, 0.35) !important;
+    transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease;
+    -webkit-tap-highlight-color: transparent;
+}
+
+#home-daily-wheel-label {
+    color: #fbbf24;
+}
+
+#home-daily-wheel-trigger.home-wheel-box.is-ready {
+    background: rgba(251, 191, 36, 0.18);
+    border-color: rgba(251, 191, 36, 0.6) !important;
+    box-shadow: 0 0 0 2px rgba(251, 191, 36, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+#home-daily-wheel-trigger.home-wheel-box.is-done {
+    opacity: 0.72;
+    filter: saturate(0.65);
+}
+
+#home-daily-wheel-trigger.home-wheel-box:active:not(:disabled) {
+    transform: scale(0.94);
+}
+
+.home-wheel-mini {
+    width: 2.35rem;
+    height: 2.35rem;
+    aspect-ratio: 1 / 1;
+    flex-shrink: 0;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 2px solid #111;
+    background: #fff;
+    box-shadow: 0 2px 0 rgba(0, 0, 0, 0.25);
+    pointer-events: none;
+}
+
+.home-wheel-mini svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+    aspect-ratio: 1 / 1;
+    object-fit: contain;
+}
+
+.lisani-carkifelek-panel {
+    background: #f8fafc !important;
+    border: 3px solid #111 !important;
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.45) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+html.preline-ui[class*="theme-"] .lisani-carkifelek-panel {
+    background: #1e293b !important;
+    border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+.lisani-carkifelek-stage {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    width: 100%;
+    max-width: 19.5rem;
+    margin: 0 auto;
+    padding: 0;
+}
+
+.lisani-carkifelek-pointer {
+    position: relative;
+    left: auto;
+    top: auto;
+    transform: none;
+    flex-shrink: 0;
+    width: 0;
+    height: 0;
+    border-top: 0.7rem solid transparent;
+    border-bottom: 0.7rem solid transparent;
+    border-right: 1.35rem solid #9ca3af;
+    border-left: none;
+    filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.35));
+    z-index: 4;
+    margin-right: -0.1rem;
+}
+
+.lisani-carkifelek-outer {
+    position: relative;
+    width: 17.5rem;
+    height: 17.5rem;
+    max-width: min(78vw, 17.5rem);
+    max-height: min(78vw, 17.5rem);
+    aspect-ratio: 1 / 1;
+    flex-shrink: 0;
+    border-radius: 50%;
+    border: 4px solid #111;
+    background: #fff;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.28);
+    overflow: hidden;
+}
+
+.lisani-carkifelek-disc {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    transform: rotate(0deg);
+    transform-origin: 50% 50%;
+}
+
+.lisani-carkifelek-disc svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+    aspect-ratio: 1 / 1;
+}
+
+.lisani-carkifelek-hub {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 4.25rem;
+    height: 4.25rem;
+    aspect-ratio: 1 / 1;
+    border-radius: 50%;
+    background: #ffffff;
+    border: 3px solid #111;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 3;
+    pointer-events: none;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    font-family: Arial, Helvetica, sans-serif;
+    line-height: 1.05;
+}
+
+.lisani-carkifelek-hub span {
+    font-size: 0.55rem;
+    font-weight: 900;
+    color: #111;
+    letter-spacing: 0.04em;
+}
+
+.lisani-carkifelek-spin-btn {
+    appearance: none;
+    border: 3px solid #111;
+    background: linear-gradient(180deg, #fbbf24 0%, #f59e0b 100%);
+    color: #111;
+    box-shadow: 0 5px 0 #b45309;
+    transition: transform 0.1s ease, box-shadow 0.1s ease;
+    cursor: pointer;
+}
+
+.lisani-carkifelek-spin-btn:active:not(:disabled) {
+    transform: translateY(3px);
+    box-shadow: 0 2px 0 #b45309;
+}
+
+.lisani-carkifelek-spin-btn.is-done {
+    background: linear-gradient(180deg, #e2e8f0 0%, #cbd5e1 100%);
+    box-shadow: 0 4px 0 #64748b;
+}
+
+.lisani-carkifelek-win {
+    color: #16a34a;
+}
+
+html.preline-ui[class*="theme-"] .lisani-carkifelek-hub {
+    background: #fff;
+}
+
+html.preline-ui[class*="theme-"] .lisani-carkifelek-hub span {
+    color: #111;
+}
+
+/* Hazır kelime kutucukları */
+.lisani-tiles-answer {
+    min-height: 2.75rem;
+    border: 1px dashed rgba(var(--theme-primary-rgb, 198, 156, 109), 0.35);
+    transition: border-color 0.25s ease, background 0.25s ease;
+}
+
+.lisani-tiles-answer--ok {
+    border-color: rgba(82, 180, 140, 0.55) !important;
+    background: rgba(52, 140, 100, 0.12) !important;
+}
+
+.lisani-tiles-answer--bad {
+    border-color: rgba(220, 100, 100, 0.55) !important;
+    background: rgba(180, 70, 70, 0.1) !important;
+    animation: lisani-match-shake 0.35s ease;
+}
+
+.lisani-tile-chip {
+    cursor: pointer;
+    transition: transform 0.12s ease, opacity 0.2s ease;
+    text-align: center;
+    line-height: 1.3;
+}
+
+.lisani-tile-chip:active:not(:disabled) {
+    transform: scale(0.97);
+}
+
+.lisani-tile-chip--picked {
+    background: rgba(var(--theme-primary-rgb, 198, 156, 109), 0.2);
+    border: 1px solid rgba(var(--theme-primary-rgb, 198, 156, 109), 0.4);
+    color: var(--theme-primary);
+}
+
+/* ===== Seviyemi Bul — tam ekran ===== */
+.lisani-placement-overlay:not(.hidden) {
+    display: flex !important;
+    flex-direction: column;
+    background: var(--theme-bg-phone, #131f24);
+    isolation: isolate;
+}
+
+.lisani-placement-fs {
+    background: var(--theme-bg-phone, #131f24);
+    color: var(--theme-text-main, #fff);
+}
+
+.lisani-placement-fs__track {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.lisani-placement-fs__fill {
+    background: var(--theme-primary, #58cc02);
+    box-shadow: 0 0 12px rgba(var(--theme-primary-rgb, 88, 204, 2), 0.45);
+}
+
+.lisani-placement-fs__body .lisani-placement-card {
+    margin-bottom: 0.25rem;
+}
+
+#placement-modal .lisani-placement-options {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+}
+
+#placement-modal .lisani-placement-option {
+    min-height: 3.5rem;
+    border-radius: 1rem !important;
+}
+
+/* ===== Renkli Yol & Duolingo — katı tema (cam kapalı) ===== */
+html.preline-ui.theme-duolingo,
+html.preline-ui.theme-renkli-yol,
+html.preline-ui.theme-duolingo body.lisani-body,
+html.preline-ui.theme-renkli-yol body.lisani-body,
+html.preline-ui.theme-duolingo .lisani-site-wrapper,
+html.preline-ui.theme-renkli-yol .lisani-site-wrapper,
+html.preline-ui.theme-duolingo #app-container,
+html.preline-ui.theme-renkli-yol #app-container,
+html.preline-ui.theme-duolingo .theme-bg-phone,
+html.preline-ui.theme-renkli-yol .theme-bg-phone {
+    background: var(--ph-bg, #12191d) !important;
+}
+
+html.preline-ui.theme-renkli-yol body.lisani-body {
+    background:
+        radial-gradient(ellipse 55% 42% at 12% 6%, rgba(28, 176, 246, 0.16) 0%, transparent 58%),
+        radial-gradient(ellipse 48% 38% at 90% 14%, rgba(206, 130, 255, 0.14) 0%, transparent 55%),
+        radial-gradient(ellipse 52% 36% at 78% 88%, rgba(255, 150, 0, 0.1) 0%, transparent 52%),
+        radial-gradient(ellipse 60% 40% at 8% 82%, rgba(88, 204, 2, 0.12) 0%, transparent 55%),
+        #12191d !important;
+}
+
+html.preline-ui.theme-duolingo .lisani-glass-panel,
+html.preline-ui.theme-renkli-yol .lisani-glass-panel,
+html.preline-ui.theme-duolingo .lisani-glass-action,
+html.preline-ui.theme-renkli-yol .lisani-glass-action,
+html.preline-ui.theme-duolingo button.lisani-glass-panel,
+html.preline-ui.theme-renkli-yol button.lisani-glass-panel,
+html.preline-ui.theme-duolingo button.lisani-glass-action,
+html.preline-ui.theme-renkli-yol button.lisani-glass-action,
+html.preline-ui.theme-duolingo #app-container .glass-card,
+html.preline-ui.theme-renkli-yol #app-container .glass-card,
+html.preline-ui.theme-duolingo #auth-container .glass-card,
+html.preline-ui.theme-renkli-yol #auth-container .glass-card,
+html.preline-ui.theme-duolingo .lisani-home-profile-card,
+html.preline-ui.theme-renkli-yol .lisani-home-profile-card,
+html.preline-ui.theme-duolingo .lisani-quiz-question,
+html.preline-ui.theme-renkli-yol .lisani-quiz-question,
+html.preline-ui.theme-duolingo .lisani-quiz-progress-wrap,
+html.preline-ui.theme-renkli-yol .lisani-quiz-progress-wrap,
+html.preline-ui.theme-duolingo .lisani-tests-header,
+html.preline-ui.theme-renkli-yol .lisani-tests-header,
+html.preline-ui.theme-duolingo .lisani-placement-card,
+html.preline-ui.theme-renkli-yol .lisani-placement-card {
+    background: #1c2c33 !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border: 2px solid #37464f !important;
+    box-shadow: none !important;
+}
+
+html.preline-ui.theme-duolingo .lisani-glass-action:not(.lisani-glass-action--primary):not(.lisani-glass-action--danger),
+html.preline-ui.theme-renkli-yol .lisani-glass-action:not(.lisani-glass-action--primary):not(.lisani-glass-action--danger) {
+    background: #23363f !important;
+    border: 2px solid #37464f !important;
+    color: #ffffff !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    box-shadow: none !important;
+}
+
+html.preline-ui.theme-duolingo .lisani-nav-bar,
+html.preline-ui.theme-renkli-yol .lisani-nav-bar,
+html.preline-ui.theme-duolingo #bottom-bar,
+html.preline-ui.theme-renkli-yol #bottom-bar {
+    background: var(--ph-bg, #12191d) !important;
+    border-top: 2px solid #37464f !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+html.preline-ui.theme-duolingo #bottom-bar .lisani-nav-tab.lisani-tab-active,
+html.preline-ui.theme-renkli-yol #bottom-bar .lisani-nav-tab.lisani-tab-active,
+html.preline-ui.theme-duolingo .lisani-nav-bar .lisani-nav-tab.lisani-tab-active,
+html.preline-ui.theme-renkli-yol .lisani-nav-bar .lisani-nav-tab.lisani-tab-active {
+    color: #58cc02 !important;
+    opacity: 1 !important;
+}
+
+html.preline-ui.theme-duolingo #tab-home.lisani-tab-active,
+html.preline-ui.theme-renkli-yol #tab-home.lisani-tab-active,
+html.preline-ui.theme-duolingo .lisani-nav-home-btn,
+html.preline-ui.theme-renkli-yol .lisani-nav-home-btn {
+    background: #58cc02 !important;
+    color: #12191d !important;
+    border-radius: 999px;
+}
+
+html.preline-ui.theme-duolingo .lisani-quiz-progress-track,
+html.preline-ui.theme-renkli-yol .lisani-quiz-progress-track {
+    background: #37464f !important;
+    border-radius: 999px;
+    height: 0.65rem;
+}
+
+html.preline-ui.theme-duolingo .lisani-quiz-progress-fill,
+html.preline-ui.theme-renkli-yol .lisani-quiz-progress-fill {
+    background: linear-gradient(90deg, #58cc02, #1cb0f6) !important;
+    border-radius: 999px;
+    box-shadow: 0 0 10px rgba(88, 204, 2, 0.4);
+}
+
+html.preline-ui.theme-duolingo .theme-text-muted,
+html.preline-ui.theme-renkli-yol .theme-text-muted,
+html.preline-ui.theme-duolingo .theme-text-muted *,
+html.preline-ui.theme-renkli-yol .theme-text-muted * {
+    color: #9bb0b8 !important;
+}
+
+html.preline-ui.theme-duolingo .theme-primary-color,
+html.preline-ui.theme-renkli-yol .theme-primary-color {
+    color: #58cc02 !important;
+}
+
+html.preline-ui.theme-duolingo .home-warn-icon,
+html.preline-ui.theme-renkli-yol .home-warn-icon,
+html.preline-ui.theme-duolingo .lisani-quiz-type-badge,
+html.preline-ui.theme-renkli-yol .lisani-quiz-type-badge {
+    color: #ffc800 !important;
+}
+
+html.preline-ui.theme-duolingo input,
+html.preline-ui.theme-renkli-yol input,
+html.preline-ui.theme-duolingo select,
+html.preline-ui.theme-renkli-yol select,
+html.preline-ui.theme-duolingo textarea,
+html.preline-ui.theme-renkli-yol textarea {
+    background: #23363f !important;
+    border: 2px solid #37464f !important;
+    color: #ffffff !important;
+    border-radius: 1rem !important;
+}
+
+html.preline-ui.theme-duolingo .lisani-learn-start-cta,
+html.preline-ui.theme-renkli-yol .lisani-learn-start-cta,
+html.preline-ui.theme-duolingo .lisani-glass-action--primary,
+html.preline-ui.theme-renkli-yol .lisani-glass-action--primary,
+html.preline-ui.theme-duolingo #screen-tests #tests-placement-btn,
+html.preline-ui.theme-renkli-yol #screen-tests #tests-placement-btn {
+    background: #58cc02 !important;
+    border: none !important;
+    border-bottom: 4px solid #46a302 !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    color: #ffffff !important;
+}
+
+html.preline-ui.theme-renkli-yol .lisani-glass-action--primary {
+    background: linear-gradient(180deg, #65d806, #58cc02) !important;
+}
+
+html.preline-ui.theme-duolingo .lisani-learn-start-cta__inner,
+html.preline-ui.theme-renkli-yol .lisani-learn-start-cta__inner {
+    color: #ffffff !important;
+}
+
+html.preline-ui.theme-duolingo .lisani-learn-start-cta__label,
+html.preline-ui.theme-renkli-yol .lisani-learn-start-cta__label {
+    color: #ffffff !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.03em;
+    text-shadow: none;
+}
+
+html.preline-ui.theme-duolingo .lisani-learn-start-cta__icon,
+html.preline-ui.theme-renkli-yol .lisani-learn-start-cta__icon {
+    color: #ffffff !important;
+    background: rgba(255, 255, 255, 0.22) !important;
+    border-color: rgba(255, 255, 255, 0.38) !important;
+}
+
+html.preline-ui.theme-duolingo .lisani-learn-start-cta__icon svg,
+html.preline-ui.theme-renkli-yol .lisani-learn-start-cta__icon svg {
+    color: #ffffff !important;
+    stroke: #ffffff !important;
+}
+
+html.preline-ui.theme-duolingo .lisani-screens,
+html.preline-ui.theme-renkli-yol .lisani-screens {
+    background: transparent !important;
+}
+
+html.preline-ui.theme-duolingo .lisani-glass-blob,
+html.preline-ui.theme-renkli-yol .lisani-glass-blob {
+    display: none !important;
+}
+
+html.preline-ui.theme-duolingo .lisani-quiz-feedback--ok,
+html.preline-ui.theme-renkli-yol .lisani-quiz-feedback--ok {
+    background: rgba(88, 204, 2, 0.15) !important;
+    border: 2px solid #58cc02 !important;
+    color: #58cc02 !important;
+}
+
+html.preline-ui.theme-duolingo .lisani-quiz-feedback--bad,
+html.preline-ui.theme-renkli-yol .lisani-quiz-feedback--bad {
+    background: rgba(255, 75, 75, 0.12) !important;
+    border: 2px solid #ff4b4b !important;
+    color: #ff4b4b !important;
+}
+
+html.preline-ui.theme-duolingo .lisani-placement-fs__close,
+html.preline-ui.theme-renkli-yol .lisani-placement-fs__close {
+    background: #23363f !important;
+    border: 2px solid #37464f !important;
+}
+
+html.preline-ui.theme-renkli-yol .theme-pick-btn.is-active {
+    background: linear-gradient(135deg, #58cc02, #1cb0f6) !important;
+    border: none !important;
+    border-bottom: 3px solid #1899d6 !important;
+    color: #fff !important;
+}
+
+html.preline-ui.theme-renkli-yol .lisani-bolum-dot-btn {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+@media (max-width: 1023.98px) {
+    html.preline-ui.theme-duolingo #bottom-bar.lisani-tab-bar-ios,
+    html.preline-ui.theme-renkli-yol #bottom-bar.lisani-tab-bar-ios,
+    html.preline-ui.theme-duolingo .lisani-nav-bar.lisani-tab-bar-ios,
+    html.preline-ui.theme-renkli-yol .lisani-nav-bar.lisani-tab-bar-ios {
+        background: var(--ph-bg, #12191d) !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+        border: 2px solid #37464f !important;
+        box-shadow: none !important;
+    }
+
+    html.preline-ui.theme-duolingo #bottom-bar.lisani-tab-bar-ios .lisani-nav-tab.lisani-tab-active,
+    html.preline-ui.theme-renkli-yol #bottom-bar.lisani-tab-bar-ios .lisani-nav-tab.lisani-tab-active {
+        background: rgba(88, 204, 2, 0.14) !important;
+        box-shadow: none !important;
+    }
+}
+
+@media (min-width: 1024px) {
+    html.preline-ui.theme-duolingo .lisani-nav-bar.lisani-tab-bar-ios,
+    html.preline-ui.theme-renkli-yol .lisani-nav-bar.lisani-tab-bar-ios {
+        background: var(--ph-bg, #12191d) !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+        border-right: 2px solid #37464f !important;
+        box-shadow: none !important;
     }
 }
