@@ -1220,12 +1220,15 @@
             const studentHint = document.getElementById('tests-student-hint');
             const placementBtn = document.getElementById('tests-placement-btn');
             const yoneticiBar = document.getElementById('tests-yonetici-sinif-bar');
-            const teacher = hasTeacherFeatures();
-            if (hint) hint.classList.toggle('hidden', !teacher);
-            if (studentHint) studentHint.classList.toggle('hidden', teacher);
-            if (placementBtn) placementBtn.classList.toggle('hidden', teacher);
-            if (yoneticiBar) yoneticiBar.classList.toggle('hidden', !isYoneticiUser());
-            if (isYoneticiUser() && typeof window.loadTestsYoneticiSinifSelect === 'function') {
+            const assignMode = isTestsAssignMode();
+            if (hint) hint.classList.toggle('hidden', !assignMode);
+            if (studentHint) studentHint.classList.toggle('hidden', assignMode);
+            if (placementBtn) placementBtn.classList.toggle('hidden', assignMode || isYoneticiUser());
+            if (yoneticiBar) {
+                yoneticiBar.classList.toggle('hidden', !isYoneticiUser() || !window._testsAssignMode);
+            }
+            updateTestsAssignToggleUI();
+            if (isYoneticiUser() && window._testsAssignMode && typeof window.loadTestsYoneticiSinifSelect === 'function') {
                 window.loadTestsYoneticiSinifSelect();
             }
         }
@@ -1495,6 +1498,31 @@
             return window.LISANI_SKIP_SPEAK_LABEL || 'Şuan konuşamam';
         }
 
+        function isTestsAssignMode() {
+            if (isYoneticiUser()) return !!window._testsAssignMode;
+            return isHocaUser();
+        }
+
+        window.toggleTestsAssignMode = function (ev) {
+            if (ev && typeof ev.stopPropagation === 'function') ev.stopPropagation();
+            if (!isYoneticiUser()) return;
+            window._testsAssignMode = !window._testsAssignMode;
+            updateTestsAssignToggleUI();
+            renderBolumList();
+            showToast(
+                window._testsAssignMode ? 'Ödev ata modu — tur veya teste dokunun' : 'Test modu — çözmeye devam',
+                'info'
+            );
+        };
+
+        function updateTestsAssignToggleUI() {
+            const btn = document.getElementById('tests-assign-toggle');
+            if (!btn) return;
+            btn.classList.toggle('hidden', !isYoneticiUser());
+            btn.classList.toggle('is-active', !!window._testsAssignMode);
+            btn.textContent = window._testsAssignMode ? 'Test Modu' : 'Ödev Ata';
+        }
+
         function bindBolumAction(btn, bolum, stepIndex, assignMode) {
             if (assignMode) {
                 btn.onclick = () => window.odevVerFromTest(bolum.id, bolum.title);
@@ -1617,7 +1645,7 @@
             const container = document.getElementById('bolum-buttons-container');
             if (!container) return;
             container.innerHTML = '';
-            const assignMode = hasTeacherFeatures();
+            const assignMode = isTestsAssignMode();
             let highlightEl = null;
 
             BOLUMLER.forEach((bolum, index) => {

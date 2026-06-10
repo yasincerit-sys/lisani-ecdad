@@ -206,6 +206,12 @@
     transform: scale(0.97);
 }
 
+.lisani-tests-placement-chip.is-active {
+    background: rgba(var(--theme-primary-rgb, 88, 204, 2), 0.22) !important;
+    border-color: rgba(var(--theme-primary-rgb, 88, 204, 2), 0.45) !important;
+    color: var(--theme-primary, #58cc02) !important;
+}
+
 .lisani-tests-path-panel {
     overflow-x: hidden;
     overflow-y: auto;

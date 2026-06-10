@@ -500,6 +500,7 @@
                         <div class="lisani-tests-bolum-toolbar shrink-0">
                             <p id="tests-student-hint" class="lisani-tests-bolum-hint">5 test · bölüme göre 5–12 soru · yuvarlaklara dokun</p>
                             <button type="button" id="tests-placement-btn" onclick="startPlacementTest(event)" class="lisani-tests-placement-chip shrink-0">Seviyemi Bul</button>
+                            <button type="button" id="tests-assign-toggle" class="hidden lisani-tests-placement-chip shrink-0" onclick="toggleTestsAssignMode(event)">Ödev Ata</button>
                             <p id="tests-hoca-hint" class="hidden lisani-tests-bolum-hint lisani-tests-bolum-hint--hoca">Ödev vermek için tur veya test seçin</p>
                             <div id="tests-yonetici-sinif-bar" class="hidden w-full mt-1">
                                 <label for="tests-yonetici-sinif-select" class="text-[10px] font-bold theme-text-muted uppercase tracking-wide block mb-1">Ödev atanacak sınıf</label>

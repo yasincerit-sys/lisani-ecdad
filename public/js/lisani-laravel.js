@@ -459,14 +459,21 @@
         window.odevVerFromTest(level, test);
     };
 
-    window.odevVerFromTest = function (level, test) {
+    window.odevVerFromTest = function (arg1, arg2) {
         const user = currentUser || window.currentUser;
         const uid = user?.id || user?.uid;
         if (!uid) {
             showToast('Giriş gerekli.', 'error');
             return;
         }
-        window.odevVer(uid, level, test);
+        const bolumIds = ['kelimeler', 'harfler', 'eslestirme', 'ceviri', 'ses'];
+        if (typeof arg1 === 'string' && bolumIds.includes(arg1)) {
+            const idx = (window.LISANI_BOLUM_INDEX && window.LISANI_BOLUM_INDEX[arg1]) || 1;
+            const meta = (window.LISANI_BOLUMLER || []).find((b) => b.id === arg1);
+            window.odevVer(uid, idx, meta?.title || arg2 || arg1);
+            return;
+        }
+        window.odevVer(uid, arg1, arg2);
     };
 
     window.odevVer = function (hocaUid, levelArg, testArg) {
