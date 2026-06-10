@@ -3813,6 +3813,22 @@ html.preline-ui.theme-duolingo .lisani-speak-meter__bar {
     gap: 0.5rem;
 }
 
+.lisani-voice-mic-btn--pro.is-permission {
+    background: linear-gradient(180deg, #3b82f6 0%, #2563eb 100%) !important;
+    box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.22), 0 5px 0 #1d4ed8 !important;
+    animation: lisaniMicPulse 1.6s ease-in-out infinite;
+}
+
+@keyframes lisaniMicPulse {
+    0%, 100% { filter: brightness(1); }
+    50% { filter: brightness(1.1); }
+}
+
+.lisani-voice-status.is-listening {
+    color: var(--theme-primary, #58cc02) !important;
+    font-weight: 700;
+}
+
 #screen-tests .lisani-tiles-grid {
     gap: 0.5rem;
 }

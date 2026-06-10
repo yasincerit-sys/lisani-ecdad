@@ -498,7 +498,7 @@
                     <!-- GÖRÜNÜM A: BÖLÜM SEÇİM ALANI -->
                     <div id="bolum-selection-view" class="lisani-tests-view lisani-tests-bolum-view flex-1 flex flex-col justify-start min-h-0">
                         <div class="lisani-tests-bolum-toolbar shrink-0">
-                            <p id="tests-student-hint" class="lisani-tests-bolum-hint">5 test · tur başına 4 soru · yuvarlaklara dokun</p>
+                            <p id="tests-student-hint" class="lisani-tests-bolum-hint">5 test · bölüme göre 5–12 soru · yuvarlaklara dokun</p>
                             <button type="button" id="tests-placement-btn" onclick="startPlacementTest(event)" class="lisani-tests-placement-chip shrink-0">Seviyemi Bul</button>
                             <p id="tests-hoca-hint" class="hidden lisani-tests-bolum-hint lisani-tests-bolum-hint--hoca">Ödev vermek için tur veya test seçin</p>
                             <div id="tests-yonetici-sinif-bar" class="hidden w-full mt-1">

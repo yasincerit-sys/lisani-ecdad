@@ -365,11 +365,11 @@
     window.LISANI_BOLUM_STEPS = 5;
 
     window.LISANI_BOLUMLER = [
-        { id: 'kelimeler', title: 'Temel', desc: '5 test · 4 soru', icon: 'T', color: 1, sessionSize: 4, baseDiff: 2 },
-        { id: 'harfler', title: 'Orta', desc: '5 test · 4 soru', icon: 'O', color: 2, sessionSize: 4, baseDiff: 3 },
-        { id: 'eslestirme', title: 'İleri', desc: '5 test · 4 soru', icon: 'İ', color: 3, sessionSize: 4, baseDiff: 3 },
-        { id: 'ceviri', title: 'Uzman', desc: '5 test · 4 soru', icon: 'U', color: 1, sessionSize: 4, baseDiff: 4 },
-        { id: 'ses', title: 'Usta', desc: '5 test · 4 soru', icon: '★', color: 2, sessionSize: 4, baseDiff: 4 },
+        { id: 'kelimeler', title: 'Temel', desc: '5 test · tur başına 5 soru', icon: 'T', color: 1, sessionSize: 5, baseDiff: 2 },
+        { id: 'harfler', title: 'Orta', desc: '5 test · tur başına 7 soru', icon: 'O', color: 2, sessionSize: 7, baseDiff: 3 },
+        { id: 'eslestirme', title: 'İleri', desc: '5 test · tur başına 9 soru', icon: 'İ', color: 3, sessionSize: 9, baseDiff: 3 },
+        { id: 'ceviri', title: 'Uzman', desc: '5 test · tur başına 10 soru', icon: 'U', color: 1, sessionSize: 10, baseDiff: 4 },
+        { id: 'ses', title: 'Usta', desc: '5 test · tur başına 12 soru', icon: '★', color: 2, sessionSize: 12, baseDiff: 4 },
     ];
 
     window.LISANI_BOLUM_INDEX = { kelimeler: 1, harfler: 2, eslestirme: 3, ceviri: 4, ses: 5 };
