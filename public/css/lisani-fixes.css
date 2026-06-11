@@ -3415,6 +3415,8 @@ html.preline-ui.theme-duolingo .lisani-bolum-worm-wrap {
     border: none;
     border-radius: 50%;
     cursor: pointer;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -3523,11 +3525,6 @@ html.preline-ui.theme-duolingo .lisani-bolum-worm-wrap {
     color: rgba(255, 255, 255, 0.35);
 }
 
-.lisani-bolum-node:disabled {
-    cursor: not-allowed;
-    pointer-events: none;
-}
-
 .lisani-bolum-node.is-highlight {
     outline: 3px solid rgba(255, 255, 255, 0.95);
     outline-offset: 4px;
@@ -3606,6 +3603,8 @@ html.preline-ui.theme-duolingo .lisani-bolum-worm-wrap {
     border: none;
     border-radius: 1rem;
     cursor: pointer;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
     text-align: left;
     color: #ffffff;
     box-shadow: 0 5px 0 rgba(0, 0, 0, 0.22);

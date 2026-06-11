@@ -1498,6 +1498,37 @@
             return window.LISANI_SKIP_SPEAK_LABEL || 'Şuan konuşamam';
         }
 
+        function isCapacitorApp() {
+            return !!(
+                window.Capacitor &&
+                typeof window.Capacitor.isNativePlatform === 'function' &&
+                window.Capacitor.isNativePlatform()
+            );
+        }
+
+        function isMobileApp() {
+            return (
+                isCapacitorApp() ||
+                /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent || '')
+            );
+        }
+
+        function bindTapAction(el, handler) {
+            if (!el || typeof handler !== 'function') return;
+            let lastFire = 0;
+            const run = (e) => {
+                const now = Date.now();
+                if (now - lastFire < 420) return;
+                lastFire = now;
+                if (e.type === 'touchend') e.preventDefault();
+                handler(e);
+            };
+            el.addEventListener('click', run);
+            if (isMobileApp()) {
+                el.addEventListener('touchend', run, { passive: false });
+            }
+        }
+
         function isTestsAssignMode() {
             if (isYoneticiUser()) return !!window._testsAssignMode;
             return isHocaUser();
@@ -1524,11 +1555,10 @@
         }
 
         function bindBolumAction(btn, bolum, stepIndex, assignMode) {
-            if (assignMode) {
-                btn.onclick = () => window.odevVerFromTest(bolum.id, bolum.title);
-            } else {
-                btn.onclick = () => startBolumStep(bolum.id, stepIndex);
-            }
+            const handler = assignMode
+                ? () => window.odevVerFromTest(bolum.id, bolum.title)
+                : () => startBolumStep(bolum.id, stepIndex);
+            bindTapAction(btn, handler);
         }
 
         function startBolumStep(bolumId, stepIndex) {
@@ -1596,8 +1626,13 @@
             node.innerHTML = stepDone
                 ? `<span class="lisani-bolum-node__icon">✓</span>`
                 : `<span class="lisani-bolum-node__num">${subIndex + 1}</span>`;
-            if (!assignMode && !unlocked) node.disabled = true;
-            bindBolumAction(node, bolum, subIndex, assignMode);
+            if (!assignMode && !unlocked) {
+                bindTapAction(node, () =>
+                    showToast(`${subIndex + 1}. test için önce ${subIndex}. testi bitir.`, 'info')
+                );
+            } else {
+                bindBolumAction(node, bolum, subIndex, assignMode);
+            }
             return node;
         }
 
@@ -1679,8 +1714,7 @@
                 if (bolumUnlocked) {
                     bindBolumAction(btn, bolum, nextStep, assignMode);
                 } else {
-                    btn.disabled = true;
-                    btn.onclick = () => showToast('Önce önceki bölümü tamamla.', 'info');
+                    bindTapAction(btn, () => showToast('Önce önceki bölümü tamamla.', 'info'));
                 }
 
                 const block = document.createElement('div');
@@ -1748,6 +1782,10 @@
                 showToast(`${stepIndex + 1}. test için önce ${stepIndex}. testi bitir.`, 'info');
                 return false;
             }
+            if (!window.LISANI_POOLS || !Object.keys(window.LISANI_POOLS).length) {
+                showToast('Soru bankası yüklenemedi. Bağlantıyı kontrol edip tekrar deneyin.', 'error');
+                return false;
+            }
             playClickSound();
             activeBolumId = bolumId;
             activeBolumStep = stepIndex;
@@ -1779,8 +1817,12 @@
             document.getElementById('active-quiz-title').innerText = activeTestName;
             ensureTestsScreenVisible();
             setTestsSubview('quiz');
+            currentActiveScreen = 'tests';
             renderQuizQuestion();
             if (typeof updateTestsTabForRole === 'function') updateTestsTabForRole();
+            requestAnimationFrame(() => {
+                document.getElementById('quiz-active-view')?.scrollIntoView({ block: 'start', behavior: 'auto' });
+            });
             return true;
         }
 
