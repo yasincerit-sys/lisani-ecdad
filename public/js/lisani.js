@@ -75,18 +75,13 @@
 
         function prepareBolumSession(bolumId, stepIndex = 0) {
             const pools = window.LISANI_POOLS || {};
-            const stepPatterns = window.LISANI_STEP_PATTERNS || [
-                ['card', 'letter', 'card', 'speak'],
-                ['letter', 'card', 'tiles', 'card'],
-                ['speak', 'card', 'letter', 'tiles'],
-                ['tiles', 'letter', 'card', 'speak'],
-                ['card', 'tiles', 'speak', 'letter'],
-            ];
-            const pattern = stepPatterns[stepIndex % stepPatterns.length];
             const meta = getBolumMeta(bolumId);
             const size = meta?.sessionSize || window.LISANI_QUESTIONS_PER_STEP || 4;
-            const baseDiff = Math.min(5, (meta?.baseDiff || BOLUM_INDEX[bolumId] || 2) + Math.floor(stepIndex / 2));
             const bolumUsed = getBolumUsedQuestionKeys(bolumId);
+            const pattern =
+                typeof window.buildLisaniSessionTypes === 'function'
+                    ? window.buildLisaniSessionTypes(bolumId, size, stepIndex)
+                    : (window.LISANI_STEP_PATTERNS || [['card', 'speak', 'tiles']])[stepIndex % 5];
 
             const picked = [];
             const usedKeys = new Set();
@@ -95,34 +90,45 @@
                 return `${q.type}|${q.word}|${(q.answerOrder || q.answer || '').toString()}`;
             }
 
-            function pickFromPool(kind, minD, maxD, slot) {
+            function pickFromPool(kind, minD, maxD, slot, pickCfg) {
                 const pool = pools[kind] || [];
-                let candidates = pool.filter((q) => {
+                const cfg = pickCfg || {};
+                const filterBase = (q, diffOnly) => {
                     const d = q.difficulty || 2;
                     const key = qKey(q);
-                    return d >= minD && d <= maxD && !usedKeys.has(key) && !bolumUsed.has(key);
-                });
+                    if (usedKeys.has(key) || bolumUsed.has(key)) return false;
+                    if (diffOnly && (d < minD || d > maxD)) return false;
+                    if (kind === 'tiles') {
+                        const parts = q.tileParts || (q.answerOrder || []).length;
+                        if (cfg.tilesPartMin && parts < cfg.tilesPartMin) return false;
+                        if (cfg.tilesPartMax && parts > cfg.tilesPartMax) return false;
+                    }
+                    if (kind === 'letter' && cfg.allowLetter === false) return false;
+                    return true;
+                };
+
+                let candidates = pool.filter((q) => filterBase(q, true));
                 if (!candidates.length) {
-                    candidates = pool.filter((q) => {
-                        const key = qKey(q);
-                        return !usedKeys.has(key) && !bolumUsed.has(key);
-                    });
+                    candidates = pool.filter((q) => filterBase(q, false));
                 }
                 if (!candidates.length) {
                     candidates = pool.filter((q) => !usedKeys.has(qKey(q)));
                 }
                 if (!candidates.length) return null;
-                const pickIdx = (stepIndex * 7 + slot * 3 + (BOLUM_INDEX[bolumId] || 0)) % candidates.length;
+                const pickIdx =
+                    (stepIndex * 11 + slot * 5 + (BOLUM_INDEX[bolumId] || 0) + kind.length) % candidates.length;
                 const q = JSON.parse(JSON.stringify(candidates[pickIdx]));
                 usedKeys.add(qKey(q));
                 return q;
             }
 
             for (let i = 0; i < size; i++) {
-                const kind = pattern[i % pattern.length];
-                const minD = Math.min(5, baseDiff + Math.floor(i / 2));
-                const maxD = Math.min(5, minD + 1);
-                const q = pickFromPool(kind, minD, maxD, i);
+                const kind = pattern[i];
+                const diffRange =
+                    typeof window.getLisaniBolumDiffRange === 'function'
+                        ? window.getLisaniBolumDiffRange(bolumId, stepIndex, i, size)
+                        : { minD: 1, maxD: 3, cfg: {} };
+                const q = pickFromPool(kind, diffRange.minD, diffRange.maxD, i, diffRange.cfg);
                 if (q) picked.push(q);
             }
 
@@ -1516,18 +1522,57 @@
         function bindTapAction(el, handler) {
             if (!el || typeof handler !== 'function') return;
             let lastFire = 0;
+            let touchStart = null;
+
             const run = (e) => {
                 const now = Date.now();
-                if (now - lastFire < 420) return;
+                if (now - lastFire < 400) return;
                 lastFire = now;
-                if (e.type === 'touchend') e.preventDefault();
-                handler(e);
+                if (e && e.cancelable) e.preventDefault();
+                if (e && e.stopPropagation) e.stopPropagation();
+                try {
+                    handler(e);
+                } catch (err) {
+                    console.error('bindTapAction', err);
+                    if (typeof showToast === 'function') {
+                        showToast('İşlem tamamlanamadı. Sayfayı yenileyip tekrar deneyin.', 'error');
+                    }
+                }
             };
-            el.addEventListener('click', run);
+
+            const onTouchStart = (e) => {
+                const t = e.changedTouches && e.changedTouches[0];
+                if (!t) return;
+                touchStart = { x: t.clientX, y: t.clientY };
+            };
+
+            const onTouchEnd = (e) => {
+                const t = e.changedTouches && e.changedTouches[0];
+                if (!t) return;
+                if (touchStart) {
+                    const dx = Math.abs(t.clientX - touchStart.x);
+                    const dy = Math.abs(t.clientY - touchStart.y);
+                    touchStart = null;
+                    if (dx > 16 || dy > 16) return;
+                }
+                run(e);
+            };
+
+            el.style.touchAction = 'manipulation';
             if (isMobileApp()) {
-                el.addEventListener('touchend', run, { passive: false });
+                el.addEventListener('touchstart', onTouchStart, { passive: true });
+                el.addEventListener('touchend', onTouchEnd, { passive: false });
             }
+            el.addEventListener('click', (e) => {
+                if (isMobileApp() && Date.now() - lastFire < 520) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    return;
+                }
+                run(e);
+            });
         }
+        window.bindTapAction = bindTapAction;
 
         function isTestsAssignMode() {
             if (isYoneticiUser()) return !!window._testsAssignMode;
@@ -1561,9 +1606,18 @@
             bindTapAction(btn, handler);
         }
 
+        function ensureLisaniQuizBank() {
+            if (window.LISANI_POOLS && Object.keys(window.LISANI_POOLS).length) return true;
+            return false;
+        }
+
         function startBolumStep(bolumId, stepIndex) {
+            if (!ensureLisaniQuizBank()) {
+                showToast('Soru bankası yükleniyor… Birkaç saniye sonra tekrar deneyin.', 'error');
+                return;
+            }
             const bolumIndex = getBolumIndex(bolumId);
-            if (bolumIndex > 0 && !isBolumUnlocked(bolumIndex) && !isHocaUser()) {
+            if (bolumIndex > 0 && !isBolumUnlocked(bolumIndex) && !isHocaUser() && !isYoneticiUser()) {
                 showToast('Önce önceki bölümü tamamla.', 'info');
                 return;
             }
@@ -1774,11 +1828,11 @@
                 return false;
             }
             const bolumIndex = getBolumIndex(bolumId);
-            if (bolumIndex > 0 && !isBolumUnlocked(bolumIndex) && !isHocaUser()) {
+            if (bolumIndex > 0 && !isBolumUnlocked(bolumIndex) && !isHocaUser() && !isYoneticiUser()) {
                 showToast('Önce önceki bölümü tamamla.', 'info');
                 return false;
             }
-            if (!isBolumStepUnlocked(bolumId, stepIndex)) {
+            if (!isBolumStepUnlocked(bolumId, stepIndex) && !isYoneticiUser()) {
                 showToast(`${stepIndex + 1}. test için önce ${stepIndex}. testi bitir.`, 'info');
                 return false;
             }
@@ -1816,6 +1870,7 @@
 
             document.getElementById('active-quiz-title').innerText = activeTestName;
             ensureTestsScreenVisible();
+            if (typeof switchTab === 'function') switchTab('tests', true, true);
             setTestsSubview('quiz');
             currentActiveScreen = 'tests';
             renderQuizQuestion();
@@ -1957,7 +2012,7 @@
                 btn.innerHTML = `
                     <span class="lisani-quiz-option__letter">${optionLabels[idx] || '•'}</span>
                     <span class="flex-1 min-w-0 leading-relaxed">${option}</span>`;
-                btn.onclick = () => selectQuizOption(option, q.answer, btn);
+                bindTapAction(btn, () => selectQuizOption(option, q.answer, btn));
                 container.appendChild(btn);
             });
 
@@ -1983,8 +2038,34 @@
                 window.isSecureContext === true ||
                 location.protocol === 'https:' ||
                 location.hostname === 'localhost' ||
-                location.hostname === '127.0.0.1'
+                location.hostname === '127.0.0.1' ||
+                isCapacitorApp()
             );
+        }
+
+        function micPermissionSettingsHint() {
+            if (isCapacitorApp()) {
+                return 'Mikrofon kapalı · Ayarlar → Uygulamalar → Lisanı Ecdad → İzinler → Mikrofon → İzin ver';
+            }
+            if (isMobileSpeakDevice()) {
+                return 'Mikrofon kapalı · Ayarlar → Site → Mikrofon → İzin ver, sonra tekrar dokunun.';
+            }
+            return 'Mikrofon izni reddedildi · adres çubuğundaki kilit simgesinden izin verin.';
+        }
+
+        async function requestNativeMicPermission() {
+            if (!isCapacitorApp()) return null;
+            const plugin = window.Capacitor?.Plugins?.LisaniMic;
+            if (!plugin || typeof plugin.requestPermission !== 'function') return null;
+            try {
+                const result = await plugin.requestPermission();
+                return !!(result && result.granted);
+            } catch (err) {
+                if (err && err.data && typeof err.data.granted === 'boolean') {
+                    return err.data.granted;
+                }
+                return false;
+            }
         }
 
         function setSpeakStatus(text, listening) {
@@ -2021,6 +2102,14 @@
                 return false;
             }
             try {
+                if (isCapacitorApp()) {
+                    setSpeakStatus('Mikrofon izni isteniyor… İzin penceresinde «İzin ver» deyin.');
+                    const nativeGranted = await requestNativeMicPermission();
+                    if (nativeGranted === false) {
+                        setSpeakStatus(micPermissionSettingsHint());
+                        return false;
+                    }
+                }
                 if (navigator.permissions && navigator.permissions.query) {
                     try {
                         const perm = await navigator.permissions.query({ name: 'microphone' });
@@ -2032,7 +2121,9 @@
                         /* Safari'de permissions.query desteklenmeyebilir */
                     }
                 }
-                setSpeakStatus('Mikrofon izni isteniyor… İzin penceresine «İzin ver» deyin.');
+                if (!isCapacitorApp()) {
+                    setSpeakStatus('Mikrofon izni isteniyor… İzin penceresine «İzin ver» deyin.');
+                }
                 const stream = await navigator.mediaDevices.getUserMedia({
                     audio: { echoCancellation: true, noiseSuppression: true },
                 });
@@ -2043,11 +2134,7 @@
             } catch (err) {
                 const name = err && err.name ? err.name : '';
                 if (name === 'NotAllowedError' || name === 'PermissionDeniedError') {
-                    setSpeakStatus(
-                        isMobileSpeakDevice()
-                            ? 'Mikrofon kapalı · Ayarlar → Site → Mikrofon → İzin ver, sonra tekrar dokunun.'
-                            : 'Mikrofon izni reddedildi · adres çubuğundaki kilit simgesinden izin verin.'
-                    );
+                    setSpeakStatus(micPermissionSettingsHint());
                 } else if (name === 'NotFoundError') {
                     setSpeakStatus('Mikrofon bulunamadı · kulaklık/mikrofon bağlantısını kontrol edin.');
                 } else {
@@ -2098,8 +2185,8 @@
                         <div class="lisani-speak-meter" id="quiz-speak-meter" aria-hidden="true">${meterBars}</div>
                         <button type="button" id="quiz-speak-skip-btn" class="lisani-glass-action w-full py-2.5 rounded-xl text-[11px] font-bold theme-text-muted">${skipLabel}</button>
                     </div>`;
-                document.getElementById('quiz-voice-mic-btn')?.addEventListener('click', () => startSpeakAnswer(q));
-                document.getElementById('quiz-speak-skip-btn')?.addEventListener('click', () => handleQuizSkip());
+                bindTapAction(document.getElementById('quiz-voice-mic-btn'), () => startSpeakAnswer(q));
+                bindTapAction(document.getElementById('quiz-speak-skip-btn'), () => handleQuizSkip());
             }
 
             animateQuizCard();
@@ -2149,20 +2236,20 @@
                 btn.className = 'lisani-tile-chip lisani-glass-panel py-2.5 px-2 rounded-xl text-[11px] font-bold theme-text-main';
                 btn.textContent = tile;
                 btn.dataset.tile = tile;
-                btn.onclick = () => {
+                bindTapAction(btn, () => {
                     if (quizAdvanceTimer || tilesSelection.length >= (q.answerOrder || []).length) return;
                     if (tilesSelection.includes(tile)) return;
                     tilesSelection.push(tile);
                     refreshTilesUI(q, answerEl, grid);
-                };
+                });
                 grid.appendChild(btn);
             });
 
-            document.getElementById('quiz-tiles-clear-btn')?.addEventListener('click', () => {
+            bindTapAction(document.getElementById('quiz-tiles-clear-btn'), () => {
                 tilesSelection = [];
                 refreshTilesUI(q, answerEl, grid);
             });
-            document.getElementById('quiz-tiles-check-btn')?.addEventListener('click', () => checkTilesAnswer(q));
+            bindTapAction(document.getElementById('quiz-tiles-check-btn'), () => checkTilesAnswer(q));
 
             refreshTilesUI(q, answerEl, grid);
             animateQuizCard();
@@ -2251,9 +2338,7 @@
                     const name = err && err.name ? err.name : '';
                     micPermissionGranted = false;
                     if (name === 'NotAllowedError' || name === 'PermissionDeniedError') {
-                        setSpeakStatus(
-                            'Mikrofon izni yok · Ayarlardan izin verip «Mikrofon İzni Ver»e tekrar dokunun.'
-                        );
+                        setSpeakStatus(`${micPermissionSettingsHint()} · sonra «Mikrofon İzni Ver»e dokunun.`);
                     } else {
                         setSpeakStatus('Mikrofon açılamadı · tekrar deneyin veya atlayın.');
                     }
@@ -2485,10 +2570,14 @@
                 localStorage.setItem('lisani_test_history', JSON.stringify(testHistory));
             } catch (e) {}
 
+            if (window.LisaniDailyTasks?.onBolumStepComplete) {
+                window.LisaniDailyTasks.onBolumStepComplete(activeBolumId);
+            }
+
             if (isBolumCompleted(activeBolumId)) {
-                if (window.LisaniDailyTasks && typeof window.LisaniDailyTasks.onBolumComplete === 'function') {
+                if (window.LisaniDailyTasks?.onBolumComplete) {
                     window.LisaniDailyTasks.onBolumComplete(activeBolumId);
-                } else if (window.LisaniDailyTasks && typeof window.LisaniDailyTasks.onLevelComplete === 'function') {
+                } else if (window.LisaniDailyTasks?.onLevelComplete) {
                     window.LisaniDailyTasks.onLevelComplete(activeLevel);
                 }
             }
@@ -4249,9 +4338,13 @@
         }
 
         function getSwipeTabOrder() {
-            return canTrackStudents()
-                ? ['hoca-dashboard', 'home', 'letters', 'osm-translate', 'settings']
-                : ['ai', 'tests', 'home', 'letters', 'osm-translate', 'settings'];
+            const order = [];
+            const tabAi = document.getElementById('tab-ai');
+            const tabHoca = document.getElementById('tab-hoca-dashboard');
+            if (tabAi && !tabAi.classList.contains('hidden')) order.push('ai');
+            if (tabHoca && !tabHoca.classList.contains('hidden')) order.push('hoca-dashboard');
+            order.push('letters', 'home', 'osm-translate', 'settings');
+            return order;
         }
 
         function canElementScroll(el, deltaY) {

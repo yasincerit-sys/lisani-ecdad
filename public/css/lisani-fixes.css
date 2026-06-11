@@ -103,9 +103,61 @@
         letter-spacing: 0.01em;
         line-height: 1.1;
     }
+
+    /* Giriş / Ana Sayfa — alt çubukta tam orta */
+    #bottom-bar.lisani-tab-bar-ios--center-home {
+        display: flex;
+        align-items: stretch;
+        justify-content: space-between;
+        gap: 0.2rem;
+    }
+
+    #bottom-bar.lisani-tab-bar-ios--center-home .lisani-nav-tab-side {
+        flex: 1 1 0;
+        display: flex;
+        align-items: stretch;
+        justify-content: space-evenly;
+        min-width: 0;
+        gap: 0.08rem;
+    }
+
+    #bottom-bar.lisani-tab-bar-ios--center-home .lisani-nav-tab-center {
+        flex: 0 0 auto;
+        display: flex;
+        align-items: stretch;
+        justify-content: center;
+        padding: 0 0.2rem;
+    }
+
+    #bottom-bar.lisani-tab-bar-ios--center-home .lisani-nav-home-btn {
+        min-width: 4.35rem;
+        padding: 0.28rem 0.55rem 0.22rem !important;
+        border-radius: 1.1rem !important;
+    }
+
+    #bottom-bar.lisani-tab-bar-ios--center-home .lisani-nav-home-btn.lisani-tab-active {
+        background: rgba(var(--theme-primary-rgb, 198, 156, 109), 0.22) !important;
+        box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.18),
+            0 3px 14px rgba(0, 0, 0, 0.18) !important;
+    }
 }
 
 @media (min-width: 1024px) {
+    #bottom-bar.lisani-tab-bar-ios--center-home {
+        flex-direction: column !important;
+        justify-content: flex-start !important;
+        gap: 0.35rem;
+    }
+
+    #bottom-bar.lisani-tab-bar-ios--center-home .lisani-nav-tab-side,
+    #bottom-bar.lisani-tab-bar-ios--center-home .lisani-nav-tab-center {
+        width: 100%;
+        flex-direction: column;
+        gap: 0.35rem;
+        padding: 0;
+    }
+
     html.preline-ui[class*="theme-"] #bottom-bar.lisani-tab-bar-ios,
     html.preline-ui[class*="theme-"] .lisani-nav-bar.lisani-tab-bar-ios {
         position: relative !important;
@@ -469,6 +521,15 @@ html.preline-ui.theme-renkli-yol #screen-tests .lisani-quiz-option {
 #screen-tests .lisani-quiz-arabic {
     text-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
     line-height: 1.35;
+}
+
+#screen-tests .lisani-quiz-option {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+}
+
+#screen-tests .lisani-quiz-option > * {
+    pointer-events: none;
 }
 
 #screen-tests .lisani-quiz-option__letter {
@@ -3587,6 +3648,11 @@ html.preline-ui.theme-duolingo .lisani-bolum-worm-wrap {
 
 .lisani-bolum-worm-wrap + .lisani-bolum-tur-block {
     margin-top: 0.25rem;
+}
+
+.lisani-bolum-dot-btn > *,
+.lisani-bolum-node > * {
+    pointer-events: none;
 }
 
 .lisani-bolum-dot-btn {

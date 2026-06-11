@@ -72,30 +72,30 @@
 
     /** osm = OSM_WORDS.ar · tr = ekranda görünen Türkçe · hint = konuşma tanıma */
     const CORE_WORDS = [
-        { tr: 'Merhaba', osm: 'مرحبا', diff: 2, hint: 'merhaba' },
-        { tr: 'Selam', osm: 'سلام', diff: 2, hint: 'selam' },
-        { tr: 'Teşekkürler', osm: 'شكرا', diff: 2, hint: 'teşekkürler', speakAlt: ['tesekkurler'] },
-        { tr: 'Lütfen', osm: 'لو سمحت', diff: 2, hint: 'lütfen', speakAlt: ['lutfen'] },
-        { tr: 'Evet', osm: 'نعم', diff: 2, hint: 'evet' },
-        { tr: 'Hayır', osm: 'لا', diff: 2, hint: 'hayır', speakAlt: ['hayir'] },
-        { tr: 'Su', osm: 'آب', diff: 2, hint: 'su' },
-        { tr: 'Çay', osm: 'چاي', diff: 2, hint: 'çay', speakAlt: ['cay'] },
-        { tr: 'Kahve', osm: 'قهوه', diff: 2, hint: 'kahve' },
-        { tr: 'Kitap', osm: 'كتاب', diff: 2, hint: 'kitap' },
-        { tr: 'Kalem', osm: 'قلم', diff: 2, hint: 'kalem' },
-        { tr: 'Defter', osm: 'دفتر', diff: 2, hint: 'defter' },
-        { tr: 'Ev', osm: 'او', diff: 2, hint: 'ev' },
-        { tr: 'Kapı', osm: 'قاپى', diff: 2, hint: 'kapı', speakAlt: ['kapi'] },
-        { tr: 'Kalp', osm: 'قلب', diff: 2, hint: 'kalp' },
-        { tr: 'Göz', osm: 'گوز', diff: 2, hint: 'göz', speakAlt: ['goz'] },
-        { tr: 'El', osm: 'ال', diff: 2, hint: 'el' },
-        { tr: 'Anne', osm: 'آنه', diff: 2, hint: 'anne' },
-        { tr: 'Baba', osm: 'بابا', diff: 2, hint: 'baba' },
-        { tr: 'Günaydın', osm: 'صباح الخير', diff: 2, hint: 'günaydın', speakAlt: ['gunaydin', 'sabah'] },
-        { tr: 'Güzel', osm: 'گوزل', diff: 2, hint: 'güzel', speakAlt: ['guzel'] },
-        { tr: 'İyi', osm: 'ايى', diff: 2, hint: 'iyi' },
-        { tr: 'Kuş', osm: 'قوش', diff: 2, hint: 'kuş', speakAlt: ['kus'] },
-        { tr: 'At', osm: 'آت', diff: 2, hint: 'at' },
+        { tr: 'Merhaba', osm: 'مرحبا', diff: 1, hint: 'merhaba' },
+        { tr: 'Selam', osm: 'سلام', diff: 1, hint: 'selam' },
+        { tr: 'Teşekkürler', osm: 'شكرا', diff: 1, hint: 'teşekkürler', speakAlt: ['tesekkurler'] },
+        { tr: 'Lütfen', osm: 'لو سمحت', diff: 1, hint: 'lütfen', speakAlt: ['lutfen'] },
+        { tr: 'Evet', osm: 'نعم', diff: 1, hint: 'evet' },
+        { tr: 'Hayır', osm: 'لا', diff: 1, hint: 'hayır', speakAlt: ['hayir'] },
+        { tr: 'Su', osm: 'آب', diff: 1, hint: 'su' },
+        { tr: 'Çay', osm: 'چاي', diff: 1, hint: 'çay', speakAlt: ['cay'] },
+        { tr: 'Kahve', osm: 'قهوه', diff: 1, hint: 'kahve' },
+        { tr: 'Kitap', osm: 'كتاب', diff: 1, hint: 'kitap' },
+        { tr: 'Kalem', osm: 'قلم', diff: 1, hint: 'kalem' },
+        { tr: 'Defter', osm: 'دفتر', diff: 1, hint: 'defter' },
+        { tr: 'Ev', osm: 'او', diff: 1, hint: 'ev' },
+        { tr: 'Kapı', osm: 'قاپى', diff: 1, hint: 'kapı', speakAlt: ['kapi'] },
+        { tr: 'Kalp', osm: 'قلب', diff: 1, hint: 'kalp' },
+        { tr: 'Göz', osm: 'گوز', diff: 1, hint: 'göz', speakAlt: ['goz'] },
+        { tr: 'El', osm: 'ال', diff: 1, hint: 'el' },
+        { tr: 'Anne', osm: 'آنه', diff: 1, hint: 'anne' },
+        { tr: 'Baba', osm: 'بابا', diff: 1, hint: 'baba' },
+        { tr: 'Günaydın', osm: 'صباح الخير', diff: 1, hint: 'günaydın', speakAlt: ['gunaydin', 'sabah'] },
+        { tr: 'Güzel', osm: 'گوزل', diff: 1, hint: 'güzel', speakAlt: ['guzel'] },
+        { tr: 'İyi', osm: 'ايى', diff: 1, hint: 'iyi' },
+        { tr: 'Kuş', osm: 'قوش', diff: 1, hint: 'kuş', speakAlt: ['kus'] },
+        { tr: 'At', osm: 'آت', diff: 1, hint: 'at' },
         { tr: 'Okul', osm: 'مدرسه', diff: 3, hint: 'okul' },
         { tr: 'Öğrenci', osm: 'طالب', diff: 3, hint: 'öğrenci', speakAlt: ['ogrenci'] },
         { tr: 'Hoca', osm: 'استاد', diff: 3, hint: 'hoca' },
@@ -144,29 +144,29 @@
     }
 
     const LETTERS = [
-        { name: 'Elif', char: 'ا', diff: 2 },
-        { name: 'Be', char: 'ب', diff: 2 },
-        { name: 'Te', char: 'ت', diff: 2 },
-        { name: 'Sin', char: 'س', diff: 2 },
-        { name: 'Şın', char: 'ش', diff: 3 },
+        { name: 'Elif', char: 'ا', diff: 1 },
+        { name: 'Be', char: 'ب', diff: 1 },
+        { name: 'Te', char: 'ت', diff: 1 },
+        { name: 'Sin', char: 'س', diff: 1 },
+        { name: 'Nun', char: 'ن', diff: 1 },
+        { name: 'Mim', char: 'م', diff: 1 },
+        { name: 'Lam', char: 'ل', diff: 1 },
+        { name: 'He', char: 'ه', diff: 1 },
+        { name: 'Vav', char: 'و', diff: 1 },
+        { name: 'Dal', char: 'د', diff: 1 },
+        { name: 'Re', char: 'ر', diff: 1 },
+        { name: 'Kef', char: 'ك', diff: 1 },
+        { name: 'Cim', char: 'ج', diff: 1 },
+        { name: 'Fe', char: 'ف', diff: 2 },
+        { name: 'Ha', char: 'ح', diff: 2 },
+        { name: 'Şın', char: 'ش', diff: 2 },
         { name: 'Sad', char: 'ص', diff: 3 },
         { name: 'Kaf', char: 'ق', diff: 3 },
         { name: 'Gim', char: 'گ', diff: 3 },
         { name: 'Pe', char: 'پ', diff: 3 },
-        { name: 'Nun', char: 'ن', diff: 2 },
-        { name: 'Mim', char: 'م', diff: 2 },
-        { name: 'Lam', char: 'ل', diff: 2 },
-        { name: 'He', char: 'ه', diff: 2 },
-        { name: 'Vav', char: 'و', diff: 2 },
+        { name: 'Zel', char: 'ز', diff: 3 },
         { name: 'Ayn', char: 'ع', diff: 4 },
         { name: 'Gayn', char: 'غ', diff: 4 },
-        { name: 'Fe', char: 'ف', diff: 3 },
-        { name: 'Kef', char: 'ك', diff: 2 },
-        { name: 'Cim', char: 'ج', diff: 2 },
-        { name: 'Ha', char: 'ح', diff: 3 },
-        { name: 'Dal', char: 'د', diff: 2 },
-        { name: 'Re', char: 'ر', diff: 2 },
-        { name: 'Zel', char: 'ز', diff: 3 },
         { name: 'Ze', char: 'ذ', diff: 4 },
     ];
 
@@ -197,6 +197,16 @@
         { osm: 'مساء الخير', parts: ['iyi', 'akşamlar'], decoys: ['kötü', 'gece', 'deniz', 'vatan', 'kapı', 'yazıyorum'], diff: 3 },
         { osm: 'مع السلامة', parts: ['güle', 'güle'], decoys: ['evet', 'hayır', 'deniz', 'vatan', 'kapı', 'yazıyorum'], diff: 2 },
         { osm: 'او ده اوكونييورم', parts: ['evde', 'okuyorum'], decoys: ['okulda', 'yazıyorum', 'gidiyorum', 'deniz', 'vatan', 'kapı'], diff: 3 },
+        { osm: 'چای و قهوه', parts: ['çay', 've', 'kahve'], decoys: ['su', 'kitap', 'kalem', 'evde', 'gidiyorum', 'okuyorum'], diff: 2 },
+        { osm: 'كتاب و قلم', parts: ['kitap', 've', 'kalem'], decoys: ['defter', 'okulda', 'yazıyorum', 'evde', 'gidiyorum', 'deniz'], diff: 2 },
+        { osm: 'آنه و بابا ايى', parts: ['anne', 've', 'baba', 'iyi'], decoys: ['kötü', 'ev', 'kapı', 'gidiyorum', 'deniz', 'vatan'], diff: 3 },
+        { osm: 'مدرسه ده كتاب اوقورم', parts: ['okulda', 'kitap', 'okuyorum'], decoys: ['evde', 'yazıyorum', 'gidiyorum', 'deniz', 'vatan', 'kapı'], diff: 3 },
+        { osm: 'قلم يازارم او ده', parts: ['kalem', 'yazıyorum', 'evde'], decoys: ['okuyorum', 'okulda', 'gidiyorum', 'deniz', 'vatan', 'kapı'], diff: 3 },
+        { osm: 'وطن و ملت سوریورم', parts: ['vatan', 've', 'millet', 'seviyorum'], decoys: ['gidiyorum', 'okuyorum', 'deniz', 'kapı', 'evde', 'sultan'], diff: 4 },
+        { osm: 'دولت و سلطان عظيم', parts: ['devlet', 've', 'sultan'], decoys: ['vatan', 'millet', 'gidiyorum', 'okuyorum', 'deniz', 'kapı'], diff: 4 },
+        { osm: 'علم و حكمت و صبر', parts: ['ilim', 've', 'hikmet', 'sabır'], decoys: ['adalet', 'rahmet', 'gidiyorum', 'okuyorum', 'deniz', 'vatan'], diff: 5 },
+        { osm: 'عدالت و رحمت اهم', parts: ['adalet', 've', 'rahmet'], decoys: ['ilim', 'hikmet', 'sabır', 'gidiyorum', 'okuyorum', 'deniz'], diff: 5 },
+        { osm: 'دين و ايمان و صبر', parts: ['din', 've', 'iman', 'sabır'], decoys: ['cami', 'ilim', 'hikmet', 'gidiyorum', 'okuyorum', 'deniz'], diff: 5 },
     ];
 
     const SKIP_PHRASES = [
@@ -290,8 +300,98 @@
             prompt: TILES,
             tiles: shuffle(tiles),
             answerOrder: parts,
+            tileParts: parts.length,
             difficulty: p.diff,
         };
+    }
+
+    function hashSessionSeed(str) {
+        let h = 0;
+        for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) | 0;
+        return Math.abs(h);
+    }
+
+    function shuffleSeeded(arr, seed) {
+        const a = arr.slice();
+        let s = seed || 1;
+        for (let i = a.length - 1; i > 0; i--) {
+            s = (s * 1103515245 + 12345) | 0;
+            const j = Math.abs(s) % (i + 1);
+            [a[i], a[j]] = [a[j], a[i]];
+        }
+        return a;
+    }
+
+    /** Bölüm bazlı soru tipi ve zorluk profili */
+    const BOLUM_QUIZ = {
+        kelimeler: {
+            baseDiff: 1,
+            maxDiff: 2,
+            stepDiffBoost: 0.25,
+            tilesPartMin: 2,
+            tilesPartMax: 2,
+            typeCycle: ['letter', 'card', 'letter', 'card', 'letter'],
+            allowLetter: true,
+        },
+        harfler: {
+            baseDiff: 2,
+            maxDiff: 3,
+            stepDiffBoost: 0.35,
+            tilesPartMin: 2,
+            tilesPartMax: 3,
+            typeCycle: ['tiles', 'card', 'tiles', 'card', 'letter'],
+            allowLetter: true,
+        },
+        eslestirme: {
+            baseDiff: 3,
+            maxDiff: 4,
+            stepDiffBoost: 0.45,
+            tilesPartMin: 2,
+            tilesPartMax: 3,
+            typeCycle: ['tiles', 'card', 'tiles', 'card', 'tiles'],
+            allowLetter: false,
+        },
+        ceviri: {
+            baseDiff: 3,
+            maxDiff: 5,
+            stepDiffBoost: 0.55,
+            tilesPartMin: 3,
+            tilesPartMax: 4,
+            typeCycle: ['tiles', 'card', 'tiles', 'card', 'tiles', 'speak'],
+            allowLetter: false,
+        },
+        ses: {
+            baseDiff: 4,
+            maxDiff: 5,
+            stepDiffBoost: 0.6,
+            tilesPartMin: 3,
+            tilesPartMax: 4,
+            typeCycle: ['speak', 'tiles', 'card', 'speak', 'tiles', 'card'],
+            allowLetter: false,
+        },
+    };
+
+    function buildLisaniSessionTypes(bolumId, sessionSize, stepIndex) {
+        const cfg = BOLUM_QUIZ[bolumId] || BOLUM_QUIZ.kelimeler;
+        const types = ['speak', 'tiles'];
+        const cycle = cfg.typeCycle || ['card'];
+        let ci = 0;
+        while (types.length < sessionSize) {
+            let next = cycle[ci % cycle.length];
+            if (next === 'letter' && cfg.allowLetter === false) next = 'card';
+            types.push(next);
+            ci++;
+        }
+        return shuffleSeeded(types, hashSessionSeed(`${bolumId}|${stepIndex}|${sessionSize}`));
+    }
+
+    function getBolumDiffRange(bolumId, stepIndex, slotIndex, sessionSize) {
+        const cfg = BOLUM_QUIZ[bolumId] || BOLUM_QUIZ.kelimeler;
+        const stepBoost = Math.floor(stepIndex * (cfg.stepDiffBoost || 0.4));
+        const slotBoost = Math.floor((slotIndex / Math.max(1, sessionSize - 1)) * 1.2);
+        const minD = Math.min(cfg.maxDiff, cfg.baseDiff + stepBoost + Math.floor(slotBoost * 0.5));
+        const maxD = Math.min(cfg.maxDiff, minD + 1 + Math.floor(stepIndex / 2));
+        return { minD, maxD, cfg };
     }
 
     function validateQuestionBank() {
@@ -363,13 +463,16 @@
     ];
     window.LISANI_QUESTIONS_PER_STEP = 4;
     window.LISANI_BOLUM_STEPS = 5;
+    window.LISANI_BOLUM_QUIZ = BOLUM_QUIZ;
+    window.buildLisaniSessionTypes = buildLisaniSessionTypes;
+    window.getLisaniBolumDiffRange = getBolumDiffRange;
 
     window.LISANI_BOLUMLER = [
-        { id: 'kelimeler', title: 'Temel', desc: '5 test · tur başına 5 soru', icon: 'T', color: 1, sessionSize: 5, baseDiff: 2 },
-        { id: 'harfler', title: 'Orta', desc: '5 test · tur başına 7 soru', icon: 'O', color: 2, sessionSize: 7, baseDiff: 3 },
-        { id: 'eslestirme', title: 'İleri', desc: '5 test · tur başına 9 soru', icon: 'İ', color: 3, sessionSize: 9, baseDiff: 3 },
-        { id: 'ceviri', title: 'Uzman', desc: '5 test · tur başına 10 soru', icon: 'U', color: 1, sessionSize: 10, baseDiff: 4 },
-        { id: 'ses', title: 'Usta', desc: '5 test · tur başına 12 soru', icon: '★', color: 2, sessionSize: 12, baseDiff: 4 },
+        { id: 'kelimeler', title: 'Temel', desc: '5 test · harf ve basit kelime', icon: 'T', color: 1, sessionSize: 5, baseDiff: 1 },
+        { id: 'harfler', title: 'Orta', desc: '5 test · 2–3 kelimeli cümle', icon: 'O', color: 2, sessionSize: 7, baseDiff: 2 },
+        { id: 'eslestirme', title: 'İleri', desc: '5 test · eşleştirme ve çeviri', icon: 'İ', color: 3, sessionSize: 9, baseDiff: 3 },
+        { id: 'ceviri', title: 'Uzman', desc: '5 test · uzun metin ve zor kelime', icon: 'U', color: 1, sessionSize: 10, baseDiff: 3 },
+        { id: 'ses', title: 'Usta', desc: '5 test · konuşma ve ileri cümle', icon: '★', color: 2, sessionSize: 12, baseDiff: 4 },
     ];
 
     window.LISANI_BOLUM_INDEX = { kelimeler: 1, harfler: 2, eslestirme: 3, ceviri: 4, ses: 5 };

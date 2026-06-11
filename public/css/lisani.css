@@ -688,7 +688,27 @@
             }
 
             .lisani-nav-bar > button,
-            #bottom-bar > button {
+            #bottom-bar > button,
+            #bottom-bar .lisani-nav-tab-side,
+            #bottom-bar .lisani-nav-tab-center {
+                flex: 0 0 auto !important;
+                width: 100%;
+                min-width: 0;
+            }
+
+            #bottom-bar .lisani-nav-tab-side {
+                display: flex;
+                flex-direction: column;
+                gap: 0.35rem;
+            }
+
+            #bottom-bar .lisani-nav-tab-center {
+                display: flex;
+                flex-direction: column;
+            }
+
+            #bottom-bar .lisani-nav-tab-side .lisani-nav-tab,
+            #bottom-bar .lisani-nav-tab-center .lisani-nav-tab {
                 flex: 0 0 auto !important;
                 width: 100%;
                 min-width: 0;

@@ -1231,43 +1231,43 @@
             </div>
 
             <!-- SABİTLENMİŞ ALT SEKMELER — iPhone tarzı cam tab bar -->
-            <nav id="bottom-bar" class="lisani-nav-bar lisani-tab-bar-ios flex items-stretch justify-between z-45 transition-all duration-300 flex-shrink-0" aria-label="Ana menü">
-                
-                <!-- 1. SEKME: Gelişim -->
-                <button type="button" onclick="switchTab('ai')" id="tab-ai" class="lisani-nav-tab flex flex-col items-center justify-center flex-1 min-w-0">
-                    <span class="lisani-nav-tab__icon-wrap"><i data-lucide="trending-up" class="w-5 h-5 shrink-0"></i></span>
-                    <span class="text-[9px] font-semibold mt-0.5 truncate max-w-full px-0.5 lisani-nav-tab__label">Gelişim</span>
-                </button>
+            <nav id="bottom-bar" class="lisani-nav-bar lisani-tab-bar-ios lisani-tab-bar-ios--center-home flex items-stretch z-45 transition-all duration-300 flex-shrink-0" aria-label="Ana menü">
 
-                <!-- 2. SEKME: Dashboard (hoca / yönetici) -->
-                <button type="button" onclick="switchTab('hoca-dashboard')" id="tab-hoca-dashboard" class="hidden lisani-nav-tab flex flex-col items-center justify-center flex-1 min-w-0">
-                    <span class="lisani-nav-tab__icon-wrap"><i data-lucide="layout-dashboard" class="w-5 h-5 shrink-0"></i></span>
-                    <span class="text-[9px] font-semibold mt-0.5 truncate max-w-full px-0.5 lisani-nav-tab__label">Dashboard</span>
-                </button>
+                <div class="lisani-nav-tab-side lisani-nav-tab-side--left">
+                    <button type="button" onclick="switchTab('ai')" id="tab-ai" class="lisani-nav-tab flex flex-col items-center justify-center flex-1 min-w-0">
+                        <span class="lisani-nav-tab__icon-wrap"><i data-lucide="trending-up" class="w-5 h-5 shrink-0"></i></span>
+                        <span class="text-[9px] font-semibold mt-0.5 truncate max-w-full px-0.5 lisani-nav-tab__label">Gelişim</span>
+                    </button>
 
-                <!-- 3. SEKME: Giriş / Ana Sayfa -->
-                <button type="button" onclick="switchTab('home')" id="tab-home" class="lisani-nav-tab flex flex-col items-center justify-center flex-1 min-w-0 lisani-tab-active">
-                    <span class="lisani-nav-tab__icon-wrap"><i data-lucide="home" class="w-5 h-5 shrink-0"></i></span>
-                    <span class="text-[9px] font-semibold mt-0.5 truncate max-w-full px-0.5 lisani-nav-tab__label" id="tab-home-text">Giriş</span>
-                </button>
+                    <button type="button" onclick="switchTab('hoca-dashboard')" id="tab-hoca-dashboard" class="hidden lisani-nav-tab flex flex-col items-center justify-center flex-1 min-w-0">
+                        <span class="lisani-nav-tab__icon-wrap"><i data-lucide="layout-dashboard" class="w-5 h-5 shrink-0"></i></span>
+                        <span class="text-[9px] font-semibold mt-0.5 truncate max-w-full px-0.5 lisani-nav-tab__label">Dashboard</span>
+                    </button>
 
-                <!-- 4. SEKME: Harfler -->
-                <button type="button" onclick="switchTab('letters')" id="tab-letters" class="lisani-nav-tab flex flex-col items-center justify-center flex-1 min-w-0">
-                    <span class="lisani-nav-tab__icon-wrap"><i data-lucide="languages" class="w-5 h-5 shrink-0"></i></span>
-                    <span class="text-[9px] font-semibold mt-0.5 truncate max-w-full px-0.5 lisani-nav-tab__label">Harfler</span>
-                </button>
+                    <button type="button" onclick="switchTab('letters')" id="tab-letters" class="lisani-nav-tab flex flex-col items-center justify-center flex-1 min-w-0">
+                        <span class="lisani-nav-tab__icon-wrap"><i data-lucide="languages" class="w-5 h-5 shrink-0"></i></span>
+                        <span class="text-[9px] font-semibold mt-0.5 truncate max-w-full px-0.5 lisani-nav-tab__label">Harfler</span>
+                    </button>
+                </div>
 
-                <!-- 5. SEKME: Osmanlıca Çeviri -->
-                <button type="button" onclick="switchTab('osm-translate')" id="tab-osm-translate" class="lisani-nav-tab flex flex-col items-center justify-center flex-1 min-w-0">
-                    <span class="lisani-nav-tab__icon-wrap"><i data-lucide="book-open-text" class="w-5 h-5 shrink-0"></i></span>
-                    <span class="text-[9px] font-semibold mt-0.5 truncate max-w-full px-0.5 lisani-nav-tab__label">Osmanlıca</span>
-                </button>
+                <div class="lisani-nav-tab-center">
+                    <button type="button" onclick="switchTab('home')" id="tab-home" class="lisani-nav-tab lisani-nav-home-btn flex flex-col items-center justify-center min-w-0 lisani-tab-active">
+                        <span class="lisani-nav-tab__icon-wrap"><i data-lucide="home" class="w-5 h-5 shrink-0"></i></span>
+                        <span class="text-[9px] font-semibold mt-0.5 truncate max-w-full px-0.5 lisani-nav-tab__label" id="tab-home-text">Giriş</span>
+                    </button>
+                </div>
 
-                <!-- 6. SEKME: Ayarlar / Profil -->
-                <button type="button" onclick="switchTab('settings')" id="tab-settings" class="lisani-nav-tab flex flex-col items-center justify-center flex-1 min-w-0">
-                    <span class="lisani-nav-tab__icon-wrap"><i data-lucide="settings" class="w-5 h-5 shrink-0"></i></span>
-                    <span class="text-[9px] font-semibold mt-0.5 truncate max-w-full px-0.5 lisani-nav-tab__label">Ayarlar</span>
-                </button>
+                <div class="lisani-nav-tab-side lisani-nav-tab-side--right">
+                    <button type="button" onclick="switchTab('osm-translate')" id="tab-osm-translate" class="lisani-nav-tab flex flex-col items-center justify-center flex-1 min-w-0">
+                        <span class="lisani-nav-tab__icon-wrap"><i data-lucide="book-open-text" class="w-5 h-5 shrink-0"></i></span>
+                        <span class="text-[9px] font-semibold mt-0.5 truncate max-w-full px-0.5 lisani-nav-tab__label">Osmanlıca</span>
+                    </button>
+
+                    <button type="button" onclick="switchTab('settings')" id="tab-settings" class="lisani-nav-tab flex flex-col items-center justify-center flex-1 min-w-0">
+                        <span class="lisani-nav-tab__icon-wrap"><i data-lucide="settings" class="w-5 h-5 shrink-0"></i></span>
+                        <span class="text-[9px] font-semibold mt-0.5 truncate max-w-full px-0.5 lisani-nav-tab__label">Ayarlar</span>
+                    </button>
+                </div>
 
             </nav>
 

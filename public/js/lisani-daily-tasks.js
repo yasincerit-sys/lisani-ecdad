@@ -4,15 +4,24 @@
 (function () {
     'use strict';
 
+    const RECENT_TASK_MEMORY = 6;
+
     const DAILY_TASK_POOL = [
         { id: 'letters_3', title: 'Elifba çalış', desc: '3 harf incele', type: 'letters', target: 3, xp: 25, action: 'letters' },
-        { id: 'bolum_kelimeler', title: 'Kelime bölümü', desc: 'Gündelik Kelimeler bölümünü tamamla', type: 'bolum_complete', bolum: 'kelimeler', target: 1, xp: 30, action: 'tests', bolumStart: 'kelimeler' },
-        { id: 'translate_2', title: 'Kelime çevir', desc: '2 kelime çevir', type: 'translate', target: 2, xp: 25, action: 'translate' },
-        { id: 'quiz_5', title: '5 doğru cevap', desc: 'Testte 5 doğru yap', type: 'quiz_correct', target: 5, xp: 30, action: 'tests' },
         { id: 'letters_5', title: '5 harf öğren', desc: 'Elifbadan 5 harf seç', type: 'letters', target: 5, xp: 30, action: 'letters' },
-        { id: 'bolum_eslestirme', title: 'Eşleştir bölümü', desc: 'Eşleştir bölümünü tamamla', type: 'bolum_complete', bolum: 'eslestirme', target: 1, xp: 35, action: 'tests', bolumStart: 'eslestirme' },
-        { id: 'bolum_ceviri', title: 'Çeviri bölümü', desc: 'Metin Çevir bölümünü tamamla', type: 'bolum_complete', bolum: 'ceviri', target: 1, xp: 35, action: 'tests', bolumStart: 'ceviri' },
-        { id: 'bolum_ses', title: 'Sesli bölüm', desc: 'Konuş ve Cevapla bölümünü dene', type: 'bolum_open', bolum: 'ses', target: 1, xp: 20, action: 'tests', bolumStart: 'ses' },
+        { id: 'letters_7', title: '7 harf keşfet', desc: 'Elifbadan 7 harf incele', type: 'letters', target: 7, xp: 35, action: 'letters' },
+        { id: 'translate_2', title: 'Kelime çevir', desc: '2 kelime çevir', type: 'translate', target: 2, xp: 25, action: 'translate' },
+        { id: 'translate_4', title: 'Çeviri pratiği', desc: '4 kelime çevir', type: 'translate', target: 4, xp: 30, action: 'translate' },
+        { id: 'quiz_3', title: '3 doğru cevap', desc: 'Testte 3 doğru yap', type: 'quiz_correct', target: 3, xp: 20, action: 'tests' },
+        { id: 'quiz_5', title: '5 doğru cevap', desc: 'Testte 5 doğru yap', type: 'quiz_correct', target: 5, xp: 30, action: 'tests' },
+        { id: 'quiz_8', title: '8 doğru cevap', desc: 'Testte 8 doğru yap', type: 'quiz_correct', target: 8, xp: 40, action: 'tests' },
+        { id: 'bolum_kelimeler', title: 'Temel bölüm', desc: 'Temel bölümünde bir test bitir', type: 'bolum_step', bolum: 'kelimeler', target: 1, xp: 30, action: 'tests', bolumStart: 'kelimeler' },
+        { id: 'bolum_harfler', title: 'Orta bölüm', desc: 'Orta bölümünde bir test bitir', type: 'bolum_step', bolum: 'harfler', target: 1, xp: 32, action: 'tests', bolumStart: 'harfler' },
+        { id: 'bolum_eslestirme', title: 'İleri bölüm', desc: 'İleri bölümünde bir test bitir', type: 'bolum_step', bolum: 'eslestirme', target: 1, xp: 35, action: 'tests', bolumStart: 'eslestirme' },
+        { id: 'bolum_ceviri', title: 'Uzman bölüm', desc: 'Uzman bölümünde bir test bitir', type: 'bolum_step', bolum: 'ceviri', target: 1, xp: 35, action: 'tests', bolumStart: 'ceviri' },
+        { id: 'bolum_open_harfler', title: 'Orta bölümü aç', desc: 'Orta bölümüne gir ve bir teste başla', type: 'bolum_open', bolum: 'harfler', target: 1, xp: 20, action: 'tests', bolumStart: 'harfler' },
+        { id: 'bolum_open_eslestirme', title: 'İleri bölümü aç', desc: 'İleri bölümüne gir ve bir teste başla', type: 'bolum_open', bolum: 'eslestirme', target: 1, xp: 22, action: 'tests', bolumStart: 'eslestirme' },
+        { id: 'bolum_ses', title: 'Usta bölümü dene', desc: 'Usta bölümünü aç ve konuşma sorusu dene', type: 'bolum_open', bolum: 'ses', target: 1, xp: 25, action: 'tests', bolumStart: 'ses' },
     ];
 
     function uid() {
@@ -20,7 +29,11 @@
     }
 
     function todayKey() {
-        return new Date().toISOString().slice(0, 10);
+        const d = new Date();
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${y}-${m}-${day}`;
     }
 
     function stateKey() {
@@ -41,6 +54,30 @@
         return Math.abs(h);
     }
 
+    function pickDailyTaskId(state) {
+        const today = todayKey();
+        const recent = Array.isArray(state?.recentTaskIds) ? state.recentTaskIds.slice(-RECENT_TASK_MEMORY) : [];
+        let pool = DAILY_TASK_POOL.filter((t) => !recent.includes(t.id));
+        if (!pool.length) pool = DAILY_TASK_POOL;
+
+        const seed = `${today}|${uid()}`;
+        let h = hashDay(seed);
+        for (let attempt = 0; attempt < pool.length; attempt++) {
+            const idx = h % pool.length;
+            const task = pool[idx];
+            if (!recent.includes(task.id)) return task.id;
+            h = (h * 17 + attempt + 1) | 0;
+        }
+        return pool[h % pool.length].id;
+    }
+
+    function trimRecentTaskIds(recent, taskId) {
+        const next = Array.isArray(recent) ? [...recent] : [];
+        if (!next.includes(taskId)) next.push(taskId);
+        while (next.length > RECENT_TASK_MEMORY) next.shift();
+        return next;
+    }
+
     function loadState() {
         try {
             const raw = localStorage.getItem(stateKey());
@@ -59,22 +96,29 @@
     function syncTaskDay(state) {
         const today = todayKey();
         if (!state || state.todayDate !== today) {
-            const idx = hashDay(today) % DAILY_TASK_POOL.length;
-            return {
+            const taskId = pickDailyTaskId(state);
+            const nextState = {
                 todayDate: today,
-                taskId: DAILY_TASK_POOL[idx].id,
+                taskId,
                 progress: 0,
                 rewardedToday: false,
                 streak: state?.streak || 0,
                 lastCompleteDate: state?.lastCompleteDate || null,
+                recentTaskIds: trimRecentTaskIds(state?.recentTaskIds, taskId),
             };
+            saveState(nextState);
+            return nextState;
         }
         return state;
     }
 
     function getTodayTask() {
-        const idx = hashDay(todayKey()) % DAILY_TASK_POOL.length;
-        return DAILY_TASK_POOL[idx];
+        const state = loadState();
+        if (state.todayDate === todayKey() && state.taskId) {
+            return DAILY_TASK_POOL.find((t) => t.id === state.taskId) || DAILY_TASK_POOL[0];
+        }
+        const taskId = pickDailyTaskId(state);
+        return DAILY_TASK_POOL.find((t) => t.id === taskId) || DAILY_TASK_POOL[0];
     }
 
     function getTaskForState(state) {
@@ -145,7 +189,7 @@
         const today = todayKey();
         const yesterday = new Date();
         yesterday.setDate(yesterday.getDate() - 1);
-        const yKey = yesterday.toISOString().slice(0, 10);
+        const yKey = `${yesterday.getFullYear()}-${String(yesterday.getMonth() + 1).padStart(2, '0')}-${String(yesterday.getDate()).padStart(2, '0')}`;
 
         if (state.lastCompleteDate === yKey) {
             state.streak = (state.streak || 0) + 1;
@@ -205,6 +249,14 @@
         const state = syncTaskDay(loadState());
         const task = getTaskForState(state);
         if (task.type === 'bolum_complete' && task.bolum === bolumId) {
+            bumpProgress(1);
+        }
+    }
+
+    function onBolumStepComplete(bolumId) {
+        const state = syncTaskDay(loadState());
+        const task = getTaskForState(state);
+        if (task.type === 'bolum_step' && task.bolum === bolumId) {
             bumpProgress(1);
         }
     }
@@ -474,6 +526,7 @@
         onTranslate,
         onQuizCorrect,
         onBolumComplete,
+        onBolumStepComplete,
         onBolumOpen,
         onLevelComplete: onBolumComplete,
         onLevelOpen: onBolumOpen,
