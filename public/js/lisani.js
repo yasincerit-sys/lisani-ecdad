@@ -4162,7 +4162,7 @@
                 typeof window.Capacitor.isNativePlatform === 'function' &&
                 window.Capacitor.isNativePlatform();
             const show = !!url && !isNativeApp;
-            ['settings-apk-download-row', 'auth-apk-download-row'].forEach((id) => {
+            ['settings-apk-download-row', 'home-apk-download-row', 'app-apk-download-strip'].forEach((id) => {
                 const el = document.getElementById(id);
                 if (!el) return;
                 if (!show) {

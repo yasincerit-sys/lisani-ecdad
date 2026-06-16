@@ -187,12 +187,6 @@
                 <button onclick="quickLogin()" class="w-full pt-6 pb-1 text-[9px] text-stone-700 hover:text-stone-500 transition-colors text-center">giriş</button>
             </div>
 
-            <a id="auth-apk-download-row" href="#" download="lisani-ecdad.apk" class="lisani-apk-download hidden w-full mt-5">
-                <i data-lucide="smartphone" class="w-4 h-4 shrink-0"></i>
-                <span>Android uygulamasını indir (APK)</span>
-                <i data-lucide="download" class="w-4 h-4 shrink-0 opacity-70"></i>
-            </a>
-
             </div>
 
         </div>
@@ -678,6 +672,19 @@
                             </div>
                         </div>
                     </div>
+
+                    <a id="home-apk-download-row" href="#" download="lisani-ecdad.apk" class="lisani-apk-download-home hidden lisani-span-full lisani-glass-panel lisani-glass-card rounded-2xl p-4 border theme-border">
+                        <div class="flex items-center gap-3 min-w-0">
+                            <div class="w-11 h-11 rounded-2xl theme-light-bg flex items-center justify-center theme-primary-color shrink-0">
+                                <i data-lucide="smartphone" class="w-5 h-5"></i>
+                            </div>
+                            <div class="min-w-0 flex-1">
+                                <p class="text-xs font-extrabold theme-text-main">Android uygulamasını indir</p>
+                                <p class="text-[10px] theme-text-muted mt-0.5">Telefona kur · bildirimler · çevrimdışı erişim</p>
+                            </div>
+                            <i data-lucide="download" class="w-5 h-5 theme-text-muted shrink-0"></i>
+                        </div>
+                    </a>
 
                     <!-- Günlük görev paneli (profil ateşi — sabit konum) -->
                     <div id="home-daily-goal-popover" class="lisani-daily-goal-popover hidden" role="dialog" aria-label="Günlük görev">
@@ -1268,6 +1275,12 @@
                 </div>
 
             </div>
+
+            <a id="app-apk-download-strip" href="#" download="lisani-ecdad.apk" class="lisani-apk-download-strip hidden" aria-label="Android uygulamasını indir">
+                <i data-lucide="smartphone" class="w-4 h-4 shrink-0"></i>
+                <span class="lisani-apk-download-strip__label">Android uygulamasını indir (APK)</span>
+                <i data-lucide="download" class="w-4 h-4 shrink-0 opacity-75"></i>
+            </a>
 
             <!-- SABİTLENMİŞ ALT SEKMELER — iPhone tarzı cam tab bar -->
             <nav id="bottom-bar" class="lisani-nav-bar lisani-tab-bar-ios lisani-tab-bar-ios--center-home flex items-stretch z-45 transition-all duration-300 flex-shrink-0" aria-label="Ana menü">
