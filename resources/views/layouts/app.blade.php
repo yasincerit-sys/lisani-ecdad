@@ -17,7 +17,7 @@
             "background_color": "#08061a",
             "theme_color": "#08061a",
             "orientation": "portrait",
-1rr            "permissions": ["microphone"],
+            "permissions": ["microphone"],
             "icons": [
                 { "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='36' fill='%232563eb'/%3E%3Ctext x='96' y='130' font-size='110' text-anchor='middle'%3E📖%3C/text%3E%3C/svg%3E", "sizes": "192x192", "type": "image/svg+xml" },
                 { "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='96' fill='%232563eb'/%3E%3Ctext x='256' y='350' font-size='300' text-anchor='middle'%3E📖%3C/text%3E%3C/svg%3E", "sizes": "512x512", "type": "image/svg+xml" }
@@ -117,6 +117,7 @@
         gokhanAudio: @json(asset('audio/gokhan-abi-call.mp4'))
     };
     window.LISANI_DONATE = @json(config('lisani.donate'));
+    window.LISANI_APK = @json(\App\Support\LisaniApk::clientConfig());
     window.LISANI_BASE = @json(rtrim(url('/'), '/'));</script>
     <script src="{{ asset('js/preline.js') }}"></script>
     <script src="{{ asset('js/lisani-flappy.js') }}?v={{ @filemtime(public_path('js/lisani-flappy.js')) ?: time() }}" defer></script>

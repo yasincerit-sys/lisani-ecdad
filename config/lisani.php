@@ -33,4 +33,18 @@ return [
         'account_name' => env('LISANI_DONATE_ACCOUNT_NAME', 'Lisan-ı Ecdad'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Android APK indirme (web sitesi)
+    |--------------------------------------------------------------------------
+    |
+    | LISANI_APK_URL boşsa public/downloads/lisani-ecdad.apk dosyası aranır.
+    | Derleme: npm run android:publish
+    |
+    */
+    'apk' => [
+        'url' => env('LISANI_APK_URL', ''),
+        'filename' => env('LISANI_APK_FILENAME', 'lisani-ecdad.apk'),
+    ],
+
 ];

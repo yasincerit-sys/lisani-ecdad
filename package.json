@@ -7,7 +7,8 @@
         "dev": "vite",
         "cap:sync": "npx cap sync android",
         "android:icons": "npx @capacitor/assets generate --android",
-        "android:build": "npx cap sync android && cd android && .\\gradlew.bat assembleDebug"
+        "android:build": "npx cap sync android && cd android && .\\gradlew.bat assembleDebug",
+        "android:publish": "npm run android:build && node scripts/publish-apk.cjs"
     },
     "dependencies": {
         "@capacitor/android": "^7.2.0",

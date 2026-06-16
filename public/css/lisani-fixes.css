@@ -4744,6 +4744,36 @@ html.preline-ui.theme-renkli-yol .lisani-bolum-dot-btn {
     appearance: textfield;
 }
 
+.lisani-apk-download,
+.lisani-apk-download-row {
+    text-decoration: none;
+    color: inherit;
+}
+
+.lisani-apk-download {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.55rem;
+    padding: 0.9rem 1rem;
+    border-radius: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.04));
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--ph-text, #f5f5f4);
+    transition: transform 0.15s ease, border-color 0.15s ease;
+}
+
+.lisani-apk-download:hover {
+    transform: translateY(-1px);
+    border-color: rgba(var(--theme-primary-rgb, 158, 108, 76), 0.45);
+}
+
+.lisani-apk-download-row.hidden {
+    display: none !important;
+}
+
 .lisani-donate-amount-input:disabled {
     opacity: 0.5;
     cursor: not-allowed;

@@ -44,6 +44,8 @@ services:
         value: "false"
       - key: LISANI_DONATE_IBAN
         sync: false
+      - key: LISANI_APK_URL
+        sync: false
 
 databases:
   - name: lisani-db

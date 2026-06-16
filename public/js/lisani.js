@@ -4153,6 +4153,29 @@
             }
         }
 
+        function initApkDownloadLink() {
+            const cfg = window.LISANI_APK || {};
+            const url = String(cfg.url || '').trim();
+            const filename = String(cfg.filename || 'lisani-ecdad.apk').trim();
+            const isNativeApp =
+                window.Capacitor &&
+                typeof window.Capacitor.isNativePlatform === 'function' &&
+                window.Capacitor.isNativePlatform();
+            const show = !!url && !isNativeApp;
+            ['settings-apk-download-row', 'auth-apk-download-row'].forEach((id) => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                if (!show) {
+                    el.classList.add('hidden');
+                    return;
+                }
+                el.href = url;
+                el.setAttribute('download', filename);
+                el.classList.remove('hidden');
+            });
+            if (show && typeof lucide !== 'undefined') lucide.createIcons();
+        }
+
         window.openDonateSupport = function () {
             playClickSound();
             initDonateModal();
@@ -6103,6 +6126,8 @@ self.addEventListener('notificationclick', e => {
             renderProgressChart();
             initPrelineTheme();
             initGrammarPrepNotes();
+            initApkDownloadLink();
+            initDonateModal();
             if (typeof syncAppShellVisibility === 'function') {
                 syncAppShellVisibility();
             }

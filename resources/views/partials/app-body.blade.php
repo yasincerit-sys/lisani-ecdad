@@ -187,6 +187,12 @@
                 <button onclick="quickLogin()" class="w-full pt-6 pb-1 text-[9px] text-stone-700 hover:text-stone-500 transition-colors text-center">giriş</button>
             </div>
 
+            <a id="auth-apk-download-row" href="#" download="lisani-ecdad.apk" class="lisani-apk-download hidden w-full mt-5">
+                <i data-lucide="smartphone" class="w-4 h-4 shrink-0"></i>
+                <span>Android uygulamasını indir (APK)</span>
+                <i data-lucide="download" class="w-4 h-4 shrink-0 opacity-70"></i>
+            </a>
+
             </div>
 
         </div>
@@ -1205,6 +1211,17 @@
                                 <p class="text-[10px] theme-text-muted">Sınıfa kayıt olduktan sonra ödevler burada görünür.</p>
                             </div>
                         </div>
+
+                        <a id="settings-apk-download-row" href="#" download="lisani-ecdad.apk" class="lisani-glass-action lisani-apk-download-row hidden w-full">
+                            <div class="flex items-center gap-3 min-w-0 flex-1">
+                                <i data-lucide="smartphone" class="w-4 h-4 theme-primary-color shrink-0"></i>
+                                <div class="min-w-0 text-left">
+                                    <span class="text-xs font-bold theme-text-main block">Android uygulamasını indir</span>
+                                    <span class="text-[10px] theme-text-muted block">APK · telefona kurulum</span>
+                                </div>
+                            </div>
+                            <i data-lucide="download" class="w-4 h-4 theme-text-muted shrink-0"></i>
+                        </a>
 
                         <button type="button" class="lisani-glass-action lisani-settings-support-btn w-full" onclick="openDonateSupport()">
                             <div class="flex items-center gap-3 min-w-0 flex-1">

@@ -23,6 +23,16 @@ npm run android:build
 
 Çıktı: `android/app/build/outputs/apk/debug/app-debug.apk`
 
+## Web sitesine APK koyma
+
+```bash
+npm run android:publish
+```
+
+Bu komut APK’yı `public/downloads/lisani-ecdad.apk` konumuna kopyalar. Siteye push edince **Ayarlar** ve **giriş ekranında** indirme linki görünür.
+
+Alternatif: `LISANI_APK_URL=https://...` ile harici bir adres de verebilirsiniz.
+
 ## Render deploy sonrası
 
 Site güncellendikten sonra APK’yı yeniden derlemeniz gerekmez (uzaktan URL yükler).
