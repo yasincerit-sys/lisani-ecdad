@@ -871,7 +871,7 @@ html.preline-ui[class*="theme-"] #screen-letters .lisani-letter-card.lisani-glas
 html.preline-ui[class*="theme-"] #screen-letters .lisani-letters-form-cell.lisani-glass-panel,
 html.preline-ui[class*="theme-"] #screen-settings .lisani-glass-action,
 html.preline-ui[class*="theme-"] #screen-settings button.lisani-glass-action:not(.lisani-glass-action--primary):not(.lisani-glass-action--danger),
-html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol)[class*="theme-"] .lisani-glass-panel {
+html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol):not(.theme-sade)[class*="theme-"] .lisani-glass-panel {
     background: rgba(255, 255, 255, 0.07) !important;
     backdrop-filter: blur(18px) saturate(150%) !important;
     -webkit-backdrop-filter: blur(18px) saturate(150%) !important;
@@ -890,7 +890,7 @@ html.preline-ui[class*="theme-"] #screen-settings button.lisani-glass-action:hov
     border-color: var(--theme-accent-border) !important;
 }
 
-html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol)[class*="theme-"] .lisani-glass-action--primary {
+html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol):not(.theme-sade)[class*="theme-"] .lisani-glass-action--primary {
     background: rgba(var(--theme-primary-rgb), 0.18) !important;
     border-color: rgba(var(--theme-primary-rgb), 0.35) !important;
     color: var(--ph-text) !important;
@@ -1523,17 +1523,17 @@ html.preline-ui[class*="theme-"] .theme-pick-btn.is-active {
     }
 }
 
-/* ===== ZORUNLU CAM — renkli-yol / duolingo hariç ===== */
-html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol)[class*="theme-"] #app-container .glass-card,
-html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol)[class*="theme-"] #app-container .glass-card-interactive,
-html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol)[class*="theme-"] #auth-container .glass-card,
-html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol)[class*="theme-"] #edit-profile-container .glass-card,
-html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol)[class*="theme-"] #notif-settings-panel .glass-card,
-html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol)[class*="theme-"] .lisani-glass-panel,
-html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol)[class*="theme-"] .lisani-glass-action,
-html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol)[class*="theme-"] button.lisani-glass-panel,
-html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol)[class*="theme-"] button.lisani-glass-action,
-html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol)[class*="theme-"] div.lisani-glass-action {
+/* ===== ZORUNLU CAM — renkli-yol / duolingo / sade hariç ===== */
+html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol):not(.theme-sade)[class*="theme-"] #app-container .glass-card,
+html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol):not(.theme-sade)[class*="theme-"] #app-container .glass-card-interactive,
+html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol):not(.theme-sade)[class*="theme-"] #auth-container .glass-card,
+html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol):not(.theme-sade)[class*="theme-"] #edit-profile-container .glass-card,
+html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol):not(.theme-sade)[class*="theme-"] #notif-settings-panel .glass-card,
+html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol):not(.theme-sade)[class*="theme-"] .lisani-glass-panel,
+html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol):not(.theme-sade)[class*="theme-"] .lisani-glass-action,
+html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol):not(.theme-sade)[class*="theme-"] button.lisani-glass-panel,
+html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol):not(.theme-sade)[class*="theme-"] button.lisani-glass-action,
+html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol):not(.theme-sade)[class*="theme-"] div.lisani-glass-action {
     background: linear-gradient(
         145deg,
         rgba(255, 255, 255, 0.16) 0%,
@@ -1548,11 +1548,11 @@ html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol)[class*="theme-"] div
         inset 0 1px 0 rgba(255, 255, 255, 0.18) !important;
 }
 
-html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol)[class*="theme-"] #app-container button.theme-primary-btn:not(.lisani-segment-btn),
-html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol)[class*="theme-"] #auth-container button.theme-primary-btn:not(.lisani-segment-btn),
-html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol)[class*="theme-"] #edit-profile-container button.theme-primary-btn,
-html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol)[class*="theme-"] #notif-settings-panel button.theme-primary-btn,
-html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol)[class*="theme-"] .lisani-glass-action--primary {
+html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol):not(.theme-sade)[class*="theme-"] #app-container button.theme-primary-btn:not(.lisani-segment-btn),
+html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol):not(.theme-sade)[class*="theme-"] #auth-container button.theme-primary-btn:not(.lisani-segment-btn),
+html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol):not(.theme-sade)[class*="theme-"] #edit-profile-container button.theme-primary-btn,
+html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol):not(.theme-sade)[class*="theme-"] #notif-settings-panel button.theme-primary-btn,
+html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol):not(.theme-sade)[class*="theme-"] .lisani-glass-action--primary {
     background: linear-gradient(
         145deg,
         rgba(var(--theme-primary-rgb), 0.38) 0%,
@@ -1587,6 +1587,67 @@ html.preline-ui[class*="theme-"] .theme-pick-btn.is-active {
 html.preline-ui[class*="theme-"] .lisani-glass-action--danger {
     background: linear-gradient(145deg, rgba(248, 113, 113, 0.22), rgba(248, 113, 113, 0.08)) !important;
     border-color: rgba(248, 113, 113, 0.4) !important;
+}
+
+/* ===== Sade tema — düz yüzeyler, cam/gradyan yok ===== */
+html.preline-ui.theme-sade #app-container .glass-card,
+html.preline-ui.theme-sade #app-container .glass-card-interactive,
+html.preline-ui.theme-sade #auth-container .glass-card,
+html.preline-ui.theme-sade #edit-profile-container .glass-card,
+html.preline-ui.theme-sade #notif-settings-panel .glass-card,
+html.preline-ui.theme-sade .lisani-glass-panel,
+html.preline-ui.theme-sade .lisani-glass-action,
+html.preline-ui.theme-sade button.lisani-glass-panel,
+html.preline-ui.theme-sade button.lisani-glass-action,
+html.preline-ui.theme-sade div.lisani-glass-action,
+html.preline-ui.theme-sade .theme-pick-btn {
+    background: var(--ph-surface, #1a1a1a) !important;
+    background-image: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border: 1px solid var(--ph-border, #333333) !important;
+    box-shadow: none !important;
+}
+
+html.preline-ui.theme-sade #app-container button.theme-primary-btn:not(.lisani-segment-btn),
+html.preline-ui.theme-sade #auth-container button.theme-primary-btn:not(.lisani-segment-btn),
+html.preline-ui.theme-sade #edit-profile-container button.theme-primary-btn,
+html.preline-ui.theme-sade #notif-settings-panel button.theme-primary-btn,
+html.preline-ui.theme-sade .lisani-glass-action--primary,
+html.preline-ui.theme-sade .theme-pick-btn.is-active {
+    background: var(--theme-btn-solid, #e5e5e5) !important;
+    background-image: none !important;
+    border: 1px solid var(--ph-border, #404040) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    box-shadow: none !important;
+    color: var(--theme-btn-text, #111111) !important;
+    filter: none !important;
+}
+
+html.preline-ui.theme-sade .lisani-glass-action--primary:hover,
+html.preline-ui.theme-sade #app-container button.theme-primary-btn:not(.lisani-segment-btn):hover,
+html.preline-ui.theme-sade .theme-pick-btn.is-active:hover {
+    background: var(--theme-btn-solid-hover, #fafafa) !important;
+}
+
+html.preline-ui.theme-sade .lisani-glass-action--danger {
+    background: rgba(248, 113, 113, 0.12) !important;
+    border-color: rgba(248, 113, 113, 0.35) !important;
+}
+
+html.preline-ui.theme-sade #bottom-bar.lisani-tab-bar-ios {
+    background: var(--ph-bg, #111111) !important;
+    background-image: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border-top: 1px solid var(--ph-border, #333333) !important;
+    box-shadow: none !important;
+}
+
+html.preline-ui.theme-sade .lisani-glass-blob,
+html.preline-ui.theme-sade .lisani-glass-blobs {
+    display: none !important;
 }
 
 /* ===== Mesajlar — glassmorphism ===== */
@@ -2517,6 +2578,8 @@ html.preline-ui[class*="theme-"] #wa-mesajlar-overlay .wa-send-btn.lisani-glass-
 }
 
 .lisani-learn-start-cta {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
     position: relative;
     width: 100%;
     min-height: 3.75rem;
@@ -3246,6 +3309,220 @@ body.lisani-play-screen-open {
     color: #93c5fd;
 }
 
+.lisani-quiz-type-badge--grammar {
+    border-color: rgba(217, 119, 6, 0.45);
+    background: rgba(217, 119, 6, 0.14);
+    color: #fbbf24;
+}
+
+.lisani-grammar-note {
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    padding-top: 0.65rem;
+    margin-top: 0.25rem;
+}
+
+.lisani-learn-card {
+    border: 1px solid rgba(251, 191, 36, 0.28);
+    background: rgba(251, 191, 36, 0.1);
+    color: var(--ph-text, #f5f5f5);
+    font-weight: 600;
+}
+
+.lisani-learn-card--tap {
+    cursor: pointer;
+    transition: border-color 0.2s ease, background 0.2s ease, transform 0.15s ease;
+}
+
+.lisani-learn-card--tap:hover,
+.lisani-learn-card--tap:focus-visible {
+    border-color: rgba(251, 191, 36, 0.5);
+    background: rgba(251, 191, 36, 0.16);
+    outline: none;
+}
+
+.lisani-learn-card--tap:active {
+    transform: scale(0.99);
+}
+
+.lisani-learn-card__icon {
+    margin-right: 0.35rem;
+}
+
+.lisani-learn-card__text {
+    display: inline;
+}
+
+.lisani-learn-card__cta,
+.lisani-learn-card__cta-inline {
+    display: block;
+    margin-top: 0.35rem;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #fbbf24;
+    opacity: 0.95;
+}
+
+.lisani-learn-card__cta-inline {
+    display: inline;
+    margin-top: 0;
+    margin-left: 0.15rem;
+}
+
+#quiz-grammar-note.lisani-learn-card--tap {
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    padding-top: 0.65rem;
+    margin-top: 0.25rem;
+    cursor: pointer;
+}
+
+.lisani-learn-modal:not(.hidden) {
+    display: flex !important;
+}
+
+.lisani-learn-modal__backdrop {
+    background: rgba(0, 0, 0, 0.62);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+}
+
+.lisani-learn-modal__panel {
+    z-index: 1;
+}
+
+.lisani-learn-modal__summary {
+    font-size: 15px;
+    line-height: 1.65;
+}
+
+.lisani-learn-modal__detail {
+    font-size: 14px;
+    line-height: 1.7;
+}
+
+.lisani-learn-modal__section-label {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+.lisani-learn-modal__examples {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.lisani-learn-modal__example {
+    border: 1px solid var(--ph-border, rgba(255, 255, 255, 0.12));
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 0.75rem;
+    padding: 0.85rem 1rem;
+    font-size: 15px;
+    line-height: 1.7;
+    color: var(--ph-text, #f5f5f5);
+}
+
+#learn-card-modal-summary {
+    font-size: 1rem;
+    line-height: 1.7;
+}
+
+#learn-card-modal-detail {
+    font-size: 1rem;
+    line-height: 1.7;
+}
+
+@media (min-width: 640px) {
+    #learn-card-modal-summary,
+    #learn-card-modal-detail {
+        font-size: 1.0625rem;
+    }
+
+    .lisani-learn-modal__example {
+        font-size: 1rem;
+    }
+}
+
+.lisani-grammar-prep-note .lisani-grammar-prep-note__title {
+    font-size: 0.9375rem;
+    line-height: 1.5;
+}
+
+.lisani-grammar-prep-note__text,
+.lisani-grammar-prep-note > p.theme-text-muted {
+    font-size: 0.875rem !important;
+    line-height: 1.65 !important;
+}
+
+@media (min-width: 640px) {
+    .lisani-grammar-prep-note .lisani-grammar-prep-note__title {
+        font-size: 1rem;
+    }
+
+    .lisani-grammar-prep-note__text,
+    .lisani-grammar-prep-note > p.theme-text-muted {
+        font-size: 0.9375rem !important;
+    }
+}
+
+.lisani-grammar-prep-note .lisani-learn-card__cta {
+    margin-top: 0.5rem;
+}
+
+.lisani-grammar-rules-panel--home {
+    margin-top: 0.25rem;
+}
+
+.lisani-grammar-rules-panel--tests {
+    margin-top: 0.35rem;
+    border: 1px solid var(--ph-border, rgba(255, 255, 255, 0.1));
+}
+
+#screen-tests .lisani-grammar-rules-panel--tests .lisani-grammar-prep-note {
+    padding: 0.65rem 0.75rem;
+}
+
+.lisani-grammar-topic-badge {
+    font-size: 9px;
+    font-weight: 800;
+    color: #fbbf24;
+    margin-left: 0.25rem;
+}
+
+.lisani-grammar-topic-badge.is-unlocked {
+    color: #34d399;
+}
+
+.lisani-grammar-prep-note.is-grammar-unlocked {
+    border-color: rgba(52, 211, 153, 0.25) !important;
+}
+
+.lisani-grammar-gate-item.is-done {
+    border-color: rgba(52, 211, 153, 0.28) !important;
+}
+
+.lisani-grammar-gate-item__icon {
+    font-size: 1.1rem;
+    width: 1.75rem;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+#placement-modal .lisani-learn-card {
+    border-radius: 0.75rem;
+    padding: 0.75rem 0.85rem;
+}
+
+#screen-tests #quiz-learn-card.lisani-learn-card {
+    margin-top: 0.35rem;
+}
+
+.lisani-grammar-prep-note {
+    border: 1px solid rgba(217, 119, 6, 0.15) !important;
+}
+
 #screen-tests .lisani-quiz-arabic {
     font-family: 'Noto Naskh Arabic', 'Amiri', 'Scheherazade New', serif;
     letter-spacing: 0.02em;
@@ -3467,6 +3744,7 @@ html.preline-ui.theme-duolingo .lisani-bolum-worm-wrap {
 /* Yuvarlak tur düğümleri — S yolu */
 .lisani-bolum-node {
     position: relative;
+    z-index: 2;
     width: 4.25rem;
     height: 4.25rem;
     flex-shrink: 0;
@@ -4429,4 +4707,53 @@ html.preline-ui.theme-renkli-yol .lisani-bolum-dot-btn {
         border-right: 2px solid #37464f !important;
         box-shadow: none !important;
     }
+}
+
+/* Destek / bağış */
+.theme-pick-btn.is-recommended {
+    outline: 1px solid rgba(198, 142, 95, 0.35);
+}
+
+.theme-pick-btn__badge {
+    font-size: 0.58rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    opacity: 0.85;
+    margin-left: 0.35rem;
+}
+
+.lisani-settings-support-btn {
+    padding: 1.1rem 1.15rem !important;
+    min-height: 3.75rem;
+    border-radius: 1.15rem !important;
+}
+
+.lisani-donate-invite-modal .lisani-settings-support-btn {
+    justify-content: center;
+}
+
+.lisani-donate-amount-input::-webkit-outer-spin-button,
+.lisani-donate-amount-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.lisani-donate-amount-input {
+    -moz-appearance: textfield;
+    appearance: textfield;
+}
+
+.lisani-donate-amount-input:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+#donate-open-link-btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.lisani-donate-modal .lisani-donate-amount-field {
+    margin-top: 0.15rem;
 }

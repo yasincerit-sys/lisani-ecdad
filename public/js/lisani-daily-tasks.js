@@ -471,14 +471,24 @@
         if (typeof window.getPlacementQuestionPool !== 'function') return [];
         const pool = window.getPlacementQuestionPool().filter((q) => q.options && q.options.length >= 2);
         const picked = [];
-        const perTier = { 1: 3, 2: 3, 3: 3 };
-        [1, 2, 3].forEach((tier) => {
-            const tierQs = pool.filter((q) => q.tier === tier);
-            const count = perTier[tier] || 3;
-            for (let i = 0; i < count && tierQs.length; i++) {
-                const idx = Math.floor(Math.random() * tierQs.length);
-                picked.push(tierQs.splice(idx, 1)[0]);
+        const perTier = { 1: 2, 2: 3, 3: 3, 4: 2 };
+
+        function pickHardestForTier(tierQs, count) {
+            const sorted = tierQs.slice().sort((a, b) => (b.difficulty || 0) - (a.difficulty || 0));
+            const out = [];
+            for (let i = 0; i < count && sorted.length; i++) {
+                const idx = Math.min(i + Math.floor(Math.random() * 2), sorted.length - 1);
+                out.push(sorted.splice(idx, 1)[0]);
             }
+            return out;
+        }
+
+        [1, 2, 3, 4].forEach((tier) => {
+            let tierQs = pool.filter((q) => q.tier === tier);
+            if (tier === 4 && window.LisaniGrammarPrep?.filterGrammarPool) {
+                tierQs = window.LisaniGrammarPrep.filterGrammarPool(tierQs);
+            }
+            picked.push(...pickHardestForTier(tierQs, perTier[tier] || 2));
         });
         return picked.sort(() => Math.random() - 0.5);
     }

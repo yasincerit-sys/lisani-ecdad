@@ -26,6 +26,8 @@
         ['teşekkürler', 'tesekkurler', 'teşekkür ederim', 'tesekkur ederim', 'sağ ol', 'sag ol', 'şükür', 'sukur', 'teşekkür', 'tesekkur'],
         ['su', 'çay', 'cay', 'kahve'],
         ['güzel', 'guzel', 'iyi'],
+        ['günaydın', 'gunaydin', 'iyi günler', 'iyi gunler', 'iyi akşamlar', 'iyi aksamlar', 'iyi geceler'],
+        ['teşekkürler', 'tesekkurler', 'teşekkür ederim', 'tesekkur ederim'],
         ['evet', 'hayır', 'hayir'],
         ['rahmet', 'merhamet', 'rahim', 'rahman'],
         ['ilim', 'ilm', 'bilim', 'fen'],
@@ -115,6 +117,23 @@
         { tr: 'Sabır', osm: 'صبر', diff: 4, hint: 'sabır', speakAlt: ['sabir'] },
         { tr: 'Rahmet', osm: 'رحمت', diff: 4, hint: 'rahmet', speakAlt: ['merhamet'] },
         { tr: 'Hikmet', osm: 'حكمت', diff: 4, hint: 'hikmet' },
+        { tr: 'Takva', osm: 'تقوى', diff: 5, hint: 'takva' },
+        { tr: 'Tevekkül', osm: 'توكل', diff: 5, hint: 'tevekkül', speakAlt: ['tevekkul'] },
+        { tr: 'İhsan', osm: 'احسان', diff: 5, hint: 'ihsan' },
+        { tr: 'Fütüvvet', osm: 'فتوة', diff: 5, hint: 'fütüvvet', speakAlt: ['futuvvet'] },
+        { tr: 'Hakikat', osm: 'حقيقة', diff: 5, hint: 'hakikat' },
+        { tr: 'Batıl', osm: 'باطل', diff: 5, hint: 'batıl', speakAlt: ['batil'] },
+        { tr: 'Zahir', osm: 'ظاهر', diff: 5, hint: 'zahir' },
+        { tr: 'Bâtın', osm: 'باطن', diff: 5, hint: 'bâtın', speakAlt: ['batin', 'batın'] },
+        { tr: 'Mülk', osm: 'ملك', diff: 5, hint: 'mülk', speakAlt: ['mulk'] },
+        { tr: 'Melekût', osm: 'ملكوت', diff: 6, hint: 'melekût', speakAlt: ['melekut'] },
+        { tr: 'Kader', osm: 'قدر', diff: 5, hint: 'kader' },
+        { tr: 'Kaza', osm: 'قضاء', diff: 5, hint: 'kaza' },
+        { tr: 'Şefaat', osm: 'شفاعة', diff: 6, hint: 'şefaat', speakAlt: ['sefaat'] },
+        { tr: 'İstiğfar', osm: 'استغفار', diff: 6, hint: 'istiğfar', speakAlt: ['istigfar'] },
+        { tr: 'Tefekkür', osm: 'تفكر', diff: 6, hint: 'tefekkür', speakAlt: ['tefekkur'] },
+        { tr: 'Marifet', osm: 'معرفة', diff: 6, hint: 'marifet' },
+        { tr: 'Muhabbet', osm: 'محبة', diff: 6, hint: 'muhabbet' },
     ];
 
     const WORDS = CORE_WORDS;
@@ -198,15 +217,506 @@
         { osm: 'مع السلامة', parts: ['güle', 'güle'], decoys: ['evet', 'hayır', 'deniz', 'vatan', 'kapı', 'yazıyorum'], diff: 2 },
         { osm: 'او ده اوكونييورم', parts: ['evde', 'okuyorum'], decoys: ['okulda', 'yazıyorum', 'gidiyorum', 'deniz', 'vatan', 'kapı'], diff: 3 },
         { osm: 'چای و قهوه', parts: ['çay', 've', 'kahve'], decoys: ['su', 'kitap', 'kalem', 'evde', 'gidiyorum', 'okuyorum'], diff: 2 },
+        { osm: 'كتاب اوقورم او ده', parts: ['kitap', 'okuyorum', 'evde'], decoys: ['okulda', 'yazıyorum', 'gidiyorum', 'kalem', 'çay', 'kahve'], diff: 2 },
+        { osm: 'قلم يازارم مدرسه ده', parts: ['kalem', 'yazıyorum', 'okulda'], decoys: ['okuyorum', 'evde', 'gidiyorum', 'kitap', 'çay', 'su'], diff: 2 },
+        { osm: 'صباح الخير يا صديق', parts: ['günaydın', 'dostum'], decoys: ['iyi', 'günler', 'akşamlar', 'geceler', 'merhaba', 'selam'], diff: 2 },
+        { osm: 'كيف حالك اليوم', parts: ['bugün', 'nasılsın'], decoys: ['merhaba', 'selam', 'iyi', 'günler', 'teşekkür', 'ederim'], diff: 2 },
+        { osm: 'بخير الحمد لله', parts: ['iyiyim', 'hamdolsun'], decoys: ['merhaba', 'selam', 'teşekkür', 'ederim', 'günaydın', 'hoş'], diff: 3 },
+        { osm: 'السلام عليكم', parts: ['selamün', 'aleyküm'], decoys: ['merhaba', 'selam', 'hoş', 'geldiniz', 'günaydın', 'iyi'], diff: 3 },
+        { osm: 'وعليكم السلام', parts: ['aleyküm', 'selam'], decoys: ['merhaba', 'hoş', 'geldiniz', 'günaydın', 'iyi', 'günler'], diff: 3 },
+        { osm: 'اتمنى لك يوما سعيدا', parts: ['iyi', 'günler', 'dilerim'], decoys: ['akşamlar', 'geceler', 'günaydın', 'merhaba', 'selam', 'hoş'], diff: 3 },
+        { osm: 'انا طالب', parts: ['ben', 'öğrenciyim'], decoys: ['okuyorum', 'yazıyorum', 'okulda', 'evde', 'gidiyorum', 'kitap'], diff: 3 },
+        { osm: 'هذا كتاب جميل', parts: ['bu', 'güzel', 'kitap'], decoys: ['kalem', 'defter', 'okuyorum', 'yazıyorum', 'evde', 'okulda'], diff: 3 },
+        { osm: 'اذهب الى المدرسة', parts: ['okula', 'gidiyorum'], decoys: ['evde', 'okuyorum', 'yazıyorum', 'kitap', 'kalem', 'çay'], diff: 3 },
+        { osm: 'احب وطني', parts: ['vatanımı', 'seviyorum'], decoys: ['millet', 'devlet', 'sultan', 'gidiyorum', 'okuyorum', 'yazıyorum'], diff: 3 },
+        { osm: 'العلم نور', parts: ['ilim', 'nurdur'], decoys: ['hikmet', 'sabır', 'adalet', 'rahmet', 'gidiyorum', 'okuyorum'], diff: 4 },
+        { osm: 'بالصبر تفتح الابواب', parts: ['sabırla', 'kapılar', 'açılır'], decoys: ['ilim', 'hikmet', 'adalet', 'rahmet', 'gidiyorum', 'okuyorum'], diff: 4 },
+        { osm: 'عدالة و رحمة', parts: ['adalet', 've', 'rahmet'], decoys: ['ilim', 'hikmet', 'sabır', 'din', 'iman', 'vatan'], diff: 4 },
         { osm: 'كتاب و قلم', parts: ['kitap', 've', 'kalem'], decoys: ['defter', 'okulda', 'yazıyorum', 'evde', 'gidiyorum', 'deniz'], diff: 2 },
         { osm: 'آنه و بابا ايى', parts: ['anne', 've', 'baba', 'iyi'], decoys: ['kötü', 'ev', 'kapı', 'gidiyorum', 'deniz', 'vatan'], diff: 3 },
         { osm: 'مدرسه ده كتاب اوقورم', parts: ['okulda', 'kitap', 'okuyorum'], decoys: ['evde', 'yazıyorum', 'gidiyorum', 'deniz', 'vatan', 'kapı'], diff: 3 },
         { osm: 'قلم يازارم او ده', parts: ['kalem', 'yazıyorum', 'evde'], decoys: ['okuyorum', 'okulda', 'gidiyorum', 'deniz', 'vatan', 'kapı'], diff: 3 },
         { osm: 'وطن و ملت سوریورم', parts: ['vatan', 've', 'millet', 'seviyorum'], decoys: ['gidiyorum', 'okuyorum', 'deniz', 'kapı', 'evde', 'sultan'], diff: 4 },
-        { osm: 'دولت و سلطان عظيم', parts: ['devlet', 've', 'sultan'], decoys: ['vatan', 'millet', 'gidiyorum', 'okuyorum', 'deniz', 'kapı'], diff: 4 },
-        { osm: 'علم و حكمت و صبر', parts: ['ilim', 've', 'hikmet', 'sabır'], decoys: ['adalet', 'rahmet', 'gidiyorum', 'okuyorum', 'deniz', 'vatan'], diff: 5 },
-        { osm: 'عدالت و رحمت اهم', parts: ['adalet', 've', 'rahmet'], decoys: ['ilim', 'hikmet', 'sabır', 'gidiyorum', 'okuyorum', 'deniz'], diff: 5 },
-        { osm: 'دين و ايمان و صبر', parts: ['din', 've', 'iman', 'sabır'], decoys: ['cami', 'ilim', 'hikmet', 'gidiyorum', 'okuyorum', 'deniz'], diff: 5 },
+        { osm: 'دولت و سلطان', parts: ['devlet', 've', 'sultan'], decoys: ['vatan', 'millet', 'gidiyorum', 'okuyorum', 'deniz', 'kapı'], diff: 4 },
+        { osm: 'علم و حكمت و صبر', parts: ['ilim', 'hikmet', 've', 'sabır'], decoys: ['adalet', 'rahmet', 'gidiyorum', 'okuyorum', 'deniz', 'vatan'], diff: 5 },
+        { osm: 'عدالت و رحمت', parts: ['adalet', 've', 'rahmet'], decoys: ['ilim', 'hikmet', 'sabır', 'gidiyorum', 'okuyorum', 'deniz'], diff: 5 },
+        { osm: 'دين و ايمان و صبر', parts: ['din', 'iman', 've', 'sabır'], decoys: ['cami', 'ilim', 'hikmet', 'gidiyorum', 'okuyorum', 'deniz'], diff: 5 },
+        { osm: 'توكل و صبر و علم', parts: ['tevekkül', 'sabır', 've', 'ilim'], decoys: ['takva', 'ihsan', 'adalet', 'rahmet', 'gidiyorum', 'okuyorum'], diff: 6 },
+        { osm: 'حقيقة و باطل', parts: ['hakikat', 've', 'batıl'], decoys: ['zahir', 'bâtın', 'ilim', 'hikmet', 'gidiyorum', 'okuyorum'], diff: 6 },
+        { osm: 'ظاهر و باطن', parts: ['zahir', 've', 'bâtın'], decoys: ['hakikat', 'batıl', 'ilim', 'hikmet', 'gidiyorum', 'okuyorum'], diff: 6 },
+        { osm: 'ملك و ملكوت', parts: ['mülk', 've', 'melekût'], decoys: ['devlet', 'sultan', 'vatan', 'millet', 'gidiyorum', 'okuyorum'], diff: 6 },
+        { osm: 'قدر و قضاء', parts: ['kader', 've', 'kaza'], decoys: ['takva', 'tevekkül', 'ilim', 'hikmet', 'gidiyorum', 'okuyorum'], diff: 6 },
+        { osm: 'استغفار و شفاعة', parts: ['istiğfar', 've', 'şefaat'], decoys: ['takva', 'ihsan', 'rahmet', 'adalet', 'gidiyorum', 'okuyorum'], diff: 6 },
+        { osm: 'تفكر و معرفة و محبة', parts: ['tefekkür', 'marifet', 've', 'muhabbet'], decoys: ['ilim', 'hikmet', 'sabır', 'adalet', 'gidiyorum', 'okuyorum'], diff: 6 },
+        { osm: 'تقوى و احسان و صبر', parts: ['takva', 'ihsan', 've', 'sabır'], decoys: ['tevekkül', 'fütüvvet', 'adalet', 'rahmet', 'gidiyorum', 'okuyorum'], diff: 6 },
+    ];
+
+    const GRAMMAR_PROMPT = 'Dil bilgisi — doğru seçeneği işaretleyin';
+
+    /** Uzman/Usta öncesi kısa hazırlık notları */
+    const GRAMMAR_TOPICS = {
+        irab: 'İ\'rab: İsim/fiil sonundaki hareke — merfû\' (üstün), mansûb (fetha), mecrûr (kesre), meczûm (sükûn).',
+        harficer: 'Harf-i cer: Sonraki ismi cer yapar. Sık gördüklerin: مِنْ (den), فِي (içinde), عَلَى (üzerinde), بِـ (ile), لِـ (için/-e ait).',
+        fiil: 'Fiil kipleri: Mâzî (geçmiş), muzâri (şimdiki/geniş), emir, nehy. Mastar fiil isim gibi kullanılır.',
+        izafet: 'İzafet tamlaması: Birinci kelime (mudâf) + ikinci kelime (mudâf ileyh). İkinci kelime genelde cer alır.',
+        tenvin: 'Tenvin (ـٌ ـٍ ـً): «bir» anlamı verir; cümledeki göreve göre hareke değişir.',
+        nefy: 'Olumsuzluk: لَا (genel nefy), لَمْ + muzâri (geçmişte olmama), مَا (soru veya nefy bağlamına göre).',
+        sifat: 'Sıfat: Nitelediği isimle aynı hâl, tâyin ve cemiyette uyumlu olmalıdır.',
+        kalin: 'Kalın-ince: ص ض ط ظ ق غ خ gibi harfler kalın okunur; önceki sesli harfe göre kalınlık değişir.',
+        zamir: 'Zamirler: مَنْ (kim), مَا (ne), هٰذَا (bu), ذٰلِكَ (şu/ o) — cümlede ismin yerini tutar.',
+        tekid: 'Tekid harfleri: إِنَّ pekiştirir; isim cümlesinde mübtedâ-haber ilişkisini güçlendirir.',
+    };
+
+    const GRAMMAR_TOPIC_DETAILS = {
+        irab: {
+            detail: 'İ\'rab, kelimenin cümledeki görevine göre sonunda aldığı hareke veya sükûndur. İsimler merfû\' (raf), mansûb (nasb), mecrûr (cer) olabilir; fiiller meczûm (cezm) de alır.',
+            examples: [
+                'الطّالِبُ — öğrenci (merfû\', mübtedâ)',
+                'الطّالِبَ — öğrenciyi (mansûb, mef\'ûl)',
+                'الطّالِبِ — öğrencinin / öğrenciye (mecrûr, harf-i cer sonrası)',
+            ],
+        },
+        harficer: {
+            detail: 'Harf-i cer (edat) sonraki ismi cer yapar ve genelde «-de, -den, -e, ile» gibi anlamlar taşır. Cümlede yer-yön veya aidiyet ilişkisi kurar.',
+            examples: [
+                'مِنَ البَيْتِ — evden',
+                'فِي المَدْرَسَةِ — okulda',
+                'عَلَى الطّاوِلَةِ — masanın üzerinde',
+                'بِالقَلَمِ — kalemle',
+            ],
+        },
+        fiil: {
+            detail: 'Arapça fiiller kök + kalıp ile çekilir. Mâzî geçmiş, muzâri şimdiki/geniş zaman, emir ve nehy emir yasak kipleridir. Mastar (kök hâli) isim gibi kullanılabilir.',
+            examples: [
+                'كَتَبَ — yazdı (mâzî)',
+                'يَكْتُبُ — yazar / yazıyor (muzâri)',
+                'اُكْتُبْ — yaz! (emir)',
+                'كِتَابَةٌ — yazma (mastar)',
+            ],
+        },
+        izafet: {
+            detail: 'İzafet tamlamasında birinci kelime (mudâf) sahipsiz kalır; ikinci kelime (mudâf ileyh) tamamlar ve genelde cer alır. Türkçede «-in» eki karşılığı düşünülebilir.',
+            examples: [
+                'كتابُ الطّالِبِ — öğrencinin kitabı',
+                'بابُ البَيْتِ — evin kapısı',
+                'مدرسةُ العلماءِ — alimlerin okulu',
+            ],
+        },
+        tenvin: {
+            detail: 'Tenvin (ـٌ ـٍ ـً) «bir» anlamı katar. İsmin cümledeki i\'rabına göre üstün, kesre veya fetha biçiminde görülür; belirsiz tekil isimlerde sık kullanılır.',
+            examples: [
+                'كِتابٌ — bir kitap (merfû\')',
+                'طالِبًا — bir öğrenciyi (mansûb)',
+                'بَيْتٍ — bir evden / bir evin (mecrûr)',
+            ],
+        },
+        nefy: {
+            detail: 'Olumsuzluk Arapçada farklı araçlarla kurulur. لَا genel nefy için; لَمْ geçmişte olmama için muzâri fiille; مَا bağlama göre nefy veya soru anlamı taşır.',
+            examples: [
+                'لَا يَكْتُبُ — yazmıyor',
+                'لَمْ يَكْتُبْ — yazmadı',
+                'مَا ذَهَبَ — gitmedi',
+            ],
+        },
+        sifat: {
+            detail: 'Sıfat, nitelediği isimle tür, sayı ve i\'rab bakımından uyumlu olmalıdır. Osmanlıca metinlerde sıfat genelde nitelenen isimden önce veya sonra gelebilir.',
+            examples: [
+                'كِتابٌ جَمِيلٌ — güzel bir kitap',
+                'الطّالِبُ المُجْتَهِدُ — çalışkan öğrenci',
+                'بَيْتٌ كَبِيرٌ — büyük bir ev',
+            ],
+        },
+        kalin: {
+            detail: 'Kalın harfler (ص ض ط ظ ق غ خ ve benzeri) okunuşta boğazın arka kısmından çıkar. Önceki sesli harfe göre kalın veya ince okunabilir.',
+            examples: [
+                'قَلَم — kalem (kalın ق)',
+                'صَبْر — sabır (kalın ص)',
+                'خَيْر — hayır / iyilik (kalın خ)',
+            ],
+        },
+        zamir: {
+            detail: 'Zamirler ismin yerini tutar. Soru zamirleri مَنْ (kim) ve مَا (ne); işaret zamirleri هٰذَا (bu), ذٰلِكَ (şu/o) sık görülür.',
+            examples: [
+                'مَنْ أَنْتَ؟ — sen kimsin?',
+                'مَا هٰذَا؟ — bu nedir?',
+                'ذٰلِكَ كِتابٌ — şu bir kitaptır',
+            ],
+        },
+        tekid: {
+            detail: 'إِنَّ ve benzeri tekid harfleri cümleye pekiştirme katar. İsim cümlesinde mübtedâ ile haber arasındaki ilişkiyi güçlendirir; çeviride «şüphesiz, gerçekten» hissi verir.',
+            examples: [
+                'إِنَّ اللّٰهَ غَفُورٌ — şüphesiz Allah bağışlayandır',
+                'إِنَّ العِلْمَ نُورٌ — ilim gerçekten nurdur',
+            ],
+        },
+    };
+
+    const GRAMMAR_TOPIC_TITLES = {
+        irab: 'İ\'rab',
+        harficer: 'Harf-i cer',
+        fiil: 'Fiil kipleri',
+        izafet: 'İzafet',
+        tenvin: 'Tenvin',
+        nefy: 'Olumsuzluk',
+        sifat: 'Sıfat',
+        kalin: 'Kalın-ince harfler',
+        zamir: 'Zamirler',
+        tekid: 'Tekid',
+    };
+
+    const LETTER_WORD_SAMPLES = {
+        Elif: ['اِسْم — isim', 'اُسْتَاد — usta / hoca'],
+        Be: ['بَيْت — ev', 'بَاب — kapı'],
+        Te: ['تِلْمِيذ — öğrenci', 'تَعْلِيم — öğretim'],
+        Sin: ['سَلَام — selam', 'سُؤَال — soru'],
+        Nun: ['نُور — nur', 'نَجَاح — başarı'],
+        Mim: ['مَدْرَسَة — okul', 'مِلَّة — millet'],
+        Lam: ['لُغَة — dil', 'لَيْل — gece'],
+        He: ['هٰذَا — bu', 'هُوَ — o (eril)'],
+        Vav: ['وَطَن — vatan', 'وَقْت — vakit'],
+        Dal: ['دَرْس — ders', 'دُنْيَا — dünya'],
+        Re: ['رَحْمَة — rahmet', 'رَأْي — görüş'],
+        Kef: ['كِتَاب — kitap', 'كَلِمَة — kelime'],
+        Cim: ['جَمِيل — güzel', 'جَامِع — cami'],
+        Fe: ['فِكْر — fikir', 'فَضْل — fazilet'],
+        Ha: ['حَقّ — hak', 'حِكْمَة — hikmet'],
+        Şın: ['شُكْر — şükür', 'شَرْف — şeref'],
+        Sad: ['صَبْر — sabır', 'صِدْق — doğruluk'],
+        Kaf: ['قَلَم — kalem', 'قُرْآن — Kur\'an'],
+        Gim: ['گُل — gül', 'گُزَل — güzel (Farsça kökenli)'],
+        Pe: ['پَرْدَه — perde', 'پَیْغَام — mesaj'],
+        Zel: ['زَمَان — zaman', 'زَهْر — çiçek'],
+        Ayn: ['عِلْم — ilim', 'عَدْل — adalet'],
+        Gayn: ['غُرْبَة — gurbet', 'غَيْر — başka'],
+        Ze: ['ذِكْر — zikir', 'ذَهَب — altın / gitti'],
+    };
+
+    function findWordByOsm(osm) {
+        return WORDS.find((w) => w.osm === osm) || null;
+    }
+
+    function findTilePhraseByOsm(osm) {
+        return TILE_PHRASES_OSM.find((p) => p.osm === osm) || null;
+    }
+
+    function wordUsageExamples(w) {
+        const tr = normQuizWord(w.tr);
+        const phrases = TILE_PHRASES_OSM.filter((p) =>
+            p.parts.some((part) => normQuizWord(part) === tr || normQuizWord(part).includes(tr))
+        );
+        const out = [`«${w.osm}» = ${w.tr}`];
+        if (w.hint) out.push(`Türkçe okunuş: ${w.hint}`);
+        phrases.slice(0, 3).forEach((p) => {
+            out.push(`«${p.osm}» → ${p.parts.join(' ')}`);
+        });
+        if (out.length < 3) {
+            out.push(`Tek başına: ${w.tr} — günlük kelime hazinesinde sık kullanılır.`);
+        }
+        return out.slice(0, 4);
+    }
+
+    function buildLisaniLearnDetail(q) {
+        if (!q) return null;
+
+        if (q.type === 'grammar') {
+            const topic = q.grammarTopic || '';
+            const topicPack = GRAMMAR_TOPIC_DETAILS[topic] || {};
+            return {
+                title: GRAMMAR_TOPIC_TITLES[topic] || 'Dil bilgisi',
+                summary: buildLisaniLearnTip(q),
+                detail:
+                    topicPack.detail ||
+                    GRAMMAR_TOPICS[topic] ||
+                    'Bu soruda Osmanlıca dil bilgisi kuralı sorgulanıyor. Doğru seçeneği işaretlerken kelimenin cümledeki görevini düşün.',
+                examples: [
+                    ...(topicPack.examples || []),
+                    q.answer ? `Bu sorunun cevabı: ${q.answer}` : '',
+                    q.word ? `Soru metni: ${q.word}` : '',
+                ].filter(Boolean),
+            };
+        }
+
+        if (q.type === 'card') {
+            const w = findWordByOsm(q.word);
+            return {
+                title: w ? `Kelime: ${w.tr}` : 'Kelime kartı',
+                summary: buildLisaniLearnTip(q),
+                detail: w
+                    ? `Osmanlıca yazılış ile Türkçe karşılığı eşleştirilir. «${w.osm}» metinde bu kelimeyi gördüğünde okunuşu «${w.hint || w.tr}» şeklinde düşün. Zorluk seviyesi: ${w.diff}/6.`
+                    : `Doğru Türkçe karşılık: «${q.answer}». Osmanlıca metni parça parça okuyarak anlam çıkar.`,
+                examples: w ? wordUsageExamples(w) : [`Doğru cevap: ${q.answer}`],
+            };
+        }
+
+        if (q.type === 'letter') {
+            const letter = LETTERS.find((l) => l.char === q.word || l.name === q.answer);
+            const name = letter?.name || q.answer;
+            const samples = LETTER_WORD_SAMPLES[name] || [`${q.word} harfi kelime içinde kullanılır`];
+            return {
+                title: `Harf: ${name} (${q.word})`,
+                summary: buildLisaniLearnTip(q),
+                detail: `Osmanlıca alfabede «${q.word}» harfinin adı «${name}»dır. Harfleri tanımak okumayı hızlandırır; kelime içindeki konumuna dikkat et.`,
+                examples: samples,
+            };
+        }
+
+        if (q.type === 'speak') {
+            const w = findWordByOsm(q.word);
+            return {
+                title: 'Konuşma pratiği',
+                summary: buildLisaniLearnTip(q),
+                detail: w
+                    ? `«${q.word}» kelimesini Türkçe «${q.speakHint || w.hint}» diye oku. Net ve yavaş söylemek ses tanımayı kolaylaştırır.`
+                    : `Hedef okunuş: «${q.speakHint || q.word}». Mikrofona yakın ve sessiz ortamda dene.`,
+                examples: w
+                    ? wordUsageExamples(w)
+                    : [`Okunuş: ${q.speakHint || '—'}`, `Osmanlıca: ${q.word}`],
+            };
+        }
+
+        if (q.type === 'tiles') {
+            const phrase = findTilePhraseByOsm(q.word);
+            const parts = q.answerOrder || phrase?.parts || [];
+            return {
+                title: 'Cümle kurma',
+                summary: buildLisaniLearnTip(q),
+                detail: phrase
+                    ? `Osmanlıca cümle «${phrase.osm}» şeklinde yazılır. Türkçe kelime sırası: ${parts.join(' → ')}. Kutucukları bu sırayla seç.`
+                    : `Kelimeleri Türkçe cümle düzenine göre sırala. Doğru sıra: ${parts.join(' ')}.`,
+                examples: [
+                    `Osmanlıca: ${q.word}`,
+                    `Türkçe: ${parts.join(' ')}`,
+                    ...(phrase ? [`Parça sayısı: ${parts.length} kelime`] : []),
+                ],
+            };
+        }
+
+        return {
+            title: 'Öğrenme notu',
+            summary: buildLisaniLearnTip(q),
+            detail: q.answer ? `Doğru cevap «${q.answer}»dır. Bir sonraki soruda tekrar dene.` : 'Bu soruyu tekrar gözden geçir.',
+            examples: q.answer ? [`Cevap: ${q.answer}`] : [],
+        };
+    }
+
+    function buildLisaniLearnDetailFromTopic(topicId) {
+        const pack = GRAMMAR_TOPIC_DETAILS[topicId] || {};
+        return {
+            title: GRAMMAR_TOPIC_TITLES[topicId] || topicId,
+            summary: GRAMMAR_TOPICS[topicId] || '',
+            detail: pack.detail || GRAMMAR_TOPICS[topicId] || '',
+            examples: pack.examples || [],
+        };
+    }
+
+    function buildLisaniLearnTip(q) {
+        if (!q) return '';
+        if (q.type === 'grammar') {
+            const topic = q.grammarTopic || '';
+            const label = GRAMMAR_TOPIC_TITLES[topic] || topic || 'Dil bilgisi';
+            return `Konu: ${label} — detay ve örnekler için dokun`;
+        }
+        if (q.learnTip) return q.learnTip;
+        if (q.grammarNote) return q.grammarNote;
+        if (q.type === 'speak' && q.speakHint) return `Okunuş hedefi: «${q.speakHint}»`;
+        if (q.type === 'tiles' && q.answerOrder?.length) return `Doğru cümle: «${q.answerOrder.join(' ')}»`;
+        if (q.answer) return `Doğru cevap: «${q.answer}»`;
+        return '';
+    }
+
+    const GRAMMAR_ITEMS = [
+        {
+            osm: '«كتابُ الطّالِبِ» tamlamasında «الطّالِبِ» hangi i\'rabı alır?',
+            prompt: GRAMMAR_PROMPT,
+            topic: 'izafet',
+            answer: 'Mecrûr (cer / izafet tamamlayıcısı)',
+            wrong: ['Merfû\' (raf)', 'Mansûb (nasb)', 'Meczûm (cezm)'],
+            diff: 4,
+        },
+        {
+            osm: '«مِنَ البَيْتِ» ifadesinde «مِنْ» hangi görevdedir?',
+            prompt: GRAMMAR_PROMPT,
+            topic: 'harficer',
+            answer: 'Harf-i cer (edat)',
+            wrong: ['Fiil öneki', 'Tanımlık (lam)', 'Şedde işareti'],
+            diff: 4,
+        },
+        {
+            osm: '«يَكْتُبُ الطّالِبُ» cümlesinde «يَكْتُبُ» hangi kiptedir?',
+            prompt: GRAMMAR_PROMPT,
+            topic: 'fiil',
+            answer: 'Muzâri (şimdiki/geniş zaman)',
+            wrong: ['Mâzî (geçmiş zaman)', 'Emir', 'Mastar'],
+            diff: 5,
+        },
+        {
+            osm: '«كَتَبَ» fiilinin babı (kök yapısı) hangisidir?',
+            prompt: GRAMMAR_PROMPT,
+            topic: 'fiil',
+            answer: 'Bab-ı sâlim (sağlam üçlü kök)',
+            wrong: ['Bab-ı müteaddî', 'Bab-ı müfâ\'ale', 'Bab-ı iftiâl'],
+            diff: 5,
+        },
+        {
+            osm: '«الْعِلْمُ نُورٌ» cümlesinde «نُورٌ» hangi i\'rabı alır?',
+            prompt: GRAMMAR_PROMPT,
+            topic: 'irab',
+            answer: 'Merfû\' (haber)',
+            wrong: ['Mansûb (meful)', 'Mecrûr', 'Meczûm'],
+            diff: 5,
+        },
+        {
+            osm: 'Tenvin (ـٌ ـٍ ـً) genelde hangi halde görülür?',
+            prompt: GRAMMAR_PROMPT,
+            topic: 'tenvin',
+            answer: 'Merfû\' veya mansûb (bağlama göre)',
+            wrong: ['Yalnızca mecrûr', 'Yalnızca meczûm', 'Hiçbir halde kullanılmaz'],
+            diff: 5,
+        },
+        {
+            osm: '«بِسْمِ اللّٰهِ» de «بِ» harfinden sonra gelen isim hangi haldedir?',
+            prompt: GRAMMAR_PROMPT,
+            topic: 'harficer',
+            answer: 'Mecrûr (cer)',
+            wrong: ['Merfû\'', 'Mansûb', 'Meczûm'],
+            diff: 4,
+        },
+        {
+            osm: '«مَدْرَسَةُ الْعُلَمَاءِ» izafetinde son kelime neyi gösterir?',
+            prompt: GRAMMAR_PROMPT,
+            topic: 'izafet',
+            answer: 'İzafet edilen (mudâf ileyh)',
+            wrong: ['Mübtedâ', 'Haber', 'Meful-i bih'],
+            diff: 5,
+        },
+        {
+            osm: 'Osmanlıca\'da «كِتاب» ile «كُتُب» arasındaki fark nedir?',
+            prompt: GRAMMAR_PROMPT,
+            topic: 'irab',
+            answer: 'Tekil / çoğul',
+            wrong: ['Mastar / fiil', 'Erkek / dişi', 'Soru / cevap'],
+            diff: 4,
+        },
+        {
+            osm: '«لَا يَكْتُبُ» olumsuzluğu hangi araçla kurulmuştur?',
+            prompt: GRAMMAR_PROMPT,
+            topic: 'nefy',
+            answer: '«لَا» nafy edatı',
+            wrong: ['«مَا» istifham', '«إِنْ» şart', '«قَدْ» tahkik'],
+            diff: 5,
+        },
+        {
+            osm: '«اِقْرَأْ» fiili hangi emir kalıbındadır?',
+            prompt: GRAMMAR_PROMPT,
+            topic: 'fiil',
+            answer: 'Emir (tekil eril)',
+            wrong: ['Muzâri', 'Mâzî', 'Mastar'],
+            diff: 5,
+        },
+        {
+            osm: '«فِي الْمَدْرَسَةِ» de «فِي» hangi anlamı taşır?',
+            prompt: GRAMMAR_PROMPT,
+            topic: 'harficer',
+            answer: 'İçinde / -de (zarf yer)',
+            wrong: ['İçin / -e', 'Den / -den', 'İle / -le'],
+            diff: 4,
+        },
+        {
+            osm: '«عَلَى الطّالِبِ» ifadesinde «عَلَى» sonrası isim hangi haldedir?',
+            prompt: GRAMMAR_PROMPT,
+            topic: 'harficer',
+            answer: 'Mecrûr',
+            wrong: ['Merfû\'', 'Mansûb', 'Mef\'ûl-i mutlak'],
+            diff: 5,
+        },
+        {
+            osm: '«كانَ» yardımcı fiili genelde ne oluşturur?',
+            prompt: GRAMMAR_PROMPT,
+            topic: 'fiil',
+            answer: 'Nominal cümle (isim cümlesi) yapısı',
+            wrong: ['Soru cümlesi', 'Olumsuz emir', 'Şart cümlesi'],
+            diff: 6,
+        },
+        {
+            osm: '«لِلطّالِبِ» deki «لِ» (lam-ı ıdık) ne anlatır?',
+            prompt: GRAMMAR_PROMPT,
+            topic: 'harficer',
+            answer: 'Aidiyet / -e ait',
+            wrong: ['Soru', 'Olumsuzluk', 'Şart'],
+            diff: 5,
+        },
+        {
+            osm: '«مَا» harfi soru bağlamında ne işlev görür?',
+            prompt: GRAMMAR_PROMPT,
+            topic: 'zamir',
+            answer: 'İstifham (soru)',
+            wrong: ['Nefy (olumsuzluk)', 'Ta\'kîd (pekiştirme)', 'Cer (çekme)'],
+            diff: 5,
+        },
+        {
+            osm: '«يُكْتَبُ» fiilinde «يُ» öneki ve «ت» arasındaki ilişki neyi gösterir?',
+            prompt: GRAMMAR_PROMPT,
+            topic: 'fiil',
+            answer: 'Edilgen (mef\'ûl) yapı',
+            wrong: ['Emir', 'Mastar', 'İstifham'],
+            diff: 6,
+        },
+        {
+            osm: '«الطّالِبُ الْمُجْتَهِدُ» de ikinci sıfat neye bağlanır?',
+            prompt: GRAMMAR_PROMPT,
+            topic: 'sifat',
+            answer: 'Önceki isme (sıfat)',
+            wrong: ['Fiile', 'Zarfa', 'Habere'],
+            diff: 5,
+        },
+        {
+            osm: '«إِنَّ» harfi cümlede genelde ne getirir?',
+            prompt: GRAMMAR_PROMPT,
+            topic: 'tekid',
+            answer: 'Tekid (pekiştirme) + isim cümlesi',
+            wrong: ['Sadece soru', 'Sadece olumsuzluk', 'Mastar'],
+            diff: 6,
+        },
+        {
+            osm: 'Kalın okunuşta «ص» harfi hangi sesi verir?',
+            prompt: GRAMMAR_PROMPT,
+            topic: 'kalin',
+            answer: 'Kalın S',
+            wrong: ['İnce S', 'Z sesi', 'Ş sesi'],
+            diff: 4,
+        },
+        {
+            osm: '«لَمْ يَكْتُبْ» yapısı hangi zaman anlamına yakındır?',
+            prompt: GRAMMAR_PROMPT,
+            topic: 'nefy',
+            answer: 'Geçmişte olmama / olumsuz geçmiş',
+            wrong: ['Gelecek', 'Emir', 'Şimdiki olumlu'],
+            diff: 6,
+        },
+        {
+            osm: '«بِالْعِلْمِ» tamlamasında «الْعِلْمِ» hangi haldedir?',
+            prompt: GRAMMAR_PROMPT,
+            topic: 'harficer',
+            answer: 'Mecrûr',
+            wrong: ['Merfû\'', 'Mansûb', 'Meczûm'],
+            diff: 5,
+        },
+        {
+            osm: '«مَنْ» zamiri genelde ne sorar?',
+            prompt: GRAMMAR_PROMPT,
+            topic: 'zamir',
+            answer: 'Akıllı varlık (kim)',
+            wrong: ['Yer (nerede)', 'Zaman (ne zaman)', 'Sebep (niçin)'],
+            diff: 5,
+        },
+        {
+            osm: '«هٰذَا» işaret zamiri neye işaret eder?',
+            prompt: GRAMMAR_PROMPT,
+            topic: 'zamir',
+            answer: 'Yakındaki eril/tekil',
+            wrong: ['Uzak çoğul', 'Soru', 'Mastar'],
+            diff: 4,
+        },
     ];
 
     const SKIP_PHRASES = [
@@ -223,6 +733,7 @@
         letter: { label: 'Harf', icon: 'type' },
         speak: { label: 'Konuş', icon: 'mic' },
         tiles: { label: 'Cümle Kur', icon: 'layout-grid' },
+        grammar: { label: 'Dil Bilgisi', icon: 'book-open' },
     };
 
     function pickWrong(answerWord, pool, diff, n) {
@@ -231,7 +742,8 @@
         const isEligible = (w, spread) =>
             w.tr !== answerTr && !blocked.has(normQuizWord(w.tr)) && Math.abs(w.diff - diff) <= spread + 1;
 
-        for (const spread of [0, 1, 2, 4, 8]) {
+        const spreads = diff >= 6 ? [0, 1] : diff >= 5 ? [0, 1, 2] : [0, 1, 2, 4, 8];
+        for (const spread of spreads) {
             const candidates = pool.filter((w) => isEligible(w, spread));
             if (candidates.length >= n) {
                 return shuffle(candidates)
@@ -240,10 +752,19 @@
             }
         }
 
-        const fallback = pool.filter((w) => w.tr !== answerTr && !blocked.has(normQuizWord(w.tr)));
+        const fallback = pool.filter(
+            (w) => w.tr !== answerTr && !blocked.has(normQuizWord(w.tr)) && !isBlockedWrongOption(w.tr, answerWord)
+        );
         return shuffle(fallback)
             .slice(0, n)
             .map((w) => w.tr);
+    }
+
+    function wordLearnTip(w) {
+        let tip = `Osmanlıca «${w.osm}» → Türkçe «${w.tr}»`;
+        if (w.hint) tip += ` · okunuş: ${w.hint}`;
+        if (w.diff >= 5) tip += ' · İleri seviye — birkaç kez tekrar et.';
+        return tip;
     }
 
     function mkCard(w) {
@@ -256,6 +777,7 @@
             options,
             answer: w.tr,
             difficulty: w.diff,
+            learnTip: wordLearnTip(w),
         };
     }
 
@@ -270,6 +792,7 @@
             options: shuffle([l.name, ...wrong]),
             answer: l.name,
             difficulty: l.diff,
+            learnTip: `Harf «${l.char}» adı: ${l.name}`,
         };
     }
 
@@ -282,16 +805,17 @@
             speakMatch: s.speakMatch,
             skipPhrases: SKIP_PHRASES,
             difficulty: s.diff,
+            learnTip: `Kelimeyi Türkçe oku: «${s.hint}»${s.diff >= 5 ? ' · net ve yavaş söyle.' : ''}`,
         };
     }
 
-    function mkTiles(p) {
+        function mkTiles(p) {
         const parts = p.parts.slice();
         const tiles = parts.slice();
         const safeDecoys = filterTileDecoys(parts, p.decoys);
         const decoys = shuffle(safeDecoys);
         for (const d of decoys) {
-            if (tiles.length >= 10) break;
+            if (tiles.length >= Math.max(10, parts.length + 4)) break;
             tiles.push(d);
         }
         return {
@@ -302,6 +826,25 @@
             answerOrder: parts,
             tileParts: parts.length,
             difficulty: p.diff,
+            learnTip: `Doğru cümle sırası: «${parts.join(' ')}»`,
+        };
+    }
+
+    function mkGrammar(g) {
+        const wrong = (g.wrong || []).slice(0, 3);
+        const options = shuffle([g.answer, ...wrong]);
+        const grammarNote = g.note || GRAMMAR_TOPICS[g.topic] || '';
+        const topicLabel = GRAMMAR_TOPIC_TITLES[g.topic] || g.topic || 'Dil bilgisi';
+        return {
+            type: 'grammar',
+            word: g.osm,
+            prompt: g.prompt || GRAMMAR_PROMPT,
+            options,
+            answer: g.answer,
+            difficulty: g.diff,
+            grammarNote,
+            grammarTopic: g.topic || '',
+            learnTip: `Konu: ${topicLabel} — önce kuralı öğren`,
         };
     }
 
@@ -326,8 +869,8 @@
     const BOLUM_QUIZ = {
         kelimeler: {
             baseDiff: 1,
-            maxDiff: 2,
-            stepDiffBoost: 0.25,
+            maxDiff: 3,
+            stepDiffBoost: 0.4,
             tilesPartMin: 2,
             tilesPartMax: 2,
             typeCycle: ['letter', 'card', 'letter', 'card', 'letter'],
@@ -335,50 +878,56 @@
         },
         harfler: {
             baseDiff: 2,
-            maxDiff: 3,
-            stepDiffBoost: 0.35,
+            maxDiff: 4,
+            stepDiffBoost: 0.55,
             tilesPartMin: 2,
             tilesPartMax: 3,
             typeCycle: ['tiles', 'card', 'tiles', 'card', 'letter'],
             allowLetter: true,
         },
         eslestirme: {
-            baseDiff: 3,
-            maxDiff: 4,
-            stepDiffBoost: 0.45,
+            baseDiff: 2,
+            maxDiff: 5,
+            stepDiffBoost: 0.65,
             tilesPartMin: 2,
-            tilesPartMax: 3,
-            typeCycle: ['tiles', 'card', 'tiles', 'card', 'tiles'],
+            tilesPartMax: 4,
+            typeCycle: ['tiles', 'card', 'tiles', 'tiles', 'card', 'tiles', 'card', 'tiles'],
             allowLetter: false,
         },
         ceviri: {
-            baseDiff: 3,
-            maxDiff: 5,
-            stepDiffBoost: 0.55,
-            tilesPartMin: 3,
-            tilesPartMax: 4,
-            typeCycle: ['tiles', 'card', 'tiles', 'card', 'tiles', 'speak'],
+            baseDiff: 4,
+            maxDiff: 6,
+            stepDiffBoost: 1.15,
+            tilesPartMin: 4,
+            tilesPartMax: 6,
+            typeCycle: ['grammar', 'tiles', 'speak', 'grammar', 'card', 'tiles', 'speak', 'grammar', 'tiles', 'speak', 'card', 'grammar'],
             allowLetter: false,
         },
         ses: {
-            baseDiff: 4,
-            maxDiff: 5,
-            stepDiffBoost: 0.6,
-            tilesPartMin: 3,
-            tilesPartMax: 4,
-            typeCycle: ['speak', 'tiles', 'card', 'speak', 'tiles', 'card'],
+            baseDiff: 5,
+            maxDiff: 6,
+            stepDiffBoost: 1.35,
+            tilesPartMin: 5,
+            tilesPartMax: 6,
+            typeCycle: ['speak', 'grammar', 'tiles', 'speak', 'grammar', 'speak', 'tiles', 'grammar', 'speak', 'tiles', 'grammar', 'speak'],
             allowLetter: false,
         },
     };
 
     function buildLisaniSessionTypes(bolumId, sessionSize, stepIndex) {
         const cfg = BOLUM_QUIZ[bolumId] || BOLUM_QUIZ.kelimeler;
-        const types = ['speak', 'tiles'];
+        const types =
+            bolumId === 'ceviri' || bolumId === 'ses'
+                ? ['grammar', 'speak']
+                : bolumId === 'eslestirme'
+                  ? ['tiles', 'card', 'tiles']
+                  : ['speak', 'tiles'];
         const cycle = cfg.typeCycle || ['card'];
         let ci = 0;
         while (types.length < sessionSize) {
             let next = cycle[ci % cycle.length];
-            if (next === 'letter' && cfg.allowLetter === false) next = 'card';
+            if (next === 'letter' && cfg.allowLetter === false) next = 'grammar';
+            if (next === 'letter') next = 'card';
             types.push(next);
             ci++;
         }
@@ -388,9 +937,22 @@
     function getBolumDiffRange(bolumId, stepIndex, slotIndex, sessionSize) {
         const cfg = BOLUM_QUIZ[bolumId] || BOLUM_QUIZ.kelimeler;
         const stepBoost = Math.floor(stepIndex * (cfg.stepDiffBoost || 0.4));
-        const slotBoost = Math.floor((slotIndex / Math.max(1, sessionSize - 1)) * 1.2);
-        const minD = Math.min(cfg.maxDiff, cfg.baseDiff + stepBoost + Math.floor(slotBoost * 0.5));
-        const maxD = Math.min(cfg.maxDiff, minD + 1 + Math.floor(stepIndex / 2));
+        const progress = slotIndex / Math.max(1, sessionSize - 1);
+        const slotBoost = Math.floor(progress * 2.8);
+        let minD = Math.min(cfg.maxDiff, cfg.baseDiff + stepBoost + Math.floor(slotBoost * 0.75));
+        let maxD = Math.min(cfg.maxDiff, minD + 1 + Math.floor(stepIndex * 0.7));
+        if (progress >= 0.6) maxD = Math.min(cfg.maxDiff, maxD + 1);
+        if (progress >= 0.85) minD = Math.min(cfg.maxDiff, minD + 1);
+        if (bolumId === 'ceviri') {
+            minD = Math.max(minD, 3 + Math.floor(stepIndex * 0.5));
+            maxD = Math.max(maxD, 5 + Math.floor(stepIndex / 2));
+        }
+        if (bolumId === 'ses') {
+            minD = Math.max(minD, 5 + Math.floor(stepIndex / 2));
+            maxD = 6;
+            if (stepIndex >= 3) minD = 6;
+        }
+        if (maxD < minD) maxD = minD;
         return { minD, maxD, cfg };
     }
 
@@ -426,8 +988,16 @@
         TILE_PHRASES_OSM.forEach((p) => {
             if (p.parts.length < 2) throw new Error(`Cümle en az 2 kelime olmalı: ${p.osm}`);
             const built = mkTiles(p);
+            const need = {};
             p.parts.forEach((part) => {
-                if (!built.tiles.includes(part)) throw new Error(`Kutucuk eksik: ${part}`);
+                need[part] = (need[part] || 0) + 1;
+            });
+            const have = {};
+            built.tiles.forEach((t) => {
+                have[t] = (have[t] || 0) + 1;
+            });
+            Object.keys(need).forEach((part) => {
+                if ((have[part] || 0) < need[part]) throw new Error(`Kutucuk eksik: ${part}`);
             });
             const blocked = synonymBlockSet(p.parts);
             built.tiles.forEach((t) => {
@@ -435,6 +1005,16 @@
                     throw new Error(`Eş anlamlı decoy: ${t} (${p.osm})`);
                 }
             });
+        });
+
+        GRAMMAR_ITEMS.forEach((g) => {
+            const q = mkGrammar(g);
+            if (!q.options.includes(q.answer) || q.options.length !== 4) {
+                throw new Error(`Dil bilgisi hatası: ${g.osm}`);
+            }
+            if (new Set(q.options).size !== 4) {
+                throw new Error(`Dil bilgisi tekrarlı şık: ${g.osm}`);
+            }
         });
     }
 
@@ -445,6 +1025,7 @@
         letter: LETTERS.map(mkLetter),
         speak: SPEAK_ITEMS.map(mkSpeak),
         tiles: TILE_PHRASES_OSM.map(mkTiles),
+        grammar: GRAMMAR_ITEMS.map(mkGrammar),
     };
 
     window.LISANI_MIX_PATTERN = [
@@ -466,15 +1047,26 @@
     window.LISANI_BOLUM_QUIZ = BOLUM_QUIZ;
     window.buildLisaniSessionTypes = buildLisaniSessionTypes;
     window.getLisaniBolumDiffRange = getBolumDiffRange;
+    window.buildLisaniLearnTip = buildLisaniLearnTip;
+    window.buildLisaniLearnDetail = buildLisaniLearnDetail;
+    window.buildLisaniLearnDetailFromTopic = buildLisaniLearnDetailFromTopic;
+    window.LISANI_GRAMMAR_TOPIC_DETAILS = GRAMMAR_TOPIC_DETAILS;
+    window.LISANI_GRAMMAR_TOPIC_TITLES = GRAMMAR_TOPIC_TITLES;
 
     window.LISANI_BOLUMLER = [
-        { id: 'kelimeler', title: 'Temel', desc: '5 test · harf ve basit kelime', icon: 'T', color: 1, sessionSize: 5, baseDiff: 1 },
-        { id: 'harfler', title: 'Orta', desc: '5 test · 2–3 kelimeli cümle', icon: 'O', color: 2, sessionSize: 7, baseDiff: 2 },
-        { id: 'eslestirme', title: 'İleri', desc: '5 test · eşleştirme ve çeviri', icon: 'İ', color: 3, sessionSize: 9, baseDiff: 3 },
-        { id: 'ceviri', title: 'Uzman', desc: '5 test · uzun metin ve zor kelime', icon: 'U', color: 1, sessionSize: 10, baseDiff: 3 },
-        { id: 'ses', title: 'Usta', desc: '5 test · konuşma ve ileri cümle', icon: '★', color: 2, sessionSize: 12, baseDiff: 4 },
+        { id: 'kelimeler', title: 'Temel', desc: '5 test · harf ve kelime öğren', icon: 'T', color: 1, sessionSize: 5, baseDiff: 1 },
+        { id: 'harfler', title: 'Orta', desc: '5 test · cümle kurma', icon: 'O', color: 2, sessionSize: 8, baseDiff: 2 },
+        { id: 'eslestirme', title: 'İleri', desc: '5 test · eşleştirme, zorlaşır', icon: 'İ', color: 3, sessionSize: 12, baseDiff: 2 },
+        { id: 'ceviri', title: 'Uzman', desc: '5 test · dil bilgisi + ses', icon: 'U', color: 1, sessionSize: 14, baseDiff: 4 },
+        { id: 'ses', title: 'Usta', desc: '5 test · en zor · bilgi kartları', icon: '★', color: 2, sessionSize: 16, baseDiff: 5 },
     ];
 
+    window.LISANI_GRAMMAR_TOPICS = GRAMMAR_TOPICS;
+    window.LISANI_GRAMMAR_PREP_NOTES = Object.entries(GRAMMAR_TOPICS).map(([id, text]) => ({
+        id,
+        title: id.charAt(0).toUpperCase() + id.slice(1),
+        text,
+    }));
     window.LISANI_BOLUM_INDEX = { kelimeler: 1, harfler: 2, eslestirme: 3, ceviri: 4, ses: 5 };
     window.LISANI_QUIZ_BANK = {};
     window.LISANI_BOLUMLER.forEach((b) => { window.LISANI_QUIZ_BANK[b.id] = []; });

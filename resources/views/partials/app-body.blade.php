@@ -507,6 +507,17 @@
                                 <select id="tests-yonetici-sinif-select" class="w-full px-3 py-2 rounded-xl border theme-border theme-card-bg theme-text-main text-xs"></select>
                             </div>
                         </div>
+                        <!-- Dil bilgisi kuralları — mobil testler -->
+                        <div class="lisani-grammar-rules-panel lisani-grammar-rules-panel--tests lg:hidden shrink-0 lisani-glass-panel rounded-2xl p-3.5 space-y-2.5">
+                            <div class="flex items-center gap-2 min-w-0">
+                                <i data-lucide="book-open" class="w-4 h-4 theme-primary-color shrink-0"></i>
+                                <div class="min-w-0">
+                                    <h3 class="text-[11px] font-extrabold theme-text-main">Dil Bilgisi Kuralları</h3>
+                                    <p class="text-[9px] theme-text-muted leading-relaxed">Test öncesi kısa notlar · dokununca detay</p>
+                                </div>
+                            </div>
+                            <div class="lisani-grammar-rules-list space-y-2 max-h-[200px] overflow-y-auto pr-1"></div>
+                        </div>
                         <div class="lisani-bolum-scene lisani-tests-path-panel flex-1 min-h-0">
                             <div class="lisani-bolum-dots-row" id="bolum-buttons-container"></div>
                         </div>
@@ -562,6 +573,7 @@
                             </div>
                             <span id="quiz-prompt-label" class="text-[9px] theme-text-muted uppercase font-bold tracking-[0.18em] block relative z-[1] mt-1">Soru</span>
                             <h2 id="quiz-display-word" class="arabic-text text-3xl sm:text-4xl font-black theme-text-main py-3 tracking-wide relative z-[1] lisani-quiz-arabic leading-relaxed">ا</h2>
+                            <p id="quiz-grammar-note" class="hidden lisani-grammar-note lisani-learn-card--tap text-[10px] theme-text-muted leading-relaxed relative z-[1] mt-1 px-2 text-left" role="button" tabindex="0"></p>
                         </div>
 
                         <div id="quiz-match-area" class="hidden" aria-hidden="true"></div>
@@ -572,6 +584,7 @@
                         </div>
 
                         <div id="quiz-feedback-box" class="hidden lisani-quiz-feedback rounded-xl p-3.5 text-center text-[11px] font-bold transition-all duration-300" aria-hidden="true"></div>
+                        <div id="quiz-learn-card" class="hidden lisani-learn-card lisani-learn-card--tap rounded-xl p-3.5 text-[10px] leading-relaxed text-left" role="button" tabindex="0" aria-hidden="true"></div>
 
                         <button id="quiz-next-btn" type="button" onclick="nextQuestion()" class="hidden" aria-hidden="true" tabindex="-1"></button>
                     </div>
@@ -610,7 +623,7 @@
                             </div>
                         </div>
 
-                        <button type="button" id="quiz-retry-wrongs-btn" onclick="startWrongQuestionsReview()" class="hidden lisani-glass-action w-full py-3 rounded-xl font-bold text-[11px] transition-all flex items-center justify-center gap-2 max-w-xs theme-text-main">
+                        <button type="button" id="quiz-retry-wrongs-btn" onclick="startWrongQuestionsReview()" class="hidden lisani-glass-action w-full py-3 rounded-xl font-bold text-[11px] transition-all flex items-center justify-center gap-2 max-w-xs theme-text-main" aria-hidden="true">
                             <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
                             <span id="quiz-retry-wrongs-label">Yanlış Soruları Tekrar Çöz</span>
                         </button>
@@ -744,12 +757,26 @@
 
                     <!-- Öğrenmeye başla -->
                     <div id="learn-start-home-card" class="lisani-span-full lisani-learn-start-home">
-                        <button type="button" onclick="openLearnStart()" class="lisani-learn-start-cta">
+                        <button type="button" id="learn-start-cta-btn" class="lisani-learn-start-cta">
                             <span class="lisani-learn-start-cta__inner">
                                 <span class="lisani-learn-start-cta__icon"><i data-lucide="graduation-cap" class="w-5 h-5"></i></span>
                                 <span class="lisani-learn-start-cta__label">Öğrenmeye Başla</span>
                             </span>
                         </button>
+                    </div>
+
+                    <!-- Dil bilgisi kuralları — masaüstü ana sayfa -->
+                    <div class="lisani-grammar-rules-panel lisani-grammar-rules-panel--home hidden lg:block lisani-span-full lisani-glass-panel lisani-glass-card rounded-2xl p-4 border theme-border space-y-3">
+                        <div class="flex items-center gap-2 min-w-0">
+                            <div class="w-9 h-9 rounded-xl theme-light-bg flex items-center justify-center theme-primary-color shrink-0">
+                                <i data-lucide="book-open" class="w-4 h-4"></i>
+                            </div>
+                            <div class="min-w-0">
+                                <h3 class="text-xs font-extrabold theme-text-main">Dil Bilgisi Kuralları</h3>
+                                <p class="text-[10px] theme-text-muted leading-relaxed">Uzman ve Usta testleri için hazırlık notları · detay ve örnekler</p>
+                            </div>
+                        </div>
+                        <div class="lisani-grammar-rules-list space-y-2 max-h-[280px] overflow-y-auto pr-1"></div>
                     </div>
 
                     <!-- Osmanlıca çeviri — masaüstü ana sayfa -->
@@ -1073,30 +1100,18 @@
                             <span class="font-extrabold">Tema</span>
                         </h4>
                         <div class="space-y-2" id="theme-picker">
-                            <button type="button" onclick="setColorMode('renkli-yol')" data-color-mode="renkli-yol" class="theme-pick-btn lisani-glass-panel">
-                                <span class="theme-pick-btn__label">Renkli Yol 🌈</span>
-                                <span class="theme-swatch-duo" aria-hidden="true">
-                                    <span class="theme-swatch-dot" style="background:#12191d"></span>
-                                    <span class="theme-swatch-dot" style="background:#58cc02"></span>
-                                    <span class="theme-swatch-dot" style="background:#1cb0f6"></span>
-                                    <span class="theme-swatch-dot" style="background:#ce82ff"></span>
-                                </span>
+                            <button type="button" onclick="setColorMode('sade')" data-color-mode="sade" class="theme-pick-btn lisani-glass-panel">
+                                <span class="theme-pick-btn__label">Sade (Düz)</span>
+                                <span class="theme-swatch-dot" style="background:#1a1a1a;border:1px solid #404040" aria-hidden="true"></span>
                             </button>
-                            <button type="button" onclick="setColorMode('duolingo')" data-color-mode="duolingo" class="theme-pick-btn lisani-glass-panel">
-                                <span class="theme-pick-btn__label">Duolingo 🦉</span>
-                                <span class="theme-swatch-duo" aria-hidden="true">
-                                    <span class="theme-swatch-dot" style="background:#131f24"></span>
-                                    <span class="theme-swatch-dot" style="background:#58cc02"></span>
-                                </span>
+                            <button type="button" onclick="setColorMode('saray-kahvesi')" data-color-mode="saray-kahvesi" class="theme-pick-btn lisani-glass-panel is-recommended">
+                                <span class="theme-pick-btn__label">Saray Kahvesi ☕ <span class="theme-pick-btn__badge">Varsayılan</span></span>
+                                <span class="theme-swatch-gradient" style="background:linear-gradient(90deg,#9e6c4c,#4a3329)" aria-hidden="true"></span>
                             </button>
                             <p class="theme-pick-section">CAM / GRADIENT TEMALAR</p>
                             <button type="button" onclick="setColorMode('mavi-mor')" data-color-mode="mavi-mor" class="theme-pick-btn lisani-glass-panel">
                                 <span class="theme-pick-btn__label">Mavi &amp; Mor 💜</span>
                                 <span class="theme-swatch-gradient" style="background:linear-gradient(90deg,#2563eb,#6366f1,#9333ea)" aria-hidden="true"></span>
-                            </button>
-                            <button type="button" onclick="setColorMode('saray-kahvesi')" data-color-mode="saray-kahvesi" class="theme-pick-btn lisani-glass-panel">
-                                <span class="theme-pick-btn__label">Saray Kahvesi ☕</span>
-                                <span class="theme-swatch-gradient" style="background:linear-gradient(90deg,#9e6c4c,#4a3329)" aria-hidden="true"></span>
                             </button>
                             <button type="button" onclick="setColorMode('derin-mavi')" data-color-mode="derin-mavi" class="theme-pick-btn lisani-glass-panel">
                                 <span class="theme-pick-btn__label">Derin Mavi 🌊</span>
@@ -1190,6 +1205,13 @@
                                 <p class="text-[10px] theme-text-muted">Sınıfa kayıt olduktan sonra ödevler burada görünür.</p>
                             </div>
                         </div>
+
+                        <button type="button" class="lisani-glass-action lisani-settings-support-btn w-full" onclick="openDonateSupport()">
+                            <div class="flex items-center gap-3 min-w-0 flex-1">
+                                <span class="text-sm font-extrabold theme-text-main">Bize destek olmak ister misiniz?</span>
+                            </div>
+                            <i data-lucide="chevron-right" class="w-5 h-5 theme-text-muted shrink-0"></i>
+                        </button>
 
                         <button type="button" class="lisani-glass-action lisani-glass-action--danger w-full" onclick="logoutApp()">
                             <div class="flex items-center gap-3 min-w-0 flex-1">
@@ -1581,13 +1603,63 @@
         </div>
     </div>
 
+    <!-- Bilgi kartı detay -->
+    <div id="learn-card-modal" class="lisani-learn-modal hidden absolute inset-0 z-[110] flex items-end lg:items-center justify-center p-0 lg:p-6" aria-hidden="true">
+        <div class="lisani-learn-modal__backdrop absolute inset-0" onclick="closeLearnCardDetail()" aria-hidden="true"></div>
+        <div class="lisani-learn-modal__panel lisani-glass-panel relative w-full max-w-lg max-h-[92vh] flex flex-col overflow-hidden rounded-t-3xl lg:rounded-3xl shadow-2xl">
+            <header class="shrink-0 px-5 pt-5 pb-4 flex items-start justify-between gap-3 border-b theme-border">
+                <div class="min-w-0">
+                    <p class="text-[10px] font-bold uppercase tracking-[0.18em] theme-text-muted">Bilgi kartı</p>
+                    <h3 id="learn-card-modal-title" class="text-xl font-extrabold theme-text-main mt-1 leading-snug"></h3>
+                </div>
+                <button type="button" onclick="closeLearnCardDetail()" class="lisani-glass-action lisani-glass-action--icon flex items-center justify-center rounded-full theme-text-muted shrink-0" aria-label="Kapat">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </header>
+            <div class="flex-1 overflow-y-auto px-5 py-4 space-y-5 min-h-0">
+                <p id="learn-card-modal-summary" class="text-base theme-primary-color font-bold leading-relaxed"></p>
+                <div>
+                    <p class="text-[11px] font-bold uppercase tracking-wider theme-text-muted mb-2.5">Açıklama</p>
+                    <p id="learn-card-modal-detail" class="text-base theme-text-main leading-relaxed"></p>
+                </div>
+                <div id="learn-card-modal-examples-wrap">
+                    <p class="text-[11px] font-bold uppercase tracking-wider theme-text-muted mb-2.5">Örnekler</p>
+                    <ul id="learn-card-modal-examples" class="lisani-learn-modal__examples space-y-2.5"></ul>
+                </div>
+            </div>
+            <footer class="shrink-0 px-5 pb-[max(1rem,env(safe-area-inset-bottom))] pt-2 space-y-2">
+                <button type="button" id="learn-card-drill-btn" class="hidden lisani-glass-action w-full py-3.5 rounded-xl text-sm font-bold theme-text-main">Mini teste geç (2 soru)</button>
+                <button type="button" id="learn-card-close-btn" onclick="closeLearnCardDetail()" class="lisani-glass-action lisani-glass-action--primary w-full py-3.5 rounded-xl text-sm font-bold">Anladım</button>
+            </footer>
+        </div>
+    </div>
+
+    <!-- Dil bilgisi kapısı — Uzman/Usta öncesi -->
+    <div id="grammar-gate-modal" class="lisani-learn-modal hidden absolute inset-0 z-[109] flex items-end lg:items-center justify-center p-0 lg:p-6" aria-hidden="true">
+        <div class="lisani-learn-modal__backdrop absolute inset-0" onclick="LisaniGrammarPrep?.closeGrammarGateModal()" aria-hidden="true"></div>
+        <div class="lisani-learn-modal__panel lisani-glass-panel relative w-full max-w-md max-h-[88vh] flex flex-col overflow-hidden rounded-t-3xl lg:rounded-3xl shadow-2xl">
+            <header class="shrink-0 px-5 pt-5 pb-3 border-b theme-border">
+                <p class="text-[9px] font-bold uppercase tracking-[0.18em] theme-text-muted">Dil bilgisi hazırlığı</p>
+                <h3 class="text-sm font-extrabold theme-text-main mt-1">Önce öğren, sonra çöz</h3>
+                <p id="grammar-gate-subtitle" class="text-[10px] theme-text-muted leading-relaxed mt-2"></p>
+            </header>
+            <div class="flex-1 overflow-y-auto px-5 py-4 min-h-0">
+                <div id="grammar-gate-topic-list" class="space-y-2"></div>
+            </div>
+            <footer class="shrink-0 px-5 pb-[max(1rem,env(safe-area-inset-bottom))] pt-2 space-y-2">
+                <button type="button" id="grammar-gate-start-btn" class="lisani-glass-action lisani-glass-action--primary w-full py-3 rounded-xl text-xs font-bold" disabled>Teste Başla</button>
+                <button type="button" onclick="LisaniGrammarPrep?.closeGrammarGateModal()" class="lisani-glass-action w-full py-2.5 rounded-xl text-[11px] font-bold theme-text-muted">Vazgeç</button>
+            </footer>
+        </div>
+    </div>
+
     <!-- Seviye bulma testi — tam ekran -->
     <div id="placement-modal" class="lisani-placement-overlay hidden absolute inset-0 z-[100] flex flex-col overflow-hidden">
         <div class="lisani-placement-fs flex flex-col flex-1 min-h-0 w-full h-full">
             <header class="lisani-placement-fs__header shrink-0 px-5 pt-[max(1.25rem,env(safe-area-inset-top))] pb-4 flex items-start justify-between gap-3">
                 <div class="flex-1 min-w-0">
                     <h3 class="text-base font-extrabold theme-text-main tracking-tight">Seviyemi Bul</h3>
-                    <p id="placement-progress" class="text-[11px] theme-primary-color font-bold mt-1">Soru 1/9</p>
+                    <p id="placement-progress" class="text-[11px] theme-primary-color font-bold mt-1">Soru 1/10</p>
                     <div class="lisani-placement-fs__track mt-3 h-2.5 rounded-full overflow-hidden" aria-hidden="true">
                         <div id="placement-progress-fill" class="lisani-placement-fs__fill h-full rounded-full transition-all duration-300" style="width:11%"></div>
                     </div>
@@ -1601,6 +1673,62 @@
                 <div id="placement-question-box"></div>
                 <div id="placement-result" class="hidden"></div>
             </div>
+        </div>
+    </div>
+
+    <!-- ================= DESTEK DAVETİ (İLK AÇILIŞ) ================= -->
+    <div id="donate-invite-modal" class="lisani-modal-overlay hidden absolute inset-0 z-[61] flex items-end lg:items-center justify-center pb-0 lg:p-6">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="dismissDonateInvite()"></div>
+        <div class="relative w-full max-w-md lisani-glass-panel lisani-donate-invite-modal rounded-t-3xl lg:rounded-3xl p-6 space-y-4 z-10">
+            <div class="flex flex-col items-center text-center space-y-3">
+                <h3 class="text-base font-extrabold theme-text-main">Bize destek olmak ister misiniz?</h3>
+                <p class="text-[11px] theme-text-muted leading-relaxed max-w-sm">Lisan-ı Ecdad gönüllü bir projedir. İsterseniz küçük bir bağışla gelişimimize katkıda bulunabilirsiniz.</p>
+            </div>
+            <div class="space-y-2">
+                <button type="button" onclick="acceptDonateInvite()" class="lisani-glass-action lisani-settings-support-btn w-full justify-center">
+                    <span class="text-sm font-extrabold theme-text-main">Evet, destek olmak istiyorum</span>
+                </button>
+                <button type="button" onclick="dismissDonateInvite()" class="lisani-glass-action w-full justify-center py-3">
+                    <span class="text-xs font-bold theme-text-muted">Şimdi değil</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= DESTEK / BAĞIŞ MODALİ ================= -->
+    <div id="donate-support-modal" class="lisani-modal-overlay hidden absolute inset-0 z-[62] flex items-end lg:items-center justify-center pb-0 lg:p-6">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeDonateSupport()"></div>
+        <div class="relative w-full max-w-lg lisani-glass-panel lisani-donate-modal rounded-t-3xl lg:rounded-3xl p-6 space-y-4 z-10">
+            <div class="flex items-center justify-between gap-2">
+                <div class="flex items-center space-x-2 min-w-0">
+                    <h3 class="text-sm font-extrabold theme-text-main truncate">Bize destek olmak ister misiniz?</h3>
+                </div>
+                <button type="button" onclick="closeDonateSupport()" class="lisani-glass-action lisani-glass-action--icon flex items-center justify-center rounded-full theme-text-muted shrink-0" aria-label="Kapat">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </div>
+            <p class="text-[11px] theme-text-muted leading-relaxed">Lisan-ı Ecdad gönüllü bir projedir. Küçük bir bağış sunucu ve geliştirme masraflarına katkı sağlar. Ödeme güvenli ödeme sayfasında tamamlanır.</p>
+            <div class="space-y-2">
+                <label for="donate-amount-input" class="text-xs font-bold theme-text-main block">Bağış tutarı (₺)</label>
+                <div class="lisani-donate-amount-field flex items-stretch gap-2">
+                    <input type="number" id="donate-amount-input" min="1" step="1" inputmode="numeric"
+                        class="lisani-donate-amount-input flex-1 min-w-0 px-4 py-3 rounded-xl border theme-border theme-card-bg theme-text-main text-sm font-bold focus:ring-2 focus:ring-[var(--theme-primary)] focus:outline-none transition-all"
+                        oninput="syncDonatePayButton()">
+                    <span class="lisani-donate-amount-suffix flex items-center px-3 rounded-xl border theme-border theme-card-bg text-sm font-bold theme-text-muted shrink-0">₺</span>
+                </div>
+                <p class="text-[10px] theme-text-muted">En az 1 ₺ — istediğiniz tutarı yazabilirsiniz.</p>
+            </div>
+            <button type="button" id="donate-open-link-btn" onclick="openDonatePaymentLink()" class="lisani-glass-action lisani-glass-action--primary w-full py-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2">
+                <i data-lucide="credit-card" class="w-4 h-4"></i>
+                <span id="donate-open-link-label">Güvenli ödeme sayfasına git</span>
+            </button>
+            <div id="donate-iban-block" class="hidden lisani-glass-panel rounded-2xl p-4 space-y-2">
+                <p class="text-xs font-bold theme-text-main">Havale / EFT</p>
+                <p id="donate-iban-account" class="text-[10px] theme-text-muted"></p>
+                <p id="donate-iban-value" class="text-xs font-mono font-bold theme-primary-color break-all select-all"></p>
+                <button type="button" onclick="copyDonateIban()" class="lisani-glass-action w-full py-2.5 rounded-xl text-[11px] font-bold">IBAN kopyala</button>
+            </div>
+            <p class="text-[9px] theme-text-muted text-center leading-relaxed">Bağış isteğe bağlıdır. Teşekkür ederiz.</p>
         </div>
     </div>
 

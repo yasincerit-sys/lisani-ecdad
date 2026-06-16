@@ -17,7 +17,7 @@
             "background_color": "#08061a",
             "theme_color": "#08061a",
             "orientation": "portrait",
-            "permissions": ["microphone"],
+1rr            "permissions": ["microphone"],
             "icons": [
                 { "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='36' fill='%232563eb'/%3E%3Ctext x='96' y='130' font-size='110' text-anchor='middle'%3E📖%3C/text%3E%3C/svg%3E", "sizes": "192x192", "type": "image/svg+xml" },
                 { "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='96' fill='%232563eb'/%3E%3Ctext x='256' y='350' font-size='300' text-anchor='middle'%3E📖%3C/text%3E%3C/svg%3E", "sizes": "512x512", "type": "image/svg+xml" }
@@ -57,23 +57,23 @@
     <link rel="stylesheet" href="{{ asset('css/lisani-fixes.css') }}?v={{ @filemtime(public_path('css/lisani-fixes.css')) ?: time() }}">
     <style>
         /* Cam — cache/atlatma; Preline solid kart ezilmesin */
-        html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol)[class*="theme-"] #app-container .glass-card,
-        html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol)[class*="theme-"] #app-container .glass-card-interactive,
-        html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol)[class*="theme-"] #auth-container .glass-card,
-        html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol)[class*="theme-"] .lisani-glass-panel,
-        html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol)[class*="theme-"] .lisani-glass-action,
-        html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol)[class*="theme-"] button.lisani-glass-panel,
-        html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol)[class*="theme-"] button.lisani-glass-action,
-        html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol)[class*="theme-"] div.lisani-glass-action {
+        html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol):not(.theme-sade)[class*="theme-"] #app-container .glass-card,
+        html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol):not(.theme-sade)[class*="theme-"] #app-container .glass-card-interactive,
+        html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol):not(.theme-sade)[class*="theme-"] #auth-container .glass-card,
+        html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol):not(.theme-sade)[class*="theme-"] .lisani-glass-panel,
+        html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol):not(.theme-sade)[class*="theme-"] .lisani-glass-action,
+        html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol):not(.theme-sade)[class*="theme-"] button.lisani-glass-panel,
+        html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol):not(.theme-sade)[class*="theme-"] button.lisani-glass-action,
+        html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol):not(.theme-sade)[class*="theme-"] div.lisani-glass-action {
             background: linear-gradient(145deg, rgba(255,255,255,.16), rgba(255,255,255,.06)) !important;
             backdrop-filter: blur(20px) saturate(165%) !important;
             -webkit-backdrop-filter: blur(20px) saturate(165%) !important;
             border: 1px solid rgba(255,255,255,.22) !important;
             box-shadow: 0 10px 32px rgba(0,0,0,.32), inset 0 1px 0 rgba(255,255,255,.18) !important;
         }
-        html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol)[class*="theme-"] #app-container button.theme-primary-btn:not(.lisani-segment-btn),
-        html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol)[class*="theme-"] #auth-container button.theme-primary-btn:not(.lisani-segment-btn),
-        html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol)[class*="theme-"] .lisani-glass-action--primary {
+        html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol):not(.theme-sade)[class*="theme-"] #app-container button.theme-primary-btn:not(.lisani-segment-btn),
+        html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol):not(.theme-sade)[class*="theme-"] #auth-container button.theme-primary-btn:not(.lisani-segment-btn),
+        html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol):not(.theme-sade)[class*="theme-"] .lisani-glass-action--primary {
             background: linear-gradient(145deg, rgba(var(--theme-primary-rgb),.38), rgba(var(--theme-primary-rgb),.16)) !important;
             border: 1px solid rgba(var(--theme-primary-rgb),.48) !important;
             backdrop-filter: blur(20px) saturate(165%) !important;
@@ -82,7 +82,7 @@
             color: var(--ph-text) !important;
             filter: none !important;
         }
-        html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol)[class*="theme-"] #bottom-bar.lisani-tab-bar-ios {
+        html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol):not(.theme-sade)[class*="theme-"] #bottom-bar.lisani-tab-bar-ios {
             background: linear-gradient(165deg, rgba(255,255,255,.18), rgba(255,255,255,.06)) !important;
             backdrop-filter: blur(44px) saturate(185%) !important;
             -webkit-backdrop-filter: blur(44px) saturate(185%) !important;
@@ -92,17 +92,16 @@
     </style>
     <script>
         (function () {
-            const valid = ['renkli-yol', 'duolingo', 'saray-kahvesi', 'derin-mavi', 'mavi-mor'];
+            const valid = ['sade', 'saray-kahvesi', 'derin-mavi', 'mavi-mor'];
             const metaMap = {
-                'renkli-yol': '#12191d',
-                duolingo: '#131f24',
+                sade: '#111111',
                 'saray-kahvesi': '#120d0a',
                 'derin-mavi': '#080c14',
                 'mavi-mor': '#08061a',
             };
-            let mode = localStorage.getItem('lisani_color_mode') || 'renkli-yol';
+            let mode = localStorage.getItem('lisani_color_mode') || 'saray-kahvesi';
             if (!valid.includes(mode)) {
-                mode = 'renkli-yol';
+                mode = 'saray-kahvesi';
             }
             const root = document.documentElement;
             root.classList.add('dark', 'theme-' + mode);
@@ -117,12 +116,14 @@
         avatars: @json(asset('images/avatars')),
         gokhanAudio: @json(asset('audio/gokhan-abi-call.mp4'))
     };
+    window.LISANI_DONATE = @json(config('lisani.donate'));
     window.LISANI_BASE = @json(rtrim(url('/'), '/'));</script>
     <script src="{{ asset('js/preline.js') }}"></script>
     <script src="{{ asset('js/lisani-flappy.js') }}?v={{ @filemtime(public_path('js/lisani-flappy.js')) ?: time() }}" defer></script>
     <script src="{{ asset('js/lisani-gokhan-easter.js') }}?v={{ @filemtime(public_path('js/lisani-gokhan-easter.js')) ?: time() }}" defer></script>
     <script src="{{ asset('js/lisani-native-notifications.js') }}?v={{ @filemtime(public_path('js/lisani-native-notifications.js')) ?: time() }}" defer></script>
     <script src="{{ asset('js/lisani-quiz-bank.js') }}?v={{ @filemtime(public_path('js/lisani-quiz-bank.js')) ?: time() }}" defer></script>
+    <script src="{{ asset('js/lisani-grammar-prep.js') }}?v={{ @filemtime(public_path('js/lisani-grammar-prep.js')) ?: time() }}" defer></script>
     <script src="{{ asset('js/lisani-reward-wheel.js') }}?v={{ @filemtime(public_path('js/lisani-reward-wheel.js')) ?: time() }}" defer></script>
     <script src="{{ asset('js/lisani.js') }}?v={{ @filemtime(public_path('js/lisani.js')) ?: time() }}" defer></script>
     <script src="{{ asset('js/lisani-daily-tasks.js') }}?v={{ @filemtime(public_path('js/lisani-daily-tasks.js')) ?: time() }}" defer></script>

@@ -365,6 +365,65 @@ html.preline-ui.theme-saray-kahvesi body.lisani-body {
         linear-gradient(180deg, #2a1c14 0%, #120d0a 38%, #0a0806 100%);
 }
 
+/* Sade — düz renkler, gradyan/cam yok */
+html.preline-ui.theme-sade {
+    --ph-bg: #111111;
+    --ph-surface: #1a1a1a;
+    --ph-surface-2: #242424;
+    --ph-border: #333333;
+    --ph-text: #f5f5f5;
+    --ph-muted: #a3a3a3;
+    --ph-primary: #d4d4d4;
+    --ph-primary-hover: #e5e5e5;
+    --ph-ring: rgba(212, 212, 212, 0.25);
+    --theme-accent: #d4d4d4;
+    --theme-accent-soft: #242424;
+    --theme-accent-border: #404040;
+    --theme-warn: #fbbf24;
+    --theme-bg-phone: #111111;
+    --theme-card-bg: #1a1a1a;
+    --theme-border: #333333;
+    --theme-text-main: #f5f5f5;
+    --theme-text-muted: #a3a3a3;
+    --theme-primary: #d4d4d4;
+    --theme-primary-hover: #e5e5e5;
+    --theme-secondary: #242424;
+    --theme-card-gradient-from: #1a1a1a;
+    --theme-card-gradient-to: #1a1a1a;
+    --theme-accent-light: #242424;
+    --theme-button-text: #111111;
+    --theme-primary-rgb: 212, 212, 212;
+    --theme-btn-solid: #e5e5e5;
+    --theme-btn-solid-hover: #fafafa;
+    --theme-btn-text: #111111;
+    --theme-btn-glow: transparent;
+    --theme-nav-bg: #111111;
+    --theme-nav-home-bg: #e5e5e5;
+    --theme-nav-home-icon: #111111;
+    --wa-bg: #111111;
+    --wa-header: #1a1a1a;
+    --wa-border: #333333;
+    --wa-text: #f5f5f5;
+    --wa-muted: #a3a3a3;
+    --wa-list-hover: #242424;
+    --wa-sent: #2a2a2a;
+    --wa-sent-border: #404040;
+    --wa-received: #1a1a1a;
+}
+
+html.preline-ui.theme-sade body.lisani-body,
+html.preline-ui.theme-sade .lisani-app-shell,
+html.preline-ui.theme-sade .lisani-main-flow,
+html.preline-ui.theme-sade #app-container,
+html.preline-ui.theme-sade .theme-bg-phone {
+    background: #111111 !important;
+    background-image: none !important;
+}
+
+html.preline-ui.theme-sade .lisani-glass-blob {
+    display: none !important;
+}
+
 /* Derin Mavi */
 html.preline-ui.theme-derin-mavi {
     --ph-bg: #080c14;

@@ -12,6 +12,9 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->trustProxies(at: '*');
+        if (filter_var(env('LISANI_KILL_SWITCH', false), FILTER_VALIDATE_BOOLEAN)) {
+            $middleware->prepend(\App\Http\Middleware\BlockWhenKillSwitch::class);
+        }
         $middleware->alias([
             'not.banned' => \App\Http\Middleware\EnsureNotBanned::class,
         ]);
