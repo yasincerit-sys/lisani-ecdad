@@ -14,13 +14,13 @@
             "description": "Osmanlıca kolay öğrenim uygulaması",
             "start_url": "{{ url('/') }}",
             "display": "standalone",
-            "background_color": "#140e09",
-            "theme_color": "#140e09",
+            "background_color": "#08061a",
+            "theme_color": "#08061a",
             "orientation": "portrait",
             "permissions": ["microphone"],
             "icons": [
-                { "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='36' fill='%235c4030'/%3E%3Ctext x='96' y='130' font-size='110' text-anchor='middle'%3E📖%3C/text%3E%3C/svg%3E", "sizes": "192x192", "type": "image/svg+xml" },
-                { "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='96' fill='%235c4030'/%3E%3Ctext x='256' y='350' font-size='300' text-anchor='middle'%3E📖%3C/text%3E%3C/svg%3E", "sizes": "512x512", "type": "image/svg+xml" }
+                { "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='36' fill='%232563eb'/%3E%3Ctext x='96' y='130' font-size='110' text-anchor='middle'%3E📖%3C/text%3E%3C/svg%3E", "sizes": "192x192", "type": "image/svg+xml" },
+                { "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='96' fill='%232563eb'/%3E%3Ctext x='256' y='350' font-size='300' text-anchor='middle'%3E📖%3C/text%3E%3C/svg%3E", "sizes": "512x512", "type": "image/svg+xml" }
             ]
         };
         const blob = new Blob([JSON.stringify(manifest)], {type: 'application/json'});
@@ -44,37 +44,36 @@
                 extend: {
                     fontFamily: {
                         sans: ['Plus Jakarta Sans', 'ui-sans-serif', 'system-ui', 'sans-serif'],
-                        serif: ['Cormorant Garamond', 'Amiri', 'Georgia', 'serif'],
                         arabic: ['Amiri', 'serif'],
                     },
                 },
             },
         };
     </script>
-    <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400;1,700&family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400;1,700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <link rel="stylesheet" href="{{ asset('css/lisani.css') }}?v={{ @filemtime(public_path('css/lisani.css')) ?: time() }}">
     <link rel="stylesheet" href="{{ asset('css/preline-lisani.css') }}?v={{ @filemtime(public_path('css/preline-lisani.css')) ?: time() }}">
     <link rel="stylesheet" href="{{ asset('css/lisani-fixes.css') }}?v={{ @filemtime(public_path('css/lisani-fixes.css')) ?: time() }}">
     <style>
         /* Cam — cache/atlatma; Preline solid kart ezilmesin */
-        html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol):not(.theme-sade):not(.theme-saray-kahvesi)[class*="theme-"] #app-container .glass-card,
-        html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol):not(.theme-sade):not(.theme-saray-kahvesi)[class*="theme-"] #app-container .glass-card-interactive,
-        html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol):not(.theme-sade):not(.theme-saray-kahvesi)[class*="theme-"] #auth-container .glass-card,
-        html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol):not(.theme-sade):not(.theme-saray-kahvesi)[class*="theme-"] .lisani-glass-panel,
-        html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol):not(.theme-sade):not(.theme-saray-kahvesi)[class*="theme-"] .lisani-glass-action,
-        html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol):not(.theme-sade):not(.theme-saray-kahvesi)[class*="theme-"] button.lisani-glass-panel,
-        html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol):not(.theme-sade):not(.theme-saray-kahvesi)[class*="theme-"] button.lisani-glass-action,
-        html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol):not(.theme-sade):not(.theme-saray-kahvesi)[class*="theme-"] div.lisani-glass-action {
+        html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol):not(.theme-sade)[class*="theme-"] #app-container .glass-card,
+        html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol):not(.theme-sade)[class*="theme-"] #app-container .glass-card-interactive,
+        html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol):not(.theme-sade)[class*="theme-"] #auth-container .glass-card,
+        html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol):not(.theme-sade)[class*="theme-"] .lisani-glass-panel,
+        html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol):not(.theme-sade)[class*="theme-"] .lisani-glass-action,
+        html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol):not(.theme-sade)[class*="theme-"] button.lisani-glass-panel,
+        html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol):not(.theme-sade)[class*="theme-"] button.lisani-glass-action,
+        html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol):not(.theme-sade)[class*="theme-"] div.lisani-glass-action {
             background: linear-gradient(145deg, rgba(255,255,255,.16), rgba(255,255,255,.06)) !important;
             backdrop-filter: blur(20px) saturate(165%) !important;
             -webkit-backdrop-filter: blur(20px) saturate(165%) !important;
             border: 1px solid rgba(255,255,255,.22) !important;
             box-shadow: 0 10px 32px rgba(0,0,0,.32), inset 0 1px 0 rgba(255,255,255,.18) !important;
         }
-        html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol):not(.theme-sade):not(.theme-saray-kahvesi)[class*="theme-"] #app-container button.theme-primary-btn:not(.lisani-segment-btn),
-        html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol):not(.theme-sade):not(.theme-saray-kahvesi)[class*="theme-"] #auth-container button.theme-primary-btn:not(.lisani-segment-btn),
-        html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol):not(.theme-sade):not(.theme-saray-kahvesi)[class*="theme-"] .lisani-glass-action--primary {
+        html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol):not(.theme-sade)[class*="theme-"] #app-container button.theme-primary-btn:not(.lisani-segment-btn),
+        html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol):not(.theme-sade)[class*="theme-"] #auth-container button.theme-primary-btn:not(.lisani-segment-btn),
+        html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol):not(.theme-sade)[class*="theme-"] .lisani-glass-action--primary {
             background: linear-gradient(145deg, rgba(var(--theme-primary-rgb),.38), rgba(var(--theme-primary-rgb),.16)) !important;
             border: 1px solid rgba(var(--theme-primary-rgb),.48) !important;
             backdrop-filter: blur(20px) saturate(165%) !important;
@@ -83,7 +82,7 @@
             color: var(--ph-text) !important;
             filter: none !important;
         }
-        html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol):not(.theme-sade):not(.theme-saray-kahvesi)[class*="theme-"] #bottom-bar.lisani-tab-bar-ios {
+        html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol):not(.theme-sade)[class*="theme-"] #bottom-bar.lisani-tab-bar-ios {
             background: linear-gradient(165deg, rgba(255,255,255,.18), rgba(255,255,255,.06)) !important;
             backdrop-filter: blur(44px) saturate(185%) !important;
             -webkit-backdrop-filter: blur(44px) saturate(185%) !important;

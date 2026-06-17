@@ -949,13 +949,13 @@
         function getHomeRoleBadgeText(role) {
             if (role === 'yonetici') return 'Yönetici';
             if (role === 'hoca') return 'Hoca';
-            return 'Yolun başında';
+            return 'Matbu Yolcusu';
         }
 
         function getSettingsRoleBadgeHtml(role) {
-            if (role === 'yonetici') return 'Yönetici';
-            if (role === 'hoca') return 'Hoca';
-            return 'Öğrenci';
+            if (role === 'yonetici') return '👑 Yönetici';
+            if (role === 'hoca') return '📚 Hoca';
+            return '🎒 Öğrenci';
         }
 
         window.updateHomeRoleBadge = function (role) {
@@ -3494,7 +3494,7 @@
 
             document.getElementById('profile-screen-name').innerText = nameInput;
             document.getElementById('profile-screen-sub').innerHTML = getSettingsRoleBadgeHtml(currentUserRole);
-            document.getElementById('home-welcome-text').innerText = `Hoş geldin, ${nameInput}`;
+            document.getElementById('home-welcome-text').innerText = `Hoş Geldin, ${nameInput}! 👋`;
             if (typeof window.updateHomeRoleBadge === 'function') {
                 window.updateHomeRoleBadge(currentUserRole);
             }
@@ -3725,7 +3725,7 @@
 
             syncTennisUnlockFromUser(user);
 
-            document.getElementById('home-welcome-text').innerText = `Hoş geldin, ${user.name}`;
+            document.getElementById('home-welcome-text').innerText = `Hoş Geldin, ${user.name}! 👋`;
             syncAppShellVisibility();
 
             const afterLogin = async () => {
@@ -4162,15 +4162,18 @@
                 typeof window.Capacitor.isNativePlatform === 'function' &&
                 window.Capacitor.isNativePlatform();
             const show = !!url && !isNativeApp;
-            const el = document.getElementById('home-apk-download-row');
-            if (!el) return;
-            if (!show) {
-                el.classList.add('hidden');
-                return;
-            }
-            el.href = url;
-            el.setAttribute('download', filename);
-            el.classList.remove('hidden');
+            ['settings-apk-download-row', 'home-apk-download-row', 'app-apk-download-strip'].forEach((id) => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                if (!show) {
+                    el.classList.add('hidden');
+                    return;
+                }
+                el.href = url;
+                el.setAttribute('download', filename);
+                el.classList.remove('hidden');
+            });
+            if (show && typeof lucide !== 'undefined') lucide.createIcons();
         }
 
         window.openDonateSupport = function () {
