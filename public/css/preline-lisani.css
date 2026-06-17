@@ -361,8 +361,10 @@ html.preline-ui.theme-saray-kahvesi {
 }
 
 html.preline-ui.theme-saray-kahvesi body.lisani-body {
-    background:
-        linear-gradient(180deg, #2a1c14 0%, #120d0a 38%, #0a0806 100%);
+    background-color: #120d09;
+    background-image:
+        radial-gradient(ellipse 90% 55% at 50% -8%, rgba(198, 156, 109, 0.1) 0%, transparent 58%),
+        linear-gradient(180deg, #22170f 0%, #140e09 42%, #0a0705 100%);
 }
 
 /* Sade — düz renkler, gradyan/cam yok */
