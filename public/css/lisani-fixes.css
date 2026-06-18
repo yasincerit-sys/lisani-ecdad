@@ -40,7 +40,9 @@
         max-width: calc(100% - 1.4rem) !important;
         margin: 0 !important;
         min-height: 3.75rem !important;
-        padding: 0.35rem 0.4rem 0.3rem !important;
+        padding: 0.35rem 0.65rem 0.3rem !important;
+        justify-content: space-evenly !important;
+        gap: 0.2rem 0.45rem !important;
         border: 1px solid rgba(255, 255, 255, 0.2) !important;
         border-radius: 1.4rem !important;
         background: linear-gradient(
@@ -62,8 +64,11 @@
         position: relative;
         z-index: 1;
         gap: 0.1rem;
-        padding: 0.28rem 0.15rem 0.22rem !important;
-        margin: 0 0.06rem;
+        flex: 1 1 0;
+        min-width: 2.65rem;
+        max-width: 4.5rem;
+        padding: 0.28rem 0.22rem 0.22rem !important;
+        margin: 0 0.14rem;
         border: none !important;
         background: transparent !important;
         border-radius: 1rem !important;
@@ -102,6 +107,20 @@
     #bottom-bar.lisani-tab-bar-ios .lisani-nav-tab__label {
         letter-spacing: 0.01em;
         line-height: 1.1;
+    }
+
+    /* Gelişim · Dashboard · Harfler — mobilde biraz daha aralıklı */
+    #bottom-bar.lisani-tab-bar-ios #tab-ai {
+        margin-right: 0.28rem;
+    }
+
+    #bottom-bar.lisani-tab-bar-ios #tab-hoca-dashboard:not(.hidden) {
+        margin-left: 0.12rem;
+        margin-right: 0.28rem;
+    }
+
+    #bottom-bar.lisani-tab-bar-ios #tab-letters {
+        margin-left: 0.28rem;
     }
 
     /* Giriş / Ana Sayfa — alt çubukta tam orta */
@@ -864,14 +883,14 @@ html.preline-ui.theme-renkli-yol #screen-tests .lisani-quiz-option {
     background: rgba(248, 113, 113, 0.12) !important;
 }
 
-/* Preline — glass-card ile aynı dil, camı ezmesin */
-html.preline-ui[class*="theme-"] #level-selection-view button.lisani-glass-panel,
-html.preline-ui[class*="theme-"] #tests-buttons-container button.lisani-glass-panel,
-html.preline-ui[class*="theme-"] #screen-letters .lisani-letter-card.lisani-glass-panel,
-html.preline-ui[class*="theme-"] #screen-letters .lisani-letters-form-cell.lisani-glass-panel,
-html.preline-ui[class*="theme-"] #screen-settings .lisani-glass-action,
-html.preline-ui[class*="theme-"] #screen-settings button.lisani-glass-action:not(.lisani-glass-action--primary):not(.lisani-glass-action--danger),
-html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol):not(.theme-sade)[class*="theme-"] .lisani-glass-panel {
+/* Preline — glass-card ile aynı dil, camı ezmesin (beyaz-cam hariç) */
+html.preline-ui:not(.theme-beyaz-cam)[class*="theme-"] #level-selection-view button.lisani-glass-panel,
+html.preline-ui:not(.theme-beyaz-cam)[class*="theme-"] #tests-buttons-container button.lisani-glass-panel,
+html.preline-ui:not(.theme-beyaz-cam)[class*="theme-"] #screen-letters .lisani-letter-card.lisani-glass-panel,
+html.preline-ui:not(.theme-beyaz-cam)[class*="theme-"] #screen-letters .lisani-letters-form-cell.lisani-glass-panel,
+html.preline-ui:not(.theme-beyaz-cam)[class*="theme-"] #screen-settings .lisani-glass-action,
+html.preline-ui:not(.theme-beyaz-cam)[class*="theme-"] #screen-settings button.lisani-glass-action:not(.lisani-glass-action--primary):not(.lisani-glass-action--danger),
+html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol):not(.theme-sade):not(.theme-beyaz-cam)[class*="theme-"] .lisani-glass-panel {
     background: rgba(255, 255, 255, 0.07) !important;
     backdrop-filter: blur(18px) saturate(150%) !important;
     -webkit-backdrop-filter: blur(18px) saturate(150%) !important;
@@ -890,7 +909,7 @@ html.preline-ui[class*="theme-"] #screen-settings button.lisani-glass-action:hov
     border-color: var(--theme-accent-border) !important;
 }
 
-html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol):not(.theme-sade)[class*="theme-"] .lisani-glass-action--primary {
+html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol):not(.theme-sade):not(.theme-beyaz-cam)[class*="theme-"] .lisani-glass-action--primary {
     background: rgba(var(--theme-primary-rgb), 0.18) !important;
     border-color: rgba(var(--theme-primary-rgb), 0.35) !important;
     color: var(--ph-text) !important;
@@ -1125,8 +1144,8 @@ html.preline-ui[class*="theme-"] .theme-pick-btn.is-active {
     }
 
     #bottom-bar.lisani-tab-bar-ios .lisani-nav-tab {
-        padding-left: 0.08rem !important;
-        padding-right: 0.08rem !important;
+        padding-left: 0.18rem !important;
+        padding-right: 0.18rem !important;
     }
 }
 
@@ -1524,16 +1543,16 @@ html.preline-ui[class*="theme-"] .theme-pick-btn.is-active {
 }
 
 /* ===== ZORUNLU CAM — renkli-yol / duolingo / sade hariç ===== */
-html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol):not(.theme-sade)[class*="theme-"] #app-container .glass-card,
-html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol):not(.theme-sade)[class*="theme-"] #app-container .glass-card-interactive,
-html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol):not(.theme-sade)[class*="theme-"] #auth-container .glass-card,
-html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol):not(.theme-sade)[class*="theme-"] #edit-profile-container .glass-card,
-html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol):not(.theme-sade)[class*="theme-"] #notif-settings-panel .glass-card,
-html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol):not(.theme-sade)[class*="theme-"] .lisani-glass-panel,
-html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol):not(.theme-sade)[class*="theme-"] .lisani-glass-action,
-html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol):not(.theme-sade)[class*="theme-"] button.lisani-glass-panel,
-html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol):not(.theme-sade)[class*="theme-"] button.lisani-glass-action,
-html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol):not(.theme-sade)[class*="theme-"] div.lisani-glass-action {
+html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol):not(.theme-sade):not(.theme-beyaz-cam)[class*="theme-"] #app-container .glass-card,
+html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol):not(.theme-sade):not(.theme-beyaz-cam)[class*="theme-"] #app-container .glass-card-interactive,
+html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol):not(.theme-sade):not(.theme-beyaz-cam)[class*="theme-"] #auth-container .glass-card,
+html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol):not(.theme-sade):not(.theme-beyaz-cam)[class*="theme-"] #edit-profile-container .glass-card,
+html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol):not(.theme-sade):not(.theme-beyaz-cam)[class*="theme-"] #notif-settings-panel .glass-card,
+html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol):not(.theme-sade):not(.theme-beyaz-cam)[class*="theme-"] .lisani-glass-panel,
+html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol):not(.theme-sade):not(.theme-beyaz-cam)[class*="theme-"] .lisani-glass-action,
+html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol):not(.theme-sade):not(.theme-beyaz-cam)[class*="theme-"] button.lisani-glass-panel,
+html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol):not(.theme-sade):not(.theme-beyaz-cam)[class*="theme-"] button.lisani-glass-action,
+html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol):not(.theme-sade):not(.theme-beyaz-cam)[class*="theme-"] div.lisani-glass-action {
     background: linear-gradient(
         145deg,
         rgba(255, 255, 255, 0.16) 0%,
@@ -1548,11 +1567,11 @@ html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol):not(.theme-sade)[cla
         inset 0 1px 0 rgba(255, 255, 255, 0.18) !important;
 }
 
-html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol):not(.theme-sade)[class*="theme-"] #app-container button.theme-primary-btn:not(.lisani-segment-btn),
-html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol):not(.theme-sade)[class*="theme-"] #auth-container button.theme-primary-btn:not(.lisani-segment-btn),
-html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol):not(.theme-sade)[class*="theme-"] #edit-profile-container button.theme-primary-btn,
-html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol):not(.theme-sade)[class*="theme-"] #notif-settings-panel button.theme-primary-btn,
-html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol):not(.theme-sade)[class*="theme-"] .lisani-glass-action--primary {
+html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol):not(.theme-sade):not(.theme-beyaz-cam)[class*="theme-"] #app-container button.theme-primary-btn:not(.lisani-segment-btn),
+html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol):not(.theme-sade):not(.theme-beyaz-cam)[class*="theme-"] #auth-container button.theme-primary-btn:not(.lisani-segment-btn),
+html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol):not(.theme-sade):not(.theme-beyaz-cam)[class*="theme-"] #edit-profile-container button.theme-primary-btn,
+html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol):not(.theme-sade):not(.theme-beyaz-cam)[class*="theme-"] #notif-settings-panel button.theme-primary-btn,
+html.preline-ui:not(.theme-duolingo):not(.theme-renkli-yol):not(.theme-sade):not(.theme-beyaz-cam)[class*="theme-"] .lisani-glass-action--primary {
     background: linear-gradient(
         145deg,
         rgba(var(--theme-primary-rgb), 0.38) 0%,
@@ -1968,6 +1987,14 @@ html.preline-ui[class*="theme-"] #wa-mesajlar-overlay .wa-send-btn.lisani-glass-
     z-index: 60;
     background-color: var(--theme-bg-phone, var(--ph-bg, #0f0f12));
     isolation: isolate;
+}
+
+html.theme-beyaz-cam #auth-container:not(.hidden),
+html.preline-ui.theme-beyaz-cam #auth-container:not(.hidden),
+html.theme-beyaz-cam #edit-profile-container:not(.hidden),
+html.preline-ui.theme-beyaz-cam #edit-profile-container:not(.hidden) {
+    background: var(--lisani-beyaz-cam-bg) !important;
+    background-color: transparent !important;
 }
 
 #main-application-flow.lisani-main-flow:not(.hidden) {
@@ -4791,37 +4818,106 @@ html.preline-ui.theme-renkli-yol .lisani-bolum-dot-btn {
 }
 
 .lisani-apk-download-home.hidden,
-.lisani-apk-download-strip.hidden {
+.lisani-apk-download-strip.hidden,
+.lisani-shell-foot-apk.hidden {
     display: none !important;
 }
 
-.lisani-apk-download-strip {
+/* Alt menü — konu anlatımı + mini APK */
+@media (max-width: 1023.98px) {
+    #bottom-bar.lisani-tab-bar-ios {
+        flex-wrap: wrap;
+    }
+}
+
+.lisani-shell-foot-actions {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.5rem;
-    margin: 0 0.75rem 0.35rem;
-    padding: 0.65rem 0.85rem;
-    border-radius: 0.9rem;
-    border: 1px solid rgba(255, 255, 255, 0.16);
-    background: linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.04));
-    font-size: 0.6875rem;
-    font-weight: 800;
-    letter-spacing: 0.01em;
-    flex-shrink: 0;
+    gap: 0.55rem;
+    flex: 0 0 100%;
+    width: 100%;
+    order: 10;
+    padding: 0.18rem 0.4rem 0.12rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
 }
 
-.lisani-apk-download-strip__label {
-    min-width: 0;
+.lisani-shell-foot-btn,
+.lisani-shell-foot-apk {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.22rem;
+    margin: 0;
+    padding: 0.1rem 0.25rem;
+    border: none;
+    border-radius: 0;
+    background: transparent;
+    font-size: 0.5rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    line-height: 1.2;
+    color: inherit;
+    text-decoration: none;
+    opacity: 0.68;
+    flex-shrink: 0;
+    cursor: pointer;
+    transition: opacity 0.15s ease;
+}
+
+.lisani-shell-foot-btn__icon,
+.lisani-shell-foot-btn i,
+.lisani-shell-foot-apk i {
+    width: 0.625rem;
+    height: 0.625rem;
+}
+
+.lisani-shell-foot-btn:hover,
+.lisani-shell-foot-apk:hover {
+    opacity: 1;
+}
+
+.lisani-grammar-topics-item__icon {
+    font-size: 0.75rem;
+    line-height: 1;
+    flex-shrink: 0;
+    width: 1.25rem;
     text-align: center;
 }
 
-@media (min-width: 640px) {
-    .lisani-apk-download-strip {
-        max-width: 28rem;
-        margin-left: auto;
-        margin-right: auto;
+@media (min-width: 1024px) {
+    #bottom-bar.lisani-tab-bar-ios {
+        flex-wrap: nowrap;
     }
+
+    .lisani-shell-foot-actions {
+        flex: 0 0 auto;
+        flex-direction: column;
+        order: unset;
+        width: 100%;
+        margin-top: auto;
+        padding: 0.3rem 0.1rem 0.15rem;
+        gap: 0.15rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .lisani-shell-foot-btn,
+    .lisani-shell-foot-apk {
+        width: 100%;
+        font-size: 0.4375rem;
+        padding: 0.12rem 0.05rem;
+        letter-spacing: 0.01em;
+    }
+
+    .lisani-shell-foot-btn__icon,
+    .lisani-shell-foot-btn i {
+        width: 0.5rem;
+        height: 0.5rem;
+    }
+}
+
+.lisani-apk-download-strip {
+    display: none !important;
 }
 
 .lisani-donate-amount-input:disabled {
@@ -4836,4 +4932,122 @@ html.preline-ui.theme-renkli-yol .lisani-bolum-dot-btn {
 
 .lisani-donate-modal .lisani-donate-amount-field {
     margin-top: 0.15rem;
+}
+
+/* ===== Beyaz Cam — ağır glassmorphism ===== */
+html.preline-ui.theme-beyaz-cam #app-container .glass-card,
+html.preline-ui.theme-beyaz-cam #app-container .glass-card-interactive,
+html.preline-ui.theme-beyaz-cam #auth-container .glass-card,
+html.preline-ui.theme-beyaz-cam #edit-profile-container .glass-card,
+html.preline-ui.theme-beyaz-cam #notif-settings-panel .glass-card,
+html.preline-ui.theme-beyaz-cam .lisani-glass-panel,
+html.preline-ui.theme-beyaz-cam .lisani-glass-action,
+html.preline-ui.theme-beyaz-cam button.lisani-glass-panel,
+html.preline-ui.theme-beyaz-cam button.lisani-glass-action,
+html.preline-ui.theme-beyaz-cam div.lisani-glass-action,
+html.preline-ui.theme-beyaz-cam .theme-pick-btn {
+    background: linear-gradient(
+        155deg,
+        rgba(255, 255, 255, 0.82) 0%,
+        rgba(255, 255, 255, 0.48) 48%,
+        rgba(255, 255, 255, 0.62) 100%
+    ) !important;
+    backdrop-filter: blur(52px) saturate(240%) brightness(1.06) !important;
+    -webkit-backdrop-filter: blur(52px) saturate(240%) brightness(1.06) !important;
+    border: 1.5px solid rgba(255, 255, 255, 0.92) !important;
+    box-shadow:
+        0 20px 56px rgba(15, 23, 42, 0.07),
+        0 8px 24px rgba(99, 102, 241, 0.06),
+        inset 0 2px 0 rgba(255, 255, 255, 1),
+        inset 0 -1px 0 rgba(255, 255, 255, 0.45) !important;
+    color: var(--ph-text) !important;
+}
+
+html.preline-ui.theme-beyaz-cam .lisani-glass-action--primary,
+html.preline-ui.theme-beyaz-cam #app-container button.theme-primary-btn:not(.lisani-segment-btn),
+html.preline-ui.theme-beyaz-cam #auth-container button.theme-primary-btn:not(.lisani-segment-btn),
+html.preline-ui.theme-beyaz-cam .theme-pick-btn.is-active {
+    background: linear-gradient(145deg, rgba(99, 102, 241, 0.94), rgba(79, 70, 229, 0.9)) !important;
+    border: 1px solid rgba(255, 255, 255, 0.6) !important;
+    color: #fff !important;
+    box-shadow:
+        0 16px 40px rgba(99, 102, 241, 0.32),
+        inset 0 1px 0 rgba(255, 255, 255, 0.5) !important;
+    backdrop-filter: blur(32px) saturate(200%) !important;
+    -webkit-backdrop-filter: blur(32px) saturate(200%) !important;
+}
+
+html.preline-ui.theme-beyaz-cam #bottom-bar.lisani-tab-bar-ios {
+    background: linear-gradient(
+        165deg,
+        rgba(255, 255, 255, 0.88) 0%,
+        rgba(255, 255, 255, 0.58) 100%
+    ) !important;
+    backdrop-filter: blur(64px) saturate(260%) brightness(1.05) !important;
+    -webkit-backdrop-filter: blur(64px) saturate(260%) brightness(1.05) !important;
+    border: 1.5px solid rgba(255, 255, 255, 0.95) !important;
+    box-shadow:
+        0 16px 48px rgba(15, 23, 42, 0.1),
+        inset 0 2px 0 rgba(255, 255, 255, 1),
+        inset 0 -1px 0 rgba(255, 255, 255, 0.5) !important;
+}
+
+html.preline-ui.theme-beyaz-cam #bottom-bar .lisani-nav-tab {
+    color: #64748b !important;
+}
+
+html.preline-ui.theme-beyaz-cam #bottom-bar .lisani-nav-tab.lisani-tab-active {
+    color: #6366f1 !important;
+    background: rgba(255, 255, 255, 0.75) !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 1),
+        0 4px 16px rgba(99, 102, 241, 0.12) !important;
+}
+
+html.preline-ui.theme-beyaz-cam .lisani-learn-modal__panel,
+html.preline-ui.theme-beyaz-cam .lisani-modal-overlay .lisani-glass-panel {
+    background: linear-gradient(160deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.65)) !important;
+    backdrop-filter: blur(56px) saturate(250%) !important;
+    -webkit-backdrop-filter: blur(56px) saturate(250%) !important;
+}
+
+html.preline-ui.theme-beyaz-cam .lisani-shell-foot-actions {
+    border-top-color: rgba(148, 163, 184, 0.2);
+}
+
+html.preline-ui.theme-beyaz-cam .lisani-shell-foot-btn,
+html.preline-ui.theme-beyaz-cam .lisani-shell-foot-apk {
+    color: #64748b;
+}
+
+@media (min-width: 1024px) {
+    html.preline-ui.theme-beyaz-cam #bottom-bar.lisani-tab-bar-ios {
+        background: rgba(255, 255, 255, 0.72) !important;
+        backdrop-filter: blur(48px) saturate(220%) !important;
+        -webkit-backdrop-filter: blur(48px) saturate(220%) !important;
+        border-right: 1px solid rgba(255, 255, 255, 0.9) !important;
+        box-shadow:
+            8px 0 32px rgba(15, 23, 42, 0.06),
+            inset -1px 0 0 rgba(255, 255, 255, 0.8) !important;
+    }
+}
+
+/* Beyaz Cam — iOS Safari: safe-area dahil tam ekran gradyan */
+@supports (-webkit-touch-callout: none) {
+    html.theme-beyaz-cam,
+    html.preline-ui.theme-beyaz-cam {
+        background: var(--lisani-beyaz-cam-bg);
+        min-height: -webkit-fill-available;
+    }
+
+    html.theme-beyaz-cam body.lisani-body,
+    html.preline-ui.theme-beyaz-cam body.lisani-body {
+        background: var(--lisani-beyaz-cam-bg) !important;
+    }
+
+    html.theme-beyaz-cam #app-container.lisani-app-shell,
+    html.preline-ui.theme-beyaz-cam #app-container.lisani-app-shell {
+        background: var(--lisani-beyaz-cam-bg) !important;
+        background-color: transparent !important;
+    }
 }

@@ -424,6 +424,156 @@ html.preline-ui.theme-sade .lisani-glass-blob {
     display: none !important;
 }
 
+/* Beyaz Cam — açık zemin, ağır glassmorphism */
+html.preline-ui.theme-beyaz-cam {
+    --ph-bg: #e8edf4;
+    --ph-surface: rgba(255, 255, 255, 0.55);
+    --ph-surface-2: rgba(255, 255, 255, 0.72);
+    --ph-border: rgba(255, 255, 255, 0.82);
+    --ph-text: #0f172a;
+    --ph-muted: #64748b;
+    --ph-primary: #6366f1;
+    --ph-primary-hover: #4f46e5;
+    --ph-ring: rgba(99, 102, 241, 0.28);
+    --theme-accent: #818cf8;
+    --theme-accent-soft: rgba(99, 102, 241, 0.1);
+    --theme-accent-border: rgba(99, 102, 241, 0.22);
+    --theme-warn: #d97706;
+    --theme-bg-phone: #e8edf4;
+    --theme-card-bg: rgba(255, 255, 255, 0.58);
+    --theme-border: rgba(255, 255, 255, 0.78);
+    --theme-text-main: #0f172a;
+    --theme-text-muted: #64748b;
+    --theme-primary: #6366f1;
+    --theme-primary-hover: #4f46e5;
+    --theme-secondary: rgba(99, 102, 241, 0.08);
+    --theme-card-gradient-from: #eef2ff;
+    --theme-card-gradient-to: #e0e7ff;
+    --theme-accent-light: rgba(99, 102, 241, 0.06);
+    --theme-button-text: #ffffff;
+    --theme-primary-rgb: 99, 102, 241;
+    --theme-btn-solid: #6366f1;
+    --theme-btn-solid-hover: #4f46e5;
+    --theme-btn-text: #ffffff;
+    --theme-btn-glow: rgba(99, 102, 241, 0.35);
+    --theme-nav-bg: rgba(255, 255, 255, 0.65);
+    --theme-nav-home-bg: #6366f1;
+    --theme-nav-home-icon: #ffffff;
+    --wa-bg: #e8edf4;
+    --wa-header: rgba(255, 255, 255, 0.88);
+    --wa-border: rgba(148, 163, 184, 0.28);
+    --wa-text: #0f172a;
+    --wa-muted: #64748b;
+    --wa-list-hover: rgba(99, 102, 241, 0.08);
+    --wa-sent: rgba(224, 231, 255, 0.95);
+    --wa-sent-border: rgba(99, 102, 241, 0.28);
+    --wa-received: rgba(255, 255, 255, 0.92);
+    --lisani-beyaz-cam-bg:
+        radial-gradient(ellipse 90% 60% at 12% 8%, rgba(147, 197, 253, 0.45) 0%, transparent 55%),
+        radial-gradient(ellipse 70% 50% at 88% 18%, rgba(196, 181, 253, 0.42) 0%, transparent 52%),
+        radial-gradient(ellipse 65% 45% at 50% 100%, rgba(167, 243, 208, 0.35) 0%, transparent 50%),
+        linear-gradient(165deg, #f8fafc 0%, #e8edf4 42%, #dde4ee 100%);
+}
+
+html.theme-beyaz-cam {
+    --lisani-beyaz-cam-bg:
+        radial-gradient(ellipse 90% 60% at 12% 8%, rgba(147, 197, 253, 0.45) 0%, transparent 55%),
+        radial-gradient(ellipse 70% 50% at 88% 18%, rgba(196, 181, 253, 0.42) 0%, transparent 52%),
+        radial-gradient(ellipse 65% 45% at 50% 100%, rgba(167, 243, 208, 0.35) 0%, transparent 50%),
+        linear-gradient(165deg, #f8fafc 0%, #e8edf4 42%, #dde4ee 100%);
+}
+
+html.theme-beyaz-cam body.lisani-body,
+html.preline-ui.theme-beyaz-cam body.lisani-body {
+    background: var(--lisani-beyaz-cam-bg) !important;
+    color: var(--ph-text, #0f172a);
+}
+
+@media (min-width: 1024px) {
+    html.theme-beyaz-cam .lisani-app-shell,
+    html.theme-beyaz-cam .lisani-main-flow,
+    html.theme-beyaz-cam #app-container,
+    html.theme-beyaz-cam .theme-bg-phone,
+    html.preline-ui.theme-beyaz-cam .lisani-app-shell,
+    html.preline-ui.theme-beyaz-cam .lisani-main-flow,
+    html.preline-ui.theme-beyaz-cam #app-container,
+    html.preline-ui.theme-beyaz-cam .theme-bg-phone {
+        background: transparent !important;
+    }
+}
+
+/* iPhone / mobil — gradyan doğrudan telefon kabuğunda (body arkada kalmaz) */
+@media (max-width: 1023.98px) {
+    html.theme-beyaz-cam,
+    html.preline-ui.theme-beyaz-cam {
+        background: var(--lisani-beyaz-cam-bg);
+    }
+
+    html.theme-beyaz-cam .lisani-site-wrapper,
+    html.theme-beyaz-cam .lisani-app-shell,
+    html.theme-beyaz-cam .lisani-main-flow,
+    html.theme-beyaz-cam #app-container,
+    html.theme-beyaz-cam .theme-bg-phone,
+    html.theme-beyaz-cam #auth-container,
+    html.theme-beyaz-cam #edit-profile-container,
+    html.theme-beyaz-cam #notif-settings-panel,
+    html.preline-ui.theme-beyaz-cam .lisani-site-wrapper,
+    html.preline-ui.theme-beyaz-cam .lisani-app-shell,
+    html.preline-ui.theme-beyaz-cam .lisani-main-flow,
+    html.preline-ui.theme-beyaz-cam #app-container,
+    html.preline-ui.theme-beyaz-cam .theme-bg-phone,
+    html.preline-ui.theme-beyaz-cam #auth-container,
+    html.preline-ui.theme-beyaz-cam #edit-profile-container,
+    html.preline-ui.theme-beyaz-cam #notif-settings-panel {
+        background: var(--lisani-beyaz-cam-bg) !important;
+        background-color: transparent !important;
+    }
+}
+
+html.preline-ui.theme-beyaz-cam .lisani-glass-blob {
+    filter: blur(64px);
+    opacity: 0.55;
+}
+
+html.preline-ui.theme-beyaz-cam .lisani-glass-blob--1 {
+    background: radial-gradient(circle, rgba(96, 165, 250, 0.75) 0%, transparent 70%);
+}
+
+html.preline-ui.theme-beyaz-cam .lisani-glass-blob--2 {
+    background: radial-gradient(circle, rgba(167, 139, 250, 0.7) 0%, transparent 70%);
+}
+
+html.preline-ui.theme-beyaz-cam .lisani-glass-blob--3 {
+    background: radial-gradient(circle, rgba(110, 231, 183, 0.65) 0%, transparent 70%);
+}
+
+html.preline-ui.theme-beyaz-cam .theme-gradient-card {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.75) 0%, rgba(224, 231, 255, 0.65) 100%) !important;
+    border: 1.5px solid rgba(255, 255, 255, 0.9) !important;
+    box-shadow:
+        0 16px 48px rgba(15, 23, 42, 0.08),
+        inset 0 2px 0 rgba(255, 255, 255, 1) !important;
+    backdrop-filter: blur(40px) saturate(200%) !important;
+    -webkit-backdrop-filter: blur(40px) saturate(200%) !important;
+}
+
+html.preline-ui.theme-beyaz-cam .lisani-glass-action--primary,
+html.preline-ui.theme-beyaz-cam .theme-primary-btn:not(.lisani-segment-btn) {
+    background: linear-gradient(145deg, rgba(99, 102, 241, 0.92), rgba(79, 70, 229, 0.88)) !important;
+    border: 1px solid rgba(255, 255, 255, 0.55) !important;
+    color: #fff !important;
+    box-shadow:
+        0 12px 32px rgba(99, 102, 241, 0.35),
+        inset 0 1px 0 rgba(255, 255, 255, 0.45) !important;
+}
+
+html.preline-ui.theme-beyaz-cam .lisani-desktop-header {
+    background: rgba(255, 255, 255, 0.72) !important;
+    backdrop-filter: blur(32px) saturate(200%) !important;
+    -webkit-backdrop-filter: blur(32px) saturate(200%) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.85) !important;
+}
+
 /* Derin Mavi */
 html.preline-ui.theme-derin-mavi {
     --ph-bg: #080c14;
@@ -584,10 +734,10 @@ html.preline-ui[class*="theme-"] .glass-card-interactive {
         inset 0 1px 0 rgba(255, 255, 255, 0.04) !important;
 }
 
-/* #app-container içinde cam — lisani-fixes.css ile birlikte */
-html.preline-ui[class*="theme-"] #app-container .glass-card,
-html.preline-ui[class*="theme-"] #app-container .glass-card-interactive,
-html.preline-ui[class*="theme-"] #auth-container .glass-card {
+/* #app-container içinde cam — lisani-fixes.css ile birlikte (beyaz-cam hariç) */
+html.preline-ui:not(.theme-beyaz-cam)[class*="theme-"] #app-container .glass-card,
+html.preline-ui:not(.theme-beyaz-cam)[class*="theme-"] #app-container .glass-card-interactive,
+html.preline-ui:not(.theme-beyaz-cam)[class*="theme-"] #auth-container .glass-card {
     background: linear-gradient(145deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.06)) !important;
     backdrop-filter: blur(20px) saturate(165%) !important;
     -webkit-backdrop-filter: blur(20px) saturate(165%) !important;
@@ -602,7 +752,7 @@ html.preline-ui[class*="theme-"] .glass-card-interactive:hover {
         inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
 }
 
-html.preline-ui[class*="theme-"] .theme-gradient-card {
+html.preline-ui:not(.theme-beyaz-cam)[class*="theme-"] .theme-gradient-card {
     background: linear-gradient(135deg, var(--theme-card-gradient-from) 0%, var(--theme-card-gradient-to) 100%) !important;
     border: 1px solid var(--ph-border) !important;
     box-shadow: 0 10px 28px rgba(0, 0, 0, 0.32) !important;

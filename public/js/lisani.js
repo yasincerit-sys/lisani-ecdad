@@ -4000,18 +4000,103 @@
         // --- PRELINE UI GÖRÜNÜM / TEMA ---
         const COLOR_MODE_KEY = 'lisani_color_mode';
         const DEFAULT_COLOR_MODE = 'saray-kahvesi';
-        const VALID_THEMES = ['sade', 'saray-kahvesi', 'derin-mavi', 'mavi-mor'];
+        const VALID_THEMES = ['sade', 'saray-kahvesi', 'derin-mavi', 'mavi-mor', 'beyaz-cam'];
         const THEME_CLASS_NAMES = VALID_THEMES.map((t) => 'theme-' + t);
         const THEME_META_COLORS = {
             sade: '#111111',
             'saray-kahvesi': '#120d0a',
             'derin-mavi': '#080c14',
             'mavi-mor': '#08061a',
+            'beyaz-cam': '#e8edf4',
         };
+        const THEME_PICKER_ITEMS = [
+            {
+                id: 'sade',
+                label: 'Sade (Düz)',
+                swatch: { kind: 'dot', style: 'background:#1a1a1a;border:1px solid #404040' },
+            },
+            {
+                id: 'saray-kahvesi',
+                label: 'Saray Kahvesi ☕',
+                badge: 'Varsayılan',
+                recommended: true,
+                swatch: { kind: 'gradient', style: 'background:linear-gradient(90deg,#9e6c4c,#4a3329)' },
+            },
+            {
+                section: 'CAM / GRADYAN TEMALAR',
+            },
+            {
+                id: 'beyaz-cam',
+                label: 'Beyaz Gradyan 🤍',
+                badge: 'Açık cam',
+                swatch: {
+                    kind: 'gradient',
+                    style: 'background:linear-gradient(135deg,#f8fafc,#e0e7ff,#c7d2fe);border:1px solid rgba(148,163,184,0.35)',
+                },
+            },
+            {
+                id: 'mavi-mor',
+                label: 'Mavi & Mor 💜',
+                swatch: { kind: 'gradient', style: 'background:linear-gradient(90deg,#2563eb,#6366f1,#9333ea)' },
+            },
+            {
+                id: 'derin-mavi',
+                label: 'Derin Mavi 🌊',
+                swatch: { kind: 'gradient', style: 'background:linear-gradient(90deg,#3b82f6,#1e3a8a)' },
+            },
+        ];
+
+        function bindThemePicker() {
+            const picker = document.getElementById('theme-picker');
+            if (!picker || picker.dataset.themeBound === '1') return;
+            picker.dataset.themeBound = '1';
+            picker.addEventListener('click', (event) => {
+                const btn = event.target.closest('[data-color-mode]');
+                if (!btn || !picker.contains(btn)) return;
+                event.preventDefault();
+                const mode = btn.getAttribute('data-color-mode');
+                if (typeof setColorMode === 'function') {
+                    setColorMode(mode);
+                } else if (typeof window.lisaniPickTheme === 'function') {
+                    window.lisaniPickTheme(mode);
+                }
+            });
+        }
+
+        function renderThemePicker(forceRebuild) {
+            const picker = document.getElementById('theme-picker');
+            if (!picker) return;
+
+            const hasAll = VALID_THEMES.every((id) => picker.querySelector(`[data-color-mode="${id}"]`));
+            if (!forceRebuild && hasAll) {
+                bindThemePicker();
+                return;
+            }
+
+            const parts = THEME_PICKER_ITEMS.map((item) => {
+                if (item.section) {
+                    return `<p class="theme-pick-section">${item.section}</p>`;
+                }
+                const badge = item.badge
+                    ? ` <span class="theme-pick-btn__badge">${item.badge}</span>`
+                    : '';
+                const recommended = item.recommended ? ' is-recommended' : '';
+                const swatchClass = item.swatch.kind === 'dot' ? 'theme-swatch-dot' : 'theme-swatch-gradient';
+                const swatch = `<span class="${swatchClass}" style="${item.swatch.style}" aria-hidden="true"></span>`;
+                return `<button type="button" data-color-mode="${item.id}" class="theme-pick-btn lisani-glass-panel${recommended}">
+                    <span class="theme-pick-btn__label">${item.label}${badge}</span>
+                    ${swatch}
+                </button>`;
+            });
+
+            picker.innerHTML = parts.join('');
+            picker.dataset.themeBound = '0';
+            bindThemePicker();
+        }
 
         function normalizeColorMode(mode) {
             if (VALID_THEMES.includes(mode)) return mode;
-            if (mode === 'light') return DEFAULT_COLOR_MODE;
+            if (mode === 'light') return 'beyaz-cam';
             if (mode === 'dark') return DEFAULT_COLOR_MODE;
             return DEFAULT_COLOR_MODE;
         }
@@ -4025,28 +4110,53 @@
         }
 
         function applyDocumentColorMode(mode) {
+            if (typeof window.lisaniPickTheme === 'function') {
+                window.lisaniPickTheme(mode);
+                return;
+            }
             const theme = normalizeColorMode(mode);
             const root = document.documentElement;
             THEME_CLASS_NAMES.forEach((cls) => root.classList.remove(cls));
             root.classList.add('theme-' + theme);
-            root.classList.add('dark');
+            if (theme === 'beyaz-cam') {
+                root.classList.remove('dark');
+            } else {
+                root.classList.add('dark');
+            }
             const meta = document.getElementById('meta-theme-color');
             if (meta) meta.setAttribute('content', THEME_META_COLORS[theme] || '#100c0a');
         }
 
         function setColorMode(mode) {
-            playClickSound();
-            const theme = normalizeColorMode(mode);
-            localStorage.setItem(COLOR_MODE_KEY, theme);
-            applyDocumentColorMode(theme);
+            try {
+                playClickSound();
+            } catch (e) {}
+            applyDocumentColorMode(mode);
             highlightColorModeButtons();
-            showToast('Renk teması güncellendi.', 'success');
+            if (typeof showToast === 'function') {
+                showToast('Renk teması güncellendi.', 'success');
+            }
         }
+
+        window.setColorMode = setColorMode;
 
         function initPrelineTheme() {
             document.documentElement.classList.add('preline-ui');
+            renderThemePicker(false);
             applyDocumentColorMode(localStorage.getItem(COLOR_MODE_KEY) || DEFAULT_COLOR_MODE);
             highlightColorModeButtons();
+        }
+
+        function bootPrelineThemeEarly() {
+            try {
+                initPrelineTheme();
+            } catch (e) {}
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', bootPrelineThemeEarly);
+        } else {
+            bootPrelineThemeEarly();
         }
 
         const DONATE_INVITE_SESSION_KEY = 'lisani_donate_invite_shown';
@@ -4162,7 +4272,7 @@
                 typeof window.Capacitor.isNativePlatform === 'function' &&
                 window.Capacitor.isNativePlatform();
             const show = !!url && !isNativeApp;
-            ['settings-apk-download-row', 'home-apk-download-row', 'app-apk-download-strip'].forEach((id) => {
+            ['app-apk-download-strip'].forEach((id) => {
                 const el = document.getElementById(id);
                 if (!el) return;
                 if (!show) {
@@ -4385,6 +4495,8 @@
             }
 
             if (screenId === 'settings') {
+                renderThemePicker(false);
+                highlightColorModeButtons();
                 if (typeof lucide !== 'undefined') lucide.createIcons();
             }
 

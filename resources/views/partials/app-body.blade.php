@@ -507,17 +507,6 @@
                                 <select id="tests-yonetici-sinif-select" class="w-full px-3 py-2 rounded-xl border theme-border theme-card-bg theme-text-main text-xs"></select>
                             </div>
                         </div>
-                        <!-- Dil bilgisi kuralları — mobil testler -->
-                        <div class="lisani-grammar-rules-panel lisani-grammar-rules-panel--tests lg:hidden shrink-0 lisani-glass-panel rounded-2xl p-3.5 space-y-2.5">
-                            <div class="flex items-center gap-2 min-w-0">
-                                <i data-lucide="book-open" class="w-4 h-4 theme-primary-color shrink-0"></i>
-                                <div class="min-w-0">
-                                    <h3 class="text-[11px] font-extrabold theme-text-main">Dil Bilgisi Kuralları</h3>
-                                    <p class="text-[9px] theme-text-muted leading-relaxed">Test öncesi kısa notlar · dokununca detay</p>
-                                </div>
-                            </div>
-                            <div class="lisani-grammar-rules-list space-y-2 max-h-[200px] overflow-y-auto pr-1"></div>
-                        </div>
                         <div class="lisani-bolum-scene lisani-tests-path-panel flex-1 min-h-0">
                             <div class="lisani-bolum-dots-row" id="bolum-buttons-container"></div>
                         </div>
@@ -778,8 +767,8 @@
                         </button>
                     </div>
 
-                    <!-- Dil bilgisi kuralları — masaüstü ana sayfa -->
-                    <div class="lisani-grammar-rules-panel lisani-grammar-rules-panel--home hidden lg:block lisani-span-full lisani-glass-panel lisani-glass-card rounded-2xl p-4 border theme-border space-y-3">
+                    <!-- Dil bilgisi — Konu Anlatımı butonundan açılır -->
+                    <div class="lisani-grammar-rules-panel lisani-grammar-rules-panel--home hidden lisani-span-full lisani-glass-panel lisani-glass-card rounded-2xl p-4 border theme-border space-y-3">
                         <div class="flex items-center gap-2 min-w-0">
                             <div class="w-9 h-9 rounded-xl theme-light-bg flex items-center justify-center theme-primary-color shrink-0">
                                 <i data-lucide="book-open" class="w-4 h-4"></i>
@@ -1112,21 +1101,25 @@
                             <i data-lucide="palette" class="w-4 h-4 theme-primary-color"></i>
                             <span class="font-extrabold">Tema</span>
                         </h4>
-                        <div class="space-y-2" id="theme-picker">
-                            <button type="button" onclick="setColorMode('sade')" data-color-mode="sade" class="theme-pick-btn lisani-glass-panel">
+                        <div class="space-y-2" id="theme-picker" aria-live="polite">
+                            <button type="button" data-color-mode="sade" onclick="lisaniPickTheme('sade')" class="theme-pick-btn lisani-glass-panel">
                                 <span class="theme-pick-btn__label">Sade (Düz)</span>
                                 <span class="theme-swatch-dot" style="background:#1a1a1a;border:1px solid #404040" aria-hidden="true"></span>
                             </button>
-                            <button type="button" onclick="setColorMode('saray-kahvesi')" data-color-mode="saray-kahvesi" class="theme-pick-btn lisani-glass-panel is-recommended">
+                            <button type="button" data-color-mode="saray-kahvesi" onclick="lisaniPickTheme('saray-kahvesi')" class="theme-pick-btn lisani-glass-panel is-recommended">
                                 <span class="theme-pick-btn__label">Saray Kahvesi ☕ <span class="theme-pick-btn__badge">Varsayılan</span></span>
                                 <span class="theme-swatch-gradient" style="background:linear-gradient(90deg,#9e6c4c,#4a3329)" aria-hidden="true"></span>
                             </button>
-                            <p class="theme-pick-section">CAM / GRADIENT TEMALAR</p>
-                            <button type="button" onclick="setColorMode('mavi-mor')" data-color-mode="mavi-mor" class="theme-pick-btn lisani-glass-panel">
+                            <p class="theme-pick-section">CAM / GRADYAN TEMALAR</p>
+                            <button type="button" data-color-mode="beyaz-cam" onclick="lisaniPickTheme('beyaz-cam')" class="theme-pick-btn lisani-glass-panel">
+                                <span class="theme-pick-btn__label">Beyaz Gradyan 🤍 <span class="theme-pick-btn__badge">Açık cam</span></span>
+                                <span class="theme-swatch-gradient" style="background:linear-gradient(135deg,#f8fafc,#e0e7ff,#c7d2fe);border:1px solid rgba(148,163,184,0.35)" aria-hidden="true"></span>
+                            </button>
+                            <button type="button" data-color-mode="mavi-mor" onclick="lisaniPickTheme('mavi-mor')" class="theme-pick-btn lisani-glass-panel">
                                 <span class="theme-pick-btn__label">Mavi &amp; Mor 💜</span>
                                 <span class="theme-swatch-gradient" style="background:linear-gradient(90deg,#2563eb,#6366f1,#9333ea)" aria-hidden="true"></span>
                             </button>
-                            <button type="button" onclick="setColorMode('derin-mavi')" data-color-mode="derin-mavi" class="theme-pick-btn lisani-glass-panel">
+                            <button type="button" data-color-mode="derin-mavi" onclick="lisaniPickTheme('derin-mavi')" class="theme-pick-btn lisani-glass-panel">
                                 <span class="theme-pick-btn__label">Derin Mavi 🌊</span>
                                 <span class="theme-swatch-gradient" style="background:linear-gradient(90deg,#3b82f6,#1e3a8a)" aria-hidden="true"></span>
                             </button>
@@ -1219,7 +1212,7 @@
                             </div>
                         </div>
 
-                        <a id="settings-apk-download-row" href="#" download="lisani-ecdad.apk" class="lisani-glass-action lisani-apk-download-row hidden w-full">
+                        <a id="settings-apk-download-row" href="#" download="lisani-ecdad.apk" class="lisani-glass-action lisani-apk-download-row hidden w-full" hidden aria-hidden="true" tabindex="-1">
                             <div class="flex items-center gap-3 min-w-0 flex-1">
                                 <i data-lucide="smartphone" class="w-4 h-4 theme-primary-color shrink-0"></i>
                                 <div class="min-w-0 text-left">
@@ -1276,49 +1269,47 @@
 
             </div>
 
-            <a id="app-apk-download-strip" href="#" download="lisani-ecdad.apk" class="lisani-apk-download-strip hidden" aria-label="Android uygulamasını indir">
-                <i data-lucide="smartphone" class="w-4 h-4 shrink-0"></i>
-                <span class="lisani-apk-download-strip__label">Android uygulamasını indir (APK)</span>
-                <i data-lucide="download" class="w-4 h-4 shrink-0 opacity-75"></i>
-            </a>
-
             <!-- SABİTLENMİŞ ALT SEKMELER — iPhone tarzı cam tab bar -->
-            <nav id="bottom-bar" class="lisani-nav-bar lisani-tab-bar-ios lisani-tab-bar-ios--center-home flex items-stretch z-45 transition-all duration-300 flex-shrink-0" aria-label="Ana menü">
+            <nav id="bottom-bar" class="lisani-nav-bar lisani-tab-bar-ios flex items-stretch justify-between z-45 transition-all duration-300 flex-shrink-0" aria-label="Ana menü">
 
-                <div class="lisani-nav-tab-side lisani-nav-tab-side--left">
-                    <button type="button" onclick="switchTab('ai')" id="tab-ai" class="lisani-nav-tab flex flex-col items-center justify-center flex-1 min-w-0">
-                        <span class="lisani-nav-tab__icon-wrap"><i data-lucide="trending-up" class="w-5 h-5 shrink-0"></i></span>
-                        <span class="text-[9px] font-semibold mt-0.5 truncate max-w-full px-0.5 lisani-nav-tab__label">Gelişim</span>
-                    </button>
+                <button type="button" onclick="switchTab('ai')" id="tab-ai" class="lisani-nav-tab flex flex-col items-center justify-center flex-1 min-w-0">
+                    <span class="lisani-nav-tab__icon-wrap"><i data-lucide="trending-up" class="w-5 h-5 shrink-0"></i></span>
+                    <span class="text-[9px] font-semibold mt-0.5 truncate max-w-full px-0.5 lisani-nav-tab__label">Gelişim</span>
+                </button>
 
-                    <button type="button" onclick="switchTab('hoca-dashboard')" id="tab-hoca-dashboard" class="hidden lisani-nav-tab flex flex-col items-center justify-center flex-1 min-w-0">
-                        <span class="lisani-nav-tab__icon-wrap"><i data-lucide="layout-dashboard" class="w-5 h-5 shrink-0"></i></span>
-                        <span class="text-[9px] font-semibold mt-0.5 truncate max-w-full px-0.5 lisani-nav-tab__label">Dashboard</span>
-                    </button>
+                <button type="button" onclick="switchTab('hoca-dashboard')" id="tab-hoca-dashboard" class="hidden lisani-nav-tab flex flex-col items-center justify-center flex-1 min-w-0">
+                    <span class="lisani-nav-tab__icon-wrap"><i data-lucide="layout-dashboard" class="w-5 h-5 shrink-0"></i></span>
+                    <span class="text-[9px] font-semibold mt-0.5 truncate max-w-full px-0.5 lisani-nav-tab__label">Dashboard</span>
+                </button>
 
-                    <button type="button" onclick="switchTab('letters')" id="tab-letters" class="lisani-nav-tab flex flex-col items-center justify-center flex-1 min-w-0">
-                        <span class="lisani-nav-tab__icon-wrap"><i data-lucide="languages" class="w-5 h-5 shrink-0"></i></span>
-                        <span class="text-[9px] font-semibold mt-0.5 truncate max-w-full px-0.5 lisani-nav-tab__label">Harfler</span>
-                    </button>
-                </div>
+                <button type="button" onclick="switchTab('home')" id="tab-home" class="lisani-nav-tab flex flex-col items-center justify-center flex-1 min-w-0 lisani-tab-active">
+                    <span class="lisani-nav-tab__icon-wrap"><i data-lucide="home" class="w-5 h-5 shrink-0"></i></span>
+                    <span class="text-[9px] font-semibold mt-0.5 truncate max-w-full px-0.5 lisani-nav-tab__label" id="tab-home-text">Giriş</span>
+                </button>
 
-                <div class="lisani-nav-tab-center">
-                    <button type="button" onclick="switchTab('home')" id="tab-home" class="lisani-nav-tab lisani-nav-home-btn flex flex-col items-center justify-center min-w-0 lisani-tab-active">
-                        <span class="lisani-nav-tab__icon-wrap"><i data-lucide="home" class="w-5 h-5 shrink-0"></i></span>
-                        <span class="text-[9px] font-semibold mt-0.5 truncate max-w-full px-0.5 lisani-nav-tab__label" id="tab-home-text">Giriş</span>
-                    </button>
-                </div>
+                <button type="button" onclick="switchTab('letters')" id="tab-letters" class="lisani-nav-tab flex flex-col items-center justify-center flex-1 min-w-0">
+                    <span class="lisani-nav-tab__icon-wrap"><i data-lucide="languages" class="w-5 h-5 shrink-0"></i></span>
+                    <span class="text-[9px] font-semibold mt-0.5 truncate max-w-full px-0.5 lisani-nav-tab__label">Harfler</span>
+                </button>
 
-                <div class="lisani-nav-tab-side lisani-nav-tab-side--right">
-                    <button type="button" onclick="switchTab('osm-translate')" id="tab-osm-translate" class="lisani-nav-tab flex flex-col items-center justify-center flex-1 min-w-0">
-                        <span class="lisani-nav-tab__icon-wrap"><i data-lucide="book-open-text" class="w-5 h-5 shrink-0"></i></span>
-                        <span class="text-[9px] font-semibold mt-0.5 truncate max-w-full px-0.5 lisani-nav-tab__label">Osmanlıca</span>
-                    </button>
+                <button type="button" onclick="switchTab('osm-translate')" id="tab-osm-translate" class="lisani-nav-tab flex flex-col items-center justify-center flex-1 min-w-0">
+                    <span class="lisani-nav-tab__icon-wrap"><i data-lucide="book-open-text" class="w-5 h-5 shrink-0"></i></span>
+                    <span class="text-[9px] font-semibold mt-0.5 truncate max-w-full px-0.5 lisani-nav-tab__label">Osmanlıca</span>
+                </button>
 
-                    <button type="button" onclick="switchTab('settings')" id="tab-settings" class="lisani-nav-tab flex flex-col items-center justify-center flex-1 min-w-0">
-                        <span class="lisani-nav-tab__icon-wrap"><i data-lucide="settings" class="w-5 h-5 shrink-0"></i></span>
-                        <span class="text-[9px] font-semibold mt-0.5 truncate max-w-full px-0.5 lisani-nav-tab__label">Ayarlar</span>
+                <button type="button" onclick="switchTab('settings')" id="tab-settings" class="lisani-nav-tab flex flex-col items-center justify-center flex-1 min-w-0">
+                    <span class="lisani-nav-tab__icon-wrap"><i data-lucide="settings" class="w-5 h-5 shrink-0"></i></span>
+                    <span class="text-[9px] font-semibold mt-0.5 truncate max-w-full px-0.5 lisani-nav-tab__label">Ayarlar</span>
+                </button>
+
+                <div class="lisani-shell-foot-actions">
+                    <button type="button" id="btn-konu-anlatimi" class="lisani-shell-foot-btn" onclick="openKonuAnlatimi()">
+                        <i data-lucide="book-open" class="lisani-shell-foot-btn__icon"></i>
+                        <span>Konu Anlatımı</span>
                     </button>
+                    <a id="app-apk-download-strip" href="#" download="lisani-ecdad.apk" class="lisani-shell-foot-apk hidden" aria-label="Android APK indir">
+                        <span>APK</span>
+                    </a>
                 </div>
 
             </nav>
@@ -1661,6 +1652,26 @@
                 <button type="button" id="learn-card-drill-btn" class="hidden lisani-glass-action w-full py-3.5 rounded-xl text-sm font-bold theme-text-main">Mini teste geç (2 soru)</button>
                 <button type="button" id="learn-card-close-btn" onclick="closeLearnCardDetail()" class="lisani-glass-action lisani-glass-action--primary w-full py-3.5 rounded-xl text-sm font-bold">Anladım</button>
             </footer>
+        </div>
+    </div>
+
+    <!-- Konu anlatımı — tüm konular -->
+    <div id="grammar-topics-modal" class="lisani-learn-modal hidden absolute inset-0 z-[108] flex items-end lg:items-center justify-center p-0 lg:p-6" aria-hidden="true">
+        <div class="lisani-learn-modal__backdrop absolute inset-0" onclick="LisaniGrammarPrep?.closeGrammarTopicsModal()" aria-hidden="true"></div>
+        <div class="lisani-learn-modal__panel lisani-glass-panel relative w-full max-w-md max-h-[88vh] flex flex-col overflow-hidden rounded-t-3xl lg:rounded-3xl shadow-2xl">
+            <header class="shrink-0 px-5 pt-5 pb-3 border-b theme-border flex items-start justify-between gap-2">
+                <div class="min-w-0">
+                    <p class="text-[9px] font-bold uppercase tracking-[0.18em] theme-text-muted">Konu anlatımı</p>
+                    <h3 class="text-sm font-extrabold theme-text-main mt-1">Dil bilgisi konuları</h3>
+                    <p class="text-[10px] theme-text-muted leading-relaxed mt-1">Konuya dokun — detay, örnek ve mini test</p>
+                </div>
+                <button type="button" onclick="LisaniGrammarPrep?.closeGrammarTopicsModal()" class="lisani-glass-action lisani-glass-action--icon flex items-center justify-center rounded-full theme-text-muted shrink-0" aria-label="Kapat">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </header>
+            <div class="flex-1 overflow-y-auto px-5 py-4 min-h-0">
+                <div id="grammar-topics-list" class="space-y-2"></div>
+            </div>
         </div>
     </div>
 

@@ -120,6 +120,59 @@
         document.getElementById('grammar-gate-modal')?.classList.add('hidden');
     }
 
+    function topicNoteText(topicId) {
+        const notes = window.LISANI_GRAMMAR_PREP_NOTES || [];
+        const found = notes.find((n) => n.id === topicId);
+        return found?.text || '';
+    }
+
+    function closeGrammarTopicsModal() {
+        document.getElementById('grammar-topics-modal')?.classList.add('hidden');
+    }
+
+    function openGrammarTopicsModal() {
+        const modal = document.getElementById('grammar-topics-modal');
+        const list = document.getElementById('grammar-topics-list');
+        if (!modal || !list) return;
+
+        const order = TOPIC_ORDER.slice();
+        list.innerHTML = order
+            .map((topic) => {
+                const unlocked = isTopicUnlocked(topic);
+                const preview = topicNoteText(topic);
+                const short = preview.length > 72 ? `${preview.slice(0, 72).trim()}…` : preview;
+                return `
+                <button type="button" class="lisani-grammar-topics-item lisani-glass-panel rounded-xl p-3 w-full text-left flex items-center gap-3 ${unlocked ? 'is-grammar-unlocked' : ''}" data-grammar-topic="${topic}">
+                    <span class="lisani-grammar-topics-item__icon" aria-hidden="true">${unlocked ? '✓' : '📖'}</span>
+                    <span class="flex-1 min-w-0">
+                        <span class="text-[11px] font-extrabold theme-text-main block">${topicTitle(topic)}</span>
+                        <span class="text-[9px] theme-text-muted block mt-0.5 leading-snug">${short || 'Detay ve örnekler'}</span>
+                    </span>
+                    <i data-lucide="chevron-right" class="w-3.5 h-3.5 theme-text-muted shrink-0"></i>
+                </button>`;
+            })
+            .join('');
+
+        list.querySelectorAll('[data-grammar-topic]').forEach((btn) => {
+            btn.addEventListener('click', () => {
+                const topic = btn.getAttribute('data-grammar-topic');
+                if (!topic) return;
+                closeGrammarTopicsModal();
+                if (typeof window.openLearnCardDetail === 'function') {
+                    window.openLearnCardDetail(topic, { showDrillAction: true, drillTopic: topic });
+                }
+            });
+        });
+
+        modal.classList.remove('hidden');
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    window.openKonuAnlatimi = function () {
+        if (typeof window.playClickSound === 'function') window.playClickSound();
+        openGrammarTopicsModal();
+    };
+
     function renderGrammarGateModal(missing, bolumId, stepIndex, onReady) {
         const modal = document.getElementById('grammar-gate-modal');
         const list = document.getElementById('grammar-gate-topic-list');
@@ -269,6 +322,8 @@
         filterGrammarPool,
         refreshGrammarRulesUI,
         closeGrammarGateModal,
+        closeGrammarTopicsModal,
+        openGrammarTopicsModal,
         syncGrammarGateModal,
     };
 
