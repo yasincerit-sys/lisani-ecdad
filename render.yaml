@@ -38,12 +38,6 @@ services:
         value: "true"
       - key: LISANI_KILL_SWITCH
         value: "false"
-      - key: LISANI_DONATE_URL
-        sync: false
-      - key: LISANI_DONATE_PAYPAL_ME
-        value: "false"
-      - key: LISANI_DONATE_IBAN
-        sync: false
       - key: LISANI_APK_URL
         sync: false
 

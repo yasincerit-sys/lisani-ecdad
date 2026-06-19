@@ -4736,7 +4736,7 @@ html.preline-ui.theme-renkli-yol .lisani-bolum-dot-btn {
     }
 }
 
-/* Destek / bağış */
+/* Tema seçici */
 .theme-pick-btn.is-recommended {
     outline: 1px solid rgba(198, 142, 95, 0.35);
 }
@@ -4748,27 +4748,6 @@ html.preline-ui.theme-renkli-yol .lisani-bolum-dot-btn {
     letter-spacing: 0.06em;
     opacity: 0.85;
     margin-left: 0.35rem;
-}
-
-.lisani-settings-support-btn {
-    padding: 1.1rem 1.15rem !important;
-    min-height: 3.75rem;
-    border-radius: 1.15rem !important;
-}
-
-.lisani-donate-invite-modal .lisani-settings-support-btn {
-    justify-content: center;
-}
-
-.lisani-donate-amount-input::-webkit-outer-spin-button,
-.lisani-donate-amount-input::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-}
-
-.lisani-donate-amount-input {
-    -moz-appearance: textfield;
-    appearance: textfield;
 }
 
 .lisani-apk-download,
@@ -4918,20 +4897,6 @@ html.preline-ui.theme-renkli-yol .lisani-bolum-dot-btn {
 
 .lisani-apk-download-strip {
     display: none !important;
-}
-
-.lisani-donate-amount-input:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-#donate-open-link-btn:disabled {
-    opacity: 0.45;
-    cursor: not-allowed;
-}
-
-.lisani-donate-modal .lisani-donate-amount-field {
-    margin-top: 0.15rem;
 }
 
 /* ===== Beyaz Cam — ağır glassmorphism ===== */

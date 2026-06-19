@@ -1107,20 +1107,20 @@
                                 <span class="theme-swatch-dot" style="background:#1a1a1a;border:1px solid #404040" aria-hidden="true"></span>
                             </button>
                             <button type="button" data-color-mode="saray-kahvesi" onclick="lisaniPickTheme('saray-kahvesi')" class="theme-pick-btn lisani-glass-panel is-recommended">
-                                <span class="theme-pick-btn__label">Saray Kahvesi ☕ <span class="theme-pick-btn__badge">Varsayılan</span></span>
+                                <span class="theme-pick-btn__label">Saray Kahvesi <span class="theme-pick-btn__badge">Varsayılan</span></span>
                                 <span class="theme-swatch-gradient" style="background:linear-gradient(90deg,#9e6c4c,#4a3329)" aria-hidden="true"></span>
                             </button>
                             <p class="theme-pick-section">CAM / GRADYAN TEMALAR</p>
                             <button type="button" data-color-mode="beyaz-cam" onclick="lisaniPickTheme('beyaz-cam')" class="theme-pick-btn lisani-glass-panel">
-                                <span class="theme-pick-btn__label">Beyaz Gradyan 🤍 <span class="theme-pick-btn__badge">Açık cam</span></span>
+                                <span class="theme-pick-btn__label">Beyaz Gradyan <span class="theme-pick-btn__badge">Açık cam</span></span>
                                 <span class="theme-swatch-gradient" style="background:linear-gradient(135deg,#f8fafc,#e0e7ff,#c7d2fe);border:1px solid rgba(148,163,184,0.35)" aria-hidden="true"></span>
                             </button>
                             <button type="button" data-color-mode="mavi-mor" onclick="lisaniPickTheme('mavi-mor')" class="theme-pick-btn lisani-glass-panel">
-                                <span class="theme-pick-btn__label">Mavi &amp; Mor 💜</span>
+                                <span class="theme-pick-btn__label">Mavi &amp; Mor</span>
                                 <span class="theme-swatch-gradient" style="background:linear-gradient(90deg,#2563eb,#6366f1,#9333ea)" aria-hidden="true"></span>
                             </button>
                             <button type="button" data-color-mode="derin-mavi" onclick="lisaniPickTheme('derin-mavi')" class="theme-pick-btn lisani-glass-panel">
-                                <span class="theme-pick-btn__label">Derin Mavi 🌊</span>
+                                <span class="theme-pick-btn__label">Derin Mavi</span>
                                 <span class="theme-swatch-gradient" style="background:linear-gradient(90deg,#3b82f6,#1e3a8a)" aria-hidden="true"></span>
                             </button>
                         </div>
@@ -1222,13 +1222,6 @@
                             </div>
                             <i data-lucide="download" class="w-4 h-4 theme-text-muted shrink-0"></i>
                         </a>
-
-                        <button type="button" class="lisani-glass-action lisani-settings-support-btn w-full" onclick="openDonateSupport()">
-                            <div class="flex items-center gap-3 min-w-0 flex-1">
-                                <span class="text-sm font-extrabold theme-text-main">Bize destek olmak ister misiniz?</span>
-                            </div>
-                            <i data-lucide="chevron-right" class="w-5 h-5 theme-text-muted shrink-0"></i>
-                        </button>
 
                         <button type="button" class="lisani-glass-action lisani-glass-action--danger w-full" onclick="logoutApp()">
                             <div class="flex items-center gap-3 min-w-0 flex-1">
@@ -1714,62 +1707,6 @@
                 <div id="placement-question-box"></div>
                 <div id="placement-result" class="hidden"></div>
             </div>
-        </div>
-    </div>
-
-    <!-- ================= DESTEK DAVETİ (İLK AÇILIŞ) ================= -->
-    <div id="donate-invite-modal" class="lisani-modal-overlay hidden absolute inset-0 z-[61] flex items-end lg:items-center justify-center pb-0 lg:p-6">
-        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="dismissDonateInvite()"></div>
-        <div class="relative w-full max-w-md lisani-glass-panel lisani-donate-invite-modal rounded-t-3xl lg:rounded-3xl p-6 space-y-4 z-10">
-            <div class="flex flex-col items-center text-center space-y-3">
-                <h3 class="text-base font-extrabold theme-text-main">Bize destek olmak ister misiniz?</h3>
-                <p class="text-[11px] theme-text-muted leading-relaxed max-w-sm">Lisan-ı Ecdad gönüllü bir projedir. İsterseniz küçük bir bağışla gelişimimize katkıda bulunabilirsiniz.</p>
-            </div>
-            <div class="space-y-2">
-                <button type="button" onclick="acceptDonateInvite()" class="lisani-glass-action lisani-settings-support-btn w-full justify-center">
-                    <span class="text-sm font-extrabold theme-text-main">Evet, destek olmak istiyorum</span>
-                </button>
-                <button type="button" onclick="dismissDonateInvite()" class="lisani-glass-action w-full justify-center py-3">
-                    <span class="text-xs font-bold theme-text-muted">Şimdi değil</span>
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- ================= DESTEK / BAĞIŞ MODALİ ================= -->
-    <div id="donate-support-modal" class="lisani-modal-overlay hidden absolute inset-0 z-[62] flex items-end lg:items-center justify-center pb-0 lg:p-6">
-        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeDonateSupport()"></div>
-        <div class="relative w-full max-w-lg lisani-glass-panel lisani-donate-modal rounded-t-3xl lg:rounded-3xl p-6 space-y-4 z-10">
-            <div class="flex items-center justify-between gap-2">
-                <div class="flex items-center space-x-2 min-w-0">
-                    <h3 class="text-sm font-extrabold theme-text-main truncate">Bize destek olmak ister misiniz?</h3>
-                </div>
-                <button type="button" onclick="closeDonateSupport()" class="lisani-glass-action lisani-glass-action--icon flex items-center justify-center rounded-full theme-text-muted shrink-0" aria-label="Kapat">
-                    <i data-lucide="x" class="w-4 h-4"></i>
-                </button>
-            </div>
-            <p class="text-[11px] theme-text-muted leading-relaxed">Lisan-ı Ecdad gönüllü bir projedir. Küçük bir bağış sunucu ve geliştirme masraflarına katkı sağlar. Ödeme güvenli ödeme sayfasında tamamlanır.</p>
-            <div class="space-y-2">
-                <label for="donate-amount-input" class="text-xs font-bold theme-text-main block">Bağış tutarı (₺)</label>
-                <div class="lisani-donate-amount-field flex items-stretch gap-2">
-                    <input type="number" id="donate-amount-input" min="1" step="1" inputmode="numeric"
-                        class="lisani-donate-amount-input flex-1 min-w-0 px-4 py-3 rounded-xl border theme-border theme-card-bg theme-text-main text-sm font-bold focus:ring-2 focus:ring-[var(--theme-primary)] focus:outline-none transition-all"
-                        oninput="syncDonatePayButton()">
-                    <span class="lisani-donate-amount-suffix flex items-center px-3 rounded-xl border theme-border theme-card-bg text-sm font-bold theme-text-muted shrink-0">₺</span>
-                </div>
-                <p class="text-[10px] theme-text-muted">En az 1 ₺ — istediğiniz tutarı yazabilirsiniz.</p>
-            </div>
-            <button type="button" id="donate-open-link-btn" onclick="openDonatePaymentLink()" class="lisani-glass-action lisani-glass-action--primary w-full py-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2">
-                <i data-lucide="credit-card" class="w-4 h-4"></i>
-                <span id="donate-open-link-label">Güvenli ödeme sayfasına git</span>
-            </button>
-            <div id="donate-iban-block" class="hidden lisani-glass-panel rounded-2xl p-4 space-y-2">
-                <p class="text-xs font-bold theme-text-main">Havale / EFT</p>
-                <p id="donate-iban-account" class="text-[10px] theme-text-muted"></p>
-                <p id="donate-iban-value" class="text-xs font-mono font-bold theme-primary-color break-all select-all"></p>
-                <button type="button" onclick="copyDonateIban()" class="lisani-glass-action w-full py-2.5 rounded-xl text-[11px] font-bold">IBAN kopyala</button>
-            </div>
-            <p class="text-[9px] theme-text-muted text-center leading-relaxed">Bağış isteğe bağlıdır. Teşekkür ederiz.</p>
         </div>
     </div>
 

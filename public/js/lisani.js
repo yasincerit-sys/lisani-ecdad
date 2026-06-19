@@ -3741,7 +3741,6 @@
                     showToast("Giriş yapıldı. İyi çalışmalar!", "success");
                     switchTab('home', true);
                 }
-                maybeShowDonateInvite();
             };
             afterLogin();
         }
@@ -4017,7 +4016,7 @@
             },
             {
                 id: 'saray-kahvesi',
-                label: 'Saray Kahvesi ☕',
+                label: 'Saray Kahvesi',
                 badge: 'Varsayılan',
                 recommended: true,
                 swatch: { kind: 'gradient', style: 'background:linear-gradient(90deg,#9e6c4c,#4a3329)' },
@@ -4027,7 +4026,7 @@
             },
             {
                 id: 'beyaz-cam',
-                label: 'Beyaz Gradyan 🤍',
+                label: 'Beyaz Gradyan',
                 badge: 'Açık cam',
                 swatch: {
                     kind: 'gradient',
@@ -4036,12 +4035,12 @@
             },
             {
                 id: 'mavi-mor',
-                label: 'Mavi & Mor 💜',
+                label: 'Mavi & Mor',
                 swatch: { kind: 'gradient', style: 'background:linear-gradient(90deg,#2563eb,#6366f1,#9333ea)' },
             },
             {
                 id: 'derin-mavi',
-                label: 'Derin Mavi 🌊',
+                label: 'Derin Mavi',
                 swatch: { kind: 'gradient', style: 'background:linear-gradient(90deg,#3b82f6,#1e3a8a)' },
             },
         ];
@@ -4159,110 +4158,6 @@
             bootPrelineThemeEarly();
         }
 
-        const DONATE_INVITE_SESSION_KEY = 'lisani_donate_invite_shown';
-
-        function maybeShowDonateInvite() {
-            try {
-                if (sessionStorage.getItem(DONATE_INVITE_SESSION_KEY) === '1') return;
-            } catch (e) {}
-            setTimeout(() => {
-                if (!window._loginDone) return;
-                const modal = document.getElementById('donate-invite-modal');
-                if (!modal || !modal.classList.contains('hidden')) return;
-                if (!document.getElementById('donate-support-modal')?.classList.contains('hidden')) return;
-                modal.classList.remove('hidden');
-                if (typeof lucide !== 'undefined') lucide.createIcons();
-            }, 900);
-        }
-
-        window.dismissDonateInvite = function () {
-            playClickSound();
-            try {
-                sessionStorage.setItem(DONATE_INVITE_SESSION_KEY, '1');
-            } catch (e) {}
-            document.getElementById('donate-invite-modal')?.classList.add('hidden');
-        };
-
-        window.acceptDonateInvite = function () {
-            playClickSound();
-            try {
-                sessionStorage.setItem(DONATE_INVITE_SESSION_KEY, '1');
-            } catch (e) {}
-            document.getElementById('donate-invite-modal')?.classList.add('hidden');
-            openDonateSupport();
-        };
-
-        function getDonateConfig() {
-            return window.LISANI_DONATE || {};
-        }
-
-        function parseDonateAmount(raw) {
-            const n = Math.floor(Number(String(raw ?? '').replace(',', '.')));
-            if (!Number.isFinite(n) || n < 1) return null;
-            return n;
-        }
-
-        function buildDonatePaymentUrl(amount) {
-            const cfg = getDonateConfig();
-            const base = String(cfg.url || '').trim();
-            if (!base) return '';
-            const parsed = parseDonateAmount(amount);
-            if (!parsed) return '';
-            if (cfg.paypal_me) {
-                const normalized = base.replace(/\/$/, '');
-                return `${normalized}/${parsed}`;
-            }
-            return base;
-        }
-
-        function openExternalDonateUrl(url) {
-            if (!url) {
-                showToast('Ödeme bağlantısı henüz ayarlanmadı.', 'info');
-                return;
-            }
-            playClickSound();
-            const opened = window.open(url, '_blank', 'noopener,noreferrer');
-            if (!opened) {
-                window.location.href = url;
-            }
-        }
-
-        function syncDonatePayButton() {
-            const cfg = getDonateConfig();
-            const input = document.getElementById('donate-amount-input');
-            const linkBtn = document.getElementById('donate-open-link-btn');
-            const label = document.getElementById('donate-open-link-label');
-            const hasUrl = !!String(cfg.url || '').trim();
-            const amount = parseDonateAmount(input?.value);
-            if (linkBtn) linkBtn.disabled = !hasUrl || !amount;
-            if (label) {
-                label.textContent = amount
-                    ? `${amount.toLocaleString('tr-TR')} ₺ ile güvenli ödemeye git`
-                    : 'Güvenli ödeme sayfasına git';
-            }
-        }
-
-        function initDonateModal() {
-            const cfg = getDonateConfig();
-            const input = document.getElementById('donate-amount-input');
-            const hasUrl = !!String(cfg.url || '').trim();
-            if (input) {
-                input.disabled = !hasUrl;
-                input.value = '';
-            }
-            syncDonatePayButton();
-            const ibanBlock = document.getElementById('donate-iban-block');
-            const ibanVal = document.getElementById('donate-iban-value');
-            const ibanAcct = document.getElementById('donate-iban-account');
-            if (ibanBlock && cfg.iban) {
-                ibanBlock.classList.remove('hidden');
-                if (ibanVal) ibanVal.textContent = cfg.iban;
-                if (ibanAcct) ibanAcct.textContent = cfg.account_name || 'Lisan-ı Ecdad';
-            } else if (ibanBlock) {
-                ibanBlock.classList.add('hidden');
-            }
-        }
-
         function initApkDownloadLink() {
             const cfg = window.LISANI_APK || {};
             const url = String(cfg.url || '').trim();
@@ -4285,55 +4180,6 @@
             });
             if (show && typeof lucide !== 'undefined') lucide.createIcons();
         }
-
-        window.openDonateSupport = function () {
-            playClickSound();
-            initDonateModal();
-            const modal = document.getElementById('donate-support-modal');
-            if (modal) modal.classList.remove('hidden');
-            document.getElementById('donate-amount-input')?.focus();
-            if (typeof lucide !== 'undefined') lucide.createIcons();
-        };
-
-        window.closeDonateSupport = function () {
-            playClickSound();
-            document.getElementById('donate-support-modal')?.classList.add('hidden');
-        };
-
-        window.openDonatePaymentLink = function (amount) {
-            const cfg = getDonateConfig();
-            const input = document.getElementById('donate-amount-input');
-            const parsed = parseDonateAmount(amount ?? input?.value);
-            if (!parsed) {
-                showToast('Lütfen en az 1 ₺ tutar girin.', 'info');
-                input?.focus();
-                return;
-            }
-            const url = buildDonatePaymentUrl(parsed);
-            if (!url) {
-                showToast('Ödeme bağlantısı ayarlanmadı. Yöneticiye bildirin.', 'info');
-                return;
-            }
-            if (!cfg.paypal_me) {
-                showToast('Ödeme sayfasında tutarı siz belirleyebilirsiniz.', 'info');
-            }
-            closeDonateSupport();
-            openExternalDonateUrl(url);
-        };
-
-        window.syncDonatePayButton = syncDonatePayButton;
-
-        window.copyDonateIban = function () {
-            const cfg = getDonateConfig();
-            const iban = String(cfg.iban || '').trim();
-            if (!iban) return;
-            const done = () => showToast('IBAN kopyalandı', 'success');
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(iban).then(done).catch(() => showToast(iban, 'info'));
-            } else {
-                showToast(iban, 'info');
-            }
-        };
 
         let currentActiveScreen = 'home';
 
@@ -4399,8 +4245,6 @@
             [
                 'edit-profile-container',
                 'notif-settings-panel',
-                'donate-invite-modal',
-                'donate-support-modal',
                 'kariyer-modal-container',
                 'tennis-overlay',
                 'gokhan-video-call-overlay',
@@ -6239,7 +6083,6 @@ self.addEventListener('notificationclick', e => {
             initPrelineTheme();
             initGrammarPrepNotes();
             initApkDownloadLink();
-            initDonateModal();
             if (typeof syncAppShellVisibility === 'function') {
                 syncAppShellVisibility();
             }

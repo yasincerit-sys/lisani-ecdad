@@ -124,7 +124,6 @@
         avatars: @json(asset('images/avatars')),
         gokhanAudio: @json(asset('audio/gokhan-abi-call.mp4'))
     };
-    window.LISANI_DONATE = @json(config('lisani.donate'));
     window.LISANI_APK = @json(\App\Support\LisaniApk::clientConfig());
     window.LISANI_BASE = @json(rtrim(url('/'), '/'));</script>
     <script src="{{ asset('js/preline.js') }}"></script>

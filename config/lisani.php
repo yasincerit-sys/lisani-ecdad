@@ -18,23 +18,6 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Destek / bağış (Ayarlar → Bize destek olmak ister misiniz?)
-    |--------------------------------------------------------------------------
-    |
-    | LISANI_DONATE_URL: PayPal.me veya Stripe Ödeme Linki (https://...)
-    | LISANI_DONATE_PAYPAL_ME=true ise URL sonuna /TUTAR eklenir (serbest tutar için önerilir)
-    | LISANI_DONATE_IBAN: Havale için (isteğe bağlı)
-    |
-    */
-    'donate' => [
-        'url' => env('LISANI_DONATE_URL', ''),
-        'paypal_me' => filter_var(env('LISANI_DONATE_PAYPAL_ME', false), FILTER_VALIDATE_BOOLEAN),
-        'iban' => env('LISANI_DONATE_IBAN', ''),
-        'account_name' => env('LISANI_DONATE_ACCOUNT_NAME', 'Lisan-ı Ecdad'),
-    ],
-
-    /*
-    |--------------------------------------------------------------------------
     | Android APK indirme (web sitesi)
     |--------------------------------------------------------------------------
     |
