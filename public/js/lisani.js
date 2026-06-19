@@ -1284,8 +1284,12 @@
                 return;
             }
             const meta = getBolumMeta(bolumId);
-            const idx = BOLUM_INDEX[bolumId] || 1;
-            odevVer(uid, idx, meta?.title || label || bolumId);
+            const assign = { bolum: bolumId, label: meta?.title || label || bolumId };
+            if (typeof window.odevVer === 'function') {
+                window.odevVer(uid, assign);
+                return;
+            }
+            showToast('Ödev servisi yüklenemedi. Sayfayı yenileyin.', 'error');
         };
 
         function updateTestsTabForRole() {
@@ -2087,10 +2091,27 @@
         window.startBolumStep = startBolumStep;
         window.renderBolumList = renderBolumList;
 
-        window.startOdevTest = function (level, testName) {
-            const bolum = BOLUMLER.find((b) => (BOLUM_INDEX[b.id] || 0) === Number(level));
-            if (bolum) launchQuizEngine(bolum.id, 0);
-            else if (typeof switchTab === 'function') switchTab('tests', true);
+        window.startOdevTest = function (levelOrOdev, testName) {
+            if (typeof levelOrOdev === 'object' && levelOrOdev !== null) {
+                const odev = levelOrOdev;
+                if (odev.bolum) {
+                    const step = odev.step != null ? Number(odev.step) : 0;
+                    if (typeof switchTab === 'function') switchTab('tests', true);
+                    startBolumStep(odev.bolum, step);
+                    return;
+                }
+                levelOrOdev = odev.level;
+                testName = odev.test;
+            }
+            const legacyTestMap = { 'Test 1': 0, 'Test 2': 1, 'Test 3': 2, Genel: 4 };
+            const step = legacyTestMap[testName];
+            const bolum = BOLUMLER.find((b) => (BOLUM_INDEX[b.id] || 0) === Number(levelOrOdev));
+            if (bolum) {
+                if (typeof switchTab === 'function') switchTab('tests', true);
+                launchQuizEngine(bolum.id, step != null ? step : 0);
+                return;
+            }
+            if (typeof switchTab === 'function') switchTab('tests', true);
         };
 
         function setQuizPrompt(text) {
@@ -2220,6 +2241,8 @@
             }
 
             if (modal) {
+                const host = document.getElementById('app-container');
+                if (host && modal.parentElement !== host) host.appendChild(modal);
                 modal.classList.remove('hidden');
                 modal.setAttribute('aria-hidden', 'false');
             }
@@ -4167,18 +4190,15 @@
                 typeof window.Capacitor.isNativePlatform === 'function' &&
                 window.Capacitor.isNativePlatform();
             const show = !!url && !isNativeApp;
-            ['app-apk-download-strip'].forEach((id) => {
-                const el = document.getElementById(id);
-                if (!el) return;
-                if (!show) {
-                    el.classList.add('hidden');
-                    return;
-                }
-                el.href = url;
-                el.setAttribute('download', filename);
-                el.classList.remove('hidden');
-            });
-            if (show && typeof lucide !== 'undefined') lucide.createIcons();
+            const el = document.getElementById('home-apk-download-row');
+            if (!el) return;
+            if (!show) {
+                el.classList.add('hidden');
+                return;
+            }
+            el.href = url;
+            el.setAttribute('download', filename);
+            el.classList.remove('hidden');
         }
 
         let currentActiveScreen = 'home';
@@ -5964,6 +5984,10 @@ self.addEventListener('notificationclick', e => {
             const { h, m } = getDefaultNotifTime();
             document.getElementById("notif-time-input").value =
                 String(h).padStart(2,"0") + ":" + String(m).padStart(2,"0");
+            const native = typeof window.isNativeHadisNotifications === 'function' && window.isNativeHadisNotifications();
+            document.getElementById('notif-sound-settings-row')?.classList.toggle('hidden', !native);
+            document.getElementById('notif-mic-settings-row')?.classList.toggle('hidden', !isCapacitorApp());
+            if (typeof lucide !== 'undefined') lucide.createIcons();
         }
 
         function closeNotifSettings() {

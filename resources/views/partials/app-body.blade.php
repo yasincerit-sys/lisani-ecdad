@@ -662,19 +662,6 @@
                         </div>
                     </div>
 
-                    <a id="home-apk-download-row" href="#" download="lisani-ecdad.apk" class="lisani-apk-download-home hidden lisani-span-full lisani-glass-panel lisani-glass-card rounded-2xl p-4 border theme-border">
-                        <div class="flex items-center gap-3 min-w-0">
-                            <div class="w-11 h-11 rounded-2xl theme-light-bg flex items-center justify-center theme-primary-color shrink-0">
-                                <i data-lucide="smartphone" class="w-5 h-5"></i>
-                            </div>
-                            <div class="min-w-0 flex-1">
-                                <p class="text-xs font-extrabold theme-text-main">Android uygulamasını indir</p>
-                                <p class="text-[10px] theme-text-muted mt-0.5">Telefona kur · bildirimler · çevrimdışı erişim</p>
-                            </div>
-                            <i data-lucide="download" class="w-5 h-5 theme-text-muted shrink-0"></i>
-                        </div>
-                    </a>
-
                     <!-- Günlük görev paneli (profil ateşi — sabit konum) -->
                     <div id="home-daily-goal-popover" class="lisani-daily-goal-popover hidden" role="dialog" aria-label="Günlük görev">
                         <p class="lisani-daily-goal-popover__title">Günlük Görev</p>
@@ -874,7 +861,9 @@
                         </button>
                     </div>
 
-                    <div class="pb-6"></div>
+                    <p class="lisani-home-apk-foot lisani-span-full text-center pt-1 pb-4">
+                        <a id="home-apk-download-row" href="#" download="lisani-ecdad.apk" class="lisani-apk-download-foot hidden">Android uygulamasını indir (APK)</a>
+                    </p>
                 </div>
 
                 <!-- PROFİL (Ana sayfa karşılama kartından açılır) -->
@@ -1212,17 +1201,6 @@
                             </div>
                         </div>
 
-                        <a id="settings-apk-download-row" href="#" download="lisani-ecdad.apk" class="lisani-glass-action lisani-apk-download-row hidden w-full" hidden aria-hidden="true" tabindex="-1">
-                            <div class="flex items-center gap-3 min-w-0 flex-1">
-                                <i data-lucide="smartphone" class="w-4 h-4 theme-primary-color shrink-0"></i>
-                                <div class="min-w-0 text-left">
-                                    <span class="text-xs font-bold theme-text-main block">Android uygulamasını indir</span>
-                                    <span class="text-[10px] theme-text-muted block">APK · telefona kurulum</span>
-                                </div>
-                            </div>
-                            <i data-lucide="download" class="w-4 h-4 theme-text-muted shrink-0"></i>
-                        </a>
-
                         <button type="button" class="lisani-glass-action lisani-glass-action--danger w-full" onclick="logoutApp()">
                             <div class="flex items-center gap-3 min-w-0 flex-1">
                                 <i data-lucide="log-out" class="w-4 h-4 text-red-400 shrink-0"></i>
@@ -1300,9 +1278,6 @@
                         <i data-lucide="book-open" class="lisani-shell-foot-btn__icon"></i>
                         <span>Konu Anlatımı</span>
                     </button>
-                    <a id="app-apk-download-strip" href="#" download="lisani-ecdad.apk" class="lisani-shell-foot-apk hidden" aria-label="Android APK indir">
-                        <span>APK</span>
-                    </a>
                 </div>
 
             </nav>
@@ -1731,6 +1706,26 @@
                 <button onclick="initNotifications()" class="lisani-glass-action lisani-glass-action--primary mt-2 w-full py-2.5 rounded-xl text-xs font-bold flex items-center justify-center space-x-2">
                     <i data-lucide="bell-ring" class="w-4 h-4"></i>
                     <span>İzin Ver ve Etkinleştir</span>
+                </button>
+            </div>
+
+            <!-- Bildirim sesi (APK) -->
+            <div id="notif-sound-settings-row" class="lisani-glass-panel rounded-2xl p-4 space-y-1.5 hidden">
+                <p class="text-xs font-bold theme-text-main">Bildirim Sesi</p>
+                <p class="text-[10px] theme-text-muted leading-relaxed">Telefon ayarlarında «Ses» açık olmalı. «Günün Hadisi» kanalında ses seçebilirsin.</p>
+                <button type="button" onclick="openNativeNotificationSettings()" class="lisani-glass-action mt-2 w-full py-2.5 rounded-xl text-xs font-bold flex items-center justify-center space-x-2">
+                    <i data-lucide="volume-2" class="w-4 h-4"></i>
+                    <span>Telefon Bildirim Ayarlarını Aç</span>
+                </button>
+            </div>
+
+            <!-- Mikrofon (APK) -->
+            <div id="notif-mic-settings-row" class="lisani-glass-panel rounded-2xl p-4 space-y-1.5 hidden">
+                <p class="text-xs font-bold theme-text-main">Mikrofon İzni</p>
+                <p class="text-[10px] theme-text-muted leading-relaxed">Konuşarak cevap vermek için mikrofon izni gerekir.</p>
+                <button type="button" onclick="requestNativeMicPermissionFromSettings()" class="lisani-glass-action mt-2 w-full py-2.5 rounded-xl text-xs font-bold flex items-center justify-center space-x-2">
+                    <i data-lucide="mic" class="w-4 h-4"></i>
+                    <span>Mikrofon İzni Ver</span>
                 </button>
             </div>
 

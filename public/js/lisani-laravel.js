@@ -77,6 +77,9 @@
                 }
                 throw new Error('Oturumunuz yok veya süresi doldu. Lütfen tekrar giriş yapın.');
             }
+            if (res.status === 404) {
+                throw new Error('İstek bulunamadı (404). Site adresini kontrol edin veya sayfayı yenileyin.');
+            }
             const errValues = data.errors ? Object.values(data.errors).flat() : [];
             const msg =
                 errValues[0] ||
@@ -370,12 +373,13 @@
 
     function formatOdevLabel(o) {
         if (o.label) return o.label;
+        if (o.bolum) return o.label || o.bolum;
         if (o.level && o.test) return `Seviye ${o.level} — ${o.test}`;
         return o.icerik || 'Ödev';
     }
 
     function isTestOdev(o) {
-        return o && (o.type === 'test' || (o.level && o.test));
+        return o && (o.type === 'test' || o.type === 'bolum' || o.bolum || (o.level && o.test));
     }
 
     function odevPickerHtml(hocaUid) {
@@ -468,24 +472,33 @@
         }
         const bolumIds = ['kelimeler', 'harfler', 'eslestirme', 'ceviri', 'ses'];
         if (typeof arg1 === 'string' && bolumIds.includes(arg1)) {
-            const idx = (window.LISANI_BOLUM_INDEX && window.LISANI_BOLUM_INDEX[arg1]) || 1;
             const meta = (window.LISANI_BOLUMLER || []).find((b) => b.id === arg1);
-            window.odevVer(uid, idx, meta?.title || arg2 || arg1);
+            window.odevVer(uid, { bolum: arg1, label: meta?.title || arg2 || arg1 });
             return;
         }
-        window.odevVer(uid, arg1, arg2);
+        window.odevVer(uid, { level: arg1, test: arg2 });
     };
 
     window.odevVer = function (hocaUid, levelArg, testArg) {
         const levelEl = document.getElementById('odev-level');
         const testEl = document.getElementById('odev-test');
-        const level = levelArg || (levelEl ? parseInt(levelEl.value, 10) : 0);
-        const test = testArg || (testEl ? testEl.value : '');
-        if (!level || !test) {
+        let payload = {};
+        if (typeof levelArg === 'object' && levelArg !== null) {
+            payload = { ...levelArg };
+        } else {
+            const level = levelArg || (levelEl ? parseInt(levelEl.value, 10) : 0);
+            const test = testArg || (testEl ? testEl.value : '');
+            payload = { level, test };
+        }
+        if (payload.bolum) {
+            if (!payload.label) {
+                const meta = (window.LISANI_BOLUMLER || []).find((b) => b.id === payload.bolum);
+                payload.label = meta?.title || payload.bolum;
+            }
+        } else if (!payload.level || !payload.test) {
             showToast('Lütfen seviye ve test seçin.', 'error');
             return;
         }
-        const payload = { level, test };
         if (currentUserRole === 'yonetici') {
             const sel =
                 document.getElementById('yonetici-odev-sinif-select') ||
@@ -2104,7 +2117,7 @@
                 const idx = parseInt(el.getAttribute('data-odev-index'), 10);
                 const o = list._odevItems && list._odevItems[idx];
                 if (!o || !isTestOdev(o)) return;
-                window.showOdevTestConfirm(o.level, o.test, formatOdevLabel(o));
+                window.showOdevTestConfirm(o);
             };
             el.addEventListener('click', open);
             el.addEventListener('keydown', (e) => {
@@ -2118,8 +2131,13 @@
         if (typeof lucide !== 'undefined') lucide.createIcons();
     }
 
-    window.showOdevTestConfirm = function (level, test, label) {
+    window.showOdevTestConfirm = function (odevOrLevel, test, label) {
         playClickSound();
+        const odev =
+            typeof odevOrLevel === 'object' && odevOrLevel !== null
+                ? odevOrLevel
+                : { level: odevOrLevel, test, label };
+        const displayLabel = label || formatOdevLabel(odev);
         let modal = document.getElementById('odev-confirm-modal');
         if (!modal) {
             modal = document.createElement('div');
@@ -2135,7 +2153,7 @@
                     <i data-lucide="help-circle" class="w-6 h-6 home-accent-text"></i>
                 </div>
                 <h3 class="text-sm font-bold theme-text-main text-center">Teste gitmek istiyor musunuz?</h3>
-                <p class="text-xs theme-text-muted text-center mt-2 leading-relaxed">${escapeHtml(label || `Seviye ${level} — ${test}`)}</p>
+                <p class="text-xs theme-text-muted text-center mt-2 leading-relaxed">${escapeHtml(displayLabel)}</p>
                 <p class="text-[10px] theme-text-muted text-center mt-1 opacity-80">Evet derseniz test hemen başlar.</p>
                 <div class="flex gap-2.5 mt-5">
                     <button type="button" class="flex-1 py-2.5 lisani-glass-action rounded-xl text-xs font-bold theme-text-muted" data-odev-dismiss>Hayır</button>
@@ -2159,7 +2177,7 @@
             yesBtn.onclick = () => {
                 close();
                 if (typeof window.startOdevTest === 'function') {
-                    window.startOdevTest(level, test);
+                    window.startOdevTest(odev);
                 } else {
                     showToast('Test ekranı yüklenemedi. Testler sekmesinden deneyin.', 'error');
                 }

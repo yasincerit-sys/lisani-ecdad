@@ -127,13 +127,24 @@
     }
 
     function closeGrammarTopicsModal() {
-        document.getElementById('grammar-topics-modal')?.classList.add('hidden');
+        const modal = document.getElementById('grammar-topics-modal');
+        modal?.classList.add('hidden');
+        modal?.setAttribute('aria-hidden', 'true');
+    }
+
+    function ensureModalHost(modal) {
+        const host = document.getElementById('app-container');
+        if (modal && host && modal.parentElement !== host) {
+            host.appendChild(modal);
+        }
     }
 
     function openGrammarTopicsModal() {
         const modal = document.getElementById('grammar-topics-modal');
         const list = document.getElementById('grammar-topics-list');
         if (!modal || !list) return;
+
+        ensureModalHost(modal);
 
         const order = TOPIC_ORDER.slice();
         list.innerHTML = order
@@ -165,12 +176,17 @@
         });
 
         modal.classList.remove('hidden');
+        modal.setAttribute('aria-hidden', 'false');
         if (typeof lucide !== 'undefined') lucide.createIcons();
     }
 
     window.openKonuAnlatimi = function () {
         if (typeof window.playClickSound === 'function') window.playClickSound();
-        openGrammarTopicsModal();
+        if (typeof openGrammarTopicsModal === 'function') {
+            openGrammarTopicsModal();
+            return;
+        }
+        window.LisaniGrammarPrep?.openGrammarTopicsModal?.();
     };
 
     function renderGrammarGateModal(missing, bolumId, stepIndex, onReady) {
@@ -182,6 +198,8 @@
             onReady(true);
             return;
         }
+
+        ensureModalHost(modal);
 
         window._lisaniGrammarGateCtx = { bolumId, stepIndex, onReady };
 

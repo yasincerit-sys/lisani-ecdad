@@ -3,8 +3,8 @@
  * Web sürümünde lisani.js içindeki setTimeout yöntemi kullanılır.
  */
 (function () {
-    const CHANNEL_ID = 'lisani-hadis';
-    const MSG_CHANNEL_ID = 'lisani-messages';
+    const CHANNEL_ID = 'lisani-hadis-v2';
+    const MSG_CHANNEL_ID = 'lisani-messages-v2';
     const ID_BASE = 1001;
     const MSG_NOTIF_ID_BASE = 3000;
     const DAYS_AHEAD = 14;
@@ -47,10 +47,11 @@
             await LocalNotifications.createChannel({
                 id: CHANNEL_ID,
                 name: 'Günün Hadisi',
-                description: 'Günlük hadis hatırlatıcıları',
-                importance: 4,
+                description: 'Günlük hadis hatırlatıcıları (sesli)',
+                importance: 5,
                 visibility: 1,
                 vibration: true,
+                sound: 'default',
             });
         } catch (e) {}
     }
@@ -60,10 +61,11 @@
             await LocalNotifications.createChannel({
                 id: MSG_CHANNEL_ID,
                 name: 'Mesajlar',
-                description: 'Yeni mesaj bildirimleri',
+                description: 'Yeni mesaj bildirimleri (sesli)',
                 importance: 5,
                 visibility: 1,
                 vibration: true,
+                sound: 'default',
             });
         } catch (e) {}
     }
@@ -92,6 +94,7 @@
                         schedule: { at: new Date(Date.now() + 250) },
                         channelId: MSG_CHANNEL_ID,
                         smallIcon: 'ic_launcher',
+                        sound: 'default',
                         extra: { partnerId: String(partnerId || '') },
                     },
                 ],
@@ -173,6 +176,7 @@
                 schedule: { at: target },
                 channelId: CHANNEL_ID,
                 smallIcon: 'ic_launcher',
+                sound: 'default',
             });
             scheduled += 1;
         }
@@ -206,6 +210,7 @@
                     schedule: { at },
                     channelId: CHANNEL_ID,
                     smallIcon: 'ic_launcher',
+                    sound: 'default',
                 },
             ],
         });

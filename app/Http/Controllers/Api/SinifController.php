@@ -113,8 +113,11 @@ class SinifController extends Controller
         }
 
         $rules = [
-            'level' => ['required', 'integer', 'between:1,3'],
-            'test' => ['required', 'string', 'in:Test 1,Test 2,Test 3,Genel'],
+            'bolum' => ['sometimes', 'string', 'in:kelimeler,harfler,eslestirme,ceviri,ses'],
+            'step' => ['sometimes', 'nullable', 'integer', 'min:0', 'max:20'],
+            'label' => ['sometimes', 'nullable', 'string', 'max:120'],
+            'level' => ['required_without:bolum', 'integer', 'between:1,3'],
+            'test' => ['required_without:bolum', 'string', 'in:Test 1,Test 2,Test 3,Genel'],
         ];
 
         if ($user->role === 'yonetici') {
@@ -133,19 +136,47 @@ class SinifController extends Controller
             return response()->json(['message' => 'Sınıf bulunamadı.'], 404);
         }
 
-        $level = (int) $validated['level'];
-        $test = $validated['test'];
         $verenAdi = $user->role === 'yonetici' ? 'Yönetici · '.$user->name : $user->name;
 
-        $odevler = $sinif->odevler ?? [];
-        $odevler[] = [
-            'type' => 'test',
-            'level' => $level,
-            'test' => $test,
-            'label' => "Seviye {$level} — {$test}",
-            'tarih' => now()->format('d.m.Y'),
-            'hocaAdi' => $verenAdi,
+        $bolumLabels = [
+            'kelimeler' => 'Kelimeler',
+            'harfler' => 'Harfler',
+            'eslestirme' => 'Eşleştir',
+            'ceviri' => 'Uzman',
+            'ses' => 'Usta',
         ];
+
+        $odevler = $sinif->odevler ?? [];
+
+        if (! empty($validated['bolum'])) {
+            $bolum = $validated['bolum'];
+            $label = trim((string) ($validated['label'] ?? ''));
+            if ($label === '') {
+                $label = $bolumLabels[$bolum] ?? $bolum;
+            }
+            $entry = [
+                'type' => 'bolum',
+                'bolum' => $bolum,
+                'label' => $label,
+                'tarih' => now()->format('d.m.Y'),
+                'hocaAdi' => $verenAdi,
+            ];
+            if (array_key_exists('step', $validated) && $validated['step'] !== null) {
+                $entry['step'] = (int) $validated['step'];
+            }
+            $odevler[] = $entry;
+        } else {
+            $level = (int) $validated['level'];
+            $test = $validated['test'];
+            $odevler[] = [
+                'type' => 'test',
+                'level' => $level,
+                'test' => $test,
+                'label' => "Seviye {$level} — {$test}",
+                'tarih' => now()->format('d.m.Y'),
+                'hocaAdi' => $verenAdi,
+            ];
+        }
         $sinif->odevler = $odevler;
         $sinif->save();
 

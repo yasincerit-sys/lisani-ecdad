@@ -3408,6 +3408,30 @@ body.lisani-play-screen-open {
     display: flex !important;
 }
 
+.lisani-learn-modal.hidden {
+    display: none !important;
+}
+
+.lisani-site-wrapper {
+    position: relative;
+}
+
+/* Capacitor APK — status bar altında içerik kalmaması için */
+html.lisani-capacitor-native {
+    --lisani-safe-top: max(
+        env(safe-area-inset-top, 0px),
+        var(--lisani-status-bar-height, 0px)
+    );
+}
+
+html.lisani-capacitor-android #auth-container:not(.hidden) {
+    padding-top: calc(3rem + env(safe-area-inset-top, 0px)) !important;
+}
+
+html.lisani-capacitor-android #edit-profile-container:not(.hidden) {
+    padding-top: calc(2.5rem + env(safe-area-inset-top, 0px)) !important;
+}
+
 .lisani-learn-modal__backdrop {
     background: rgba(0, 0, 0, 0.62);
     backdrop-filter: blur(4px);
@@ -4750,59 +4774,35 @@ html.preline-ui.theme-renkli-yol .lisani-bolum-dot-btn {
     margin-left: 0.35rem;
 }
 
-.lisani-apk-download,
-.lisani-apk-download-row {
-    text-decoration: none;
-    color: inherit;
+.lisani-apk-download-foot {
+    display: inline;
+    font-size: 0.625rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.42);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    text-decoration-color: rgba(255, 255, 255, 0.22);
 }
 
-.lisani-apk-download {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.55rem;
-    padding: 0.9rem 1rem;
-    border-radius: 1rem;
-    border: 1px solid rgba(255, 255, 255, 0.18);
-    background: linear-gradient(145deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.04));
-    font-size: 0.75rem;
-    font-weight: 700;
-    color: var(--ph-text, #f5f5f4);
-    transition: transform 0.15s ease, border-color 0.15s ease;
+.lisani-apk-download-foot:hover {
+    color: rgba(var(--theme-primary-rgb, 158, 108, 76), 0.85);
+    text-decoration-color: rgba(var(--theme-primary-rgb, 158, 108, 76), 0.55);
 }
 
-.lisani-apk-download:hover {
-    transform: translateY(-1px);
-    border-color: rgba(var(--theme-primary-rgb, 158, 108, 76), 0.45);
-}
-
-.lisani-apk-download-row.hidden {
+.lisani-apk-download-foot.hidden {
     display: none !important;
 }
 
-.lisani-apk-download-home,
-.lisani-apk-download-strip {
-    text-decoration: none;
-    color: inherit;
+html.preline-ui.theme-beyaz-cam .lisani-apk-download-foot {
+    color: rgba(30, 41, 59, 0.52);
+    text-decoration-color: rgba(30, 41, 59, 0.22);
 }
 
-.lisani-apk-download-home {
-    display: block;
-    transition: transform 0.15s ease, border-color 0.15s ease;
+html.preline-ui.theme-beyaz-cam .lisani-apk-download-foot:hover {
+    color: rgba(var(--theme-primary-rgb, 158, 108, 76), 0.9);
 }
 
-.lisani-apk-download-home:hover {
-    transform: translateY(-1px);
-    border-color: rgba(var(--theme-primary-rgb, 158, 108, 76), 0.45);
-}
-
-.lisani-apk-download-home.hidden,
-.lisani-apk-download-strip.hidden,
-.lisani-shell-foot-apk.hidden {
-    display: none !important;
-}
-
-/* Alt menü — konu anlatımı + mini APK */
+/* Alt menü — konu anlatımı */
 @media (max-width: 1023.98px) {
     #bottom-bar.lisani-tab-bar-ios {
         flex-wrap: wrap;
@@ -4821,8 +4821,7 @@ html.preline-ui.theme-renkli-yol .lisani-bolum-dot-btn {
     border-top: 1px solid rgba(255, 255, 255, 0.06);
 }
 
-.lisani-shell-foot-btn,
-.lisani-shell-foot-apk {
+.lisani-shell-foot-btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -4845,14 +4844,12 @@ html.preline-ui.theme-renkli-yol .lisani-bolum-dot-btn {
 }
 
 .lisani-shell-foot-btn__icon,
-.lisani-shell-foot-btn i,
-.lisani-shell-foot-apk i {
+.lisani-shell-foot-btn i {
     width: 0.625rem;
     height: 0.625rem;
 }
 
-.lisani-shell-foot-btn:hover,
-.lisani-shell-foot-apk:hover {
+.lisani-shell-foot-btn:hover {
     opacity: 1;
 }
 
@@ -4880,8 +4877,7 @@ html.preline-ui.theme-renkli-yol .lisani-bolum-dot-btn {
         border-top: 1px solid rgba(255, 255, 255, 0.08);
     }
 
-    .lisani-shell-foot-btn,
-    .lisani-shell-foot-apk {
+    .lisani-shell-foot-btn {
         width: 100%;
         font-size: 0.4375rem;
         padding: 0.12rem 0.05rem;
@@ -4893,10 +4889,6 @@ html.preline-ui.theme-renkli-yol .lisani-bolum-dot-btn {
         width: 0.5rem;
         height: 0.5rem;
     }
-}
-
-.lisani-apk-download-strip {
-    display: none !important;
 }
 
 /* ===== Beyaz Cam — ağır glassmorphism ===== */
@@ -4980,8 +4972,7 @@ html.preline-ui.theme-beyaz-cam .lisani-shell-foot-actions {
     border-top-color: rgba(148, 163, 184, 0.2);
 }
 
-html.preline-ui.theme-beyaz-cam .lisani-shell-foot-btn,
-html.preline-ui.theme-beyaz-cam .lisani-shell-foot-apk {
+html.preline-ui.theme-beyaz-cam .lisani-shell-foot-btn {
     color: #64748b;
 }
 
