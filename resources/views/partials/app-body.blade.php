@@ -228,7 +228,7 @@
                             </div>
                             
                             <!-- SVG Alanı -->
-                            <div class="relative w-full h-60 bg-black/45 rounded-2xl p-2 border theme-border flex items-center justify-center shadow-inner">
+                            <div class="relative w-full h-60 lisani-progress-chart-wrap rounded-2xl p-2 border theme-border flex items-center justify-center shadow-inner">
                                 <svg id="progress-svg-chart" class="w-full h-full" viewBox="0 0 500 260">
                                     <defs>
                                         <linearGradient id="chart-area-grad" x1="0" y1="0" x2="0" y2="1">
@@ -495,23 +495,6 @@
                         </div>
                     </div>
 
-                    <!-- GÖRÜNÜM A: BÖLÜM SEÇİM ALANI -->
-                    <div id="bolum-selection-view" class="lisani-tests-view lisani-tests-bolum-view flex-1 flex flex-col justify-start min-h-0">
-                        <div class="lisani-tests-bolum-toolbar shrink-0">
-                            <p id="tests-student-hint" class="lisani-tests-bolum-hint">5 test · bölüme göre 5–12 soru · yuvarlaklara dokun</p>
-                            <button type="button" id="tests-placement-btn" onclick="startPlacementTest(event)" class="lisani-tests-placement-chip shrink-0">Seviyemi Bul</button>
-                            <button type="button" id="tests-assign-toggle" class="hidden lisani-tests-placement-chip shrink-0" onclick="toggleTestsAssignMode(event)">Ödev Ata</button>
-                            <p id="tests-hoca-hint" class="hidden lisani-tests-bolum-hint lisani-tests-bolum-hint--hoca">Ödev vermek için tur veya test seçin</p>
-                            <div id="tests-yonetici-sinif-bar" class="hidden w-full mt-1">
-                                <label for="tests-yonetici-sinif-select" class="text-[10px] font-bold theme-text-muted uppercase tracking-wide block mb-1">Ödev atanacak sınıf</label>
-                                <select id="tests-yonetici-sinif-select" class="w-full px-3 py-2 rounded-xl border theme-border theme-card-bg theme-text-main text-xs"></select>
-                            </div>
-                        </div>
-                        <div class="lisani-bolum-scene lisani-tests-path-panel flex-1 min-h-0">
-                            <div class="lisani-bolum-dots-row" id="bolum-buttons-container"></div>
-                        </div>
-                    </div>
-
                     <!-- (eski seviye/test ara ekranı — kullanılmıyor) -->
                     <div id="level-selection-view" class="hidden"></div>
 
@@ -662,6 +645,43 @@
                         </div>
                     </div>
 
+                    <!-- 🗺️ KARİYER MODU -->
+                    <div class="relative min-w-0 lisani-span-full w-full">
+                        <button type="button" id="kariyer-home-card-btn" onclick="openKariyerModu()" class="lisani-kariyer-home-card relative w-full max-w-full overflow-hidden rounded-[24px] text-left transition-all active:scale-[0.98] group box-border">
+                            <div class="lisani-kariyer-cover-bg absolute inset-0 pointer-events-none" style="background-image: url('{{ asset('images/kariyer-cover.jpg') }}');" aria-hidden="true"></div>
+                            <div class="absolute inset-0 pointer-events-none bg-gradient-to-t from-[#0c1328] via-[#0c1328]/55 to-[#0c1328]/15"></div>
+                            
+                            <div class="relative z-20 flex flex-col justify-between w-full min-w-0 gap-3 px-1">
+                                <div class="flex justify-between items-start gap-2 min-w-0">
+                                    <div class="space-y-1 min-w-0 flex-1 pr-1">
+                                        <span class="text-[8px] uppercase font-black tracking-wide text-cyan-200 bg-cyan-950/85 border border-cyan-400/40 px-2 py-0.5 rounded-full inline-block max-w-full truncate">
+                                            Öğrenme Yolu 🎓
+                                        </span>
+                                        <h3 class="text-sm font-black text-white drop-shadow-md truncate">
+                                            Kariyer Modu
+                                        </h3>
+                                        <p class="text-[10px] text-stone-100 font-medium leading-snug drop-shadow-md line-clamp-3 break-words">
+                                            Seviye testi, bölüm haritası ve tüm öğrenme içeriği burada.
+                                        </p>
+                                    </div>
+                                    <div class="w-8 h-8 rounded-full bg-amber-500 text-stone-950 flex items-center justify-center shadow-md shrink-0 border border-white">
+                                        <i data-lucide="compass" class="w-4 h-4"></i>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex justify-between items-center gap-2 pt-2 border-t border-white/10 min-w-0">
+                                    <span class="text-[8px] text-cyan-200 font-bold bg-black/60 px-2 py-0.5 rounded border border-white/5 truncate min-w-0">
+                                        Bölümler &amp; testler
+                                    </span>
+                                    <span class="text-[9px] text-white font-bold flex items-center gap-1 bg-gradient-to-r from-cyan-500 to-blue-500 px-2.5 py-1 rounded-lg shadow-md shrink-0 whitespace-nowrap">
+                                        <span>Öğrenmeye Başla</span>
+                                        <i data-lucide="sparkles" class="w-3 h-3"></i>
+                                    </span>
+                                </div>
+                            </div>
+                        </button>
+                    </div>
+
                     <!-- Günlük görev paneli (profil ateşi — sabit konum) -->
                     <div id="home-daily-goal-popover" class="lisani-daily-goal-popover hidden" role="dialog" aria-label="Günlük görev">
                         <p class="lisani-daily-goal-popover__title">Günlük Görev</p>
@@ -676,20 +696,20 @@
                     </div>
 
                     <!-- Mesajlar (WhatsApp tarzı) -->
-                    <div id="home-mesajlar-card" class="hidden lisani-home-mesajlar-card lisani-glass-panel lisani-glass-card rounded-3xl p-4 border home-accent-border cursor-pointer" onclick="showMesajlar()" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();showMesajlar();}">
-                        <div class="flex items-center justify-between gap-2">
-                            <div class="flex items-center space-x-3 min-w-0 flex-1">
-                                <div class="w-11 h-11 rounded-2xl home-accent-icon-wrap flex items-center justify-center relative shrink-0 lisani-home-card-icon">
-                                    <i data-lucide="message-circle" class="w-5 h-5 home-accent-text"></i>
-                                    <span id="home-mesaj-badge" class="hidden absolute -top-1 -right-1 wa-unread-badge rounded-full px-1.5 flex items-center justify-center">0</span>
+                    <div id="home-mesajlar-card" class="hidden lisani-home-mesajlar-card lisani-glass-panel lisani-glass-card rounded-xl py-2 px-2.5 border home-accent-border cursor-pointer" onclick="showMesajlar()" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();showMesajlar();}">
+                        <div class="flex items-center justify-between gap-1.5">
+                            <div class="flex items-center space-x-2 min-w-0 flex-1">
+                                <div class="w-7 h-7 rounded-lg home-accent-icon-wrap flex items-center justify-center relative shrink-0 lisani-home-card-icon">
+                                    <i data-lucide="message-circle" class="w-3.5 h-3.5 home-accent-text"></i>
+                                    <span id="home-mesaj-badge" class="hidden absolute -top-1 -right-1 wa-unread-badge rounded-full px-1 flex items-center justify-center text-[8px]">0</span>
                                 </div>
-                                <div class="min-w-0 flex-1">
-                                    <h3 class="text-xs font-extrabold home-accent-text lisani-home-card-title">Mesajlar</h3>
-                                    <p class="text-[10px] theme-text-muted mt-0.5 truncate" id="home-mesajlar-sub">Hocanız veya öğrencilerinizle yazışın</p>
-                                    <p class="text-[10px] theme-text-main mt-0.5 truncate font-semibold hidden" id="home-mesajlar-preview"></p>
+                                <div class="min-w-0 flex-1 leading-none">
+                                    <h3 class="text-[10px] font-extrabold home-accent-text lisani-home-card-title">Mesajlar</h3>
+                                    <p class="text-[8px] theme-text-muted mt-0.5 truncate" id="home-mesajlar-sub">Hocanız veya öğrencilerinizle yazışın</p>
+                                    <p class="text-[8px] theme-text-main mt-0.5 truncate font-semibold hidden" id="home-mesajlar-preview"></p>
                                 </div>
                             </div>
-                            <i data-lucide="chevron-right" class="w-5 h-5 home-accent-text shrink-0"></i>
+                            <i data-lucide="chevron-right" class="w-3.5 h-3.5 home-accent-text shrink-0 opacity-70"></i>
                         </div>
                     </div>
 
@@ -726,32 +746,22 @@
                     </div>
 
                     <!-- Öğrenci: Hocadan gelen ödevler -->
-                    <div id="home-odevler-card" class="hidden lisani-home-odevler-card lisani-glass-panel rounded-3xl p-4 space-y-3">
-                        <div class="flex items-center justify-between border-b theme-border pb-2 gap-2">
-                            <span class="text-xs font-extrabold theme-text-main flex items-center gap-2 min-w-0 lisani-home-card-title">
-                                <i data-lucide="clipboard-list" class="w-4 h-4 theme-primary-color shrink-0"></i>
+                    <div id="home-odevler-card" class="hidden lisani-home-odevler-card lisani-glass-panel rounded-xl py-2 px-2.5 space-y-1">
+                        <div class="flex items-center justify-between border-b theme-border pb-1 gap-1.5">
+                            <span class="text-[10px] font-extrabold theme-text-main flex items-center gap-1 min-w-0 lisani-home-card-title leading-none">
+                                <i data-lucide="clipboard-list" class="w-3 h-3 theme-primary-color shrink-0"></i>
                                 Hocadan Ödevler
                             </span>
-                            <div class="flex items-center gap-1.5 shrink-0">
-                                <span id="home-odevler-sinif" class="text-[9px] theme-text-muted font-bold max-w-[7rem] truncate"></span>
-                                <button type="button" id="home-odevler-refresh" onclick="refreshOdevler()" class="lisani-odev-refresh-btn" title="Ödevleri yenile" aria-label="Ödevleri yenile">
-                                    <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+                            <div class="flex items-center gap-0.5 shrink-0">
+                                <span id="home-odevler-sinif" class="text-[7px] theme-text-muted font-bold max-w-[6rem] truncate"></span>
+                                <button type="button" id="home-odevler-refresh" onclick="refreshOdevler()" class="lisani-odev-refresh-btn lisani-odev-refresh-btn--compact" title="Ödevleri yenile" aria-label="Ödevleri yenile">
+                                    <i data-lucide="refresh-cw" class="w-2.5 h-2.5"></i>
                                 </button>
                             </div>
                         </div>
-                        <div id="home-odevler-list" class="space-y-2 max-h-[200px] overflow-y-auto pr-1">
-                            <p class="text-[10px] theme-text-muted text-center py-3">Ödevler yükleniyor...</p>
+                        <div id="home-odevler-list" class="space-y-1 max-h-[108px] overflow-y-auto pr-0.5">
+                            <p class="text-[8px] theme-text-muted text-center py-1">Ödevler yükleniyor...</p>
                         </div>
-                    </div>
-
-                    <!-- Öğrenmeye başla -->
-                    <div id="learn-start-home-card" class="lisani-span-full lisani-learn-start-home">
-                        <button type="button" id="learn-start-cta-btn" class="lisani-learn-start-cta">
-                            <span class="lisani-learn-start-cta__inner">
-                                <span class="lisani-learn-start-cta__icon"><i data-lucide="graduation-cap" class="w-5 h-5"></i></span>
-                                <span class="lisani-learn-start-cta__label">Öğrenmeye Başla</span>
-                            </span>
-                        </button>
                     </div>
 
                     <!-- Dil bilgisi — Konu Anlatımı butonundan açılır -->
@@ -822,47 +832,11 @@
                         </div>
                     </div>
 
-                    <!-- 🗺️ KARİYER MODU -->
-                    <div class="relative min-w-0">
-                        <button onclick="handleKariyerModuClick()" class="lisani-kariyer-home-card relative w-full max-w-full overflow-hidden theme-gradient-card rounded-[24px] p-4 text-left transition-all active:scale-[0.98] group flex flex-col justify-between min-h-[128px] box-border">
-                            <div class="absolute inset-0 opacity-45 pointer-events-none overflow-hidden bg-slate-900">
-                                <img src="https://images.unsplash.com/photo-1559128010-7c1ad6e1b6a5?auto=format&fit=crop&w=600&q=80" alt="Eşsiz Ada Manzarası" class="w-full h-full object-cover object-center" onerror="this.style.display='none'" />
-                                <div class="absolute inset-0 bg-gradient-to-t from-[#0c1328] via-[#0c1328]/85 to-transparent"></div>
-                            </div>
-                            
-                            <div class="relative z-20 flex flex-col justify-between w-full min-w-0 gap-3 px-1">
-                                <div class="flex justify-between items-start gap-2 min-w-0">
-                                    <div class="space-y-1 min-w-0 flex-1 pr-1">
-                                        <span class="text-[8px] uppercase font-black tracking-wide text-cyan-200 bg-cyan-950/85 border border-cyan-400/40 px-2 py-0.5 rounded-full inline-block max-w-full truncate">
-                                            Tropik Harita 🏝️
-                                        </span>
-                                        <h3 class="text-sm font-black text-white drop-shadow-md truncate">
-                                            Kariyer Modu
-                                        </h3>
-                                        <p class="text-[10px] text-stone-100 font-medium leading-snug drop-shadow-md line-clamp-3 break-words">
-                                            Haritada seviyeleri geçip unvan kazanacağın özel serüven.
-                                        </p>
-                                    </div>
-                                    <div class="w-8 h-8 rounded-full bg-amber-500 text-stone-950 flex items-center justify-center shadow-md shrink-0 border border-white">
-                                        <i data-lucide="compass" class="w-4 h-4"></i>
-                                    </div>
-                                </div>
-                                
-                                <div class="flex justify-between items-center gap-2 pt-2 border-t border-white/10 min-w-0">
-                                    <span class="text-[8px] text-cyan-200 font-bold bg-black/60 px-2 py-0.5 rounded border border-white/5 truncate min-w-0">
-                                        Kilit Açıldı 🔓
-                                    </span>
-                                    <span class="text-[9px] text-white font-bold flex items-center gap-1 bg-gradient-to-r from-cyan-500 to-blue-500 px-2.5 py-1 rounded-lg shadow-md shrink-0 whitespace-nowrap">
-                                        <span>Yola Çık</span>
-                                        <i data-lucide="sparkles" class="w-3 h-3"></i>
-                                    </span>
-                                </div>
-                            </div>
+                    <p class="lisani-home-apk-foot lisani-span-full text-center pt-2 pb-4 px-4">
+                        <button type="button" id="home-apk-download-row" class="lisani-apk-download-btn lisani-glass-action lisani-glass-action--primary hidden w-full max-w-xs mx-auto py-2.5 rounded-xl text-[11px] font-bold inline-flex items-center justify-center gap-2">
+                            <i data-lucide="download" class="w-4 h-4 shrink-0" aria-hidden="true"></i>
+                            <span>Android uygulamasını indir (APK)</span>
                         </button>
-                    </div>
-
-                    <p class="lisani-home-apk-foot lisani-span-full text-center pt-1 pb-4">
-                        <a id="home-apk-download-row" href="#" download="lisani-ecdad.apk" class="lisani-apk-download-foot hidden">Android uygulamasını indir (APK)</a>
                     </p>
                 </div>
 
@@ -1217,30 +1191,10 @@
                         <p class="text-[9px] theme-text-muted mt-0.5">Yenilenen arayüz, test motoru ve otomatik gelişim grafiği.</p>
                     </div>
 
-                    <!-- 🗝️ GİZLİ ŞİFRE GİRİŞ ALANI (PROFİL EN ALTI) -->
-                    <div class="lisani-glass-panel rounded-2xl p-4 border theme-border space-y-3 transition-all">
-                        <div class="flex items-center space-x-2 pb-1.5 border-b theme-border">
-                            <i data-lucide="key-round" class="w-4 h-4 theme-primary-color"></i>
-                            <span class="text-xs font-extrabold theme-text-main">Antik Şifre Girişi 🗝️</span>
-                            <span id="tennis-unlock-badge" class="hidden ml-auto text-[8px] font-black px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 uppercase tracking-wider">🎾 Aktif</span>
-                        </div>
-                        <p id="tennis-secret-hint" class="text-[10px] theme-text-muted leading-relaxed">Doğru şifreyi girdikten sonra ana sayfadaki <strong class="theme-primary-color">Kariyer Modu</strong> kartına <strong>çift tıklayarak</strong> gizli tenis lobisini açabilirsin. <strong class="theme-text-main">Her uygulama girişinde şifreyi yeniden girmen gerekir.</strong></p>
-                        <p id="tennis-unlocked-msg" class="hidden text-[10px] text-emerald-400 leading-relaxed font-semibold">Tenis bu oturumda aktif! Kariyer Modu kartına çift tıkla — online veya solo oyna. 🎾</p>
-                        <div id="tennis-secret-form" class="space-y-3">
-                        <div class="relative flex items-center theme-light-bg border theme-border rounded-xl px-3 py-1.5">
-                            <input type="text" id="profile-secret-code" class="w-full bg-transparent text-xs theme-text-main focus:outline-none text-center tracking-widest font-black uppercase" placeholder="ŞİFREYİ GİRİN" />
-                        </div>
-                        <button type="button" onclick="submitProfileSecretCode()" data-testid="profile-submit-secret-code-btn" class="lisani-glass-action lisani-glass-action--primary w-full py-2.5 text-[10px] font-bold uppercase tracking-wider flex items-center justify-center gap-1.5">
-                            <i data-lucide="key" class="w-3.5 h-3.5"></i>
-                            <span>Şifreyi Çöz</span>
-                        </button>
-                        </div>
-                    </div>
                 </div>
 
             </div>
 
-            <!-- SABİTLENMİŞ ALT SEKMELER — iPhone tarzı cam tab bar -->
             <nav id="bottom-bar" class="lisani-nav-bar lisani-tab-bar-ios flex items-stretch justify-between z-45 transition-all duration-300 flex-shrink-0" aria-label="Ana menü">
 
                 <button type="button" onclick="switchTab('ai')" id="tab-ai" class="lisani-nav-tab flex flex-col items-center justify-center flex-1 min-w-0">
@@ -1287,198 +1241,84 @@
         <!-- ================= KARIYER MODU MODAL ALANI ================= -->
         <div id="kariyer-modal-container" class="lisani-kariyer-modal hidden absolute inset-0 z-50 bg-gradient-to-br from-[#0b1329] to-[#121f31] flex flex-col box-border">
             
-            <div class="absolute inset-0 opacity-45 pointer-events-none overflow-hidden">
-                <img src="https://images.unsplash.com/photo-1559128010-7c1ad6e1b6a5?auto=format&fit=crop&w=600&q=80" alt="" class="w-full h-full object-cover object-center" onerror="this.style.display='none'" />
-                <div class="absolute inset-0 bg-gradient-to-t from-[#0b1329] via-[#0b1329]/70 to-transparent"></div>
-            </div>
+            <div class="lisani-kariyer-cover-bg absolute inset-0 pointer-events-none" style="background-image: url('{{ asset('images/kariyer-cover.jpg') }}');" aria-hidden="true"></div>
+            <div class="absolute inset-0 pointer-events-none bg-gradient-to-t from-[#0b1329] via-[#0b1329]/58 to-[#0b1329]/18"></div>
 
             <div class="lisani-kariyer-modal__inner relative z-20 flex flex-col flex-1 min-h-0 min-w-0 w-full mx-auto overflow-hidden">
                 <div class="lisani-kariyer-modal__header flex items-center justify-between pb-3 border-b border-cyan-800/30 shrink-0 gap-2 min-w-0">
                     <div class="flex items-center gap-2 min-w-0 flex-1">
                         <i data-lucide="compass" class="w-5 h-5 text-cyan-400 shrink-0"></i>
-                        <h3 class="text-sm font-bold text-white truncate min-w-0">Kariyer Haritası</h3>
+                        <h3 class="text-sm font-bold text-white truncate min-w-0">Kariyer Modu</h3>
                     </div>
                     <button type="button" onclick="closeKariyerModu()" class="p-1.5 hover:bg-white/10 rounded-lg shrink-0" aria-label="Kapat">
                         <i data-lucide="x" class="w-5 h-5 text-white"></i>
                     </button>
                 </div>
 
-                <div id="career-intro-wrapper" class="lisani-kariyer-body relative flex-1 min-h-0 min-w-0 flex flex-col items-center justify-center text-center gap-3 py-3 overflow-y-auto overflow-x-hidden">
-                    <div class="w-12 h-12 rounded-full bg-cyan-950/85 border border-cyan-500/35 flex items-center justify-center text-cyan-400 shrink-0">
-                        <i data-lucide="map" class="w-6 h-6"></i>
-                    </div>
-                    <div class="lisani-kariyer-copy w-full min-w-0 space-y-2">
-                        <h4 class="text-[13px] font-black text-white leading-snug break-words">Kariyer Modu Çok Yakında!</h4>
-                        <p class="text-[11px] text-cyan-100 font-medium leading-relaxed break-words hyphens-auto">
-                            Kariyer haritan için ayrılmış alan. Yakında seviyeleri geçip unvan kazanacaksın.
-                        </p>
-                    </div>
-                    <span class="lisani-kariyer-badge text-[8px] text-cyan-300 bg-cyan-950/90 border border-cyan-500/30 px-2.5 py-1 rounded-full font-bold max-w-full break-words">
-                        Hazırlık aşamasında
-                    </span>
-                </div>
-
-                <!-- Gizli Online Tenis (Kariyer Modu içi — çift tıkla açılır) -->
-                <div id="kariyer-tennis-online-block" class="hidden lisani-kariyer-body flex-1 min-h-0 flex flex-col gap-3 py-2 lisani-kariyer-copy overflow-y-auto overflow-x-hidden">
-                    <div class="lisani-tennis-online-block lisani-glass-panel rounded-xl p-3 space-y-2.5 border border-cyan-500/25">
-                        <div class="flex items-center justify-between gap-2 flex-wrap">
-                            <div class="flex items-center gap-2 min-w-0">
-                                <i data-lucide="users" class="w-4 h-4 text-cyan-400 shrink-0"></i>
-                                <span class="text-xs font-extrabold text-white">Online Tenis</span>
-                            </div>
-                            <div class="lisani-tennis-mode-toggle flex rounded-lg border border-cyan-500/30 overflow-hidden text-[9px] font-bold shrink-0">
-                                <button type="button" id="tennis-mode-create" onclick="setTennisOnlineLobbyMode('create')" class="lisani-tennis-mode-btn is-active px-2.5 py-1 text-cyan-100">Oda Aç</button>
-                                <button type="button" id="tennis-mode-join" onclick="setTennisOnlineLobbyMode('join')" class="lisani-tennis-mode-btn px-2.5 py-1 text-cyan-100">Katıl</button>
-                            </div>
-                        </div>
-                        <p id="tennis-online-status" class="text-[9px] text-cyan-200/80 text-center leading-snug">Arkadaşınla 1v1 online tenis</p>
-
-                        <div id="tennis-online-lobby-panels" class="space-y-2">
-                            <div id="tennis-online-panel-create" class="space-y-2">
-                                <button type="button" id="tennis-create-room-btn" class="lisani-glass-action lisani-glass-action--primary w-full py-2.5 rounded-xl text-[10px] font-bold">Oda Oluştur</button>
-                            </div>
-                            <div id="tennis-online-panel-join" class="hidden space-y-2">
-                                <input type="text" id="tennis-join-code-input" maxlength="8" placeholder="Oda kodu" onkeydown="handleTennisJoinKey(event)" class="w-full px-3 py-2.5 rounded-xl border theme-border theme-card-bg text-xs uppercase tracking-widest text-center focus:outline-none focus:ring-2 focus:ring-cyan-500/50">
-                                <button type="button" id="tennis-join-room-btn" class="lisani-glass-action lisani-glass-action--primary w-full py-2.5 rounded-xl text-[10px] font-bold">Odaya Katıl</button>
-                            </div>
-                        </div>
-
-                        <div id="tennis-online-waiting-panel" class="hidden lisani-tennis-waiting rounded-xl p-3 border border-cyan-500/25 space-y-2">
-                            <p class="text-[9px] font-bold text-cyan-200/70 uppercase tracking-wide text-center">Oda Kodu</p>
-                            <p id="tennis-room-code-display" class="text-xl font-black text-cyan-300 tracking-[0.35em] text-center">------</p>
-                            <button type="button" id="tennis-copy-code-btn" class="lisani-glass-action lisani-glass-action--primary w-full py-2 rounded-xl text-[10px] font-bold flex items-center justify-center gap-1.5">
-                                <i data-lucide="copy" class="w-3.5 h-3.5"></i>
-                                Kodu Kopyala
-                            </button>
-                            <p class="text-[9px] text-cyan-200/60 text-center">Arkadaşın Katıl sekmesinden bu kodu girebilir.</p>
-                            <div class="border-t border-cyan-500/20 pt-2 space-y-1.5">
-                                <p class="text-[9px] font-bold text-cyan-200/70 uppercase">Mesajla davet et</p>
-                                <div id="tennis-invite-list" class="space-y-1 max-h-24 overflow-y-auto"></div>
-                            </div>
-                            <button type="button" onclick="cancelTennisOnline()" class="lisani-glass-action w-full py-2 rounded-xl text-[9px] font-bold text-cyan-200/60">İptal</button>
-                        </div>
-
-                        <button type="button" onclick="launchTennisDirectly()" class="lisani-glass-action w-full py-2 rounded-xl text-[10px] font-bold">Bota Karşı Solo Oyna</button>
-                    </div>
-                    <button type="button" onclick="cancelTennisOnline()" class="lisani-glass-action w-full py-2 rounded-xl text-[9px] font-bold text-cyan-200/60">Kariyer Haritasına Dön</button>
-                </div>
-
-                <div id="tennis-game-container" class="hidden lisani-kariyer-body relative flex-1 min-h-0 min-w-0 flex flex-col items-stretch justify-center w-full gap-2.5 py-2 overflow-y-auto overflow-x-hidden">
-                    <div class="flex justify-between items-center w-full min-w-0 gap-2 lisani-kariyer-copy">
-                        <span class="text-[10px] font-black text-cyan-400 uppercase flex items-center gap-1 min-w-0 truncate">
-                            <i data-lucide="trophy" class="w-3.5 h-3.5 shrink-0"></i>
-                            <span class="truncate">Tenis</span>
-                        </span>
-                        <span id="tennis-match-info" class="text-[8px] font-bold text-cyan-200/80 shrink-0">İlk 7 sayı</span>
-                        <span id="tennis-score" class="text-[9px] font-black text-white bg-black/45 border border-cyan-500/35 px-2 py-0.5 rounded-full shrink-0">0 - 0</span>
-                    </div>
-
-                    <div class="relative w-full max-w-full aspect-[8/5] bg-neutral-950 rounded-xl border border-cyan-500/40 overflow-hidden shrink-0 lisani-kariyer-copy">
-                        <div id="tennis-scene-host" class="hidden w-full h-full block touch-none"></div>
-                        <canvas id="tennis-canvas" class="w-full h-full block touch-none"></canvas>
-                        <div id="tennis-overlay" class="hidden absolute inset-0 flex flex-col items-center justify-center bg-black/55 backdrop-blur-sm text-center px-4 z-10">
-                            <p id="tennis-overlay-title" class="text-sm font-black text-white mb-1">Maç Bitti</p>
-                            <p id="tennis-overlay-sub" class="text-[10px] text-cyan-100/90 mb-3"></p>
-                            <button type="button" onclick="resetTennisGame()" class="lisani-glass-action lisani-glass-action--primary px-4 py-2 rounded-xl text-[10px] font-bold">Yeniden Oyna</button>
-                        </div>
-                    </div>
-
-                    <div class="flex w-full min-w-0 gap-1.5 shrink-0 lisani-kariyer-copy">
-                        <button type="button" id="btn-paddle-left" aria-label="Sola hareket" class="lisani-glass-action flex-1 min-w-0 py-2.5 rounded-lg text-cyan-400 flex items-center justify-center">
-                            <i data-lucide="chevron-left" class="w-4 h-4"></i>
-                        </button>
-                        <button type="button" id="btn-tennis-pause" onclick="toggleTennisPause()" class="px-2.5 py-2 lisani-glass-action rounded-lg text-stone-200 text-[9px] font-bold shrink-0">Duraklat</button>
-                        <button type="button" onclick="resetTennisGame()" class="px-2.5 py-2 lisani-glass-action rounded-lg text-stone-200 text-[9px] font-bold shrink-0">Sıfır</button>
-                        <button type="button" id="btn-paddle-right" aria-label="Sağa hareket" class="lisani-glass-action flex-1 min-w-0 py-2.5 rounded-lg text-cyan-400 flex items-center justify-center">
-                            <i data-lucide="chevron-right" class="w-4 h-4"></i>
-                        </button>
-                    </div>
-
-                    <p class="text-[9px] text-cyan-200/70 text-center leading-snug break-words lisani-kariyer-copy">
-                        Raketi sürükleyerek veya ok tuşlarıyla hareket ettir. Servis öncesi konumun top yönünü belirler. İlk 7 sayıyı alan kazanır.
-                    </p>
-                </div>
-
-                <!-- Gizli Gökhan Abi (Kariyer Modu kartına dört kez tıkla) -->
-                <div id="gokhan-abi-block" class="hidden lisani-kariyer-body relative flex-1 min-h-0 flex flex-col overflow-hidden rounded-xl border border-white/10 bg-[#dfe3e8]">
-                    <div class="shrink-0 px-4 pt-3 pb-2 bg-white/55 backdrop-blur-sm border-b border-white/40">
-                        <h4 class="text-[15px] font-semibold text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.45)] tracking-wide">Gokhan Abi</h4>
-                    </div>
-                    <div class="relative flex-1 min-h-0 bg-white overflow-hidden">
-                        <img src="{{ asset('images/easter/gokhan-abi.png') }}" alt="Gokhan Abi" class="w-full h-full object-cover object-center" draggable="false">
-                    </div>
-                    <div class="shrink-0 flex items-center justify-around gap-2 px-3 py-3 bg-[#eceff1] border-t border-[#cfd8dc]">
-                        <button type="button" class="flex flex-col items-center gap-1 text-[#00897b] opacity-90" aria-label="Mesaj">
-                            <i data-lucide="message-square" class="w-6 h-6"></i>
-                        </button>
-                        <button type="button" class="flex flex-col items-center gap-1 text-[#00897b] opacity-50 cursor-default" aria-label="Ara" disabled>
-                            <i data-lucide="phone" class="w-6 h-6"></i>
-                        </button>
-                        <button type="button" onclick="window.LisaniGokhanEaster?.startVideoCall?.()" class="flex flex-col items-center gap-1 text-[#00897b] opacity-90 active:scale-95 transition-transform" aria-label="Kamera — görüntülü arama">
-                            <i data-lucide="video" class="w-6 h-6"></i>
-                        </button>
-                        <button type="button" class="flex flex-col items-center gap-1 text-[#00897b] opacity-90" aria-label="Bilgi">
-                            <i data-lucide="info" class="w-6 h-6"></i>
-                        </button>
-                    </div>
-                    <p id="gokhan-abi-audio-hint" class="hidden shrink-0 text-center text-[9px] text-amber-200/90 px-3 py-1.5 bg-black/40">Sesi açmak için kamera ikonuna tekrar dokun.</p>
-                    <video id="gokhan-abi-media" playsinline preload="auto" loop class="hidden w-0 h-0 pointer-events-none" aria-hidden="true">
-                        <source src="{{ asset('audio/gokhan-abi-call.mp4') }}" type="video/mp4">
-                    </video>
-
-                    <!-- Gelen görüntülü arama — tam ekran Gokhan Abi arka planı -->
-                    <div id="gokhan-video-call-overlay" class="hidden absolute inset-0 z-20 flex flex-col justify-between overflow-hidden">
-                        <img src="{{ asset('images/easter/gokhan-abi.png') }}" alt="" class="absolute inset-0 w-full h-full object-cover object-center pointer-events-none select-none" draggable="false" aria-hidden="true">
-                        <div class="absolute inset-0 bg-gradient-to-b from-black/60 via-black/15 to-black/80 pointer-events-none" aria-hidden="true"></div>
-
-                        <div class="relative z-10 flex flex-col items-center text-center px-5 pt-8 gap-1">
-                            <p class="text-[10px] font-bold uppercase tracking-[0.22em] text-white/75">Görüntülü arama</p>
-                            <h5 class="text-xl font-black text-white drop-shadow-lg">Gokhan Abi</h5>
-                            <p id="gokhan-call-status" class="text-sm text-white/90 mt-1 drop-shadow-md">Seni arıyor…</p>
-                        </div>
-
-                        <div id="gokhan-call-actions" class="relative z-10 flex items-center justify-center gap-12 pb-10 px-5">
-                            <button type="button" onclick="window.LisaniGokhanEaster?.rejectVideoCall?.()" class="flex flex-col items-center gap-2" aria-label="Reddet">
-                                <span class="w-16 h-16 rounded-full bg-red-500 flex items-center justify-center shadow-lg shadow-black/40 active:scale-95 transition-transform">
-                                    <i data-lucide="phone-off" class="w-7 h-7 text-white"></i>
+                <div id="career-learn-wrapper" class="lisani-kariyer-body flex-1 min-h-0 min-w-0 flex flex-col gap-3 py-2 overflow-hidden">
+                    <div id="bolum-selection-view" class="lisani-tests-view lisani-tests-bolum-view lisani-kariyer-bolum-view flex-1 flex flex-col justify-start min-h-0 overflow-hidden">
+                        <div class="lisani-tests-bolum-toolbar shrink-0">
+                            <button type="button" id="time-attack-start-btn" onclick="startTimeAttack(event)" class="lisani-time-attack-chip w-full shrink-0">
+                                <span class="lisani-time-attack-chip__icon" aria-hidden="true"><i data-lucide="timer" class="w-4 h-4"></i></span>
+                                <span class="lisani-time-attack-chip__text">
+                                    <span class="lisani-time-attack-chip__title">Zamana Karşı</span>
+                                    <span class="lisani-time-attack-chip__sub">1 dakika · kaç doğru yapabilirsin?</span>
                                 </span>
-                                <span class="text-[11px] font-bold text-white drop-shadow">Reddet</span>
+                                <span class="lisani-time-attack-chip__go" aria-hidden="true"><i data-lucide="chevron-right" class="w-4 h-4"></i></span>
                             </button>
-                            <button type="button" onclick="window.LisaniGokhanEaster?.acceptVideoCall?.()" class="flex flex-col items-center gap-2" aria-label="Kabul et">
-                                <span class="w-16 h-16 rounded-full bg-emerald-500 flex items-center justify-center shadow-lg shadow-black/40 active:scale-95 transition-transform">
-                                    <i data-lucide="phone" class="w-7 h-7 text-white"></i>
-                                </span>
-                                <span class="text-[11px] font-bold text-white drop-shadow">Kabul Et</span>
-                            </button>
+                            <p id="tests-student-hint" class="lisani-tests-bolum-hint lisani-kariyer-copy">5 test · bölüme göre 5–12 soru · yuvarlaklara dokun</p>
+                            <button type="button" id="tests-placement-btn" onclick="startPlacementTest(event)" class="lisani-tests-placement-chip shrink-0">Seviyemi Bul</button>
+                            <button type="button" id="tests-assign-toggle" class="hidden lisani-tests-placement-chip shrink-0" onclick="toggleTestsAssignMode(event)">Ödev Ata</button>
+                            <p id="tests-hoca-hint" class="hidden lisani-tests-bolum-hint lisani-tests-bolum-hint--hoca lisani-kariyer-copy">Ödev vermek için tur veya test seçin</p>
+                            <div id="tests-yonetici-sinif-bar" class="hidden w-full mt-1">
+                                <label for="tests-yonetici-sinif-select" class="text-[10px] font-bold text-cyan-200/80 uppercase tracking-wide block mb-1">Ödev atanacak sınıf</label>
+                                <select id="tests-yonetici-sinif-select" class="w-full px-3 py-2 rounded-xl border border-cyan-500/30 bg-black/40 text-cyan-50 text-xs"></select>
+                            </div>
                         </div>
-
-                        <div id="gokhan-call-connected" class="hidden relative z-10 flex flex-col items-center gap-4 pb-10 px-5 w-full">
-                            <p class="text-sm font-bold text-emerald-300 drop-shadow-lg bg-black/35 px-4 py-1.5 rounded-full">Bağlandı · Gokhan Abi</p>
-                            <button type="button" onclick="window.LisaniGokhanEaster?.endVideoCall?.()" class="w-16 h-16 rounded-full bg-red-500 flex items-center justify-center shadow-lg shadow-black/40 active:scale-95 transition-transform" aria-label="Görüşmeyi bitir">
-                                <i data-lucide="phone-off" class="w-7 h-7 text-white"></i>
-                            </button>
-                            <span class="text-[11px] font-bold text-white drop-shadow">Görüşmeyi Bitir</span>
+                        <div class="lisani-bolum-scene lisani-tests-path-panel lisani-kariyer-path-panel flex-1 min-h-0 overflow-y-auto">
+                            <div class="lisani-bolum-dots-row" id="bolum-buttons-container"></div>
                         </div>
                     </div>
-                </div>
 
-                <!-- Gizli Flappy Bird (Kariyer Modu kartına üç kez tıkla) -->
-                <div id="flappy-game-container" class="hidden lisani-kariyer-body relative flex-1 min-h-0 min-w-0 flex flex-col items-stretch justify-center w-full gap-2.5 py-2 overflow-y-auto overflow-x-hidden">
-                    <div class="flex justify-between items-center w-full min-w-0 gap-2 lisani-kariyer-copy">
-                        <span class="text-[10px] font-black text-amber-400 uppercase flex items-center gap-1 min-w-0 truncate">
-                            <i data-lucide="bird" class="w-3.5 h-3.5 shrink-0"></i>
-                            <span class="truncate">Flappy Bird</span>
-                        </span>
-                        <span id="flappy-best-score" class="text-[9px] font-black text-white bg-black/45 border border-amber-500/35 px-2 py-0.5 rounded-full shrink-0">En iyi: 0</span>
+                    <div id="time-attack-view" class="lisani-time-attack-view hidden flex-1 flex flex-col min-h-0 min-w-0 overflow-hidden">
+                        <div class="lisani-time-attack-top shrink-0">
+                            <button type="button" onclick="exitTimeAttack()" class="lisani-time-attack-back lisani-glass-action lisani-glass-action--compact flex items-center gap-1.5 text-[10px] font-bold">
+                                <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
+                                <span>Geri</span>
+                            </button>
+                            <div class="lisani-time-attack-timer-wrap" aria-live="polite">
+                                <span id="time-attack-timer" class="lisani-time-attack-timer">1:00</span>
+                            </div>
+                            <div class="lisani-time-attack-live-score">
+                                <span id="time-attack-live-score" class="lisani-time-attack-live-score__num">0</span>
+                                <span class="lisani-time-attack-live-score__lbl">doğru</span>
+                            </div>
+                        </div>
+                        <div class="lisani-time-attack-timer-bar shrink-0" aria-hidden="true">
+                            <div id="time-attack-timer-fill" class="lisani-time-attack-timer-bar__fill" style="width:100%"></div>
+                        </div>
+
+                        <div id="time-attack-play" class="lisani-time-attack-play flex-1 min-h-0 overflow-y-auto">
+                            <div id="time-attack-question-box" class="lisani-time-attack-question space-y-3"></div>
+                        </div>
+
+                        <div id="time-attack-result" class="lisani-time-attack-result hidden flex-1 flex flex-col items-center justify-center text-center px-4 py-6 gap-4 min-h-0">
+                            <div class="lisani-time-attack-result__badge">⏱️</div>
+                            <div class="space-y-1">
+                                <h4 class="text-base font-black text-white">Süre Doldu!</h4>
+                                <p class="text-[11px] text-cyan-100/80">Zamana karşı turun bitti</p>
+                            </div>
+                            <div class="lisani-time-attack-result__score-box">
+                                <span id="time-attack-final-score" class="lisani-time-attack-result__score">0</span>
+                                <span class="lisani-time-attack-result__score-label">doğru cevap</span>
+                                <p id="time-attack-final-meta" class="lisani-time-attack-result__meta text-[10px] text-cyan-200/70 mt-1"></p>
+                            </div>
+                            <div class="flex flex-col gap-2 w-full max-w-xs">
+                                <button type="button" onclick="startTimeAttack(event)" class="lisani-glass-action lisani-glass-action--primary w-full py-2.5 rounded-xl text-[11px] font-bold">Tekrar Oyna</button>
+                                <button type="button" onclick="exitTimeAttack()" class="lisani-glass-action w-full py-2.5 rounded-xl text-[11px] font-bold text-cyan-100">Bölümlere Dön</button>
+                            </div>
+                        </div>
                     </div>
-
-                    <div class="relative w-full max-w-full aspect-[3/4] min-h-[320px] max-h-[min(68vh,560px)] bg-sky-300 rounded-xl border border-cyan-500/40 overflow-hidden shrink-0 lisani-kariyer-copy mx-auto">
-                        <canvas id="flappy-canvas" class="w-full h-full block touch-none"></canvas>
-                    </div>
-
-                    <p class="text-[9px] text-amber-200/70 text-center leading-snug break-words lisani-kariyer-copy">
-                        Dokun, tıkla veya Space ile zıpla. Borulardan geç, skorunu yükselt.
-                    </p>
                 </div>
 
                 <button type="button" onclick="closeKariyerModu()" class="lisani-kariyer-footer-btn lisani-glass-action lisani-glass-action--primary shrink-0 py-2.5 rounded-xl font-bold text-[11px] flex items-center justify-center gap-1.5 mt-2 min-w-0">
@@ -1533,25 +1373,6 @@
         </div>
 
     </div>
-    <!-- Öğrenmeye başla — seviye seçimi -->
-    <div id="learn-start-modal" class="lisani-modal-overlay hidden absolute inset-0 z-[60] flex items-end lg:items-center justify-center pb-0 lg:p-6">
-        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeLearnStartModal()"></div>
-        <div class="relative w-full max-w-sm lisani-glass-panel rounded-t-3xl lg:rounded-3xl p-6 space-y-4 z-10">
-            <div class="flex items-center justify-between">
-                <h3 class="text-sm font-extrabold theme-text-main">Öğrenmeye Başla</h3>
-                <button type="button" onclick="closeLearnStartModal()" class="lisani-glass-action lisani-glass-action--icon flex items-center justify-center rounded-full theme-text-muted">
-                    <i data-lucide="x" class="w-4 h-4"></i>
-                </button>
-            </div>
-            <p class="text-[11px] theme-text-muted leading-relaxed">Kısa bir testle uygun bölümü bulabilir veya kaldığın yerden devam edebilirsin.</p>
-            <div class="space-y-2">
-                <button type="button" onclick="startPlacementTest(event)" class="lisani-glass-action lisani-glass-action--primary w-full py-3 rounded-xl text-xs font-bold">Seviyemi Bul</button>
-                <button type="button" onclick="continueLearnFromLast(event)" class="lisani-glass-action w-full py-3 rounded-xl text-xs font-bold">Kaldığım Yerden Devam</button>
-                <button type="button" onclick="openLevelPicker(event)" class="lisani-glass-action w-full py-2.5 rounded-xl text-[11px] font-bold theme-text-muted">Seviyemi Biliyorum</button>
-            </div>
-        </div>
-    </div>
-
     <!-- Seviye seçici -->
     <div id="level-picker-modal" class="lisani-modal-overlay hidden absolute inset-0 z-[60] flex items-end lg:items-center justify-center pb-0 lg:p-6">
         <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeLevelPicker()"></div>
@@ -1573,22 +1394,30 @@
 
     <!-- Bölüm sandığı çarkıfelek -->
     <div id="reward-wheel-modal" class="lisani-modal-overlay lisani-carkifelek-overlay hidden absolute inset-0 z-[70] flex items-end lg:items-center justify-center pb-0 lg:p-6">
-        <div class="absolute inset-0 bg-black/75" onclick="closeRewardWheel(true)"></div>
-        <div class="relative w-full max-w-md lisani-carkifelek-panel rounded-t-3xl lg:rounded-3xl p-5 sm:p-6 space-y-4 z-10 text-center">
-            <h3 id="reward-wheel-title" class="text-base font-black theme-text-main tracking-tight">Sandık Ödülü</h3>
-            <p id="reward-wheel-desc" class="text-[11px] theme-text-muted leading-relaxed">Bölümü tamamla · sandıktan çark hakkı kazan!</p>
+        <div class="absolute inset-0 bg-black/80 backdrop-blur-sm" onclick="closeRewardWheel(true)"></div>
+        <div class="relative w-full max-w-md lisani-carkifelek-panel rounded-t-3xl lg:rounded-3xl p-5 sm:p-6 space-y-4 z-10 text-center overflow-hidden">
+            <div class="lisani-carkifelek-panel__shine" aria-hidden="true"></div>
+            <span class="lisani-carkifelek-badge">🎁 SANDIK ÖDÜLÜ</span>
+            <h3 id="reward-wheel-title" class="text-lg font-black theme-text-main tracking-tight lisani-carkifelek-title">Sandık Ödülü</h3>
+            <p id="reward-wheel-desc" class="text-[11px] theme-text-muted leading-relaxed max-w-xs mx-auto">Bölümü tamamla · sandıktan çark hakkı kazan!</p>
             <div class="lisani-carkifelek-stage mx-auto">
-                <div class="lisani-carkifelek-pointer" aria-hidden="true"></div>
+                <div class="lisani-carkifelek-pointer" aria-hidden="true">
+                    <span class="lisani-carkifelek-pointer__gem"></span>
+                </div>
                 <div class="lisani-carkifelek-outer">
+                    <div class="lisani-carkifelek-ring" aria-hidden="true"></div>
+                    <div class="lisani-carkifelek-lights" aria-hidden="true"></div>
                     <div id="reward-wheel-disc" class="lisani-carkifelek-disc"></div>
                     <div class="lisani-carkifelek-hub" aria-hidden="true">
-                        <span>ÖDÜL</span>
-                        <span>ÇARK</span>
+                        <span class="lisani-carkifelek-hub__star">★</span>
+                        <span class="lisani-carkifelek-hub__label">XP</span>
                     </div>
                 </div>
             </div>
-            <p id="reward-wheel-result" class="hidden text-sm font-bold"></p>
-            <button type="button" id="reward-wheel-spin-btn" onclick="spinRewardWheel()" class="lisani-carkifelek-spin-btn w-full py-3.5 rounded-2xl text-sm font-black">ÇEVİR!</button>
+            <p id="reward-wheel-result" class="hidden lisani-carkifelek-result text-sm font-bold"></p>
+            <button type="button" id="reward-wheel-spin-btn" onclick="spinRewardWheel()" class="lisani-carkifelek-spin-btn w-full py-3.5 rounded-2xl text-sm font-black">
+                <span class="lisani-carkifelek-spin-btn__text">ÇEVİR!</span>
+            </button>
         </div>
     </div>
 

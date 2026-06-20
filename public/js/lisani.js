@@ -556,31 +556,54 @@
         }
 
         function teamAvatarImg(file) {
-            const src = `${avatarAssetsBase()}/${file}`;
+            const rev = window.LISANI_ASSETS?.avatarRev;
+            const q = rev ? `?v=${rev}` : '';
+            const src = `${avatarAssetsBase()}/${file}${q}`;
             return `<span class="avatar-glass-emblem"><img src="${src}" alt="" /></span>`;
         }
 
-        const DEFAULT_AVATAR = teamAvatarImg('besiktas.svg');
+        const DEFAULT_AVATAR = 'team:besiktas.svg';
 
         const AVATAR_OPTIONS = [
-            { type: 'besiktas', emoji: teamAvatarImg('besiktas.svg'), label: 'Beşiktaş' },
-            { type: 'bursaspor', emoji: teamAvatarImg('bursaspor.svg'), label: 'Bursaspor' },
-            { type: 'goztepe', emoji: teamAvatarImg('goztepe.svg'), label: 'Göztepe' },
-            { type: 'eskisehirspor', emoji: teamAvatarImg('eskisehirspor.svg'), label: 'Eskişehirspor' },
-            { type: 'saray', emoji: teamAvatarImg('saray-kavvesi.svg'), label: 'Saray Kavvesi' },
-            { type: 'ayasofya', emoji: teamAvatarImg('istanbul/ayasofya.svg'), label: 'Ayasofya' },
-            { type: 'ulucami', emoji: teamAvatarImg('istanbul/ulucami.svg'), label: 'Ulu Camii' },
-            { type: 'galata', emoji: teamAvatarImg('istanbul/galata.svg'), label: 'Galata' },
-            { type: 'kizkulesi', emoji: teamAvatarImg('istanbul/kiz-kulesi.svg'), label: 'Kız Kulesi' },
-            { type: 'bogaz', emoji: teamAvatarImg('istanbul/bogaz.svg'), label: 'Boğaz' },
-            { type: 'kopru', emoji: teamAvatarImg('istanbul/kopru.svg'), label: 'Köprü' },
-            { type: 'eminonu', emoji: teamAvatarImg('istanbul/eminonu.svg'), label: 'Eminönü' },
-            { type: 'balat', emoji: teamAvatarImg('istanbul/balat.svg'), label: 'Balat' },
-            { type: 'camii', emoji: teamAvatarImg('istanbul/camii.svg'), label: 'Camii' },
-            { type: 'sokak', emoji: teamAvatarImg('istanbul/sokak.svg'), label: 'Sokak' },
-            { type: 'panorama', emoji: teamAvatarImg('istanbul/panorama.svg'), label: 'Panorama' },
-            { type: 'gunbatimi', emoji: teamAvatarImg('istanbul/gunbatimi.svg'), label: 'Gün Batımı' },
+            { type: 'besiktas', file: 'besiktas.svg', label: 'Beşiktaş' },
+            { type: 'bursaspor', file: 'bursaspor.svg', label: 'Bursaspor' },
+            { type: 'goztepe', file: 'goztepe.svg', label: 'Göztepe' },
+            { type: 'eskisehirspor', file: 'eskisehirspor.svg', label: 'Eskişehirspor' },
+            { type: 'saray', file: 'saray-kavvesi.svg', label: 'Saray Kavvesi' },
+            { type: 'ayasofya', file: 'istanbul/ayasofya.svg', label: 'Ayasofya' },
+            { type: 'ulucami', file: 'istanbul/ulucami.svg', label: 'Ulu Camii' },
+            { type: 'galata', file: 'istanbul/galata.svg', label: 'Galata' },
+            { type: 'kizkulesi', file: 'istanbul/kiz-kulesi.svg', label: 'Kız Kulesi' },
+            { type: 'bogaz', file: 'istanbul/bogaz.svg', label: 'Boğaz' },
+            { type: 'kopru', file: 'istanbul/kopru.svg', label: 'Köprü' },
+            { type: 'eminonu', file: 'istanbul/eminonu.svg', label: 'Eminönü' },
+            { type: 'balat', file: 'istanbul/balat.svg', label: 'Balat' },
+            { type: 'camii', file: 'istanbul/camii.svg', label: 'Camii' },
+            { type: 'sokak', file: 'istanbul/sokak.svg', label: 'Sokak' },
+            { type: 'panorama', file: 'istanbul/panorama.svg', label: 'Panorama' },
+            { type: 'gunbatimi', file: 'istanbul/gunbatimi.svg', label: 'Gün Batımı' },
         ];
+
+        function extractAvatarSvgPath(value) {
+            if (!value || typeof value !== 'string') return null;
+            if (value.startsWith('team:')) return value.slice(5);
+            const match = value.match(/avatars\/([^"?]+\.svg)/i);
+            return match ? match[1] : null;
+        }
+
+        function resolveAvatarType(value) {
+            const file = extractAvatarSvgPath(value);
+            if (!file) return null;
+            const found = AVATAR_OPTIONS.find((o) => o.file === file);
+            return found ? found.type : null;
+        }
+
+        function serializeAvatarForSave(value) {
+            if (isCustomPhotoAvatar(value)) return value;
+            const file = extractAvatarSvgPath(value);
+            if (file) return `team:${file}`;
+            return value;
+        }
 
         function isLegacyEmojiAvatar(value) {
             return typeof value === 'string' && value.length <= 8 && !value.includes('<') && !value.includes('/');
@@ -601,16 +624,19 @@
         }
 
         function isTeamAvatar(value) {
-            return typeof value === 'string' && value.includes('avatar-glass-emblem');
+            return typeof value === 'string' && (value.startsWith('team:') || value.includes('avatar-glass-emblem'));
         }
 
         function isCustomPhotoAvatar(value) {
-            return typeof value === 'string' && value.includes('<img') && !isTeamAvatar(value);
+            return typeof value === 'string'
+                && (value.startsWith('photo:') || (value.includes('<img') && !isTeamAvatar(value)));
         }
 
-        function highlightAvatarSelection(selector, value) {
+        function highlightAvatarSelection(selector, value, typeHint) {
+            const activeType = typeHint || resolveAvatarType(value);
             document.querySelectorAll(selector).forEach((btn) => {
-                const active = btn.getAttribute('data-avatar-value') === value;
+                const btnType = btn.getAttribute('data-avatar-type');
+                const active = activeType ? btnType === activeType : false;
                 btn.classList.toggle('selected', active);
                 btn.classList.toggle('ring-2', active);
                 btn.classList.toggle('ring-[var(--theme-primary)]', active);
@@ -630,11 +656,15 @@
 
         function normalizeAvatarValue(value, userId) {
             if (!value || typeof value !== 'string') return DEFAULT_AVATAR;
-            if (value.includes('avatar-glass-emblem') || value.includes('lisani-avatar-img') || value.includes('object-cover')) {
-                return value;
+            if (value.startsWith('team:')) return teamAvatarImg(value.slice(5));
+            if (value.startsWith('photo:')) {
+                const path = value.slice(6).replace(/^\/+/, '');
+                const base = (window.LISANI_BASE || '').replace(/\/$/, '');
+                return `<img src="${base}/storage/${path}" class="lisani-avatar-img" alt="" />`;
             }
-            const svgMatch = value.match(/avatars\/(.+\.svg)/i);
-            if (svgMatch) return teamAvatarImg(svgMatch[1]);
+            if (isCustomPhotoAvatar(value)) return value;
+            const svgPath = extractAvatarSvgPath(value);
+            if (svgPath) return teamAvatarImg(svgPath);
             return resolveLegacyAvatar(value);
         }
 
@@ -671,6 +701,8 @@
         window.applyAvatarToContainer = applyAvatarToContainer;
         window.normalizeAvatarValue = normalizeAvatarValue;
         window.formatAvatarForDisplay = formatAvatarForDisplay;
+        window.serializeAvatarForSave = serializeAvatarForSave;
+        window.resolveAvatarType = resolveAvatarType;
 
         function resolveAvatarSlotClass(sizeClass) {
             const map = {
@@ -707,17 +739,19 @@
             const btn = document.createElement('button');
             btn.type = 'button';
             btn.setAttribute('data-avatar-type', opt.type);
-            btn.setAttribute('data-avatar-value', opt.emoji);
+            btn.setAttribute('data-avatar-file', opt.file);
+            btn.setAttribute('data-avatar-value', `team:${opt.file}`);
+            const emoji = teamAvatarImg(opt.file);
             const iconSize = mode === 'register' ? 'h-8 w-8' : 'h-7 w-7';
             const labelSize = mode === 'register' ? 'text-[8px]' : 'text-[7px]';
             btn.className = mode === 'register'
                 ? 'avatar-option flex flex-col items-center justify-center gap-1 rounded-xl py-2.5 transition-all duration-200 theme-border'
                 : 'edit-avatar-option flex flex-col items-center justify-center gap-1 rounded-xl py-2 transition-all duration-200 theme-border w-full';
-            btn.innerHTML = `${avatarIconHtml(opt.emoji, iconSize)}<span class="${labelSize} font-semibold theme-text-muted truncate max-w-full px-0.5">${opt.label}</span>`;
+            btn.innerHTML = `${avatarIconHtml(emoji, iconSize)}<span class="${labelSize} font-semibold theme-text-muted truncate max-w-full px-0.5">${opt.label}</span>`;
             if (mode === 'register') {
-                btn.addEventListener('click', () => selectAvatar(opt.type, opt.emoji));
+                btn.addEventListener('click', () => selectAvatar(opt.type));
             } else {
-                btn.addEventListener('click', () => selectEditAvatar(opt.type, opt.emoji));
+                btn.addEventListener('click', () => selectEditAvatar(opt.type));
             }
             return btn;
         }
@@ -819,25 +853,29 @@
             }
         }
 
-        function selectAvatar(type, emoji) {
+        function selectAvatar(type) {
             playClickSound();
+            const opt = AVATAR_OPTIONS.find((o) => o.type === type);
+            if (!opt) return;
             selectedAvatarType = type;
-            selectedAvatarValue = emoji;
-            highlightAvatarSelection('.avatar-option', emoji);
+            selectedAvatarValue = `team:${opt.file}`;
+            highlightAvatarSelection('.avatar-option', selectedAvatarValue, type);
 
             const preview = document.getElementById('avatar-preview-big');
             const label = document.getElementById('avatar-preview-label');
-            if (preview) applyAvatarToContainer(preview, emoji);
+            if (preview) applyAvatarToContainer(preview, selectedAvatarValue);
             if (label) label.textContent = getAvatarLabel(type);
         }
 
-        function selectEditAvatar(type, emoji) {
+        function selectEditAvatar(type) {
             playClickSound();
-            editAvatarValue = emoji;
-            highlightAvatarSelection('.edit-avatar-option', emoji);
+            const opt = AVATAR_OPTIONS.find((o) => o.type === type);
+            if (!opt) return;
+            editAvatarValue = `team:${opt.file}`;
+            highlightAvatarSelection('.edit-avatar-option', editAvatarValue, type);
 
             const preview = document.getElementById('edit-avatar-preview');
-            applyAvatarToContainer(preview, emoji);
+            applyAvatarToContainer(preview, editAvatarValue);
         }
 
         function triggerAvatarUpload() {
@@ -1761,6 +1799,32 @@
             launchQuizEngine(bolumId, stepIndex);
         }
 
+        function getChestAssetUrls() {
+            const assets = window.LISANI_ASSETS || {};
+            const base = window.LISANI_BASE || '';
+            const rev = assets.chestRev || '';
+            const withRev = (url, file) => {
+                const raw = url || `${base}/images/chest/${file}`;
+                if (!rev) return raw;
+                const clean = String(raw).replace(/([?&])v=[^&]+/g, '');
+                const sep = clean.includes('?') ? '&' : '?';
+                return `${clean}${sep}v=${rev}`;
+            };
+            return {
+                ready: withRev(assets.chestReady, 'treasure-chest-ready.png'),
+                opened: withRev(assets.chestOpened, 'treasure-chest-opened.png'),
+                locked: withRev(assets.chestLocked, 'treasure-chest-locked.png'),
+            };
+        }
+
+        function treasureChestIcon(state) {
+            const urls = getChestAssetUrls();
+            const src = urls[state] || urls.ready;
+            return `<span class="lisani-bolum-chest__icon lisani-bolum-chest__icon--${state}" aria-hidden="true">
+                <img src="${src}" alt="" class="lisani-treasure-chest-img" width="256" height="256" decoding="async" draggable="false"${state === 'ready' ? ' fetchpriority="high"' : ' loading="lazy"'} />
+            </span>`;
+        }
+
         function createBolumChest(bolum, bolumUnlocked, assignMode) {
             const chest = document.createElement('button');
             chest.type = 'button';
@@ -1781,7 +1845,7 @@
                 chest.disabled = true;
             } else if (chestReady) {
                 chest.classList.add('is-ready');
-                chest.innerHTML = '<span class="lisani-bolum-chest__icon" aria-hidden="true">🎁</span>';
+                chest.innerHTML = treasureChestIcon('ready');
                 chest.onclick = () => {
                     if (typeof window.openBolumChestWheel === 'function') {
                         window.openBolumChestWheel(bolum.id);
@@ -1789,11 +1853,11 @@
                 };
             } else if (chestClaimed) {
                 chest.classList.add('is-opened');
-                chest.innerHTML = '<span class="lisani-bolum-chest__icon" aria-hidden="true">📦</span>';
+                chest.innerHTML = treasureChestIcon('opened');
                 chest.disabled = true;
             } else {
                 chest.classList.add('is-locked');
-                chest.innerHTML = '<span class="lisani-bolum-chest__icon" aria-hidden="true">🔒</span>';
+                chest.innerHTML = treasureChestIcon('locked');
                 chest.disabled = true;
             }
             return chest;
@@ -1844,16 +1908,25 @@
 
         function setTestsSubview(mode) {
             const map = { list: 1, quiz: 2, result: 3 };
-            const showId =
-                mode === 'quiz'
-                    ? 'quiz-active-view'
-                    : mode === 'result'
-                      ? 'quiz-result-view'
-                      : 'bolum-selection-view';
-            ['bolum-selection-view', 'test-selection-view', 'quiz-active-view', 'quiz-result-view'].forEach((id) => {
-                const el = document.getElementById(id);
-                if (el) el.classList.toggle('hidden', id !== showId);
-            });
+            if (mode === 'list') {
+                ['test-selection-view', 'quiz-active-view', 'quiz-result-view'].forEach((id) => {
+                    document.getElementById(id)?.classList.add('hidden');
+                });
+                document.getElementById('kariyer-modal-container')?.classList.remove('hidden');
+                if (typeof renderBolumList === 'function') renderBolumList();
+            } else {
+                document.getElementById('kariyer-modal-container')?.classList.add('hidden');
+                const showId =
+                    mode === 'quiz'
+                        ? 'quiz-active-view'
+                        : mode === 'result'
+                          ? 'quiz-result-view'
+                          : null;
+                ['test-selection-view', 'quiz-active-view', 'quiz-result-view'].forEach((id) => {
+                    const el = document.getElementById(id);
+                    if (el) el.classList.toggle('hidden', id !== showId);
+                });
+            }
             updateTestsStepPill(map[mode] || 1);
         }
 
@@ -1907,7 +1980,8 @@
 
                 const block = document.createElement('div');
                 const blockCurve = index % 2 === 0 ? 'lisani-bolum-tur-block--c-reverse' : 'lisani-bolum-tur-block--c-normal';
-                block.className = `lisani-bolum-tur-block ${blockCurve}${!bolumUnlocked ? ' is-bolum-locked' : ''}`;
+                const chestSide = blockCurve.includes('c-normal') ? ' lisani-bolum-tur-block--chest-left' : '';
+                block.className = `lisani-bolum-tur-block ${blockCurve}${chestSide}${!bolumUnlocked ? ' is-bolum-locked' : ''}`;
                 block.appendChild(btn);
 
                 block.appendChild(createBolumNodeTrack(bolum, index, assignMode, bolumUnlocked));
@@ -2019,6 +2093,7 @@
             }
 
             document.getElementById('active-quiz-title').innerText = activeTestName;
+            document.getElementById('kariyer-modal-container')?.classList.add('hidden');
             ensureTestsScreenVisible();
             setTestsSubview('quiz');
             if (typeof switchTab === 'function') switchTab('tests', true, true);
@@ -2059,6 +2134,7 @@
             );
 
             document.getElementById('active-quiz-title').innerText = activeTestName;
+            document.getElementById('kariyer-modal-container')?.classList.add('hidden');
             ensureTestsScreenVisible();
             setTestsSubview('quiz');
             if (typeof switchTab === 'function') switchTab('tests', true, true);
@@ -2077,13 +2153,7 @@
             stopSpeechListening();
             if (quizAdvanceTimer) clearTimeout(quizAdvanceTimer);
             quizAdvanceTimer = null;
-            const highlight = bolumIdFromHint(bolumIdHint) || null;
-
-            ensureTestsScreenVisible();
-            setTestsSubview('list');
-            if (typeof switchTab === 'function') switchTab('tests', true, true);
-            renderBolumList(highlight);
-            if (typeof lucide !== 'undefined') lucide.createIcons();
+            openKariyerModu(bolumIdHint);
         };
 
         window.startLevel = startBolum;
@@ -3076,7 +3146,7 @@
                 typeof window.openBolumChestWheel === 'function'
             ) {
                 setTimeout(() => {
-                    showToast('Sandık açıldı! Çark hakkın hazır 🎁', 'success');
+                    showToast('Sandık açıldı! Çark hakkın hazır ✨', 'success');
                     window.openBolumChestWheel(activeBolumId);
                 }, 900);
             }
@@ -3251,14 +3321,11 @@
             const preview = document.getElementById('edit-avatar-preview');
             editAvatarValue = currentUser.avatar;
             applyAvatarToContainer(preview, normalizeAvatarValue(currentUser.avatar, currentUser.uid));
-
-            document.querySelectorAll('.edit-avatar-option').forEach(btn => {
-                btn.classList.remove('selected');
-                const val = btn.getAttribute('data-avatar-value');
-                if (val && val === normalizeAvatarValue(currentUser.avatar, currentUser.uid)) {
-                    btn.classList.add('selected');
-                }
-            });
+            highlightAvatarSelection(
+                '.edit-avatar-option',
+                currentUser.avatar,
+                resolveAvatarType(currentUser.avatar)
+            );
 
             document.getElementById('edit-profile-container').classList.remove('hidden');
         }
@@ -3268,204 +3335,276 @@
             document.getElementById('edit-profile-container').classList.add('hidden');
         }
 
-        function openKariyerModu() {
-            playClickSound();
-            if (window.LisaniTennisOnline?.resetKariyerPanels) {
-                window.LisaniTennisOnline.resetKariyerPanels();
-            } else {
-                document.getElementById('career-intro-wrapper')?.classList.remove('hidden');
-                document.getElementById('kariyer-tennis-online-block')?.classList.add('hidden');
-                document.getElementById('tennis-game-container')?.classList.add('hidden');
-                document.getElementById('flappy-game-container')?.classList.add('hidden');
-                document.getElementById('gokhan-abi-block')?.classList.add('hidden');
+        // --- ZAMANA KARŞI (1 dk) ---
+        const TIME_ATTACK_DURATION_MS = 60 * 1000;
+        let timeAttackState = null;
+        let timeAttackTimerId = null;
+
+        function buildTimeAttackPool() {
+            const pools = window.LISANI_POOLS || {};
+            const out = [];
+            ['card', 'letter'].forEach((kind) => {
+                (pools[kind] || []).forEach((q) => {
+                    if (!q.options || q.options.length < 2) return;
+                    if (q.type === 'speak' || q.type === 'tiles') return;
+                    out.push(JSON.parse(JSON.stringify({ ...q, type: q.type || kind })));
+                });
+            });
+            if (out.length) return shuffleQuizPool(out);
+            if (typeof window.getPlacementQuestionPool === 'function') {
+                const placement = window.getPlacementQuestionPool().filter((q) => q.options && q.options.length >= 2);
+                if (placement.length) return shuffleQuizPool(placement);
             }
-            if (window.LisaniFlappy?.stop) window.LisaniFlappy.stop();
-            if (window.LisaniGokhanEaster?.stopAudio) window.LisaniGokhanEaster.stopAudio();
-            document.getElementById('kariyer-modal-container').classList.remove('hidden');
-            lucide.createIcons();
+            return [];
+        }
+
+        function formatTimeAttackClock(msLeft) {
+            const totalSec = Math.max(0, Math.ceil(msLeft / 1000));
+            const m = Math.floor(totalSec / 60);
+            const s = totalSec % 60;
+            return `${m}:${String(s).padStart(2, '0')}`;
+        }
+
+        function updateTimeAttackHud() {
+            if (!timeAttackState) return;
+            const left = Math.max(0, timeAttackState.endAt - Date.now());
+            const timerEl = document.getElementById('time-attack-timer');
+            const fillEl = document.getElementById('time-attack-timer-fill');
+            const scoreEl = document.getElementById('time-attack-live-score');
+            if (timerEl) {
+                timerEl.textContent = formatTimeAttackClock(left);
+                timerEl.classList.toggle('is-urgent', left <= 10000);
+            }
+            if (fillEl) {
+                const pct = Math.max(0, Math.min(100, (left / TIME_ATTACK_DURATION_MS) * 100));
+                fillEl.style.width = `${pct}%`;
+            }
+            if (scoreEl) scoreEl.textContent = String(timeAttackState.correct);
+        }
+
+        function pullNextTimeAttackQuestion() {
+            if (!timeAttackState) return null;
+            if (timeAttackState.poolIndex >= timeAttackState.pool.length) {
+                timeAttackState.pool = shuffleQuizPool(timeAttackState.pool);
+                timeAttackState.poolIndex = 0;
+            }
+            const raw = timeAttackState.pool[timeAttackState.poolIndex++];
+            return raw?.options ? shuffleQuestionOptions(raw) : null;
+        }
+
+        function renderTimeAttackQuestion() {
+            if (!timeAttackState?.running) return;
+            const box = document.getElementById('time-attack-question-box');
+            if (!box) return;
+
+            let q = null;
+            for (let i = 0; i < 8; i++) {
+                q = pullNextTimeAttackQuestion();
+                if (q && q.options?.length >= 2) break;
+            }
+            if (!q) {
+                box.innerHTML = '<p class="text-[11px] text-cyan-100/80 text-center py-8">Soru yüklenemedi.</p>';
+                return;
+            }
+
+            timeAttackState.current = q;
+            timeAttackState.locked = false;
+
+            const defaultPrompt = window.LISANI_CARD_PROMPT || 'Doğru cevabı seç';
+            const optionLabels = ['A', 'B', 'C', 'D'];
+            const optionsHtml = q.options
+                .map(
+                    (opt, idx) => `
+                <button type="button" class="lisani-time-attack-option lisani-glass-panel w-full py-3 px-3.5 rounded-xl text-[11px] font-bold text-left flex items-center gap-3 cursor-pointer active:scale-[0.98]" data-option="${String(opt).replace(/"/g, '&quot;')}">
+                    <span class="lisani-quiz-option__letter">${optionLabels[idx] || '•'}</span>
+                    <span class="flex-1 min-w-0 leading-relaxed text-white">${opt}</span>
+                </button>`
+                )
+                .join('');
+
+            const wordHtml = (q.word || '').replace(/\n/g, '<br>');
+            box.innerHTML = `
+                <div class="lisani-time-attack-card lisani-glass-panel rounded-2xl p-5 text-center space-y-2.5">
+                    <div class="text-4xl leading-none">${q.image || '📖'}</div>
+                    <p class="text-[9px] text-cyan-200/75 uppercase font-bold tracking-[0.18em]">${q.prompt || defaultPrompt}</p>
+                    <h2 class="arabic-text text-2xl font-black text-white lisani-quiz-arabic leading-relaxed">${wordHtml}</h2>
+                </div>
+                <div class="lisani-time-attack-options space-y-2 mt-3">${optionsHtml}</div>`;
+
+            box.querySelectorAll('.lisani-time-attack-option').forEach((btn) => {
+                btn.onclick = () => {
+                    if (!timeAttackState?.running || timeAttackState.locked) return;
+                    timeAttackState.locked = true;
+                    playClickSound();
+                    const selected = btn.getAttribute('data-option');
+                    const isCorrect = selected === q.answer;
+                    timeAttackState.answered += 1;
+                    if (isCorrect) {
+                        timeAttackState.correct += 1;
+                        if (typeof playSuccessSound === 'function') playSuccessSound();
+                    }
+                    updateTimeAttackHud();
+
+                    box.querySelectorAll('.lisani-time-attack-option').forEach((b) => {
+                        b.disabled = true;
+                        if (b.getAttribute('data-option') === q.answer) {
+                            b.classList.add('lisani-quiz-option--correct');
+                        } else if (b === btn && !isCorrect) {
+                            b.classList.add('lisani-quiz-option--wrong');
+                        }
+                    });
+
+                    setTimeout(() => {
+                        if (!timeAttackState?.running) return;
+                        renderTimeAttackQuestion();
+                    }, isCorrect ? 320 : 520);
+                };
+            });
+        }
+
+        function showTimeAttackResult() {
+            const play = document.getElementById('time-attack-play');
+            const result = document.getElementById('time-attack-result');
+            const finalScore = document.getElementById('time-attack-final-score');
+            const finalMeta = document.getElementById('time-attack-final-meta');
+            if (play) play.classList.add('hidden');
+            if (result) result.classList.remove('hidden');
+            const correct = timeAttackState?.correct || 0;
+            const answered = timeAttackState?.answered || 0;
+            if (finalScore) finalScore.textContent = String(correct);
+            if (finalMeta) {
+                finalMeta.textContent =
+                    answered > 0 ? `${answered} soru cevaplandı` : 'Hiç soru cevaplanmadı';
+            }
+            try {
+                const key = 'lisani_time_attack_best';
+                const prev = parseInt(localStorage.getItem(key) || '0', 10) || 0;
+                if (correct > prev) localStorage.setItem(key, String(correct));
+                const best = Math.max(prev, correct);
+                if (finalMeta && best > 0) {
+                    finalMeta.textContent += best === correct && correct > prev ? ' · Yeni rekor! 🎉' : ` · En iyi: ${best}`;
+                }
+            } catch (_) { /* ignore */ }
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        }
+
+        function finishTimeAttack() {
+            if (!timeAttackState) return;
+            timeAttackState.running = false;
+            if (timeAttackTimerId) {
+                clearInterval(timeAttackTimerId);
+                timeAttackTimerId = null;
+            }
+            updateTimeAttackHud();
+            showTimeAttackResult();
+        }
+
+        function stopTimeAttackSession(showResult) {
+            if (timeAttackTimerId) {
+                clearInterval(timeAttackTimerId);
+                timeAttackTimerId = null;
+            }
+            if (showResult && timeAttackState?.running) {
+                finishTimeAttack();
+                return;
+            }
+            timeAttackState = null;
+            document.getElementById('time-attack-play')?.classList.remove('hidden');
+            document.getElementById('time-attack-result')?.classList.add('hidden');
+            document.getElementById('time-attack-view')?.classList.add('hidden');
+            document.getElementById('bolum-selection-view')?.classList.remove('hidden');
+        }
+
+        function startTimeAttackTick() {
+            if (timeAttackTimerId) clearInterval(timeAttackTimerId);
+            timeAttackTimerId = setInterval(() => {
+                if (!timeAttackState?.running) return;
+                updateTimeAttackHud();
+                if (Date.now() >= timeAttackState.endAt) finishTimeAttack();
+            }, 100);
+        }
+
+        window.startTimeAttack = function (event) {
+            if (event) event.stopPropagation();
+            playClickSound();
+
+            const pool = buildTimeAttackPool();
+            if (!pool.length) {
+                if (typeof showToast === 'function') showToast('Zamana karşı soruları yüklenemedi.', 'error');
+                return;
+            }
+
+            if (timeAttackTimerId) {
+                clearInterval(timeAttackTimerId);
+                timeAttackTimerId = null;
+            }
+
+            timeAttackState = {
+                pool,
+                poolIndex: 0,
+                correct: 0,
+                answered: 0,
+                running: true,
+                locked: false,
+                endAt: Date.now() + TIME_ATTACK_DURATION_MS,
+            };
+
+            document.getElementById('bolum-selection-view')?.classList.add('hidden');
+            document.getElementById('time-attack-view')?.classList.remove('hidden');
+            document.getElementById('time-attack-play')?.classList.remove('hidden');
+            document.getElementById('time-attack-result')?.classList.add('hidden');
+
+            updateTimeAttackHud();
+            startTimeAttackTick();
+            renderTimeAttackQuestion();
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        };
+
+        window.exitTimeAttack = function () {
+            playClickSound();
+            stopTimeAttackSession(false);
+            document.getElementById('bolum-selection-view')?.classList.remove('hidden');
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        };
+
+        function preloadChestAssets(force) {
+            if (window._lisaniChestPreloaded && !force) return;
+            window._lisaniChestPreloaded = false;
+            Object.values(getChestAssetUrls()).forEach((src) => {
+                const img = new Image();
+                img.src = src;
+            });
+            window._lisaniChestPreloaded = true;
+        }
+
+        function openKariyerModu(bolumIdHint) {
+            playClickSound();
+            preloadChestAssets(true);
+            if (typeof stopTimeAttackSession === 'function') stopTimeAttackSession(false);
+            const highlight = typeof bolumIdHint === 'string' ? bolumIdFromHint(bolumIdHint) : null;
+            if (typeof renderBolumList === 'function') {
+                renderBolumList(highlight || undefined);
+            }
+            document.getElementById('bolum-selection-view')?.classList.remove('hidden');
+            document.getElementById('time-attack-view')?.classList.add('hidden');
+            document.getElementById('kariyer-modal-container')?.classList.remove('hidden');
+            if (typeof lucide !== 'undefined') lucide.createIcons();
         }
 
         function closeKariyerModu() {
             playClickSound();
-            stopTennisGame();
-            if (window.LisaniFlappy?.stop) window.LisaniFlappy.stop();
-            if (window.LisaniGokhanEaster?.stopAudio) window.LisaniGokhanEaster.stopAudio();
-            if (window.LisaniTennisOnline) {
-                window.LisaniTennisOnline.stop(false);
-            }
-            document.getElementById('kariyer-modal-container').classList.add('hidden');
-
-            document.getElementById('career-intro-wrapper').classList.remove('hidden');
-            document.getElementById('kariyer-tennis-online-block')?.classList.add('hidden');
-            document.getElementById('tennis-game-container').classList.add('hidden');
-            document.getElementById('flappy-game-container')?.classList.add('hidden');
-            document.getElementById('gokhan-abi-block')?.classList.add('hidden');
+            if (typeof stopTimeAttackSession === 'function') stopTimeAttackSession(false);
+            document.getElementById('kariyer-modal-container')?.classList.add('hidden');
         }
 
-        // --- 🎾 GİZLİ TENİS OYUNU KİLİT DURUMU (yalnızca oturum içi; her girişte şifre gerekir) ---
-        let tennisUnlocked = false;
+        window.openKariyerModu = openKariyerModu;
+        window.closeKariyerModu = closeKariyerModu;
 
         window.getTennisUnlocked = function () {
-            return tennisUnlocked;
+            return false;
         };
 
-        function tennisUnlockStorageKey(uid) {
-            return uid ? `lisani_tennis_unlocked_${uid}` : 'lisani_tennis_unlocked';
-        }
-
-        function clearTennisUnlockStorage(uid) {
-            try {
-                localStorage.removeItem(tennisUnlockStorageKey(uid));
-                localStorage.removeItem('lisani_tennis_unlocked');
-            } catch (e) {}
-        }
-
-        function applyTennisUnlockUI(unlocked) {
-            const badge = document.getElementById('tennis-unlock-badge');
-            if (badge) badge.classList.toggle('hidden', !unlocked);
-            const form = document.getElementById('tennis-secret-form');
-            const hint = document.getElementById('tennis-secret-hint');
-            const msg = document.getElementById('tennis-unlocked-msg');
-            if (form) form.classList.toggle('hidden', unlocked);
-            if (hint) hint.classList.toggle('hidden', unlocked);
-            if (msg) msg.classList.toggle('hidden', !unlocked);
-        }
-
-        function setTennisUnlockState(unlocked, uid) {
-            tennisUnlocked = !!unlocked;
-            if (!unlocked) {
-                clearTennisUnlockStorage(uid);
-            }
-            applyTennisUnlockUI(tennisUnlocked);
-            if (currentUser && (!uid || String(currentUser.uid) === String(uid))) {
-                currentUser.tennisUnlocked = tennisUnlocked;
-            }
-        }
-
-        function syncTennisUnlockFromUser(user) {
-            clearTennisUnlockStorage(user?.uid);
-            setTennisUnlockState(false, user?.uid);
-        }
-
-        window.syncTennisUnlockFromUser = syncTennisUnlockFromUser;
-
-        // --- KARİYER MODU TEK / ÇİFT / ÜÇ / DÖRT TIKLAMA YÖNETİMİ ---
-        let kariyerClickCount = 0;
-        let kariyerClickTimer = null;
-
-        function handleKariyerModuClick() {
-            kariyerClickCount++;
-            clearTimeout(kariyerClickTimer);
-
-            if (kariyerClickCount >= 4) {
-                kariyerClickCount = 0;
-                launchGokhanAbiEasterEgg();
-                return;
-            }
-
-            kariyerClickTimer = setTimeout(() => {
-                const count = kariyerClickCount;
-                kariyerClickCount = 0;
-                if (count === 1) {
-                    openKariyerModu();
-                } else if (count === 2) {
-                    if (tennisUnlocked) {
-                        if (typeof window.openTennisOnlineLobby === 'function') {
-                            window.openTennisOnlineLobby();
-                        } else {
-                            launchTennisDirectly();
-                        }
-                    } else {
-                        openKariyerModu();
-                        showToast("Tenis oyununu açmak için önce profil bölümündeki şifreyi gir. 🗝️", "info");
-                    }
-                } else if (count === 3) {
-                    launchFlappyDirectly();
-                }
-            }, 380);
-        }
-
-        function launchGokhanAbiEasterEgg() {
-            playClickSound();
-            stopTennisGame();
-            if (window.LisaniFlappy?.stop) window.LisaniFlappy.stop();
-            if (window.LisaniTennisOnline) window.LisaniTennisOnline.stop(false);
-
-            document.getElementById('kariyer-modal-container').classList.remove('hidden');
-            document.getElementById('career-intro-wrapper')?.classList.add('hidden');
-            document.getElementById('kariyer-tennis-online-block')?.classList.add('hidden');
-            document.getElementById('tennis-game-container')?.classList.add('hidden');
-            document.getElementById('flappy-game-container')?.classList.add('hidden');
-            document.getElementById('gokhan-abi-block')?.classList.remove('hidden');
-            lucide.createIcons();
-
-            showToast('Gökhan Abi açıldı — kamera ikonuna dokun. 📹', 'success');
-        }
-
-        window.launchGokhanAbiEasterEgg = launchGokhanAbiEasterEgg;
-
-        function launchFlappyDirectly() {
-            playClickSound();
-            stopTennisGame();
-            if (window.LisaniTennisOnline) {
-                window.LisaniTennisOnline.stop(false);
-            }
-            document.getElementById('kariyer-modal-container').classList.remove('hidden');
-            document.getElementById('career-intro-wrapper').classList.add('hidden');
-            document.getElementById('kariyer-tennis-online-block')?.classList.add('hidden');
-            document.getElementById('tennis-game-container')?.classList.add('hidden');
-            document.getElementById('gokhan-abi-block')?.classList.add('hidden');
-            document.getElementById('flappy-game-container')?.classList.remove('hidden');
-            lucide.createIcons();
-            try {
-                const best = parseInt(localStorage.getItem('lisani_flappy_best') || '0', 10) || 0;
-                const bestEl = document.getElementById('flappy-best-score');
-                if (bestEl) bestEl.textContent = 'En iyi: ' + best;
-            } catch (_) { /* ignore */ }
-            showToast("Flappy Bird açıldı! 🐦", "success");
-            setTimeout(() => {
-                if (window.LisaniFlappy?.start) window.LisaniFlappy.start();
-            }, 180);
-        }
-
-        window.launchFlappyDirectly = launchFlappyDirectly;
-
-        // --- ANA SAYFADAN DOĞRUDAN TENİS OYUNUNU BAŞLAT ---
-        function launchTennisDirectly() {
-            playClickSound();
-            if (window.LisaniFlappy?.stop) window.LisaniFlappy.stop();
-            if (window.LisaniTennis) {
-                window.LisaniTennis.setOnlineMode(false, null, '', '');
-            }
-            if (window.LisaniTennisOnline) {
-                window.LisaniTennisOnline.stop(false);
-            }
-            document.getElementById('kariyer-modal-container').classList.remove('hidden');
-            document.getElementById('career-intro-wrapper').classList.add('hidden');
-            document.getElementById('kariyer-tennis-online-block')?.classList.add('hidden');
-            document.getElementById('flappy-game-container')?.classList.add('hidden');
-            document.getElementById('gokhan-abi-block')?.classList.add('hidden');
-            document.getElementById('tennis-game-container').classList.remove('hidden');
-            lucide.createIcons();
-            showToast("Tenis oyunu başlatıldı! 🎾", "success");
-            setTimeout(() => { initTennisGameEngine(); }, 220);
-        }
-
-        // --- PROFİL EKRANINDA ŞİFRE DOĞRULAMA ---
-        function submitProfileSecretCode() {
-            playClickSound();
-            const codeField = document.getElementById('profile-secret-code');
-            const entered = (codeField?.value || '').trim();
-
-            if (entered === "264506") {
-                setTennisUnlockState(true, currentUser?.uid);
-                if (codeField) codeField.value = '';
-                showToast("Şifre doğru! Kariyer Modu'na çift tıklayarak tenis oyununu aç. 🎾", "success");
-            } else {
-                showToast("Hatalı şifre.", "error");
-                if (codeField) codeField.value = '';
-            }
-        }
+        window.syncTennisUnlockFromUser = function () {};
 
         function handleAvatarUpload(event) {
             const file = event.target.files[0];
@@ -4155,6 +4294,7 @@
             } catch (e) {}
             applyDocumentColorMode(mode);
             highlightColorModeButtons();
+            if (typeof renderProgressChart === 'function') renderProgressChart();
             if (typeof showToast === 'function') {
                 showToast('Renk teması güncellendi.', 'success');
             }
@@ -4196,8 +4336,15 @@
                 el.classList.add('hidden');
                 return;
             }
-            el.href = url;
-            el.setAttribute('download', filename);
+            el.onclick = () => {
+                const a = document.createElement('a');
+                a.href = url;
+                a.setAttribute('download', filename);
+                a.rel = 'noopener';
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+            };
             el.classList.remove('hidden');
         }
 
@@ -4586,8 +4733,8 @@
                 line.setAttribute("y1", gy);
                 line.setAttribute("x2", width - marginR);
                 line.setAttribute("y2", gy);
-                line.setAttribute("stroke", "var(--theme-border)");
-                line.setAttribute("stroke-opacity", "0.35");
+                line.setAttribute("stroke", "var(--lisani-chart-grid, var(--theme-border))");
+                line.setAttribute("stroke-opacity", "0.55");
                 line.setAttribute("stroke-width", "1");
                 svg.appendChild(line);
 
@@ -4672,7 +4819,7 @@
                 circle.setAttribute("cx", pt.x);
                 circle.setAttribute("cy", pt.y);
                 circle.setAttribute("r", "6");
-                circle.setAttribute("fill", "#FFFFFF"); 
+                circle.setAttribute("fill", "var(--lisani-chart-point-fill, #ffffff)"); 
                 circle.setAttribute("stroke", "var(--theme-primary)"); 
                 circle.setAttribute("stroke-width", "3");
                 circle.style.cursor = "pointer";
@@ -6115,19 +6262,6 @@ self.addEventListener('notificationclick', e => {
             initDesktopWheelScroll();
             initToastSwipe();
             initRememberMeCheckbox();
-            initLearnStartTap();
-
-            try {
-                const savedSession = localStorage.getItem('lisani_session_user');
-                if (savedSession) {
-                    const u = JSON.parse(savedSession);
-                    syncTennisUnlockFromUser(u);
-                } else {
-                    applyTennisUnlockUI(false);
-                }
-            } catch (e) {
-                applyTennisUnlockUI(false);
-            }
 
             const firstHadis = hadisList[0];
             if (firstHadis) {
