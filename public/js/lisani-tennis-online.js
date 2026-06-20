@@ -39,11 +39,24 @@
         const game = el('tennis-game-container');
         const flappy = el('flappy-game-container');
         const gokhan = el('gokhan-abi-block');
+        const gorilla = el('kariyer-gorilla-block');
+        const secretVideo = el('kariyer-secret-video-block');
         if (intro) intro.classList.toggle('hidden', panel !== 'intro');
         if (online) online.classList.toggle('hidden', panel !== 'online');
         if (game) game.classList.toggle('hidden', panel !== 'game');
         if (flappy) flappy.classList.add('hidden');
         if (gokhan) gokhan.classList.add('hidden');
+        if (gorilla) gorilla.classList.add('hidden');
+        if (secretVideo) secretVideo.classList.add('hidden');
+        if (secretVideo) {
+            const video = document.getElementById('kariyer-secret-video');
+            if (video) {
+                try {
+                    video.pause();
+                    video.currentTime = 0;
+                } catch (_) { /* ignore */ }
+            }
+        }
         if (window.LisaniFlappy?.stop) window.LisaniFlappy.stop();
         if (window.LisaniGokhanEaster?.stopAudio) window.LisaniGokhanEaster.stopAudio();
     }

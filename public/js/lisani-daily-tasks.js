@@ -393,19 +393,16 @@
         if (event) event.stopPropagation();
         if (!isNewLearner()) {
             if (!isPlacementDone()) markPlacementDone();
-            closeLearnStartModal();
             if (typeof window.openLearnTests === 'function') {
                 window.openLearnTests();
+            } else if (typeof window.openKariyerModu === 'function') {
+                window.openKariyerModu();
             }
             return;
         }
-        const modal = document.getElementById('learn-start-modal');
-        if (modal) {
-            modal.classList.remove('hidden');
-            if (typeof lucide !== 'undefined') lucide.createIcons();
-            return;
-        }
-        if (typeof window.openLearnTests === 'function') {
+        if (typeof window.openKariyerModu === 'function') {
+            window.openKariyerModu();
+        } else if (typeof window.openLearnTests === 'function') {
             window.openLearnTests();
         }
     };
@@ -413,16 +410,13 @@
     window.continueLearnFromLast = function (event) {
         if (event) event.stopPropagation();
         markPlacementDone();
-        closeLearnStartModal();
+        closeLevelPicker();
         if (typeof window.openLearnTests === 'function') {
             window.openLearnTests();
         }
     };
 
-    window.closeLearnStartModal = function () {
-        const modal = document.getElementById('learn-start-modal');
-        if (modal) modal.classList.add('hidden');
-    };
+    window.closeLearnStartModal = function () {};
 
     window.openDailyGoalLetters = startDailyTaskAction;
     window.goToDailyGoalLetters = startDailyTaskAction;
@@ -460,7 +454,6 @@
         setUserLevel(lv);
         markPlacementDone();
         closeLevelPicker();
-        closeLearnStartModal();
         if (typeof showToast === 'function') showToast(`Seviye ${lv} kaydedildi.`, 'success');
         if (typeof window.openLearnTests === 'function') {
             window.openLearnTests(startBolum);
@@ -495,7 +488,7 @@
 
     window.startPlacementTest = function (event) {
         if (event) event.stopPropagation();
-        closeLearnStartModal();
+        if (typeof window.closeKariyerModu === 'function') window.closeKariyerModu();
         const questions = buildPlacementQuestions();
         if (!questions.length) {
             if (typeof showToast === 'function') showToast('Seviye testi hazırlanamadı.', 'error');

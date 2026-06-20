@@ -4,8 +4,17 @@
 (function () {
     'use strict';
 
-    const WHEEL_COLORS = ['#22c55e', '#9333ea', '#1d4ed8', '#0d9488', '#dc2626', '#ea580c'];
-    const POINTER_DEG = 270;
+    const WHEEL_COLORS = [
+        ['#22c55e', '#16a34a'],
+        ['#a855f7', '#7c3aed'],
+        ['#3b82f6', '#2563eb'],
+        ['#14b8a6', '#0d9488'],
+        ['#ef4444', '#dc2626'],
+        ['#f97316', '#ea580c'],
+        ['#eab308', '#ca8a04'],
+        ['#ec4899', '#db2777'],
+    ];
+    const POINTER_DEG = -90;
 
     const SEGMENTS = [
         { label: '25 XP', xp: 25, weight: 12 },
@@ -24,7 +33,10 @@
         { label: '1000 XP', xp: 1000, weight: 3 },
         { label: '1500 XP', xp: 1500, weight: 2 },
         { label: '2000 XP', xp: 2000, weight: 1 },
-    ].map((seg, i) => ({ ...seg, color: WHEEL_COLORS[i % WHEEL_COLORS.length] }));
+    ].map((seg, i) => {
+        const pair = WHEEL_COLORS[i % WHEEL_COLORS.length];
+        return { ...seg, color: pair[0], colorDark: pair[1] };
+    });
 
     let wheelCallback = null;
     let wheelSpinning = false;
@@ -85,6 +97,11 @@
 
         const n = SEGMENTS.length;
         const slice = 360 / n;
+        let defs = '<defs>';
+        SEGMENTS.forEach((seg, i) => {
+            defs += `<linearGradient id="wg${i}" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="${seg.color}"/><stop offset="100%" stop-color="${seg.colorDark}"/></linearGradient>`;
+        });
+        defs += '</defs>';
         let inner = '';
 
         SEGMENTS.forEach((seg, i) => {
@@ -95,17 +112,21 @@
             const x2 = 50 + 45 * Math.cos(a2);
             const y2 = 50 + 45 * Math.sin(a2);
             const large = slice > 180 ? 1 : 0;
-            inner += `<path d="M50,50 L${x1},${y1} A45,45 0 ${large},1 ${x2},${y2} Z" fill="${seg.color}" stroke="#111" stroke-width="0.35"/>`;
+            inner += `<path d="M50,50 L${x1},${y1} A45,45 0 ${large},1 ${x2},${y2} Z" fill="url(#wg${i})" stroke="rgba(255,255,255,0.35)" stroke-width="0.5"/>`;
 
             const mid = ((i + 0.5) * slice - 90) * (Math.PI / 180);
-            const tx = 50 + 30 * Math.cos(mid);
-            const ty = 50 + 30 * Math.sin(mid);
+            const tx = 50 + 28 * Math.cos(mid);
+            const ty = 50 + 28 * Math.sin(mid);
             const rot = i * slice + slice / 2;
-            const fs = seg.label.length > 7 ? '3.1' : '3.6';
-            inner += `<text x="${tx}" y="${ty}" fill="#fff" font-size="${fs}" font-weight="800" font-family="Arial,sans-serif" text-anchor="middle" dominant-baseline="middle" transform="rotate(${rot},${tx},${ty})">${segmentLabelSvg(seg.label)}</text>`;
+            const fs = seg.label.length > 7 ? '2.85' : '3.2';
+            const isJackpot = seg.xp >= 500;
+            inner += `<text x="${tx}" y="${ty}" fill="#fff" font-size="${fs}" font-weight="900" font-family="Arial,sans-serif" text-anchor="middle" dominant-baseline="middle" transform="rotate(${rot},${tx},${ty})" stroke="rgba(0,0,0,0.35)" stroke-width="0.25" paint-order="stroke">${segmentLabelSvg(seg.label)}</text>`;
+            if (isJackpot) {
+                inner += `<circle cx="${50 + 38 * Math.cos(mid)}" cy="${50 + 38 * Math.sin(mid)}" r="1.1" fill="#fef08a" opacity="0.95"/>`;
+            }
         });
 
-        wheelSvgCache = `<svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="50" cy="50" r="48" fill="none" stroke="#111" stroke-width="1.4"/>${inner}</svg>`;
+        wheelSvgCache = `<svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">${defs}<circle cx="50" cy="50" r="48" fill="none" stroke="#fbbf24" stroke-width="1.8"/><circle cx="50" cy="50" r="46.2" fill="none" stroke="rgba(255,255,255,0.25)" stroke-width="0.6"/>${inner}<circle cx="50" cy="50" r="14" fill="rgba(0,0,0,0.12)"/></svg>`;
         return wheelSvgCache;
     }
 
@@ -141,10 +162,13 @@
                 : 'Bu sandık zaten açıldı.';
         }
         if (hub) {
-            hub.innerHTML = ready ? '<span>ÖDÜL</span><span>ÇARK</span>' : '<span>SANDIK</span><span>🎁</span>';
+            hub.innerHTML = ready
+                ? '<span class="lisani-carkifelek-hub__star">★</span><span class="lisani-carkifelek-hub__label">ÇEVİR</span>'
+                : '<span class="lisani-carkifelek-hub__star">✓</span><span class="lisani-carkifelek-hub__label">BİTTİ</span>';
         }
         if (spinBtn) {
-            spinBtn.textContent = ready ? 'ÇEVİR!' : 'TAMAM';
+            const label = spinBtn.querySelector('.lisani-carkifelek-spin-btn__text');
+            if (label) label.textContent = ready ? 'ÇEVİR!' : 'TAMAM';
             spinBtn.disabled = false;
             spinBtn.classList.toggle('is-done', !ready);
         }
@@ -170,6 +194,7 @@
 
         if (result) {
             result.classList.add('hidden');
+            result.classList.remove('is-visible');
             result.innerHTML = '';
         }
         resetWheelDisc();
@@ -236,14 +261,18 @@
         const { seg, index } = pickSegment();
         const slice = 360 / SEGMENTS.length;
         const target = POINTER_DEG - (index * slice + slice / 2);
-        const spins = 6 + Math.floor(Math.random() * 2);
+        const spins = 7 + Math.floor(Math.random() * 3);
         const finalDeg = spins * 360 + target;
         const bolumId = activeChestBolumId;
 
-        disc.style.transition = 'transform 4.5s cubic-bezier(0.1, 0.85, 0.15, 1)';
+        disc.classList.add('is-spinning');
+        disc.style.transition = 'transform 5s cubic-bezier(0.12, 0.78, 0.1, 1)';
         disc.style.transform = `rotate(${finalDeg}deg)`;
+        document.querySelector('.lisani-carkifelek-outer')?.classList.add('is-spinning');
 
         setTimeout(() => {
+            disc.classList.remove('is-spinning');
+            document.querySelector('.lisani-carkifelek-outer')?.classList.remove('is-spinning');
             markChestClaimed(bolumId);
             if (typeof window.addLisaniXp === 'function') window.addLisaniXp(seg.xp);
             if (typeof showToast === 'function') {
@@ -251,17 +280,19 @@
             }
             if (result) {
                 result.classList.remove('hidden');
-                result.innerHTML = `<span class="text-xl font-black lisani-carkifelek-win">+${seg.xp} XP</span><span class="block text-[11px] theme-text-muted mt-1">${bolumTitle(bolumId)} sandığı açıldı</span>`;
+                result.classList.add('is-visible');
+                result.innerHTML = `<span class="lisani-carkifelek-win">+${seg.xp} XP</span><span class="lisani-carkifelek-win-sub">${bolumTitle(bolumId)} sandığı açıldı 🎉</span>`;
             }
             if (spinBtn) {
-                spinBtn.textContent = 'DEVAM ET';
+                const label = spinBtn.querySelector('.lisani-carkifelek-spin-btn__text');
+                if (label) label.textContent = 'DEVAM ET';
                 spinBtn.disabled = false;
                 spinBtn.classList.add('is-done');
                 spinBtn.onclick = () => window.closeRewardWheel();
             }
             wheelSpinning = false;
             setWheelModalCopy();
-        }, 4600);
+        }, 5100);
     };
 
     document.addEventListener('DOMContentLoaded', () => {

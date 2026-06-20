@@ -1,0 +1,312 @@
+/* Shitpost modu — tamamen bu dosyada; kapatınca devre dışı kalır */
+
+@import url('https://fonts.googleapis.com/css2?family=Comic+Neue:wght@700&family=Rubik+Glitch&display=swap');
+
+html.lisani-shitpost,
+html.lisani-shitpost body.lisani-body,
+html.lisani-shitpost .lisani-site-wrapper,
+html.lisani-shitpost #app-container,
+html.lisani-shitpost #auth-container,
+html.lisani-shitpost #main-application-flow,
+html.lisani-shitpost .theme-bg-phone {
+    font-family: 'Comic Neue', 'Comic Sans MS', cursive, sans-serif !important;
+}
+
+html.lisani-shitpost body.lisani-body,
+html.lisani-shitpost #app-container,
+html.lisani-shitpost #auth-container,
+html.lisani-shitpost .theme-bg-phone {
+    background: linear-gradient(
+        135deg,
+        #ff00ff 0%,
+        #ff6b9d 20%,
+        #00ffff 45%,
+        #ffff00 65%,
+        #00ff00 85%,
+        #ff0000 100%
+    ) !important;
+    background-color: transparent !important;
+    background-size: 400% 400% !important;
+    animation: lisani-shitpost-bg 4s ease infinite !important;
+}
+
+@keyframes lisani-shitpost-bg {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+html.lisani-shitpost .glass-card,
+html.lisani-shitpost .lisani-glass-panel,
+html.lisani-shitpost .theme-gradient-card,
+html.lisani-shitpost .lisani-glass-action {
+    border: 3px dashed #ff00ff !important;
+    box-shadow: 0 0 18px rgba(255, 0, 105, 0.55), 0 0 6px rgba(131, 58, 180, 0.45) !important;
+    transform: rotate(-0.6deg);
+}
+
+html.lisani-shitpost .glass-card:nth-child(even),
+html.lisani-shitpost .lisani-glass-panel:nth-child(even) {
+    transform: rotate(0.9deg);
+}
+
+html.lisani-shitpost .theme-text-main,
+html.lisani-shitpost h1,
+html.lisani-shitpost h2,
+html.lisani-shitpost h3,
+html.lisani-shitpost h4 {
+    text-shadow: 2px 2px 0 #000, -1px -1px 0 #ff00ff !important;
+    letter-spacing: 0.02em;
+}
+
+html.lisani-shitpost .lisani-desktop-brand__title,
+html.lisani-shitpost #auth-container h1 {
+    font-family: 'Rubik Glitch', 'Comic Neue', cursive !important;
+    animation: lisani-shitpost-wiggle 0.35s ease-in-out infinite alternate;
+}
+
+@keyframes lisani-shitpost-wiggle {
+    from { transform: rotate(-2deg) scale(1); }
+    to { transform: rotate(2deg) scale(1.03); }
+}
+
+html.lisani-shitpost #bottom-bar.lisani-tab-bar-ios button {
+    animation: lisani-shitpost-bounce 1.2s ease-in-out infinite;
+}
+
+html.lisani-shitpost #bottom-bar.lisani-tab-bar-ios button:nth-child(2) { animation-delay: 0.1s; }
+html.lisani-shitpost #bottom-bar.lisani-tab-bar-ios button:nth-child(3) { animation-delay: 0.2s; }
+html.lisani-shitpost #bottom-bar.lisani-tab-bar-ios button:nth-child(4) { animation-delay: 0.3s; }
+html.lisani-shitpost #bottom-bar.lisani-tab-bar-ios button:nth-child(5) { animation-delay: 0.4s; }
+
+@keyframes lisani-shitpost-bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-4px) rotate(3deg); }
+}
+
+/* —— Instagram stories şeridi —— */
+html.lisani-shitpost .lisani-ig-stories {
+    display: flex !important;
+    gap: 10px;
+    overflow-x: auto;
+    padding: 10px 4px 12px;
+    margin-bottom: 8px;
+    scrollbar-width: none;
+}
+
+html.lisani-shitpost .lisani-ig-stories::-webkit-scrollbar {
+    display: none;
+}
+
+html.lisani-shitpost .lisani-ig-story {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    width: 68px;
+    text-align: center;
+}
+
+html.lisani-shitpost .lisani-ig-story__ring {
+    width: 58px;
+    height: 58px;
+    border-radius: 50%;
+    padding: 3px;
+    background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+    animation: lisani-shitpost-ring 2s linear infinite;
+}
+
+@keyframes lisani-shitpost-ring {
+    0% { filter: hue-rotate(0deg); }
+    100% { filter: hue-rotate(360deg); }
+}
+
+html.lisani-shitpost .lisani-ig-story__avatar {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: #111;
+    border: 2px solid #111;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+}
+
+html.lisani-shitpost .lisani-ig-story__label {
+    font-size: 9px;
+    font-weight: 800;
+    color: #fff;
+    text-shadow: 0 1px 2px #000;
+    line-height: 1.1;
+    max-width: 68px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* —— Trend kartları (Reels / carousel vibe) —— */
+html.lisani-shitpost .lisani-ig-trends {
+    display: flex !important;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+html.lisani-shitpost .lisani-ig-trend-card {
+    background: rgba(0, 0, 0, 0.55);
+    border: 2px solid rgba(255, 255, 255, 0.25);
+    border-radius: 16px;
+    padding: 10px 12px;
+    backdrop-filter: blur(8px);
+}
+
+html.lisani-shitpost .lisani-ig-trend-card__tag {
+    display: inline-block;
+    font-size: 8px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #fffa;
+    background: linear-gradient(90deg, #833ab4, #fd1d1d, #fcb045);
+    padding: 2px 8px;
+    border-radius: 999px;
+    margin-bottom: 6px;
+}
+
+html.lisani-shitpost .lisani-ig-trend-card__title {
+    font-size: 12px;
+    font-weight: 900;
+    color: #fff;
+    margin-bottom: 4px;
+}
+
+html.lisani-shitpost .lisani-ig-trend-card__body {
+    font-size: 10px;
+    color: #ffffffcc;
+    line-height: 1.35;
+}
+
+html.lisani-shitpost .lisani-ig-pov {
+    position: relative;
+    margin: 8px 0 12px;
+    padding: 14px 12px;
+    border-radius: 14px;
+    background: rgba(0, 0, 0, 0.72);
+    border: 2px solid #fff;
+    text-align: center;
+}
+
+html.lisani-shitpost .lisani-ig-pov__label {
+    font-size: 9px;
+    font-weight: 900;
+    color: #fffa;
+    letter-spacing: 0.12em;
+    margin-bottom: 6px;
+}
+
+html.lisani-shitpost .lisani-ig-pov__text {
+    font-size: 13px;
+    font-weight: 800;
+    color: #fff;
+    line-height: 1.3;
+}
+
+html.lisani-shitpost .lisani-ig-add-yours {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 8px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: #fff;
+    color: #111;
+    font-size: 9px;
+    font-weight: 900;
+}
+
+html.lisani-shitpost .lisani-shitpost-marquee {
+    display: block !important;
+    overflow: hidden;
+    white-space: nowrap;
+    background: linear-gradient(90deg, #833ab4, #fd1d1d);
+    color: #fff;
+    font-weight: 900;
+    font-size: 11px;
+    padding: 7px 0;
+    border-bottom: 2px solid #fffa;
+}
+
+html.lisani-shitpost .lisani-shitpost-marquee span {
+    display: inline-block;
+    padding-left: 100%;
+    animation: lisani-shitpost-marquee 22s linear infinite;
+}
+
+@keyframes lisani-shitpost-marquee {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-100%); }
+}
+
+html.lisani-shitpost .lisani-shitpost-float {
+    position: fixed;
+    z-index: 115;
+    pointer-events: none;
+    font-size: 10px;
+    font-weight: 900;
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: rgba(0, 0, 0, 0.75);
+    color: #fff;
+    border: 2px solid #fffa;
+    animation: lisani-shitpost-float 4s ease-in-out infinite;
+    max-width: 140px;
+    text-align: center;
+    line-height: 1.2;
+}
+
+html.lisani-shitpost .lisani-shitpost-float--1 { top: 18%; right: 6%; animation-delay: 0s; }
+html.lisani-shitpost .lisani-shitpost-float--2 { top: 42%; left: 4%; animation-delay: 1.2s; }
+html.lisani-shitpost .lisani-shitpost-float--3 { bottom: 22%; right: 8%; animation-delay: 2.1s; }
+
+@keyframes lisani-shitpost-float {
+    0%, 100% { transform: translateY(0) rotate(-3deg); opacity: 0.92; }
+    50% { transform: translateY(-8px) rotate(3deg); opacity: 1; }
+}
+
+html.lisani-shitpost .lisani-kariyer-home-card {
+    animation: lisani-shitpost-pulse 0.8s ease-in-out infinite;
+}
+
+@keyframes lisani-shitpost-pulse {
+    0%, 100% { filter: hue-rotate(0deg) saturate(1.4); }
+    50% { filter: hue-rotate(180deg) saturate(2); }
+}
+
+html.lisani-shitpost img:not(#kariyer-gorilla-overlay-img) {
+    border-radius: 50% !important;
+}
+
+html.lisani-shitpost .lisani-ig-acting {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    margin: 10px 0;
+}
+
+html.lisani-shitpost .lisani-ig-acting__cell {
+    font-size: 9px;
+    font-weight: 800;
+    text-align: center;
+    padding: 8px 4px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: #fff;
+}
+
+html.lisani-shitpost .lisani-ig-acting__cell:nth-child(1) { background: rgba(76, 175, 80, 0.35); }
+html.lisani-shitpost .lisani-ig-acting__cell:nth-child(2) { background: rgba(244, 67, 54, 0.35); }
+html.lisani-shitpost .lisani-ig-acting__cell:nth-child(3) { background: rgba(255, 193, 7, 0.35); }
+html.lisani-shitpost .lisani-ig-acting__cell:nth-child(4) { background: rgba(233, 30, 99, 0.35); }

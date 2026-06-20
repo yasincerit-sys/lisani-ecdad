@@ -19,10 +19,10 @@ Route::get('/api/csrf-token', function () {
 Route::prefix('api')->group(function () {
     Route::post('/register', [AuthController::class, 'register']);
     Route::post('/login', [AuthController::class, 'login']);
+    Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/user', [AuthController::class, 'user']);
 
     Route::middleware(['auth', 'not.banned'])->group(function () {
-        Route::post('/logout', [AuthController::class, 'logout']);
         Route::put('/profile', [AuthController::class, 'updateProfile']);
         Route::post('/profile', [AuthController::class, 'updateProfile']);
         Route::post('/profile/tennis-unlock', [AuthController::class, 'unlockTennis']);

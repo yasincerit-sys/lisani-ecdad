@@ -30,4 +30,18 @@ return [
         'filename' => env('LISANI_APK_FILENAME', 'lisani-ecdad.apk'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Shitpost modu (şaka arayüzü)
+    |--------------------------------------------------------------------------
+    |
+    | true iken uygulama shitpost temasına girer.
+    | Geri al: .env LISANI_SHITPOST=false veya konsolda LisaniShitpost.revert()
+    |
+    */
+    'shitpost_mode' => env('LISANI_SHITPOST', false),
+
+    /** localStorage "geri al" sürümü — artırınca eski kapalı kayıtlar sıfırlanır */
+    'shitpost_rev' => (int) env('LISANI_SHITPOST_REV', 3),
+
 ];

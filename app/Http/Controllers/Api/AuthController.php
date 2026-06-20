@@ -23,8 +23,10 @@ class AuthController extends Controller
             'role' => ['required', 'in:ogrenci,hoca'],
             'sinif' => ['nullable', 'string', 'max:120'],
             'sinif_kodu' => ['nullable', 'string', 'min:4', 'max:20'],
-            'avatar' => ['nullable', 'string', 'max:500'],
+            'avatar' => ['nullable', 'string', 'max:200000'],
         ]);
+
+        $avatarInput = $validated['avatar'] ?? null;
 
         $nameSafe = Str::slug(Str::lower($validated['name']), '');
         $nameSafe = substr(preg_replace('/[^a-z0-9]/', '', $nameSafe) ?: 'kullanici', 0, 15);
@@ -38,10 +40,15 @@ class AuthController extends Controller
             'name' => $validated['name'],
             'email' => $email,
             'password' => $validated['password'],
-            'avatar' => $validated['avatar'] ?? AvatarHelper::defaultHtml(),
+            'avatar' => AvatarHelper::defaultStorageKey(),
             'role' => $validated['role'],
             'sinif_adi' => $validated['role'] === 'hoca' ? ($validated['sinif'] ?? null) : null,
         ]);
+
+        if ($avatarInput !== null && $avatarInput !== '') {
+            $user->avatar = AvatarHelper::persistForStorage($avatarInput, $user);
+            $user->save();
+        }
 
         if ($user->role === 'hoca') {
             Sinif::create([
@@ -106,7 +113,10 @@ class AuthController extends Controller
 
     public function logout(Request $request): JsonResponse
     {
-        Auth::logout();
+        if ($request->user()) {
+            Auth::logout();
+        }
+
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
@@ -134,10 +144,14 @@ class AuthController extends Controller
         $validated = $request->validate([
             'name' => ['sometimes', 'string', 'min:2', 'max:80', 'unique:users,name,'.$user->id],
             'email' => ['sometimes', 'email', 'unique:users,email,'.$user->id],
-            'avatar' => ['sometimes', 'string', 'max:500'],
+            'avatar' => ['sometimes', 'string', 'max:200000'],
             'total_score' => ['sometimes', 'integer', 'min:0'],
             'sinif_kodu' => ['sometimes', 'nullable', 'string', 'min:4', 'max:20'],
         ]);
+
+        if (array_key_exists('avatar', $validated)) {
+            $validated['avatar'] = AvatarHelper::persistForStorage($validated['avatar'], $user);
+        }
 
         $user->fill(collect($validated)->except('sinif_kodu')->all());
         $user->save();

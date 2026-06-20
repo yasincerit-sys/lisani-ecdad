@@ -257,9 +257,7 @@ html.preline-ui.theme-duolingo #placement-modal .lisani-placement-option:active 
     border-bottom-width: 2px !important;
 }
 
-html.preline-ui.theme-duolingo .lisani-bolum-dot-btn {
-    box-shadow: 0 5px 0 rgba(0, 0, 0, 0.28);
-}
+/* Bölüm kartları — tema override box-shadow'u ezmesin (ton/gölge lisani-fixes'te) */
 
 html.preline-ui.theme-duolingo .theme-pick-btn.is-active {
     background: #58cc02 !important;
@@ -574,6 +572,56 @@ html.preline-ui.theme-beyaz-cam .lisani-desktop-header {
     border-bottom: 1px solid rgba(255, 255, 255, 0.85) !important;
 }
 
+/* Beyaz Cam — grafik & quiz şıkları (açık zemin) */
+html.preline-ui.theme-beyaz-cam {
+    --lisani-chart-bg: rgba(255, 255, 255, 0.78);
+    --lisani-chart-grid: rgba(148, 163, 184, 0.55);
+    --lisani-chart-point-fill: #ffffff;
+    --theme-border: rgba(148, 163, 184, 0.38);
+}
+
+html.preline-ui.theme-beyaz-cam .lisani-progress-chart-wrap {
+    background: var(--lisani-chart-bg) !important;
+    border-color: rgba(148, 163, 184, 0.35) !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 1px 4px rgba(15, 23, 42, 0.06) !important;
+}
+
+html.preline-ui.theme-beyaz-cam #quiz-options-container .lisani-quiz-option,
+html.preline-ui.theme-beyaz-cam #screen-tests .lisani-quiz-option,
+html.preline-ui.theme-beyaz-cam #placement-modal .lisani-placement-option {
+    background: rgba(255, 255, 255, 0.88) !important;
+    border: 1.5px solid rgba(148, 163, 184, 0.42) !important;
+    border-bottom-width: 3px !important;
+    border-bottom-color: rgba(148, 163, 184, 0.55) !important;
+    color: var(--theme-text-main) !important;
+    box-shadow: 0 1px 4px rgba(15, 23, 42, 0.06) !important;
+}
+
+html.preline-ui.theme-beyaz-cam #quiz-options-container .lisani-quiz-option:hover,
+html.preline-ui.theme-beyaz-cam #screen-tests .lisani-quiz-option:hover:not(.lisani-quiz-option--correct):not(.lisani-quiz-option--wrong) {
+    background: rgba(255, 255, 255, 0.98) !important;
+    border-color: rgba(99, 102, 241, 0.38) !important;
+}
+
+html.preline-ui.theme-beyaz-cam #screen-tests .lisani-quiz-option--correct {
+    background: rgba(34, 197, 94, 0.14) !important;
+    border-color: #22c55e !important;
+    color: #166534 !important;
+    box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.2) !important;
+}
+
+html.preline-ui.theme-beyaz-cam #screen-tests .lisani-quiz-option--wrong {
+    background: rgba(239, 68, 68, 0.12) !important;
+    border-color: #ef4444 !important;
+    color: #991b1b !important;
+    box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.18) !important;
+}
+
+html.preline-ui.theme-beyaz-cam #screen-tests .lisani-quiz-arabic {
+    text-shadow: none;
+    color: var(--theme-text-main);
+}
+
 /* Derin Mavi */
 html.preline-ui.theme-derin-mavi {
     --ph-bg: #080c14;
@@ -870,7 +918,7 @@ html.preline-ui[class*="theme-"] .theme-primary-btn.shadow-md {
         0 4px 14px rgba(0, 0, 0, 0.32) !important;
 }
 
-html.preline-ui[class*="theme-"] #quiz-options-container button:not(.glass-emerald):not(.glass-rose) {
+html.preline-ui:not(.theme-beyaz-cam)[class*="theme-"] #quiz-options-container button:not(.glass-emerald):not(.glass-rose) {
     background: rgba(255, 255, 255, 0.03) !important;
     border: 1px solid rgba(255, 255, 255, 0.08) !important;
     box-shadow: none !important;
@@ -879,7 +927,7 @@ html.preline-ui[class*="theme-"] #quiz-options-container button:not(.glass-emera
     -webkit-backdrop-filter: blur(18px) !important;
 }
 
-html.preline-ui[class*="theme-"] #quiz-options-container button:not(.glass-emerald):not(.glass-rose):hover {
+html.preline-ui:not(.theme-beyaz-cam)[class*="theme-"] #quiz-options-container button:not(.glass-emerald):not(.glass-rose):hover {
     background: rgba(255, 255, 255, 0.06) !important;
     border-color: rgba(255, 255, 255, 0.14) !important;
     filter: none;

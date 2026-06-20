@@ -156,6 +156,7 @@
     }
 
     async function reauthWithStoredCredentials(savedUser) {
+        if (isUserLoggedOutLocally()) return false;
         const password = resolveStoredPassword(savedUser?.name, savedUser);
         if (!savedUser?.name || !password) return false;
 
@@ -169,8 +170,6 @@
         });
         const user = userFromApi(data.user);
         user.password = password;
-        window._loginDone = true;
-        currentUserRole = user.role;
         applyCsrfToken(data.csrf_token);
         _saveUserLocally(user);
         loginSuccess(user, true, true);
@@ -203,6 +202,7 @@
             });
             const user = userFromApi(data.user);
             user.password = passwordInput;
+            clearUserLoggedOutFlag();
             window._loginDone = true;
             currentUserRole = user.role;
             _saveUserLocally(user);
@@ -268,12 +268,26 @@
                     role,
                     sinif,
                     sinif_kodu: sinifKodu || null,
-                    avatar: typeof selectedAvatarValue !== 'undefined' ? selectedAvatarValue : (typeof window.DEFAULT_AVATAR !== 'undefined' ? window.DEFAULT_AVATAR : ''),
+                    avatar:
+                        typeof window.serializeAvatarForSave === 'function'
+                            ? window.serializeAvatarForSave(
+                                  typeof selectedAvatarValue !== 'undefined'
+                                      ? selectedAvatarValue
+                                      : typeof window.DEFAULT_AVATAR !== 'undefined'
+                                        ? window.DEFAULT_AVATAR
+                                        : ''
+                              )
+                            : typeof selectedAvatarValue !== 'undefined'
+                              ? selectedAvatarValue
+                              : typeof window.DEFAULT_AVATAR !== 'undefined'
+                                ? window.DEFAULT_AVATAR
+                                : '',
                     remember: true,
                 }),
             });
             const user = userFromApi(data.user);
             user.password = password;
+            clearUserLoggedOutFlag();
             window._loginDone = true;
             currentUserRole = role;
             _saveUserLocally(user);
@@ -293,33 +307,95 @@
     window._firebaseRegisterBg = async () => {};
 
     const origLogout = window.logoutApp;
-    window.logoutApp = async function () {
-        playClickSound();
-        window._manualLogout = true;
-        window._loginDone = false;
-        _sessionRestorePromise = null;
-        if (typeof window.stopMesajNotificationPoll === 'function') {
-            window.stopMesajNotificationPoll();
-        }
-        currentUser = null;
-        window.currentUser = null;
-        currentUserRole = null;
 
+    function markUserLoggedOut() {
+        window._manualLogout = true;
+        try {
+            sessionStorage.setItem('lisani_user_logged_out', '1');
+        } catch (e) {}
         try {
             localStorage.removeItem('lisani_session_user');
             localStorage.removeItem('lisani_remember_me');
+            localStorage.setItem('lisani_remember_me_pref', 'false');
+        } catch (e) {}
+    }
+
+    function clearUserLoggedOutFlag() {
+        window._manualLogout = false;
+        try {
+            sessionStorage.removeItem('lisani_user_logged_out');
+        } catch (e) {}
+    }
+
+    function isUserLoggedOutLocally() {
+        if (window._manualLogout) return true;
+        try {
+            return sessionStorage.getItem('lisani_user_logged_out') === '1';
+        } catch (e) {
+            return false;
+        }
+    }
+
+    window.isUserLoggedOutLocally = isUserLoggedOutLocally;
+    window.invalidateServerSession = invalidateServerSession;
+    window.clearUserLoggedOutFlag = clearUserLoggedOutFlag;
+
+    async function invalidateServerSession() {
+        try {
             const data = await apiFetch('/api/logout', { method: 'POST', body: '{}' });
             applyCsrfToken(data.csrf_token);
+            return true;
+        } catch (e) {
+            if ((e.message || '').includes('Oturum süresi doldu')) {
+                try {
+                    await refreshMetaCsrf();
+                    const data = await apiFetch('/api/logout', { method: 'POST', body: '{}' });
+                    applyCsrfToken(data.csrf_token);
+                    return true;
+                } catch (e2) {}
+            }
+            return false;
+        }
+    }
+
+    window.logoutApp = async function () {
+        playClickSound();
+        markUserLoggedOut();
+        if (typeof window.clearLocalUserSession === 'function') {
+            window.clearLocalUserSession();
+        } else {
+            window._loginDone = false;
+            window.currentUser = null;
+        }
+
+        if (typeof window.stopMesajNotificationPoll === 'function') {
+            window.stopMesajNotificationPoll();
+        }
+
+        if (typeof window.syncAppShellVisibility === 'function') {
+            window.syncAppShellVisibility();
+        } else {
+            document.getElementById('main-application-flow')?.classList.add('hidden');
+            document.getElementById('auth-container')?.classList.remove('hidden');
+        }
+        toggleAuthTab('login');
+
+        try {
+            await invalidateServerSession();
         } catch (e) {}
 
-        document.getElementById('login-username').value = '';
-        document.getElementById('login-password').value = '';
-        const ru = document.getElementById('reg-username');
-        if (ru) ru.value = '';
-        const rp = document.getElementById('reg-password');
-        if (rp) rp.value = '';
-        const rpc = document.getElementById('reg-password-confirm');
-        if (rpc) rpc.value = '';
+        try {
+            const loginUser = document.getElementById('login-username');
+            if (loginUser) loginUser.value = '';
+            const loginPass = document.getElementById('login-password');
+            if (loginPass) loginPass.value = '';
+            const ru = document.getElementById('reg-username');
+            if (ru) ru.value = '';
+            const rp = document.getElementById('reg-password');
+            if (rp) rp.value = '';
+            const rpc = document.getElementById('reg-password-confirm');
+            if (rpc) rpc.value = '';
+        } catch (e) {}
 
         if (typeof window.resetAppShellForLogout === 'function') {
             window.resetAppShellForLogout();
@@ -743,11 +819,13 @@
     };
 
     window.forceAuthScreen = function () {
-        window._loginDone = false;
+        if (typeof window.clearLocalUserSession === 'function') {
+            window.clearLocalUserSession();
+        } else {
+            window._loginDone = false;
+            window.currentUser = null;
+        }
         window._manualLogout = false;
-        currentUser = null;
-        window.currentUser = null;
-        currentUserRole = null;
         if (typeof window.stopMesajNotificationPoll === 'function') {
             window.stopMesajNotificationPoll();
         }
@@ -764,6 +842,7 @@
     };
 
     async function ensureServerSession() {
+        if (isUserLoggedOutLocally()) return null;
         if (window._loginDone && (currentUser || window.currentUser)) {
             const local = currentUser || window.currentUser;
             try {
@@ -1045,8 +1124,12 @@
 
         const nameInput = document.getElementById('edit-profile-username').value.trim();
         const emailInput = document.getElementById('edit-profile-email').value.trim();
-        const avatar =
+        const rawAvatar =
             typeof editAvatarValue !== 'undefined' ? editAvatarValue : currentUser?.avatar || '🐱';
+        const avatar =
+            typeof window.serializeAvatarForSave === 'function'
+                ? window.serializeAvatarForSave(rawAvatar)
+                : rawAvatar;
 
         if (!nameInput) {
             showToast('Lütfen tüm alanları doldurun.', 'error');
@@ -1077,7 +1160,7 @@
                 }
             } catch (e) {}
 
-            applyProfileToUI(user, avatar);
+            applyProfileToUI(user, user.avatar);
             hideLoading();
             showToast('Profil güncellendi.', 'success');
             closeEditProfile();
@@ -1161,10 +1244,21 @@
     }
 
     async function trySessionRestore() {
-        if (window._manualLogout) return;
+        if (isUserLoggedOutLocally()) {
+            try {
+                await invalidateServerSession();
+            } catch (e) {}
+            if (typeof window.syncAppShellVisibility === 'function') {
+                window.syncAppShellVisibility();
+            }
+            if (typeof toggleAuthTab === 'function') toggleAuthTab('login');
+            return;
+        }
         if (_sessionRestorePromise) return _sessionRestorePromise;
 
         _sessionRestorePromise = (async () => {
+            if (isUserLoggedOutLocally()) return;
+
             const keepOpen = shouldKeepSessionOpen();
             const savedUser = keepOpen ? readSavedSessionUser() : null;
 
@@ -1178,11 +1272,11 @@
                 serverUser = data.user || null;
             } catch (e) {}
 
+            if (isUserLoggedOutLocally()) return;
+
             if (serverUser) {
                 const user = userFromApi(serverUser);
                 user.password = resolveStoredPassword(user.name, savedUser);
-                window._loginDone = true;
-                currentUserRole = user.role;
                 if (user.password) _saveUserLocally(user);
                 loginSuccess(user, keepOpen || !!savedUser, true);
                 return;
@@ -2068,14 +2162,14 @@
         }
 
         if (!data.sinifAdi && data.message) {
-            list.innerHTML = `<p class="text-[10px] theme-text-muted text-center py-3">${data.message}</p>`;
+            list.innerHTML = `<p class="text-[8px] theme-text-muted text-center py-1">${data.message}</p>`;
             return;
         }
 
         const odevler = data.odevler || [];
         if (odevler.length === 0) {
             list.innerHTML =
-                '<p class="text-[10px] theme-text-muted text-center py-3">Henüz ödev yok. Hocanız test seçtiğinde burada görünecek.</p>';
+                '<p class="text-[8px] theme-text-muted text-center py-1">Henüz ödev yok. Hocanız test seçtiğinde burada görünecek.</p>';
             return;
         }
 
@@ -2087,25 +2181,24 @@
                     ? ' odev-test-item cursor-pointer hover:opacity-90 active:scale-[0.99] transition-all'
                     : '';
                 const badge = testOdev
-                    ? '<span class="text-[8px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full bg-[rgba(127,168,138,0.15)] text-[#7fa88a] border border-[rgba(127,168,138,0.25)]">Test</span>'
+                    ? '<span class="text-[7px] font-bold uppercase tracking-wide px-1.5 py-px rounded-full bg-[rgba(127,168,138,0.15)] text-[#7fa88a] border border-[rgba(127,168,138,0.25)] shrink-0">Test</span>'
                     : '';
                 return `
-            <div class="lisani-glass-panel lisani-glass-card rounded-xl p-3 border theme-border${interactive}"
+            <div class="lisani-home-odev-item lisani-glass-panel lisani-glass-card rounded-md px-2 py-1.5 border theme-border${interactive}"
                 ${testOdev ? `data-odev-index="${idx}" role="button" tabindex="0"` : ''}>
-                <div class="flex items-start justify-between gap-2">
+                <div class="flex items-center justify-between gap-1">
                     <div class="flex-1 min-w-0">
-                        <p class="text-xs font-semibold theme-text-main leading-relaxed flex items-center gap-1.5">
-                            <i data-lucide="file-question" class="w-3.5 h-3.5 theme-primary-color shrink-0"></i>
+                        <p class="text-[10px] font-semibold theme-text-main leading-tight flex items-center gap-1">
+                            <i data-lucide="file-question" class="w-2.5 h-2.5 theme-primary-color shrink-0"></i>
                             <span class="truncate">${escapeHtml(label)}</span>
                         </p>
-                        <p class="text-[9px] theme-text-muted mt-1.5 flex justify-between">
-                            <span>${escapeHtml(o.hocaAdi || data.hocaAdi || 'Hoca')}</span>
-                            <span>${escapeHtml(o.tarih || '')}</span>
+                        <p class="text-[7px] theme-text-muted mt-0.5 flex justify-between gap-1">
+                            <span class="truncate">${escapeHtml(o.hocaAdi || data.hocaAdi || 'Hoca')}</span>
+                            <span class="shrink-0">${escapeHtml(o.tarih || '')}</span>
                         </p>
                     </div>
                     ${badge}
                 </div>
-                ${testOdev ? '<p class="text-[9px] theme-text-muted mt-2 opacity-80">Başlamak için dokunun →</p>' : ''}
             </div>`;
             })
             .join('');
