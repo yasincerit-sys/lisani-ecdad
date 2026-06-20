@@ -117,13 +117,46 @@
             window.lisaniPickTheme(localStorage.getItem('lisani_color_mode') || 'saray-kahvesi');
         })();
     </script>
+    @php($lisaniShitpost = filter_var(config('lisani.shitpost_mode', false), FILTER_VALIDATE_BOOLEAN))
+    @php($lisaniShitpostRev = (int) config('lisani.shitpost_rev', 3))
+    @if($lisaniShitpost)
+    <script>
+        window.LISANI_SHITPOST_DEFAULT = true;
+        window.LISANI_SHITPOST_REV = @json($lisaniShitpostRev);
+        window.lisaniShitpostIsEnabled = function () {
+            try {
+                var mode = localStorage.getItem('lisani_shitpost');
+                var rev = parseInt(localStorage.getItem('lisani_shitpost_rev') || '0', 10) || 0;
+                if (mode === '1') return true;
+                if (mode === '0' && rev >= window.LISANI_SHITPOST_REV) return false;
+            } catch (e) { /* ignore */ }
+            return true;
+        };
+        (function () {
+            try {
+                if (window.lisaniShitpostIsEnabled()) {
+                    document.documentElement.classList.add('lisani-shitpost');
+                }
+            } catch (e) { /* ignore */ }
+        })();
+    </script>
+    <link rel="stylesheet" href="{{ asset('css/lisani-shitpost.css') }}?v={{ @filemtime(public_path('css/lisani-shitpost.css')) ?: time() }}">
+    @else
+    <script>
+        window.LISANI_SHITPOST_DEFAULT = false;
+        (function () {
+            try {
+                localStorage.setItem('lisani_shitpost', '0');
+                localStorage.setItem('lisani_shitpost_rev', @json($lisaniShitpostRev));
+            } catch (e) { /* ignore */ }
+            document.documentElement.classList.remove('lisani-shitpost');
+        })();
+    </script>
+    @endif
 </head>
 <body class="lisani-body select-none font-size-standard" id="body-main">
     @yield('content')
-    <script>window.LISANI_ASSETS = {
-        avatars: @json(asset('images/avatars')),
-        gokhanAudio: @json(asset('audio/gokhan-abi-call.mp4'))
-    };
+    <script>window.LISANI_ASSETS = @json(\App\Support\LisaniAssets::clientConfig());
     window.LISANI_APK = @json(\App\Support\LisaniApk::clientConfig());
     window.LISANI_BASE = @json(rtrim(url('/'), '/'));</script>
     <script src="{{ asset('js/preline.js') }}"></script>
@@ -139,6 +172,9 @@
     <script src="{{ asset('js/lisani-osm-translate.js') }}?v={{ @filemtime(public_path('js/lisani-osm-translate.js')) ?: time() }}" defer></script>
     <script src="{{ asset('js/lisani-laravel.js') }}?v={{ @filemtime(public_path('js/lisani-laravel.js')) ?: time() }}" defer></script>
     <script src="{{ asset('js/lisani-tennis-online.js') }}?v={{ @filemtime(public_path('js/lisani-tennis-online.js')) ?: time() }}" defer></script>
+    @if($lisaniShitpost)
+    <script src="{{ asset('js/lisani-shitpost.js') }}?v={{ @filemtime(public_path('js/lisani-shitpost.js')) ?: time() }}"></script>
+    @endif
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             if (window.HSStaticMethods && typeof window.HSStaticMethods.autoInit === 'function') {

@@ -1670,16 +1670,26 @@ html.preline-ui[class*="theme-"] .theme-pick-btn.is-active {
 }
 
 .lisani-kariyer-cover-bg {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 42%;
+    pointer-events: none;
+    user-select: none;
+    -webkit-user-drag: none;
+    display: block;
     background-color: #0c1328;
-    background-size: cover;
-    background-position: center 42%;
-    background-repeat: no-repeat;
     transform: translateZ(0);
     -webkit-transform: translateZ(0);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
 }
 
 #kariyer-modal-container .lisani-kariyer-cover-bg {
-    background-position: center 38%;
+    object-position: center 38%;
 }
 
 #kariyer-home-card-btn .relative.z-20 {
@@ -4185,12 +4195,15 @@ html.preline-ui.theme-duolingo .lisani-bolum-worm-wrap {
 .lisani-treasure-chest-img {
     width: 6.8rem;
     height: 6.8rem;
+    max-width: none;
     object-fit: contain;
     display: block;
     pointer-events: none;
     user-select: none;
     -webkit-user-drag: none;
     filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.28));
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
 }
 
 .lisani-bolum-chest.is-ready .lisani-treasure-chest-img {

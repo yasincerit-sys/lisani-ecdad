@@ -1799,12 +1799,21 @@
             launchQuizEngine(bolumId, stepIndex);
         }
 
+        function resolveLisaniAssetUrl(url, fallbackPath) {
+            const base = (window.LISANI_BASE || '').replace(/\/$/, '');
+            const path = fallbackPath.startsWith('/') ? fallbackPath : `/${fallbackPath}`;
+            let raw = url || (base ? `${base}${path}` : path);
+            if (/^https?:\/\//i.test(raw)) return raw;
+            if (raw.startsWith('//')) return `${window.location.protocol}${raw}`;
+            if (raw.startsWith('/')) return `${window.location.origin}${raw}`;
+            return `${window.location.origin}/${String(raw).replace(/^\.\//, '')}`;
+        }
+
         function getChestAssetUrls() {
             const assets = window.LISANI_ASSETS || {};
-            const base = window.LISANI_BASE || '';
             const rev = assets.chestRev || '';
             const withRev = (url, file) => {
-                const raw = url || `${base}/images/chest/${file}`;
+                const raw = resolveLisaniAssetUrl(url, `/images/chest/${file}`);
                 if (!rev) return raw;
                 const clean = String(raw).replace(/([?&])v=[^&]+/g, '');
                 const sep = clean.includes('?') ? '&' : '?';
@@ -1817,11 +1826,21 @@
             };
         }
 
+        function initKariyerCoverImages() {
+            const url = window.LISANI_ASSETS?.kariyerCover;
+            if (!url) return;
+            document.querySelectorAll('.lisani-kariyer-cover-bg').forEach((el) => {
+                if (el.tagName === 'IMG' && el.getAttribute('src') !== url) {
+                    el.src = url;
+                }
+            });
+        }
+
         function treasureChestIcon(state) {
             const urls = getChestAssetUrls();
             const src = urls[state] || urls.ready;
             return `<span class="lisani-bolum-chest__icon lisani-bolum-chest__icon--${state}" aria-hidden="true">
-                <img src="${src}" alt="" class="lisani-treasure-chest-img" width="256" height="256" decoding="async" draggable="false"${state === 'ready' ? ' fetchpriority="high"' : ' loading="lazy"'} />
+                <img src="${src}" alt="" class="lisani-treasure-chest-img" width="256" height="256" decoding="async" loading="eager" draggable="false"${state === 'ready' ? ' fetchpriority="high"' : ''} />
             </span>`;
         }
 
@@ -3840,11 +3859,22 @@
         }
 
         function loginSuccess(user, rememberMe = false, silent = false) {
+            if (typeof window.isUserLoggedOutLocally === 'function' && window.isUserLoggedOutLocally()) {
+                window.clearLocalUserSession();
+                if (typeof window.syncAppShellVisibility === 'function') window.syncAppShellVisibility();
+                return;
+            }
+            if (typeof window.clearUserLoggedOutFlag === 'function') {
+                window.clearUserLoggedOutFlag();
+            }
             currentUser = user;
             window.currentUser = user;
             currentUserRole = user.role || 'ogrenci';
             window._loginDone = true;
             window._manualLogout = false;
+            try {
+                sessionStorage.removeItem('lisani_user_logged_out');
+            } catch (e) {}
 
             if (rememberMe) {
                 try {
@@ -3909,38 +3939,64 @@
         window.loginSuccess = loginSuccess;
 
         async function logoutApp() {
+            if (typeof window.isUserLoggedOutLocally === 'function' && window.isUserLoggedOutLocally()) {
+                if (typeof window.syncAppShellVisibility === 'function') window.syncAppShellVisibility();
+                if (typeof toggleAuthTab === 'function') toggleAuthTab('login');
+                return;
+            }
             playClickSound();
             window._manualLogout = true;
-            window._loginDone = false;
-            currentUser = null;
-            window.currentUser = null;
-            currentUserRole = null;
+            window.clearLocalUserSession();
 
             // Tüm yerel verileri temizle
             try {
+                sessionStorage.setItem('lisani_user_logged_out', '1');
                 localStorage.removeItem('lisani_session_user');
                 localStorage.removeItem('lisani_remember_me');
-                // lisani_all_users'ı silme — bir sonraki girişte lazım olur
-            } catch(e) {}
+                localStorage.setItem('lisani_remember_me_pref', 'false');
+            } catch (e) {}
 
-            // Firebase çıkış
-            if (window._auth) { try { await window._auth.signOut(); } catch(e) {} }
+            if (typeof window.syncAppShellVisibility === 'function') {
+                window.syncAppShellVisibility();
+            }
+            if (typeof toggleAuthTab === 'function') toggleAuthTab('login');
 
-            // Formları temizle
-            document.getElementById('login-username').value = '';
-            document.getElementById('login-password').value = '';
-            const ru = document.getElementById('reg-username'); if(ru) ru.value = '';
-            const re = document.getElementById('reg-email'); if(re) re.value = '';
-            const rp = document.getElementById('reg-password'); if(rp) rp.value = '';
-            const rpc = document.getElementById('reg-password-confirm'); if(rpc) rpc.value = '';
+            if (window._auth) {
+                try {
+                    await window._auth.signOut();
+                } catch (e) {}
+            }
 
-            // Giriş ekranına dön
+            if (typeof window.invalidateServerSession === 'function') {
+                try {
+                    await window.invalidateServerSession();
+                } catch (e) {}
+            }
+
+            try {
+                const loginUser = document.getElementById('login-username');
+                if (loginUser) loginUser.value = '';
+                const loginPass = document.getElementById('login-password');
+                if (loginPass) loginPass.value = '';
+                const ru = document.getElementById('reg-username');
+                if (ru) ru.value = '';
+                const re = document.getElementById('reg-email');
+                if (re) re.value = '';
+                const rp = document.getElementById('reg-password');
+                if (rp) rp.value = '';
+                const rpc = document.getElementById('reg-password-confirm');
+                if (rpc) rpc.value = '';
+            } catch (e) {}
+
             resetAppShellForLogout();
-            syncAppShellVisibility();
-            toggleAuthTab('login');
+            if (typeof window.syncAppShellVisibility === 'function') {
+                window.syncAppShellVisibility();
+            }
+            if (typeof toggleAuthTab === 'function') toggleAuthTab('login');
             if (window.LisaniTennisOnline) window.LisaniTennisOnline.stop(false);
-            showToast("Çıkış yapıldı.", "info");
+            showToast('Çıkış yapıldı.', 'info');
         }
+        window.logoutApp = logoutApp;
 
         // --- HOCA PANELİ ---
         // --- HOCA VERİ YÖNETİMİ (yerel + Firebase arka plan) ---
@@ -4350,11 +4406,20 @@
 
         let currentActiveScreen = 'home';
 
+        window.clearLocalUserSession = function () {
+            currentUser = null;
+            currentUserRole = null;
+            window.currentUser = null;
+            window._loginDone = false;
+        };
+
         function syncAppShellVisibility() {
             const auth = document.getElementById('auth-container');
             const main = document.getElementById('main-application-flow');
+            const loggedOutLocally =
+                typeof window.isUserLoggedOutLocally === 'function' && window.isUserLoggedOutLocally();
             const loggedIn =
-                window._loginDone === true && !!(currentUser || window.currentUser);
+                !loggedOutLocally && window._loginDone === true && !!window.currentUser;
             if (loggedIn) {
                 auth?.classList.add('hidden');
                 main?.classList.remove('hidden');
@@ -4399,14 +4464,12 @@
         function resetAppShellForLogout() {
             currentActiveScreen = 'home';
             document.querySelectorAll('.screen').forEach((screen) => screen.classList.remove('active'));
-            document.getElementById('screen-home')?.classList.add('active');
 
             const screensContainer = document.getElementById('screens-container');
             if (screensContainer) {
                 screensContainer.classList.remove('lisani-screens--letters-only', 'lisani-screens--hoca-dash');
             }
 
-            resetTabHighlightToHome();
             hideLoading();
 
             [
@@ -6254,6 +6317,8 @@ self.addEventListener('notificationclick', e => {
             initPrelineTheme();
             initGrammarPrepNotes();
             initApkDownloadLink();
+            initKariyerCoverImages();
+            preloadChestAssets(true);
             if (typeof syncAppShellVisibility === 'function') {
                 syncAppShellVisibility();
             }

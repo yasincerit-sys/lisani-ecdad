@@ -648,7 +648,7 @@
                     <!-- 🗺️ KARİYER MODU -->
                     <div class="relative min-w-0 lisani-span-full w-full">
                         <button type="button" id="kariyer-home-card-btn" onclick="openKariyerModu()" class="lisani-kariyer-home-card relative w-full max-w-full overflow-hidden rounded-[24px] text-left transition-all active:scale-[0.98] group box-border">
-                            <div class="lisani-kariyer-cover-bg absolute inset-0 pointer-events-none" style="background-image: url('{{ asset('images/kariyer-cover.jpg') }}');" aria-hidden="true"></div>
+                            <img src="{{ \App\Support\LisaniAssets::clientConfig()['kariyerCover'] ?? asset('images/kariyer-cover.jpg') }}" alt="" class="lisani-kariyer-cover-bg" width="800" height="450" decoding="async" loading="eager" draggable="false" aria-hidden="true">
                             <div class="absolute inset-0 pointer-events-none bg-gradient-to-t from-[#0c1328] via-[#0c1328]/55 to-[#0c1328]/15"></div>
                             
                             <div class="relative z-20 flex flex-col justify-between w-full min-w-0 gap-3 px-1">
@@ -1241,7 +1241,7 @@
         <!-- ================= KARIYER MODU MODAL ALANI ================= -->
         <div id="kariyer-modal-container" class="lisani-kariyer-modal hidden absolute inset-0 z-50 bg-gradient-to-br from-[#0b1329] to-[#121f31] flex flex-col box-border">
             
-            <div class="lisani-kariyer-cover-bg absolute inset-0 pointer-events-none" style="background-image: url('{{ asset('images/kariyer-cover.jpg') }}');" aria-hidden="true"></div>
+            <img src="{{ \App\Support\LisaniAssets::clientConfig()['kariyerCover'] ?? asset('images/kariyer-cover.jpg') }}" alt="" class="lisani-kariyer-cover-bg" width="800" height="450" decoding="async" loading="eager" draggable="false" aria-hidden="true">
             <div class="absolute inset-0 pointer-events-none bg-gradient-to-t from-[#0b1329] via-[#0b1329]/58 to-[#0b1329]/18"></div>
 
             <div class="lisani-kariyer-modal__inner relative z-20 flex flex-col flex-1 min-h-0 min-w-0 w-full mx-auto overflow-hidden">
