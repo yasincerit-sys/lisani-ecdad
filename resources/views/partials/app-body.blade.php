@@ -1475,7 +1475,7 @@
             <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-2">
                     <i data-lucide="bell" class="w-5 h-5 theme-primary-color"></i>
-                    <h3 class="text-sm font-extrabold theme-text-main">Bildirim Ayarları</h3>
+                    <h3 class="text-sm font-extrabold theme-text-main">Bildirim ve İzin Ayarları</h3>
                 </div>
                 <button onclick="closeNotifSettings()" class="lisani-glass-action lisani-glass-action--icon flex items-center justify-center rounded-full theme-text-muted">
                     <i data-lucide="x" class="w-4 h-4"></i>
@@ -1502,13 +1502,18 @@
                 </button>
             </div>
 
-            <!-- Mikrofon (APK) -->
-            <div id="notif-mic-settings-row" class="lisani-glass-panel rounded-2xl p-4 space-y-1.5 hidden">
+            <!-- Mikrofon -->
+            <div id="notif-mic-settings-row" class="lisani-glass-panel rounded-2xl p-4 space-y-1.5">
                 <p class="text-xs font-bold theme-text-main">Mikrofon İzni</p>
-                <p class="text-[10px] theme-text-muted leading-relaxed">Konuşarak cevap vermek için mikrofon izni gerekir.</p>
-                <button type="button" onclick="requestNativeMicPermissionFromSettings()" class="lisani-glass-action mt-2 w-full py-2.5 rounded-xl text-xs font-bold flex items-center justify-center space-x-2">
+                <p class="text-[10px] theme-text-muted leading-relaxed">Sesli sorularda konuşarak cevap vermek için mikrofon izni gerekir.</p>
+                <p id="notif-mic-status" class="text-[10px] font-bold theme-primary-color">Durum: kontrol ediliyor…</p>
+                <button type="button" id="notif-mic-permission-btn" onclick="requestMicPermissionFromSettings()" class="lisani-glass-action mt-2 w-full py-2.5 rounded-xl text-xs font-bold flex items-center justify-center space-x-2">
                     <i data-lucide="mic" class="w-4 h-4"></i>
                     <span>Mikrofon İzni Ver</span>
+                </button>
+                <button type="button" id="notif-mic-settings-btn" onclick="openNativeAppSettings()" class="hidden lisani-glass-action w-full py-2 rounded-xl text-[10px] font-bold flex items-center justify-center space-x-2 theme-text-muted">
+                    <i data-lucide="settings" class="w-3.5 h-3.5"></i>
+                    <span>Telefon Uygulama Ayarlarını Aç</span>
                 </button>
             </div>
 

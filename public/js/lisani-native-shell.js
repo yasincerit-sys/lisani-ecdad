@@ -58,23 +58,49 @@
             } catch (e) {}
         }
         if (typeof showToast === 'function') {
-            showToast('Ayarlar → Uygulamalar → Lisanı Ecdad → İzinler', 'info');
+            showToast('Ayarlar → Uygulamalar → Lisanı Ecdad → İzinler → Mikrofon', 'info');
         }
         return false;
     };
 
-    window.requestNativeMicPermissionFromSettings = async function () {
+    window.requestMicPermissionFromSettings = async function () {
+        if (typeof window.ensureMicPermissionPublic === 'function') {
+            const ok = await window.ensureMicPermissionPublic(true);
+            if (typeof window.refreshMicPermissionUI === 'function') {
+                await window.refreshMicPermissionUI();
+            }
+            if (typeof showToast === 'function') {
+                showToast(
+                    ok ? 'Mikrofon hazır. Sesli soruları çözebilirsiniz.' : 'Mikrofon izni alınamadı.',
+                    ok ? 'success' : 'error'
+                );
+            }
+            return ok;
+        }
+
         const plugin = nativePlugin();
         if (plugin?.requestPermission) {
             try {
                 const result = await plugin.requestPermission();
-                return !!(result && result.granted);
+                const granted = !!(result && result.granted);
+                if (typeof window.refreshMicPermissionUI === 'function') {
+                    await window.refreshMicPermissionUI();
+                }
+                if (typeof showToast === 'function') {
+                    showToast(
+                        granted ? 'Mikrofon izni verildi.' : 'Mikrofon izni reddedildi.',
+                        granted ? 'success' : 'error'
+                    );
+                }
+                return granted;
             } catch (err) {
                 if (err?.data?.granted) return true;
             }
         }
         return window.openNativeAppSettings();
     };
+
+    window.requestNativeMicPermissionFromSettings = window.requestMicPermissionFromSettings;
 
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', initNativeShell);

@@ -1,5 +1,6 @@
 /**
  * Osmanlıca çeviri sekmesi (Türkçe ↔ Osmanlı harfleri)
+ * Sözlük tabanlı — harf harf Latin eşlemesi yok (Ingilizce tarzı sahte çeviri kaldırıldı).
  */
 (function () {
     'use strict';
@@ -7,122 +8,208 @@
     /** @type {'tr-to-osm'|'osm-to-tr'} */
     let osmTranslateMode = 'tr-to-osm';
 
-    const OSM_WORDS = {
-        merhaba: { ar: 'مرحبا', tr: 'merhaba' },
-        selam: { ar: 'سلام', tr: 'selam' },
-        'selamün aleyküm': { ar: 'سلام عليكم', tr: 'selamün aleyküm' },
-        'aleyküm selam': { ar: 'عليكم سلام', tr: 'aleyküm selam' },
-        günaydın: { ar: 'گوناي دين', tr: 'günaydın' },
-        'iyi günler': { ar: 'ايى گونلر', tr: 'iyi günler' },
-        'iyi akşamlar': { ar: 'ايى آخشام', tr: 'iyi akşamlar' },
-        'iyi geceler': { ar: 'ايى گجه لر', tr: 'iyi geceler' },
-        'teşekkür ederim': { ar: 'تشكر ايدرم', tr: 'teşekkür ederim' },
-        teşekkürler: { ar: 'تشكر', tr: 'teşekkürler' },
-        'sağ ol': { ar: 'ساڭ اول', tr: 'sağ ol' },
-        lütfen: { ar: 'لطفاً', tr: 'lütfen' },
-        evet: { ar: 'أيوه', tr: 'evet' },
-        hayır: { ar: 'يوخ', tr: 'hayır' },
-        affedersiniz: { ar: 'عفوا', tr: 'affedersiniz' },
-        'hoş geldiniz': { ar: 'خوش كلدك', tr: 'hoş geldiniz' },
-        'güle güle': { ar: 'گله گله', tr: 'güle güle' },
-        kitap: { ar: 'كتاب', tr: 'kitap' },
-        kalem: { ar: 'قلم', tr: 'kalem' },
-        defter: { ar: 'دفتر', tr: 'defter' },
-        okul: { ar: 'مدرسه', tr: 'okul' },
-        öğrenci: { ar: 'طالب', tr: 'öğrenci' },
-        hoca: { ar: 'خوجه', tr: 'hoca' },
-        öğretmen: { ar: 'معلم', tr: 'öğretmen' },
-        sınıf: { ar: 'صنف', tr: 'sınıf' },
-        ders: { ar: 'درس', tr: 'ders' },
-        soru: { ar: 'سؤال', tr: 'soru' },
-        cevap: { ar: 'جواب', tr: 'cevap' },
-        test: { ar: 'امتحان', tr: 'test' },
-        harf: { ar: 'حرف', tr: 'harf' },
-        kelime: { ar: 'كلمه', tr: 'kelime' },
-        cümle: { ar: 'جمله', tr: 'cümle' },
-        dil: { ar: 'لغة', tr: 'dil' },
-        osmanlıca: { ar: 'عثمانى', tr: 'osmanlıca' },
-        türkçe: { ar: 'تركچه', tr: 'türkçe' },
-        güzel: { ar: 'گوزل', tr: 'güzel' },
-        kötü: { ar: 'كوتى', tr: 'kötü' },
-        büyük: { ar: 'بيوك', tr: 'büyük' },
-        küçük: { ar: 'كوچك', tr: 'küçük' },
-        iyi: { ar: 'ايى', tr: 'iyi' },
-        'güzel gün': { ar: 'گوزل كون', tr: 'güzel gün' },
-        gün: { ar: 'كون', tr: 'gün' },
-        gece: { ar: 'گجه', tr: 'gece' },
-        sabah: { ar: 'صباح', tr: 'sabah' },
-        akşam: { ar: 'عشا', tr: 'akşam' },
-        su: { ar: 'آب', tr: 'su' },
-        ekmek: { ar: 'اكمك', tr: 'ekmek' },
-        çay: { ar: 'چاي', tr: 'çay' },
-        kahve: { ar: 'قهوه', tr: 'kahve' },
-        yemek: { ar: 'طعام', tr: 'yemek' },
-        ev: { ar: 'آو', tr: 'ev' },
-        kapı: { ar: 'قاپى', tr: 'kapı' },
-        pencere: { ar: 'پنجره', tr: 'pencere' },
-        göz: { ar: 'گوز', tr: 'göz' },
-        el: { ar: 'ال', tr: 'el' },
-        kalp: { ar: 'قلب', tr: 'kalp' },
-        aile: { ar: 'آيله', tr: 'aile' },
-        anne: { ar: 'آنه', tr: 'anne' },
-        baba: { ar: 'بابا', tr: 'baba' },
-        çocuk: { ar: 'چوجق', tr: 'çocuk' },
-        dost: { ar: 'دوست', tr: 'dost' },
-        arkadaş: { ar: 'آرقداش', tr: 'arkadaş' },
-        insan: { ar: 'انسان', tr: 'insan' },
-        vatan: { ar: 'وطن', tr: 'vatan' },
-        millet: { ar: 'ملت', tr: 'millet' },
-        devlet: { ar: 'دولت', tr: 'devlet' },
-        padışah: { ar: 'پادشاه', tr: 'padışah' },
-        sultan: { ar: 'سلطان', tr: 'sultan' },
-        saray: { ar: 'سراى', tr: 'saray' },
-        cami: { ar: 'جامع', tr: 'cami' },
-        namaz: { ar: 'نماز', tr: 'namaz' },
-        kuran: { ar: 'قرآن', tr: "kur'an" },
-        iman: { ar: 'ايمان', tr: 'iman' },
-        din: { ar: 'دين', tr: 'din' },
-        ilim: { ar: 'علم', tr: 'ilim' },
-        toprak: { ar: 'توراق', tr: 'toprak' },
-        meydan: { ar: 'ميدان', tr: 'meydan' },
-        çarşı: { ar: 'چارشى', tr: 'çarşı' },
-        kale: { ar: 'قلعه', tr: 'kale' },
-        köy: { ar: 'كوى', tr: 'köy' },
-        şehir: { ar: 'شهر', tr: 'şehir' },
-        deniz: { ar: 'دنيز', tr: 'deniz' },
-        ay: { ar: 'آى', tr: 'ay' },
-        güneş: { ar: 'كونش', tr: 'güneş' },
-        bahçe: { ar: 'باغچه', tr: 'bahçe' },
-        çiçek: { ar: 'گل', tr: 'çiçek' },
-        kuş: { ar: 'قوش', tr: 'kuş' },
-        at: { ar: 'آت', tr: 'at' },
-        kedi: { ar: 'قطة', tr: 'kedi' },
-        köpek: { ar: 'كلب', tr: 'köpek' },
-        allah: { ar: 'الله', tr: 'Allah' },
-        peygamber: { ar: 'پيغمبر', tr: 'peygamber' },
-        dua: { ar: 'دعا', tr: 'dua' },
-        sabır: { ar: 'صبر', tr: 'sabır' },
-        şükür: { ar: 'شكر', tr: 'şükür' },
-        hikmet: { ar: 'حكمت', tr: 'hikmet' },
-        adalet: { ar: 'عدالت', tr: 'adalet' },
-        merhamet: { ar: 'رحمت', tr: 'merhamet' },
-        elifba: { ar: 'الفبا', tr: 'elifba' },
-        okumak: { ar: 'اوقومق', tr: 'okumak' },
-        yazmak: { ar: 'يازمق', tr: 'yazmak' },
-        öğrenmek: { ar: 'اورنمك', tr: 'öğrenmek' },
+    /** @type {Record<string, { ar: string, tr: string }>} */
+    const OSM_WORDS = {};
+
+    /** @type {Record<string, string>} */
+    const OSM_PHRASES = {};
+
+    /** Cümle parçaları ve fiil çekimleri — quiz bankası TILE_PHRASES ile uyumlu */
+    const EXTRA_WORDS = {
+        ve: 'و',
+        bu: 'بو',
+        ben: 'بن',
+        istiyorum: 'ايستييورم',
+        istiyor: 'ايستييور',
+        istiyoruz: 'ايستييورز',
+        okuyorum: 'اوكونييورم',
+        okuyor: 'اوكونييور',
+        yazıyorum: 'يازييورم',
+        yaziyorum: 'يازييور\u0645',
+        yazıyor: 'يازييور',
+        gidiyorum: 'گيدييور\u0645',
+        gidiyor: 'گيدييور',
+        seviyorum: 'سورييور\u0645',
+        seviyor: 'سورييور',
+        ederim: 'ايدرم',
+        ederiz: 'ايدرز',
+        dilerim: 'ديلييور\u0645',
+        okulda: 'مدرسه ده',
+        evde: 'آو ده',
+        okula: 'مدرسه يه',
+        günler: 'گونلر',
+        gunler: 'گونلر',
+        akşamlar: 'آخشام',
+        aksamlar: 'آخشام',
+        geceler: 'گجه لر',
+        geldiniz: 'كلدك',
+        'hoş geldiniz': 'خوش كلدك',
+        'hos geldiniz': 'خوش كلدك',
+        güle: 'گله',
+        gule: 'گله',
+        teşekkür: 'تشكر',
+        tesekkur: 'تشكر',
+        'teşekkür ederim': 'تشكر ايدرم',
+        'tesekkur ederim': 'تشكر ايدرم',
+        'iyi günler': 'ايى گونلر',
+        'iyi gunler': 'ايى گونلر',
+        'iyi akşamlar': 'ايى آخشام',
+        'iyi aksamlar': 'ايى آخشام',
+        'iyi geceler': 'ايى گجه لر',
+        'güle güle': 'گله گله',
+        'gule gule': 'گله گله',
+        'selamün aleyküm': 'سلام عليكم',
+        'selamun aleykum': 'سلام عليكم',
+        'aleyküm selam': 'عليكم سلام',
+        'aleykum selam': 'عليكم سلام',
+        bugün: 'بوگون',
+        bugun: 'بوگون',
+        nasılsın: 'ناصل سين',
+        nasilsin: 'ناصل سين',
+        iyiyim: 'ايييم',
+        hamdolsun: 'الحمد',
+        selamün: 'سلام',
+        selamun: 'سلام',
+        aleyküm: 'عليكم',
+        aleykum: 'عليكم',
+        öğrenciyim: 'طالبم',
+        ogrenciyim: 'طالبم',
+        vatanımı: 'وطن',
+        vatanimi: 'وطن',
+        nurdur: 'نور',
+        sabırla: 'صبر',
+        sabirla: 'صبر',
+        kapılar: 'كاپيلر',
+        kapilar: 'كاپيلر',
+        açılır: 'آچيلير',
+        acilir: 'آچيلير',
+        dostum: 'دوست',
+        'güzel gün': 'گوزل كون',
+        'guzel gun': 'گوزل كون',
+        kötü: 'كوتى',
+        kotu: 'كوتى',
+        gece: 'گجه',
+        sabah: 'صباح',
+        akşam: 'عشا',
+        aksam: 'عشا',
+        gün: 'كون',
+        gun: 'كون',
+        'sağ ol': 'ساڭ اول',
+        'sag ol': 'ساڭ اول',
+        affedersiniz: 'عفوا',
+        öğretmen: 'معلم',
+        ogretmen: 'معلم',
+        sınıf: 'صنف',
+        sinif: 'صنف',
+        ders: 'درس',
+        soru: 'سؤال',
+        cevap: 'جواب',
+        test: 'امتحان',
+        harf: 'حرف',
+        kelime: 'كلمه',
+        cümle: 'جمله',
+        cumle: 'جمله',
+        dil: 'لغة',
+        osmanlıca: 'عثمانى',
+        osmanlica: 'عثمانى',
+        türkçe: 'تركچه',
+        turkce: 'تركچه',
+        büyük: 'بيوك',
+        buyuk: 'بيوك',
+        küçük: 'كوچك',
+        kucuk: 'كوچك',
+        ekmek: 'اكمك',
+        yemek: 'طعام',
+        pencere: 'پنجره',
+        aile: 'آيله',
+        çocuk: 'چوجق',
+        cocuk: 'چوجق',
+        arkadaş: 'آرقداش',
+        arkadas: 'آرقداش',
+        insan: 'انسان',
+        padışah: 'پادشاه',
+        padisah: 'پادشاه',
+        saray: 'سراى',
+        namaz: 'نماز',
+        kuran: 'قرآن',
+        "kur'an": 'قرآن',
+        iman: 'ايمان',
+        toprak: 'توراق',
+        meydan: 'ميدان',
+        çarşı: 'چارشى',
+        carsi: 'چارشى',
+        kale: 'قلعه',
+        bahçe: 'باغچه',
+        bahce: 'باغچه',
+        çiçek: 'گل',
+        cicek: 'گل',
+        kedi: 'قطة',
+        köpek: 'كلب',
+        kopek: 'كلب',
+        allah: 'الله',
+        peygamber: 'پيغمبر',
+        dua: 'دعا',
+        şükür: 'شكر',
+        sukur: 'شكر',
+        merhamet: 'رحمت',
+        elifba: 'الفبا',
+        okumak: 'اوقومق',
+        yazmak: 'يازمق',
+        öğrenmek: 'اورنمك',
+        ogrenmek: 'اورنمك',
+        öğrenci: 'طالب',
+        ogrenci: 'طالب',
+        rahmet: 'رحمت',
+        takva: 'تقوى',
+        tevekkül: 'توكل',
+        tevekkul: 'توكل',
+        ihsan: 'احسان',
+        fütüvvet: 'فتوة',
+        futuvvet: 'فتوة',
+        hakikat: 'حقيقة',
+        batıl: 'باطل',
+        batil: 'باطل',
+        zahir: 'ظاهر',
+        bâtın: 'باطن',
+        batin: 'باطن',
+        mülk: 'ملك',
+        mulk: 'ملك',
+        melekût: 'ملكوت',
+        melekut: 'ملكوت',
+        kader: 'قدر',
+        kaza: 'قضاء',
+        şefaat: 'شفاعة',
+        sefaat: 'شفاعة',
+        istiğfar: 'استغفار',
+        istigfar: 'استغفار',
+        tefekkür: 'تفكر',
+        tefekkur: 'تفكر',
+        marifet: 'معرفة',
+        muhabbet: 'محبة',
     };
 
+    /** Ekler — uzun olan önce denenir; yer-yön ekleri Osmanlıca’da genelde ayrı yazılır */
     const OSM_SUFFIXES = [
+        ['iyorum', 'ييور\u0645'],
+        ['iyoruz', 'ييورز'],
+        ['iyorsun', 'ييورسون'],
+        ['iyor', 'ييور'],
+        ['uyorum', 'ويور\u0645'],
+        ['uyor', 'ويور'],
+        ['üyorum', 'ويور\u0645'],
+        ['üyor', 'ويور'],
         ['ler', 'لر'],
         ['lar', 'لر'],
-        ['den', 'دن'],
-        ['dan', 'دن'],
-        ['ten', 'دن'],
-        ['tan', 'دن'],
-        ['de', 'ده'],
-        ['da', 'ده'],
-        ['te', 'ده'],
-        ['ta', 'ده'],
+        ['den', ' دن'],
+        ['dan', ' دن'],
+        ['ten', ' دن'],
+        ['tan', ' دن'],
+        ['de', ' ده'],
+        ['da', ' ده'],
+        ['te', ' ده'],
+        ['ta', ' ده'],
+        ['ye', ' يه'],
+        ['ya', ' يه'],
         ['in', 'ىن'],
         ['ın', 'ىن'],
         ['un', 'ون'],
@@ -135,47 +222,9 @@
         ['mak', 'ماق'],
     ];
 
-    const OSM_CHAR = {
-        a: 'ا',
-        b: 'ب',
-        c: 'ج',
-        ç: 'چ',
-        d: 'د',
-        e: '',
-        f: 'ف',
-        g: 'گ',
-        ğ: 'غ',
-        h: 'ه',
-        ı: 'ى',
-        i: '',
-        j: 'ژ',
-        k: 'ك',
-        l: 'ل',
-        m: 'م',
-        n: 'ن',
-        o: 'و',
-        ö: 'و',
-        p: 'پ',
-        r: 'ر',
-        s: 'س',
-        ş: 'ش',
-        t: 'ت',
-        u: 'و',
-        ü: 'و',
-        v: 'و',
-        y: 'ى',
-        z: 'ز',
-        â: 'ا',
-        î: 'ى',
-        û: 'و',
-    };
-
-    const SORTED_KEYS = Object.keys(OSM_WORDS).sort((a, b) => b.length - a.length);
-
+    let SORTED_WORD_KEYS = [];
+    let SORTED_PHRASE_KEYS = [];
     const AR_TO_TR = {};
-    Object.entries(OSM_WORDS).forEach(([, v]) => {
-        AR_TO_TR[normalizeArabic(v.ar)] = v.tr;
-    });
 
     function normalizeTr(text) {
         return (text || '').trim().toLocaleLowerCase('tr-TR').replace(/\s+/g, ' ');
@@ -186,9 +235,59 @@
             .replace(/[\u064B-\u065F\u0670]/g, '')
             .replace(/أ|إ|آ/g, 'ا')
             .replace(/ة/g, 'ه')
-            .replace(/ى/g, 'ي')
             .replace(/\s+/g, ' ')
             .trim();
+    }
+
+    function registerWord(tr, ar) {
+        const key = normalizeTr(tr);
+        if (!key || !ar) return;
+        if (!OSM_WORDS[key]) {
+            OSM_WORDS[key] = { ar, tr: key };
+        }
+    }
+
+    function registerPhrase(tr, ar) {
+        const key = normalizeTr(tr);
+        if (!key || !ar) return;
+        OSM_PHRASES[key] = ar;
+        registerWord(key, ar);
+    }
+
+    function buildOsmDictionary() {
+        Object.entries(EXTRA_WORDS).forEach(([tr, ar]) => registerWord(tr, ar));
+
+        const core = window.LISANI_CORE_WORDS;
+        if (Array.isArray(core)) {
+            core.forEach((w) => {
+                if (!w || !w.osm) return;
+                registerWord(w.tr, w.osm);
+                if (w.hint) registerWord(w.hint, w.osm);
+                (w.speakAlt || []).forEach((alt) => registerWord(alt, w.osm));
+            });
+        }
+
+        const tiles = window.LISANI_TILE_PHRASES_OSM;
+        if (Array.isArray(tiles)) {
+            tiles.forEach((p) => {
+                if (!p || !p.osm || !Array.isArray(p.parts)) return;
+                registerPhrase(p.parts.join(' '), p.osm);
+            });
+        }
+
+        rebuildIndexes();
+    }
+
+    function rebuildIndexes() {
+        SORTED_WORD_KEYS = Object.keys(OSM_WORDS).sort((a, b) => b.length - a.length);
+        SORTED_PHRASE_KEYS = Object.keys(OSM_PHRASES).sort((a, b) => b.length - a.length);
+        Object.keys(AR_TO_TR).forEach((k) => delete AR_TO_TR[k]);
+        Object.entries(OSM_WORDS).forEach(([, v]) => {
+            AR_TO_TR[normalizeArabic(v.ar)] = v.tr;
+        });
+        Object.entries(OSM_PHRASES).forEach(([tr, ar]) => {
+            AR_TO_TR[normalizeArabic(ar)] = tr;
+        });
     }
 
     function isArabicScript(text) {
@@ -208,31 +307,25 @@
             }
         }
 
-        return { ar: latinToOttomanLetters(w), exact: false };
-    }
-
-    function latinToOttomanLetters(word) {
-        const w = normalizeTr(word);
-        if (!w) return '';
-
-        let out = '';
-        for (let i = 0; i < w.length; i++) {
-            if (w[i] === 'n' && w[i + 1] === 'g') {
-                out += 'نگ';
-                i += 1;
-                continue;
-            }
-            out += OSM_CHAR[w[i]] ?? '';
-        }
-
-        return out || null;
+        return null;
     }
 
     function translateTrToOsm(text) {
         const normalized = normalizeTr(text);
         if (!normalized) return null;
 
-        for (const key of SORTED_KEYS) {
+        for (const key of SORTED_PHRASE_KEYS) {
+            if (normalized === key) {
+                return {
+                    main: OSM_PHRASES[key],
+                    sub: key,
+                    note: 'Sözlük eşleşmesi (cümle)',
+                    rtl: true,
+                };
+            }
+        }
+
+        for (const key of SORTED_WORD_KEYS) {
             if (normalized === key) {
                 return {
                     main: OSM_WORDS[key].ar,
@@ -246,25 +339,35 @@
         const tokens = normalized.split(' ');
         const parts = [];
         let exactCount = 0;
-        let approxCount = 0;
+        let missingCount = 0;
 
         tokens.forEach((token) => {
             const clean = token.replace(/[.,!?;:'"()]/g, '');
             if (!clean) return;
             const hit = lookupTrWord(clean);
-            if (!hit || !hit.ar) return;
-            parts.push(hit.ar);
-            if (hit.exact) exactCount += 1;
-            else approxCount += 1;
+            if (hit && hit.ar) {
+                parts.push(hit.ar);
+                exactCount += 1;
+            } else {
+                parts.push('؟');
+                missingCount += 1;
+            }
         });
 
         if (!parts.length) return null;
 
+        if (missingCount === parts.length) {
+            return {
+                main: 'Bu kelime veya cümle sözlükte yok.',
+                sub: normalized,
+                note: 'Örnek: merhaba · kitap · çay istiyorum · iyi günler',
+                rtl: false,
+            };
+        }
+
         let note = 'Sözlük eşleşmesi';
-        if (approxCount > 0 && exactCount === 0) {
-            note = 'Yaklaşık harf karşılığı — kesin anlam için sözlükteki kelimeleri deneyin';
-        } else if (approxCount > 0) {
-            note = 'Bazı kelimeler sözlükte yok; harf karşılığı eklendi';
+        if (missingCount > 0) {
+            note = 'Bazı kelimeler sözlükte yok (؟) — bilinen kelimeler Osmanlıca yazıldı';
         }
 
         return {
@@ -305,7 +408,7 @@
             return {
                 main: 'Bu Osmanlıca metin sözlükte bulunamadı.',
                 sub: text.trim(),
-                note: 'Örnek: مرحبا · كتاب · گوزل',
+                note: 'Örnek: مرحبا · كتاب · گوزل · چای ايستييورم',
                 rtl: false,
             };
         }
@@ -343,7 +446,7 @@
         input.placeholder =
             osmTranslateMode === 'osm-to-tr'
                 ? 'Osmanlıca yazın: مرحبا'
-                : 'Türkçe yazın: merhaba, kitap';
+                : 'Türkçe yazın: merhaba, kitap, çay istiyorum';
         input.dir = osmTranslateMode === 'osm-to-tr' ? 'rtl' : 'ltr';
     }
 
@@ -375,6 +478,8 @@
     function renderHomeResult(result) {
         renderResultToTargets(result, 'home-osm-translate-result', 'home-osm-translate-main', 'home-osm-translate-sub', null);
     }
+
+    buildOsmDictionary();
 
     window.runHomeOsmTranslate = function () {
         if (typeof playClickSound === 'function') playClickSound();
@@ -517,6 +622,7 @@
     };
 
     document.addEventListener('DOMContentLoaded', function () {
+        buildOsmDictionary();
         updateModeButtons();
         updateInputHint();
         if (typeof lucide !== 'undefined') lucide.createIcons();

@@ -210,16 +210,13 @@
         let speakAudioCtx = null;
         let speakAnalyser = null;
         let speakMeterRaf = null;
+        let nativeSpeechListener = null;
         let micPermissionGranted = false;
         let tilesSelection = [];
         let tilesPickedIndices = new Set();
         let activeQuestionAnswered = false;
-        const SPEAK_LISTEN_MS = () => {
-            let sec = window.LISANI_SPEAK_LISTEN_SEC || 15;
-            if (activeBolumId === 'ses') sec = Math.max(10, sec - 4);
-            else if (activeBolumId === 'ceviri') sec = Math.max(11, sec - 2);
-            return sec * 1000;
-        };
+        const SPEAK_LISTEN_MS = () => (window.LISANI_SPEAK_LISTEN_SEC || 15) * 1000;
+        const speakListenSecLabel = () => Math.round(SPEAK_LISTEN_MS() / 1000);
 
         // --- AKTİF SINAV PARAMETRELERİ ---
         let activeQuizQuestions = [];
@@ -1515,6 +1512,17 @@
             } catch (e) {}
         }
 
+        function stopNativeSpeechListening() {
+            const plugin = window.Capacitor?.Plugins?.LisaniMic;
+            if (plugin?.stopListening) {
+                plugin.stopListening().catch(() => {});
+            }
+            if (nativeSpeechListener) {
+                nativeSpeechListener.remove().catch(() => {});
+                nativeSpeechListener = null;
+            }
+        }
+
         function stopSpeechListening() {
             voiceListening = false;
             if (speakListenTimer) {
@@ -1527,6 +1535,7 @@
             }
             speakListenDeadline = 0;
             stopSpeakMeterOnly();
+            stopNativeSpeechListening();
             if (speakMediaStream) {
                 speakMediaStream.getTracks().forEach((t) => t.stop());
                 speakMediaStream = null;
@@ -2624,8 +2633,72 @@
             }
         }
 
-        async function ensureMicPermission() {
-            if (micPermissionGranted) return true;
+        function hasWebSpeechRecognition() {
+            return !!(window.SpeechRecognition || window.webkitSpeechRecognition);
+        }
+
+        function shouldUseNativeSpeech() {
+            return (
+                isCapacitorApp() &&
+                !!(window.Capacitor?.Plugins?.LisaniMic?.startListening) &&
+                (!hasWebSpeechRecognition() || /Android/i.test(navigator.userAgent || ''))
+            );
+        }
+
+        function getNativeMicPlugin() {
+            return window.Capacitor?.Plugins?.LisaniMic ?? null;
+        }
+
+        async function refreshMicPermissionUI() {
+            const statusEl = document.getElementById('notif-mic-status');
+            const settingsBtn = document.getElementById('notif-mic-settings-btn');
+            if (!statusEl) return;
+
+            let label = 'Henüz sorulmadı';
+            if (!isSecureMicContext()) {
+                label = 'HTTPS gerekli';
+            } else if (!navigator.mediaDevices?.getUserMedia) {
+                label = 'Bu cihaz desteklemiyor';
+            } else {
+                const plugin = getNativeMicPlugin();
+                if (isCapacitorApp() && plugin?.checkPermission) {
+                    try {
+                        const result = await plugin.checkPermission();
+                        label = result?.granted ? 'İzin verildi ✓' : 'İzin verilmedi';
+                        micPermissionGranted = !!result?.granted;
+                    } catch (e) {
+                        label = micPermissionGranted ? 'İzin verildi ✓' : 'Kontrol edilemedi';
+                    }
+                } else if (navigator.permissions?.query) {
+                    try {
+                        const perm = await navigator.permissions.query({ name: 'microphone' });
+                        label =
+                            perm.state === 'granted'
+                                ? 'İzin verildi ✓'
+                                : perm.state === 'denied'
+                                  ? 'Reddedildi'
+                                  : 'Henüz sorulmadı';
+                        if (perm.state === 'granted') micPermissionGranted = true;
+                    } catch (e) {
+                        label = micPermissionGranted ? 'İzin verildi ✓' : 'Henüz sorulmadı';
+                    }
+                } else {
+                    label = micPermissionGranted ? 'İzin verildi ✓' : 'Henüz sorulmadı';
+                }
+            }
+
+            statusEl.textContent = `Durum: ${label}`;
+            if (settingsBtn) {
+                settingsBtn.classList.toggle(
+                    'hidden',
+                    !(isCapacitorApp() && (label === 'Reddedildi' || label === 'İzin verilmedi'))
+                );
+            }
+        }
+        window.refreshMicPermissionUI = refreshMicPermissionUI;
+
+        async function ensureMicPermission(forcePrompt) {
+            if (micPermissionGranted && !forcePrompt) return true;
             if (!isSecureMicContext()) {
                 setSpeakStatus('Mikrofon için güvenli bağlantı gerekli (HTTPS).');
                 return false;
@@ -2648,6 +2721,7 @@
                         const perm = await navigator.permissions.query({ name: 'microphone' });
                         if (perm.state === 'granted') {
                             micPermissionGranted = true;
+                            if (typeof refreshMicPermissionUI === 'function') refreshMicPermissionUI();
                             return true;
                         }
                     } catch (e) {
@@ -2662,9 +2736,12 @@
                 });
                 stream.getTracks().forEach((t) => t.stop());
                 micPermissionGranted = true;
+                if (typeof refreshMicPermissionUI === 'function') refreshMicPermissionUI();
                 setSpeakStatus('Mikrofon hazır · dinlemeyi başlatın.');
                 return true;
             } catch (err) {
+                micPermissionGranted = false;
+                if (typeof refreshMicPermissionUI === 'function') refreshMicPermissionUI();
                 const name = err && err.name ? err.name : '';
                 if (name === 'NotAllowedError' || name === 'PermissionDeniedError') {
                     setSpeakStatus(micPermissionSettingsHint());
@@ -2676,6 +2753,7 @@
                 return false;
             }
         }
+        window.ensureMicPermissionPublic = ensureMicPermission;
 
         function renderSpeakQuestion(q) {
             const total = activeQuizQuestions.length;
@@ -2696,7 +2774,7 @@
 
             const voiceArea = document.getElementById('quiz-voice-area');
             const skipLabel = speakSkipLabel();
-            const listenSec = window.LISANI_SPEAK_LISTEN_SEC || 14;
+            const listenSec = speakListenSecLabel();
             const meterBars = Array.from({ length: 14 }, () => '<span class="lisani-speak-meter__bar"></span>').join('');
             const session = ++speakSessionId;
             if (voiceArea) {
@@ -2849,14 +2927,6 @@
 
         async function startSpeakAnswer(q) {
             if (isQuizQuestionLocked() || voiceListening) return;
-            const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-            const status = document.getElementById('quiz-voice-status');
-            const micBtn = document.getElementById('quiz-voice-mic-btn');
-
-            if (!SR) {
-                setSpeakStatus('Ses tanıma desteklenmiyor · «Şuan konuşamam» kullanın.');
-                return;
-            }
 
             if (!isSecureMicContext()) {
                 setSpeakStatus('Telefonda mikrofon için HTTPS gerekli · site adresi https:// ile açılmalı.');
@@ -2878,21 +2948,105 @@
                 return;
             }
 
+            if (shouldUseNativeSpeech()) {
+                beginNativeSpeakListening(q);
+                return;
+            }
+
+            const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SR) {
+                setSpeakStatus('Ses tanıma desteklenmiyor · Ayarlardan mikrofon izni verin veya «Şuan konuşamam» kullanın.');
+                return;
+            }
+
             navigator.mediaDevices
                 .getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } })
                 .then((stream) => {
                     startSpeakMeter(stream);
-                    beginSpeakListening(q, SR, status, micBtn);
+                    beginSpeakListening(q, SR, document.getElementById('quiz-voice-status'), document.getElementById('quiz-voice-mic-btn'));
                 })
                 .catch((err) => {
                     const name = err && err.name ? err.name : '';
                     micPermissionGranted = false;
+                    if (typeof refreshMicPermissionUI === 'function') refreshMicPermissionUI();
                     if (name === 'NotAllowedError' || name === 'PermissionDeniedError') {
                         setSpeakStatus(`${micPermissionSettingsHint()} · sonra «Mikrofon İzni Ver»e dokunun.`);
                     } else {
                         setSpeakStatus('Mikrofon açılamadı · tekrar deneyin veya atlayın.');
                     }
                     updateMicButtonState('permission');
+                });
+        }
+
+        function beginNativeSpeakListening(q) {
+            const plugin = getNativeMicPlugin();
+            const status = document.getElementById('quiz-voice-status');
+            const micBtn = document.getElementById('quiz-voice-mic-btn');
+            if (!plugin?.startListening) {
+                setSpeakStatus('Ses tanıma bu sürümde desteklenmiyor · «Şuan konuşamam» ile atlayın.');
+                return;
+            }
+
+            voiceListening = true;
+            speakListenDeadline = Date.now() + SPEAK_LISTEN_MS();
+            updateSpeakCountdownUI();
+            resetSpeakMeterUI();
+            updateMicButtonState('listening');
+            setSpeakStatus('Dinleniyor… metni Türkçe okuyun', true);
+
+            let finalTranscript = '';
+            let resolved = false;
+
+            function finishListen(spoken) {
+                if (resolved) return;
+                resolved = true;
+                stopSpeechListening();
+                if (status) {
+                    status.classList.remove('is-listening');
+                    status.textContent = spoken ? `Duydum: «${spoken.trim()}»` : 'Süre doldu';
+                }
+                updateMicButtonState('ready');
+                if (!spoken) {
+                    handleQuizAnswer(false, null);
+                    return;
+                }
+                const match = speechMatchesSpeak(spoken, q);
+                if (match === 'skip') handleQuizSkip();
+                else if (match) handleQuizAnswer(true, null);
+                else handleQuizAnswer(false, null);
+            }
+
+            navigator.mediaDevices
+                .getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } })
+                .then((stream) => startSpeakMeter(stream))
+                .catch(() => {});
+
+            speakCountdownTimer = setInterval(updateSpeakCountdownUI, 250);
+            speakListenTimer = setTimeout(() => finishListen(finalTranscript.trim()), SPEAK_LISTEN_MS());
+
+            const attachListener = async () => {
+                if (nativeSpeechListener) {
+                    await nativeSpeechListener.remove().catch(() => {});
+                    nativeSpeechListener = null;
+                }
+                nativeSpeechListener = await plugin.addListener('speechRecognition', (data) => {
+                    if (!voiceListening || resolved) return;
+                    const text = (data && data.text ? String(data.text) : '').trim();
+                    if (!text) return;
+                    if (data.final) finalTranscript += `${text} `;
+                    const combined = (data.final ? finalTranscript : `${finalTranscript}${text}`).trim();
+                    if (status) status.textContent = `Dinleniyor: «${combined || text}»`;
+                    const match = speechMatchesSpeak(combined || text, q);
+                    if (match === 'skip' || match) finishListen(combined || text);
+                });
+            };
+
+            attachListener()
+                .then(() => plugin.startListening({ language: 'tr-TR' }))
+                .catch(() => {
+                    setSpeakStatus('Ses tanıma başlatılamadı · tekrar deneyin veya atlayın.');
+                    updateMicButtonState('permission');
+                    stopSpeechListening();
                 });
         }
 
@@ -6289,7 +6443,7 @@ self.addEventListener('notificationclick', e => {
                 String(h).padStart(2,"0") + ":" + String(m).padStart(2,"0");
             const native = typeof window.isNativeHadisNotifications === 'function' && window.isNativeHadisNotifications();
             document.getElementById('notif-sound-settings-row')?.classList.toggle('hidden', !native);
-            document.getElementById('notif-mic-settings-row')?.classList.toggle('hidden', !isCapacitorApp());
+            if (typeof refreshMicPermissionUI === 'function') refreshMicPermissionUI();
             if (typeof lucide !== 'undefined') lucide.createIcons();
         }
 
