@@ -439,18 +439,34 @@
         }
     };
 
-    const ODEV_TEST_OPTIONS = ['Test 1', 'Test 2', 'Test 3', 'Genel'];
+    const ODEV_STEP_OPTIONS = ['Test 1', 'Test 2', 'Test 3', 'Test 4', 'Test 5', 'Genel'];
 
-    const ODEV_LEVEL_LABELS = {
-        1: 'Seviye 1: Harfler & Sayılar',
-        2: 'Seviye 2: Yazım Kuralları & Okuma',
-        3: 'Seviye 3: Kelime Kökü & Kaynak Dil',
+    const ODEV_STEP_INDEX = {
+        'Test 1': 0,
+        'Test 2': 1,
+        'Test 3': 2,
+        'Test 4': 3,
+        'Test 5': 4,
+        Genel: 4,
     };
+
+    function getBolumList() {
+        return window.LISANI_BOLUMLER || [];
+    }
 
     function formatOdevLabel(o) {
         if (o.label) return o.label;
-        if (o.bolum) return o.label || o.bolum;
-        if (o.level && o.test) return `Seviye ${o.level} — ${o.test}`;
+        if (o.bolum) {
+            const meta = getBolumList().find((b) => b.id === o.bolum);
+            const name = meta?.title || o.bolum;
+            if (o.test) return `${name} — ${o.test}`;
+            if (o.step != null) return `${name} · Test ${Number(o.step) + 1}`;
+            return name;
+        }
+        if (o.level && o.test) {
+            const legacy = getBolumList().find((b, i) => i + 1 === Number(o.level));
+            return legacy ? `${legacy.title} — ${o.test}` : o.test;
+        }
         return o.icerik || 'Ödev';
     }
 
@@ -460,19 +476,20 @@
 
     function odevPickerHtml(hocaUid) {
         return `
-            <p class="text-[10px] theme-text-muted mb-3">Aşağıdan seviye ve test seçerek ödev gönderin.</p>
+            <p class="text-[10px] theme-text-muted mb-3">Aşağıdan bölüm seçerek ödev gönderin.</p>
             <div id="odev-test-picker" data-hoca-uid="${hocaUid}"></div>`;
     }
 
-    function renderOdevPickerLevelCards() {
-        return [1, 2, 3]
+    function renderOdevPickerBolumCards() {
+        return getBolumList()
             .map(
-                (l) => `
-            <button type="button" onclick="selectOdevPickerLevel(${l})" class="lisani-glass-panel lisani-test-btn lisani-test-level-card rounded-2xl p-3.5 text-left flex items-center justify-between w-full min-w-0">
+                (b, index) => `
+            <button type="button" onclick="selectOdevPickerBolum('${b.id}')" class="lisani-glass-panel lisani-test-btn lisani-test-level-card rounded-2xl p-3.5 text-left flex items-center justify-between w-full min-w-0">
                 <div class="flex items-center gap-3 min-w-0">
-                    <div class="w-10 h-10 rounded-2xl lisani-level-badge--${l} flex items-center justify-center font-black text-sm border shrink-0">${l}</div>
+                    <div class="w-10 h-10 rounded-2xl lisani-bolum-tur--${index + 1} flex items-center justify-center font-black text-sm border shrink-0">${b.icon || '•'}</div>
                     <div class="min-w-0">
-                        <h4 class="text-xs font-extrabold theme-text-main leading-snug">${ODEV_LEVEL_LABELS[l]}</h4>
+                        <h4 class="text-xs font-extrabold theme-text-main leading-snug">${b.title}</h4>
+                        <p class="text-[10px] theme-text-muted mt-0.5">${b.desc || ''}</p>
                     </div>
                 </div>
                 <i data-lucide="chevron-right" class="w-4 h-4 theme-text-muted shrink-0"></i>
@@ -481,62 +498,70 @@
             .join('');
     }
 
-    function renderOdevPickerTestCards(level) {
-        const cards = ODEV_TEST_OPTIONS.map(
+    function renderOdevPickerStepCards(bolumId) {
+        const meta = getBolumList().find((b) => b.id === bolumId);
+        return ODEV_STEP_OPTIONS.map(
             (testName) => `
-            <button type="button" onclick="odevVerFromTest(${level}, '${testName.replace(/'/g, "\\'")}')" class="lisani-glass-panel lisani-test-btn lisani-test-list-card rounded-2xl p-3.5 text-left flex items-center justify-between w-full min-w-0">
+            <button type="button" onclick="odevVerFromTest('${bolumId}', '${testName.replace(/'/g, "\\'")}')" class="lisani-glass-panel lisani-test-btn lisani-test-list-card rounded-2xl p-3.5 text-left flex items-center justify-between w-full min-w-0">
                 <div class="flex items-center gap-3 min-w-0">
                     <div class="lisani-test-list-icon w-10 h-10 rounded-xl flex items-center justify-center shrink-0">
                         <i data-lucide="${testName === 'Genel' ? 'award' : 'file-question'}" class="w-4 h-4"></i>
                     </div>
                     <div class="min-w-0">
                         <h4 class="text-xs font-extrabold theme-text-main">${testName === 'Genel' ? 'Genel Değerlendirme 🏆' : testName}</h4>
-                        <p class="text-[10px] theme-text-muted mt-0.5">${ODEV_LEVEL_LABELS[level]}</p>
+                        <p class="text-[10px] theme-text-muted mt-0.5">${meta?.title || bolumId}</p>
                     </div>
                 </div>
                 <span class="lisani-test-go-chip shrink-0 ml-2">Ödev Ver</span>
             </button>`
-        );
-        return cards.join('');
+        ).join('');
     }
 
-    window.backOdevPickerLevels = function () {
-        const levels = document.getElementById('odev-picker-levels');
-        const tests = document.getElementById('odev-picker-tests');
-        if (levels) levels.classList.remove('hidden');
-        if (tests) tests.classList.add('hidden');
+    window.backOdevPickerBolums = function () {
+        const bolums = document.getElementById('odev-picker-bolums');
+        const steps = document.getElementById('odev-picker-steps');
+        if (bolums) bolums.classList.remove('hidden');
+        if (steps) steps.classList.add('hidden');
     };
 
-    window.selectOdevPickerLevel = function (level) {
-        const levels = document.getElementById('odev-picker-levels');
-        const tests = document.getElementById('odev-picker-tests');
-        const list = document.getElementById('odev-picker-tests-list');
-        if (!levels || !tests || !list) return;
-        list.innerHTML = renderOdevPickerTestCards(level);
-        levels.classList.add('hidden');
-        tests.classList.remove('hidden');
+    window.backOdevPickerLevels = window.backOdevPickerBolums;
+
+    window.selectOdevPickerBolum = function (bolumId) {
+        const bolums = document.getElementById('odev-picker-bolums');
+        const steps = document.getElementById('odev-picker-steps');
+        const list = document.getElementById('odev-picker-steps-list');
+        if (!bolums || !steps || !list) return;
+        list.innerHTML = renderOdevPickerStepCards(bolumId);
+        bolums.classList.add('hidden');
+        steps.classList.remove('hidden');
         if (typeof lucide !== 'undefined') lucide.createIcons();
     };
+
+    window.selectOdevPickerLevel = window.selectOdevPickerBolum;
 
     window.initOdevTestPicker = function () {
         const root = document.getElementById('odev-test-picker');
         if (!root) return;
         root.innerHTML = `
-            <div id="odev-picker-levels" class="grid grid-cols-1 gap-2">${renderOdevPickerLevelCards()}</div>
-            <div id="odev-picker-tests" class="hidden space-y-2">
-                <button type="button" onclick="backOdevPickerLevels()" class="lisani-glass-action lisani-glass-action--compact flex items-center gap-2 text-xs font-bold w-fit">
+            <div id="odev-picker-bolums" class="grid grid-cols-1 gap-2">${renderOdevPickerBolumCards()}</div>
+            <div id="odev-picker-steps" class="hidden space-y-2">
+                <button type="button" onclick="backOdevPickerBolums()" class="lisani-glass-action lisani-glass-action--compact flex items-center gap-2 text-xs font-bold w-fit">
                     <i data-lucide="arrow-left" class="w-4 h-4"></i>
-                    <span>Seviyelere dön</span>
+                    <span>Bölümlere dön</span>
                 </button>
-                <div id="odev-picker-tests-list" class="grid grid-cols-1 gap-2"></div>
+                <div id="odev-picker-steps-list" class="grid grid-cols-1 gap-2"></div>
             </div>`;
         if (typeof lucide !== 'undefined') lucide.createIcons();
     };
 
     window.submitYoneticiOdev = function () {
-        const level = parseInt(document.getElementById('yonetici-odev-level')?.value, 10);
+        const bolum = document.getElementById('yonetici-odev-bolum')?.value || '';
         const test = document.getElementById('yonetici-odev-test')?.value || '';
-        window.odevVerFromTest(level, test);
+        if (!bolum) {
+            showToast('Lütfen bölüm seçin.', 'error');
+            return;
+        }
+        window.odevVerFromTest(bolum, test);
     };
 
     window.odevVerFromTest = function (arg1, arg2) {
@@ -548,12 +573,19 @@
         }
         const bolumIds = ['kelimeler', 'harfler', 'eslestirme', 'ceviri', 'ses'];
         if (typeof arg1 === 'string' && bolumIds.includes(arg1)) {
-            const meta = (window.LISANI_BOLUMLER || []).find((b) => b.id === arg1);
-            window.odevVer(uid, { bolum: arg1, label: meta?.title || arg2 || arg1 });
+            const meta = getBolumList().find((b) => b.id === arg1);
+            const step = ODEV_STEP_INDEX[arg2];
+            const payload = {
+                bolum: arg1,
+                label: `${meta?.title || arg1} — ${arg2}`,
+            };
+            if (step != null) payload.step = step;
+            window.odevVer(uid, payload);
             return;
         }
         window.odevVer(uid, { level: arg1, test: arg2 });
     };
+    window.__lisaniOdevVerFromTest = window.odevVerFromTest;
 
     window.odevVer = function (hocaUid, levelArg, testArg) {
         const levelEl = document.getElementById('odev-level');
@@ -572,7 +604,7 @@
                 payload.label = meta?.title || payload.bolum;
             }
         } else if (!payload.level || !payload.test) {
-            showToast('Lütfen seviye ve test seçin.', 'error');
+            showToast('Lütfen bölüm ve test seçin.', 'error');
             return;
         }
         if (currentUserRole === 'yonetici') {
@@ -1851,17 +1883,14 @@
         populateYoneticiSinifSelect(select, siniflar);
         if (picker && !picker.dataset.ready) {
             picker.innerHTML = `
-                <div class="grid grid-cols-2 gap-2">
-                    <select id="yonetici-odev-level" class="px-3 py-2 rounded-xl border theme-border theme-card-bg theme-text-main text-xs">
-                        <option value="1">Seviye 1</option>
-                        <option value="2">Seviye 2</option>
-                        <option value="3">Seviye 3</option>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <select id="yonetici-odev-bolum" class="px-3 py-2 rounded-xl border theme-border theme-card-bg theme-text-main text-xs">
+                        ${getBolumList()
+                            .map((b) => `<option value="${b.id}">${b.title}</option>`)
+                            .join('')}
                     </select>
                     <select id="yonetici-odev-test" class="px-3 py-2 rounded-xl border theme-border theme-card-bg theme-text-main text-xs">
-                        <option value="Test 1">Test 1</option>
-                        <option value="Test 2">Test 2</option>
-                        <option value="Test 3">Test 3</option>
-                        <option value="Genel">Genel</option>
+                        ${ODEV_STEP_OPTIONS.map((t) => `<option value="${t}">${t}</option>`).join('')}
                     </select>
                 </div>
                 <button type="button" onclick="submitYoneticiOdev()" class="lisani-glass-action lisani-glass-action--primary w-full py-2.5 text-xs font-bold mt-2">Ödevi Gönder</button>`;
@@ -2156,20 +2185,27 @@
         const list = document.getElementById(containerId);
         if (!list) return;
 
+        const isHome = containerId === 'home-odevler-list';
+        const emptyCls = isHome ? 'text-[10px] theme-text-muted text-center py-2' : 'text-[10px] theme-text-muted text-center py-3';
+        const itemPad = isHome ? 'rounded-xl px-3 py-2.5' : 'rounded-xl px-3 py-2.5';
+        const titleCls = isHome ? 'text-xs font-semibold' : 'text-xs font-semibold';
+        const metaCls = isHome ? 'text-[9px]' : 'text-[9px]';
+        const iconCls = isHome ? 'w-3.5 h-3.5' : 'w-3.5 h-3.5';
+        const badgeCls = isHome ? 'text-[8px]' : 'text-[8px]';
+
         const sinifEl = document.getElementById('home-odevler-sinif');
         if (sinifEl && data.sinifAdi) {
             sinifEl.textContent = data.sinifAdi + (data.hocaAdi ? ' · ' + data.hocaAdi : '');
         }
 
         if (!data.sinifAdi && data.message) {
-            list.innerHTML = `<p class="text-[8px] theme-text-muted text-center py-1">${data.message}</p>`;
+            list.innerHTML = `<p class="${emptyCls}">${data.message}</p>`;
             return;
         }
 
         const odevler = data.odevler || [];
         if (odevler.length === 0) {
-            list.innerHTML =
-                '<p class="text-[8px] theme-text-muted text-center py-1">Henüz ödev yok. Hocanız test seçtiğinde burada görünecek.</p>';
+            list.innerHTML = `<p class="${emptyCls}">Henüz ödev yok. Hocanız test seçtiğinde burada görünecek.</p>`;
             return;
         }
 
@@ -2181,18 +2217,18 @@
                     ? ' odev-test-item cursor-pointer hover:opacity-90 active:scale-[0.99] transition-all'
                     : '';
                 const badge = testOdev
-                    ? '<span class="text-[7px] font-bold uppercase tracking-wide px-1.5 py-px rounded-full bg-[rgba(127,168,138,0.15)] text-[#7fa88a] border border-[rgba(127,168,138,0.25)] shrink-0">Test</span>'
+                    ? `<span class="${badgeCls} font-bold uppercase tracking-wide px-2 py-0.5 rounded-full bg-[rgba(127,168,138,0.15)] text-[#7fa88a] border border-[rgba(127,168,138,0.25)] shrink-0">Test</span>`
                     : '';
                 return `
-            <div class="lisani-home-odev-item lisani-glass-panel lisani-glass-card rounded-md px-2 py-1.5 border theme-border${interactive}"
+            <div class="lisani-home-odev-item lisani-glass-panel lisani-glass-card ${itemPad} border theme-border${interactive}"
                 ${testOdev ? `data-odev-index="${idx}" role="button" tabindex="0"` : ''}>
-                <div class="flex items-center justify-between gap-1">
+                <div class="flex items-center justify-between gap-2">
                     <div class="flex-1 min-w-0">
-                        <p class="text-[10px] font-semibold theme-text-main leading-tight flex items-center gap-1">
-                            <i data-lucide="file-question" class="w-2.5 h-2.5 theme-primary-color shrink-0"></i>
+                        <p class="${titleCls} theme-text-main leading-snug flex items-center gap-1.5">
+                            <i data-lucide="file-question" class="${iconCls} theme-primary-color shrink-0"></i>
                             <span class="truncate">${escapeHtml(label)}</span>
                         </p>
-                        <p class="text-[7px] theme-text-muted mt-0.5 flex justify-between gap-1">
+                        <p class="${metaCls} theme-text-muted mt-1 flex justify-between gap-2">
                             <span class="truncate">${escapeHtml(o.hocaAdi || data.hocaAdi || 'Hoca')}</span>
                             <span class="shrink-0">${escapeHtml(o.tarih || '')}</span>
                         </p>
@@ -2397,6 +2433,14 @@
         if (odevSettings) odevSettings.classList.toggle('hidden', !studentLike);
         if (mesajCard) mesajCard.classList.toggle('hidden', !(isHoca || isYonetici || isOgrenci));
         if (mesajRow) mesajRow.classList.toggle('hidden', !(isHoca || isYonetici || isOgrenci));
+        const commsRow = document.getElementById('home-comms-row');
+        if (commsRow) {
+            const showMesaj = mesajCard && !mesajCard.classList.contains('hidden');
+            const showOdev = odevCard && !odevCard.classList.contains('hidden');
+            commsRow.classList.toggle('hidden', !showMesaj && !showOdev);
+            commsRow.classList.toggle('lisani-home-comms-row--mesaj-only', showMesaj && !showOdev);
+            commsRow.classList.toggle('lisani-home-comms-row--odev-only', showOdev && !showMesaj);
+        }
         const profileStats = document.getElementById('profile-stats-section');
         if (profileStats) profileStats.classList.toggle('hidden', !studentLike);
         const sub = document.getElementById('home-mesajlar-sub');

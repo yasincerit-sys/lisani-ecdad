@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Support\AiBotRegistry;
 use App\Support\AvatarHelper;
 use App\Support\HocaClassRegistry;
+use App\Support\PresetHocaAccounts;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -51,7 +52,7 @@ class DatabaseSeeder extends Seeder
         User::updateOrCreate(
             ['email' => 'kerem.cerit@lisaniecdad.app'],
             [
-                'name' => 'Kerem Cerit',
+                'name' => 'keremcerit',
                 'password' => 'es26ma45',
                 'avatar' => AvatarHelper::teamHtml('saray-kavvesi.svg'),
                 'role' => 'yonetici',
@@ -61,11 +62,22 @@ class DatabaseSeeder extends Seeder
 
         AiBotRegistry::ensureBotsExist();
 
+        $this->command?->info('');
+        $this->command?->info('Önceden tanımlı hoca hesapları (config/hoca_accounts.php):');
+        foreach (PresetHocaAccounts::ensureAll() as $sinif) {
+            $hoca = $sinif->hoca;
+            $cfg = collect(PresetHocaAccounts::definitions())->first(
+                fn ($a) => strcasecmp(trim((string) ($a['name'] ?? '')), (string) $hoca?->name) === 0
+            );
+            $pass = (string) ($cfg['password'] ?? '—');
+            $this->command?->info("  {$hoca?->name} / {$pass} — sınıf kodu: {$sinif->kisa_kod} ({$sinif->sinif_adi})");
+        }
+
         $this->command?->info('Demo hoca oluşturuldu.');
         $this->command?->info('  Giriş: Demo Hoca / hoca123');
         $this->command?->info('  Sınıf kodu (öğrencilere verin): DEMO01');
         $this->command?->info('Demo öğrenci: Demo Öğrenci / ogrenci123 (DEMO01 sınıfında)');
-        $this->command?->info('Uygulama yöneticisi: Kerem Cerit / es26ma45');
+        $this->command?->info('Uygulama yöneticisi: keremcerit / es26ma45');
         $this->command?->info('');
         $this->command?->info('5 hoca sınıfı (botlar bölünmüş):');
         foreach (HocaClassRegistry::CLASSES as $cfg) {

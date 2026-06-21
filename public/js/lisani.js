@@ -1265,7 +1265,7 @@
                         <p class="text-2xl">🎯</p>
                         <h4 class="text-sm font-extrabold theme-text-main">Başlangıç bölümün</h4>
                         <p class="text-xs theme-primary-color font-bold">${startTitle}</p>
-                        <p class="text-[10px] theme-text-muted leading-relaxed">Önceki bölümler atlandı; uygun seviyeden devam edeceksin.</p>
+                        <p class="text-[10px] theme-text-muted leading-relaxed">Önceki bölümler atlandı; uygun bölümden devam edeceksin.</p>
                         <button type="button" id="placement-start-btn" class="lisani-glass-action lisani-glass-action--primary w-full py-3 rounded-xl text-xs font-bold">Öğrenmeye Devam Et</button>
                     </div>`;
                 document.getElementById('placement-start-btn')?.addEventListener('click', () => {
@@ -1277,7 +1277,7 @@
             }
 
             if (typeof showToast === 'function') {
-                showToast(`Seviye belirlendi: ${startTitle}`, 'success');
+                showToast(`Başlangıç bölümü: ${startTitle}`, 'success');
             }
             placementState = null;
         }
@@ -1315,14 +1315,18 @@
             document.getElementById('placement-modal')?.classList.add('hidden');
         };
 
-        window.odevVerFromTest = function (bolumId, label) {
+        window.odevVerFromTest = function (bolumId, testName) {
+            if (typeof window.__lisaniOdevVerFromTest === 'function') {
+                window.__lisaniOdevVerFromTest(bolumId, testName);
+                return;
+            }
             const uid = currentUser?.uid || currentUser?.id;
             if (!uid) {
                 showToast('Giriş gerekli.', 'error');
                 return;
             }
             const meta = getBolumMeta(bolumId);
-            const assign = { bolum: bolumId, label: meta?.title || label || bolumId };
+            const assign = { bolum: bolumId, label: meta?.title || bolumId };
             if (typeof window.odevVer === 'function') {
                 window.odevVer(uid, assign);
                 return;
@@ -1736,18 +1740,18 @@
         window.bindTapAction = bindTapAction;
 
         function isTestsAssignMode() {
-            if (isYoneticiUser()) return !!window._testsAssignMode;
-            return isHocaUser();
+            if (isYoneticiUser() || isHocaUser()) return !!window._testsAssignMode;
+            return false;
         }
 
         window.toggleTestsAssignMode = function (ev) {
             if (ev && typeof ev.stopPropagation === 'function') ev.stopPropagation();
-            if (!isYoneticiUser()) return;
+            if (!isYoneticiUser() && !isHocaUser()) return;
             window._testsAssignMode = !window._testsAssignMode;
             updateTestsAssignToggleUI();
             renderBolumList();
             showToast(
-                window._testsAssignMode ? 'Ödev ata modu — tur veya teste dokunun' : 'Test modu — çözmeye devam',
+                window._testsAssignMode ? 'Ödev ata modu — teste dokunun' : 'Test modu — çözmeye devam',
                 'info'
             );
         };
@@ -1755,14 +1759,21 @@
         function updateTestsAssignToggleUI() {
             const btn = document.getElementById('tests-assign-toggle');
             if (!btn) return;
-            btn.classList.toggle('hidden', !isYoneticiUser());
+            btn.classList.toggle('hidden', !(isYoneticiUser() || isHocaUser()));
             btn.classList.toggle('is-active', !!window._testsAssignMode);
             btn.textContent = window._testsAssignMode ? 'Test Modu' : 'Ödev Ata';
         }
 
+        function assignOdevFromBolumStep(bolum, stepIndex) {
+            const testName = `Test ${stepIndex + 1}`;
+            if (typeof window.odevVerFromTest === 'function') {
+                window.odevVerFromTest(bolum.id, testName);
+            }
+        }
+
         function bindBolumAction(btn, bolum, stepIndex, assignMode) {
             const handler = assignMode
-                ? () => window.odevVerFromTest(bolum.id, bolum.title)
+                ? () => assignOdevFromBolumStep(bolum, stepIndex)
                 : () => startBolumStep(bolum.id, stepIndex);
             bindTapAction(btn, handler);
             btn.addEventListener(
@@ -1919,16 +1930,9 @@
             return wrap;
         }
 
-        function updateTestsStepPill(step) {
-            document.querySelectorAll('#screen-tests .lisani-tests-step').forEach((el, i) => {
-                el.classList.toggle('is-active', i + 1 === step);
-            });
-        }
-
         function setTestsSubview(mode) {
-            const map = { list: 1, quiz: 2, result: 3 };
             if (mode === 'list') {
-                ['test-selection-view', 'quiz-active-view', 'quiz-result-view'].forEach((id) => {
+                ['quiz-active-view', 'quiz-result-view'].forEach((id) => {
                     document.getElementById(id)?.classList.add('hidden');
                 });
                 document.getElementById('kariyer-modal-container')?.classList.remove('hidden');
@@ -1941,12 +1945,11 @@
                         : mode === 'result'
                           ? 'quiz-result-view'
                           : null;
-                ['test-selection-view', 'quiz-active-view', 'quiz-result-view'].forEach((id) => {
+                ['quiz-active-view', 'quiz-result-view'].forEach((id) => {
                     const el = document.getElementById(id);
                     if (el) el.classList.toggle('hidden', id !== showId);
                 });
             }
-            updateTestsStepPill(map[mode] || 1);
         }
 
         function ensureTestsScreenVisible() {
@@ -3596,10 +3599,13 @@
             window._lisaniChestPreloaded = true;
         }
 
-        function openKariyerModu(bolumIdHint) {
+        function openKariyerModu(bolumIdHint, opts) {
             playClickSound();
             preloadChestAssets(true);
             if (typeof stopTimeAttackSession === 'function') stopTimeAttackSession(false);
+            if (opts && opts.assignMode === true) {
+                window._testsAssignMode = true;
+            }
             const highlight = typeof bolumIdHint === 'string' ? bolumIdFromHint(bolumIdHint) : null;
             if (typeof renderBolumList === 'function') {
                 renderBolumList(highlight || undefined);
@@ -3607,8 +3613,18 @@
             document.getElementById('bolum-selection-view')?.classList.remove('hidden');
             document.getElementById('time-attack-view')?.classList.add('hidden');
             document.getElementById('kariyer-modal-container')?.classList.remove('hidden');
+            if (typeof updateTestsTabForRole === 'function') updateTestsTabForRole();
             if (typeof lucide !== 'undefined') lucide.createIcons();
         }
+
+        window.openHocaOdevAtama = function () {
+            if (!isHocaUser() && !isYoneticiUser()) {
+                showToast('Bu özellik hoca ve yönetici hesapları içindir.', 'error');
+                return;
+            }
+            openKariyerModu(null, { assignMode: true });
+            showToast('Teste dokunarak ödev atayabilirsiniz.', 'info');
+        };
 
         function closeKariyerModu() {
             playClickSound();
@@ -4076,7 +4092,16 @@
             let odevlerHTML = '';
             if (sinif.odevler && sinif.odevler.length > 0) {
                 sinif.odevler.slice(-3).reverse().forEach(o => {
-                    const lbl = o.label || (o.level && o.test ? `Seviye ${o.level} — ${o.test}` : o.icerik);
+                    let lbl = o.label || o.icerik;
+                    if (!lbl && o.bolum) {
+                        const meta = getBolumMeta(o.bolum);
+                        lbl = `${meta?.title || o.bolum}${o.test ? ` — ${o.test}` : ''}`;
+                    }
+                    if (!lbl && o.level && o.test) {
+                        const bolum = BOLUMLER.find((b) => (BOLUM_INDEX[b.id] || 0) === Number(o.level));
+                        lbl = bolum ? `${bolum.title} — ${o.test}` : o.test;
+                    }
+                    if (!lbl) lbl = 'Ödev';
                     odevlerHTML += `<div class="py-1.5 border-b theme-border"><p class="text-xs theme-text-main">${lbl}</p><p class="text-[10px] theme-text-muted">${o.tarih}</p></div>`;
                 });
             }
@@ -4097,7 +4122,7 @@
                 <div class="mb-4">${ogrencilerHTML}</div>
                 ${odevlerHTML ? `<h3 class="text-xs font-bold theme-text-main mb-2">📋 Son Ödevler</h3><div class="mb-4">${odevlerHTML}</div>` : ''}
                 <h3 class="text-xs font-bold theme-text-main mb-2">📝 Yeni Test Ödevi</h3>
-                <p class="text-[10px] theme-text-muted mb-3">Aşağıdan seviye ve test seçerek ödev gönderin.</p>
+                <p class="text-[10px] theme-text-muted mb-3">Aşağıdan bölüm seçerek ödev gönderin.</p>
                 <div id="odev-test-picker" data-hoca-uid="${uid}"></div>
             </div>`;
             if (typeof window.initOdevTestPicker === 'function') {
@@ -4495,7 +4520,6 @@
             setTennisUnlockState(false);
 
             document.getElementById('bottom-bar')?.classList.remove('hidden');
-            document.getElementById('test-selection-view')?.classList.add('hidden');
             document.getElementById('quiz-active-view')?.classList.add('hidden');
             document.getElementById('quiz-result-view')?.classList.add('hidden');
             document.getElementById('bolum-selection-view')?.classList.remove('hidden');
@@ -4556,6 +4580,10 @@
                 } else if (typeof switchTab === 'function') {
                     switchTab('home');
                 }
+            }
+
+            if (screenId === 'home') {
+                refreshDailyHadisIfNeeded();
             }
 
             if (screenId === 'tests') {
@@ -4664,17 +4692,83 @@
         ];
 
         let currentHadisIdx = 0;
+        const HADIS_DAY_KEY = 'lisani_hadis_day';
+        const HADIS_IDX_KEY = 'lisani_hadis_idx';
+
+        function getHadisIndexForDate(date) {
+            const d = date instanceof Date ? date : new Date(date);
+            const dayOfYear = Math.floor((d - new Date(d.getFullYear(), 0, 0)) / 86400000);
+            return dayOfYear % hadisList.length;
+        }
+
+        function getTodayDateKey() {
+            const d = new Date();
+            return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        }
+
+        function renderHadisAtIndex(idx) {
+            const hadis = hadisList[idx];
+            if (!hadis) return;
+            currentHadisIdx = idx;
+            const elOsm = document.getElementById('home-hadis-osmanli');
+            const elTr = document.getElementById('home-hadis-turkce');
+            const elKy = document.getElementById('home-hadis-kaynak');
+            if (elOsm) elOsm.innerText = hadis.osmanli;
+            if (elTr) elTr.innerText = `"${hadis.turkce}"`;
+            if (elKy) elKy.innerText = hadis.kaynak;
+        }
+
+        function initDailyHadis() {
+            const todayKey = getTodayDateKey();
+            let idx = getHadisIndexForDate(new Date());
+            try {
+                const savedDay = localStorage.getItem(HADIS_DAY_KEY);
+                const savedIdx = parseInt(localStorage.getItem(HADIS_IDX_KEY) || '', 10);
+                if (savedDay === todayKey && !Number.isNaN(savedIdx) && savedIdx >= 0 && savedIdx < hadisList.length) {
+                    idx = savedIdx;
+                } else {
+                    localStorage.setItem(HADIS_DAY_KEY, todayKey);
+                    localStorage.setItem(HADIS_IDX_KEY, String(idx));
+                }
+            } catch (e) {}
+            renderHadisAtIndex(idx);
+        }
+
+        function refreshDailyHadisIfNeeded() {
+            try {
+                if (localStorage.getItem(HADIS_DAY_KEY) !== getTodayDateKey()) {
+                    initDailyHadis();
+                }
+            } catch (e) {
+                initDailyHadis();
+            }
+        }
 
         function nextHadis() {
             playClickSound();
-            currentHadisIdx = (currentHadisIdx + 1) % hadisList.length;
-            const hadis = hadisList[currentHadisIdx];
-            
-            document.getElementById('home-hadis-osmanli').innerText = hadis.osmanli;
-            document.getElementById('home-hadis-turkce').innerText = `"${hadis.turkce}"`;
-            document.getElementById('home-hadis-kaynak').innerText = hadis.kaynak;
-            
-            showToast("Yeni hadis yüklendi.", "success");
+            const idx = (currentHadisIdx + 1) % hadisList.length;
+            renderHadisAtIndex(idx);
+            try {
+                localStorage.setItem(HADIS_DAY_KEY, getTodayDateKey());
+                localStorage.setItem(HADIS_IDX_KEY, String(idx));
+            } catch (e) {}
+            showToast('Yeni hadis yüklendi.', 'success');
+        }
+
+        window.nextHadis = nextHadis;
+
+        function formatTrialLabel(record) {
+            if (record.test) return record.test;
+            if (record.bolum) {
+                const meta = getBolumMeta(record.bolum);
+                return meta?.title || record.bolum;
+            }
+            if (record.level) {
+                const bolum = BOLUMLER.find((b) => (BOLUM_INDEX[b.id] || 0) === Number(record.level));
+                if (bolum && record.test) return `${bolum.title} — ${record.test}`;
+                if (bolum) return bolum.title;
+            }
+            return 'Test';
         }
 
         // Detay analizi kartına geçmiş sınavı yükler
@@ -4685,7 +4779,7 @@
             const detailCard = document.getElementById('selected-trial-detail-card');
             if (detailCard) detailCard.classList.remove('hidden');
 
-            document.getElementById('detail-trial-title').innerText = `Seviye ${deneme.level} - ${deneme.test} Detayı`;
+            document.getElementById('detail-trial-title').innerText = `${formatTrialLabel(deneme)} Detayı`;
             document.getElementById('detail-trial-date').innerText = deneme.date;
             document.getElementById('detail-trial-corrects').innerText = `${deneme.correct} Doğru`;
             document.getElementById('detail-trial-wrongs').innerText = `${deneme.wrong} Yanlış`;
@@ -4738,7 +4832,7 @@
                 
                 row.innerHTML = `
                     <div class="flex items-center space-x-2.5">
-                        <span class="text-xs font-bold theme-text-main">Sev. ${record.level} - ${record.test}</span>
+                        <span class="text-xs font-bold theme-text-main">${formatTrialLabel(record)}</span>
                         <span class="text-[9px] theme-text-muted font-semibold">${record.date}</span>
                     </div>
                     <div class="flex items-center space-x-2">
@@ -6055,8 +6149,7 @@ self.addEventListener('notificationclick', e => {
         }
 
         function getHadisForDate(date) {
-            const dayOfYear = Math.floor((date - new Date(date.getFullYear(), 0, 0)) / 86400000);
-            return hadisList[dayOfYear % hadisList.length];
+            return hadisList[getHadisIndexForDate(date)];
         }
 
         function getTodaysHadis() {
@@ -6328,15 +6421,7 @@ self.addEventListener('notificationclick', e => {
             initToastSwipe();
             initRememberMeCheckbox();
 
-            const firstHadis = hadisList[0];
-            if (firstHadis) {
-                const elOsm = document.getElementById('home-hadis-osmanli');
-                const elTr = document.getElementById('home-hadis-turkce');
-                const elKy = document.getElementById('home-hadis-kaynak');
-                if (elOsm) elOsm.innerText = firstHadis.osmanli;
-                if (elTr) elTr.innerText = `"${firstHadis.turkce}"`;
-                if (elKy) elKy.innerText = firstHadis.kaynak;
-            }
+            initDailyHadis();
 
             // Kayıtlı kullanıcıları yükle (yerel)
             try {

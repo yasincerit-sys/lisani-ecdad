@@ -1604,37 +1604,63 @@ html.preline-ui[class*="theme-"] .theme-pick-btn.is-active {
     word-break: break-word;
 }
 
-/* Ana sayfa — Mesajlar & Ödevler (ince şerit kart) */
+/* Ana sayfa — Mesajlar & Ödevler (geniş kart satırı) */
+.lisani-home-comms-row {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.85rem;
+    width: 100%;
+}
+
+.lisani-home-comms-row:not(.hidden) {
+    display: grid;
+}
+
 .lisani-home-mesajlar-card,
 .lisani-home-odevler-card {
-    padding: 0.45rem 0.6rem !important;
-    border-radius: 0.85rem !important;
+    padding: 1rem !important;
+    border-radius: 1rem !important;
+    min-height: 5.5rem;
 }
 
 .lisani-home-mesajlar-card .lisani-home-card-icon {
-    width: 1.75rem !important;
-    height: 1.75rem !important;
-    border-radius: 0.45rem !important;
+    width: 2.75rem !important;
+    height: 2.75rem !important;
+    border-radius: 1rem !important;
 }
 
 .lisani-home-mesajlar-card .lisani-home-card-icon i,
 .lisani-home-mesajlar-card .lisani-home-card-icon svg {
-    width: 0.85rem !important;
-    height: 0.85rem !important;
+    width: 1.25rem !important;
+    height: 1.25rem !important;
+}
+
+.lisani-home-card-title {
+    font-size: 0.75rem !important;
+}
+
+.lisani-home-mesajlar-card p,
+.lisani-home-odevler-card p,
+.lisani-home-odevler-card .lisani-home-card-title {
+    line-height: 1.35;
 }
 
 .lisani-home-odevler-card > .flex.border-b {
-    padding-bottom: 0.25rem !important;
+    padding-bottom: 0.5rem !important;
     margin-bottom: 0 !important;
 }
 
 .lisani-home-odevler-card #home-odevler-list {
-    max-height: 6.75rem;
+    max-height: 15rem;
 }
 
 .lisani-home-odevler-card .lisani-home-odev-item {
-    padding: 0.35rem 0.45rem !important;
-    border-radius: 0.5rem !important;
+    padding: 0.65rem 0.75rem !important;
+    border-radius: 0.75rem !important;
+}
+
+.lisani-home-odevler-card .lisani-home-odev-item p {
+    font-size: 0.75rem !important;
 }
 
 .lisani-odev-refresh-btn--compact {
@@ -2115,6 +2141,7 @@ html.preline-ui.theme-sade .lisani-glass-blobs {
 }
 
 #wa-mesajlar-overlay .wa-contact-card {
+    padding: 0.9rem 1rem !important;
     background: rgba(255, 255, 255, 0.06) !important;
     border: 1px solid rgba(255, 255, 255, 0.12) !important;
     backdrop-filter: none !important;
@@ -2144,6 +2171,8 @@ html.preline-ui.theme-sade .lisani-glass-blobs {
 }
 
 #wa-mesajlar-overlay .wa-contact-avatar {
+    width: 3rem !important;
+    height: 3rem !important;
     background: rgba(255, 255, 255, 0.08) !important;
     backdrop-filter: blur(10px) saturate(150%);
     -webkit-backdrop-filter: blur(10px) saturate(150%);
@@ -2813,48 +2842,69 @@ html.preline-ui.theme-beyaz-cam #edit-profile-container:not(.hidden) {
         padding: 0.55rem 0.75rem !important;
     }
 
-    /* Mesajlar & ödevler — masaüstü ince şerit */
+    /* Mesajlar & ödevler — masaüstü geniş satır */
+    .lisani-home-comms-row {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1rem;
+    }
+
+    .lisani-home-comms-row.lisani-home-comms-row--mesaj-only,
+    .lisani-home-comms-row.lisani-home-comms-row--odev-only {
+        grid-template-columns: 1fr;
+    }
+
     .lisani-home-mesajlar-card,
     .lisani-home-odevler-card {
-        padding: 0.4rem 0.55rem !important;
-        border-radius: 0.8rem !important;
+        padding: 1.1rem 1.25rem !important;
+        border-radius: 1.15rem !important;
+        min-height: 6.5rem;
     }
 
     .lisani-home-mesajlar-card .lisani-home-card-icon {
-        width: 1.65rem !important;
-        height: 1.65rem !important;
-        border-radius: 0.4rem !important;
+        width: 3rem !important;
+        height: 3rem !important;
+        border-radius: 1rem !important;
     }
 
     .lisani-home-mesajlar-card .lisani-home-card-icon i,
     .lisani-home-mesajlar-card .lisani-home-card-icon svg {
-        width: 0.8rem !important;
-        height: 0.8rem !important;
+        width: 1.35rem !important;
+        height: 1.35rem !important;
     }
 
     .lisani-home-card-title {
-        font-size: 0.625rem !important;
-        font-weight: 600 !important;
+        font-size: 0.8125rem !important;
+        font-weight: 700 !important;
     }
 
     .lisani-home-mesajlar-card p,
     .lisani-home-odevler-card p,
     .lisani-home-odevler-card span {
+        font-size: 0.6875rem !important;
         font-weight: 500 !important;
     }
 
     .lisani-home-odevler-card .lisani-home-odev-item {
-        padding: 0.3rem 0.4rem !important;
-        border-radius: 0.45rem !important;
+        padding: 0.75rem 0.85rem !important;
+        border-radius: 0.85rem !important;
     }
 
     .lisani-home-odevler-card .lisani-home-odev-item p {
-        font-size: 0.625rem !important;
-        font-weight: 500 !important;
+        font-size: 0.75rem !important;
+        font-weight: 600 !important;
     }
 
     .lisani-home-odevler-card #home-odevler-list {
-        max-height: 6.25rem;
+        max-height: 18rem;
+    }
+
+    #wa-mesajlar-overlay .wa-contact-card {
+        padding: 1rem 1.15rem !important;
+    }
+
+    #wa-mesajlar-overlay .wa-contact-avatar {
+        width: 3.25rem !important;
+        height: 3.25rem !important;
     }
 }
 

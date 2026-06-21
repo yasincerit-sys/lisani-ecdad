@@ -40,10 +40,6 @@
         return `lisani_daily_task_${uid()}`;
     }
 
-    function levelKey() {
-        return `lisani_user_level_${uid()}`;
-    }
-
     function placementKey() {
         return `lisani_placement_done_${uid()}`;
     }
@@ -133,25 +129,7 @@
         return !n ? '0 Gün' : `${n} Gün`;
     }
 
-    function getUserLevel() {
-        try {
-            const v = parseInt(localStorage.getItem(levelKey()), 10);
-            return v >= 1 && v <= 3 ? v : null;
-        } catch (e) {
-            return null;
-        }
-    }
-
-    function setUserLevel(lv) {
-        try {
-            localStorage.setItem(levelKey(), String(lv));
-        } catch (e) {}
-        renderLearnStartCard();
-    }
-
-    function renderLearnStartCard() {
-        /* yeşil buton modunda ek kart yok */
-    }
+    function renderLearnStartCard() {}
 
     function isPlacementDone() {
         try {
@@ -173,15 +151,13 @@
             typeof window.getLisaniProgress === 'function'
                 ? window.getLisaniProgress().testHistory || []
                 : [];
-        return history.length === 0 && !isPlacementDone() && !getUserLevel();
+        return history.length === 0 && !isPlacementDone();
     }
 
     function applyPlacementResult(startBolumId) {
         if (typeof window.applyPlacementStartBolum === 'function') {
             window.applyPlacementStartBolum(startBolumId);
         }
-        const lvlMap = { kelimeler: 1, harfler: 1, eslestirme: 2, ceviri: 3, ses: 3 };
-        setUserLevel(lvlMap[startBolumId] || 1);
         markPlacementDone();
     }
 
@@ -410,7 +386,6 @@
     window.continueLearnFromLast = function (event) {
         if (event) event.stopPropagation();
         markPlacementDone();
-        closeLevelPicker();
         if (typeof window.openLearnTests === 'function') {
             window.openLearnTests();
         }
@@ -421,44 +396,6 @@
     window.openDailyGoalLetters = startDailyTaskAction;
     window.goToDailyGoalLetters = startDailyTaskAction;
     window.startDailyTaskAction = startDailyTaskAction;
-
-    window.continueFromKnownLevel = function (event) {
-        if (event) event.stopPropagation();
-        const lv = getUserLevel();
-        if (!lv) return;
-        const startMap = { 1: 'kelimeler', 2: 'eslestirme', 3: 'ceviri' };
-        if (typeof window.openLearnTests === 'function') {
-            window.openLearnTests(startMap[lv] || 'kelimeler');
-        }
-    };
-
-    window.openLevelPicker = function (event) {
-        if (event) event.stopPropagation();
-        let modal = document.getElementById('level-picker-modal');
-        if (!modal) return;
-        modal.classList.remove('hidden');
-        if (typeof lucide !== 'undefined') lucide.createIcons();
-    };
-
-    window.closeLevelPicker = function () {
-        const modal = document.getElementById('level-picker-modal');
-        if (modal) modal.classList.add('hidden');
-    };
-
-    window.pickUserLevel = function (lv) {
-        const startMap = { 1: 'kelimeler', 2: 'eslestirme', 3: 'ceviri' };
-        const startBolum = startMap[lv] || 'kelimeler';
-        if (typeof window.applyPlacementStartBolum === 'function') {
-            window.applyPlacementStartBolum(startBolum);
-        }
-        setUserLevel(lv);
-        markPlacementDone();
-        closeLevelPicker();
-        if (typeof showToast === 'function') showToast(`Seviye ${lv} kaydedildi.`, 'success');
-        if (typeof window.openLearnTests === 'function') {
-            window.openLearnTests(startBolum);
-        }
-    };
 
     function buildPlacementQuestions() {
         if (typeof window.getPlacementQuestionPool !== 'function') return [];
@@ -491,7 +428,7 @@
         if (typeof window.closeKariyerModu === 'function') window.closeKariyerModu();
         const questions = buildPlacementQuestions();
         if (!questions.length) {
-            if (typeof showToast === 'function') showToast('Seviye testi hazırlanamadı.', 'error');
+            if (typeof showToast === 'function') showToast('Başlangıç testi hazırlanamadı.', 'error');
             return;
         }
         if (typeof window.launchPlacementQuiz === 'function') {
@@ -535,8 +472,6 @@
         onLevelOpen: onBolumOpen,
         updateDailyGoalUI,
         applyPlacementResult,
-        getUserLevel,
-        setUserLevel,
         getTodayTask,
         isNewLearner,
     };
