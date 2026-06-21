@@ -35,8 +35,31 @@
             updateUIPoints();
             if (typeof renderProgressChart === 'function') renderProgressChart();
             if (typeof renderQuizHistoryList === 'function') renderQuizHistoryList();
+            if (typeof renderGelisimWrongsPanel === 'function') renderGelisimWrongsPanel();
+            if (typeof renderGelisimImprovementPanel === 'function') renderGelisimImprovementPanel();
             if (typeof window.updateDailyWheelHomeUI === 'function') window.updateDailyWheelHomeUI();
         };
+
+        function matchProgressRecord(serverR, localRecords) {
+            if (!serverR || !localRecords?.length) return null;
+            if (serverR.id != null) {
+                const byId = localRecords.find((l) => l.id === serverR.id);
+                if (byId) return byId;
+            }
+            return localRecords.find(
+                (l) =>
+                    l.date === serverR.date &&
+                    l.test === serverR.test &&
+                    l.bolum === serverR.bolum &&
+                    Number(l.step) === Number(serverR.step)
+            );
+        }
+
+        function mergeWrongItemsFromLocal(serverItems, localItems) {
+            const server = Array.isArray(serverItems) ? serverItems : [];
+            if (server.length) return server;
+            return Array.isArray(localItems) ? localItems : [];
+        }
 
         window.addLisaniXp = function (amount) {
             const n = Number(amount);
@@ -97,17 +120,60 @@
             const usedKeys = new Set();
 
             function qKey(q) {
-                return `${q.type}|${q.word}|${(q.answerOrder || q.answer || '').toString()}`;
+                if (q.type === 'match' && q.pairIds) return `match|${q.pairIds}`;
+                if (q.type === 'speak') return `speak|${q.word}|${q.speakHint || ''}`;
+                const word = q.word || q.osm || '';
+                return `${q.type || 'word'}|${word}|${(q.answerOrder || q.answer || q.tr || '').toString()}`;
+            }
+
+            function questionDifficulty(q) {
+                return q?.difficulty ?? q?.diff ?? 2;
+            }
+
+            function fitsBolumDifficulty(kind, q, minD, maxD) {
+                const d = questionDifficulty(q);
+                const bounds = {
+                    kelimeler: { floor: 1, ceiling: 3, kinds: ['match', 'card', 'letter', 'speak'] },
+                    harfler: { floor: 2, ceiling: 4, kinds: null },
+                    eslestirme: { floor: 2, ceiling: 5, kinds: null },
+                    ceviri: { floor: 4, ceiling: 6, kinds: null },
+                    ses: { floor: 5, ceiling: 6, kinds: ['grammar', 'tiles', 'match', 'speak'] },
+                }[bolumId] || { floor: 1, ceiling: 6, kinds: null };
+
+                if (bounds.kinds && !bounds.kinds.includes(kind)) return false;
+                if (kind === 'speak') {
+                    if (bolumId === 'kelimeler' && d > 3) return false;
+                    if (bolumId === 'ses' && d < 4) return false;
+                }
+                if (kind === 'match') {
+                    if (bolumId === 'kelimeler' && d > 3) return false;
+                    if (bolumId === 'ses' && d < 4) return false;
+                }
+                const effMin = Math.max(minD, bounds.floor);
+                const effMax = Math.min(maxD, bounds.ceiling);
+                return d >= effMin && d <= effMax;
+            }
+
+            function pickIndex(total, kind, slot) {
+                if (total <= 1) return 0;
+                let h = hashSessionSeed(`${bolumId}|${stepIndex}|${slot}|${kind}|${size}`);
+                return Math.abs(h) % total;
+            }
+
+            function hashSessionSeed(str) {
+                let h = 0;
+                for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) | 0;
+                return h;
             }
 
             function pickFromPool(kind, minD, maxD, slot, pickCfg) {
                 const pool = pools[kind] || [];
                 const cfg = pickCfg || {};
+                const strictBolum = bolumId === 'kelimeler' || bolumId === 'ses' || bolumId === 'ceviri';
                 const filterBase = (q, diffOnly) => {
-                    const d = q.difficulty || 2;
                     const key = qKey(q);
                     if (usedKeys.has(key) || bolumUsed.has(key)) return false;
-                    if (diffOnly && (d < minD || d > maxD)) return false;
+                    if (diffOnly && !fitsBolumDifficulty(kind, q, minD, maxD)) return false;
                     if (kind === 'tiles') {
                         const parts = q.tileParts || (q.answerOrder || []).length;
                         if (cfg.tilesPartMin && parts < cfg.tilesPartMin) return false;
@@ -118,11 +184,16 @@
                 };
 
                 let candidates = pool.filter((q) => filterBase(q, true));
-                if (!candidates.length) {
-                    candidates = pool.filter((q) => filterBase(q, false));
+                if (!candidates.length && !strictBolum) {
+                    candidates = pool.filter((q) => filterBase(q, false) && fitsBolumDifficulty(kind, q, minD, maxD));
+                }
+                if (!candidates.length && !strictBolum) {
+                    candidates = pool.filter(
+                        (q) => filterBase(q, false) && fitsBolumDifficulty(kind, q, 1, 6)
+                    );
                 }
                 if (!candidates.length) {
-                    candidates = pool.filter((q) => !usedKeys.has(qKey(q)));
+                    candidates = pool.filter((q) => !usedKeys.has(qKey(q)) && fitsBolumDifficulty(kind, q, minD, maxD));
                 }
                 if (kind === 'grammar' && window.LisaniGrammarPrep?.filterGrammarPool) {
                     const filtered = window.LisaniGrammarPrep.filterGrammarPool(candidates);
@@ -136,9 +207,14 @@
                     candidates = candidates.slice(0, hardCount);
                 }
 
-                const pickIdx =
-                    (stepIndex * 11 + slot * 5 + (BOLUM_INDEX[bolumId] || 0) + kind.length) % candidates.length;
-                const q = JSON.parse(JSON.stringify(candidates[pickIdx]));
+                const pickIdx = pickIndex(candidates.length, kind, slot);
+                let raw = candidates[pickIdx];
+                let q =
+                    window.LisaniQuizBank?.materializeQuestion?.(kind, raw) ||
+                    (raw?.type ? raw : null);
+                if (!q && raw) q = raw;
+                if (!q) return null;
+                q = JSON.parse(JSON.stringify(q));
                 usedKeys.add(qKey(q));
                 return q;
             }
@@ -220,6 +296,9 @@
         let micPermissionGranted = false;
         let tilesSelection = [];
         let tilesPickedIndices = new Set();
+        let matchSelectedLeft = null;
+        let matchSelectedRight = null;
+        let matchCompletedIds = new Set();
         let activeQuestionAnswered = false;
         const SPEAK_LISTEN_MS = () => (window.LISANI_SPEAK_LISTEN_SEC || 15) * 1000;
         const speakListenSecLabel = () => Math.round(SPEAK_LISTEN_MS() / 1000);
@@ -244,15 +323,179 @@
         let lastTestSummary = { correct: 0, wrong: 0, percent: 0 };
 
         function quizQuestionKey(q) {
+            if (q.type === 'speak') return `speak|${q.word}|${q.speakHint || ''}`;
             return `${q.type}|${q.word}|${(q.answerOrder || q.answer || '').toString()}`;
         }
 
-        function recordWrongQuestion(q) {
+        function formatCorrectAnswer(q) {
+            if (!q) return '';
+            if (q.type === 'speak') return q.speakHint || q.word || '';
+            if (q.type === 'tiles' && q.answerOrder?.length) return q.answerOrder.join(' ');
+            if (q.type === 'match' && q.pairs?.length) {
+                return q.pairs.map((p) => `${p.emoji || ''} ${p.tr} = ${p.osm}`).join(' · ');
+            }
+            if (q.answer) return String(q.answer);
+            return '';
+        }
+
+        function formatQuestionTypeLabel(q) {
+            const meta = window.LISANI_QUIZ_META?.[q?.type];
+            return meta?.label || q?.type || 'Soru';
+        }
+
+        function formatWrongQuestionText(q) {
+            if (!q) return '';
+            if (q.type === 'grammar') return q.word || q.prompt || '';
+            if (q.type === 'card' || q.type === 'letter') {
+                const parts = [];
+                if (q.prompt) parts.push(q.prompt);
+                if (q.word) parts.push(`Osmanlıca: «${q.word}»`);
+                return parts.join(' · ') || q.word || '';
+            }
+            if (q.type === 'tiles') {
+                const parts = [q.prompt || 'Cümle parçalarını doğru sırayla birleştir'];
+                const chunks = q.tiles || q.tileParts;
+                if (chunks?.length) parts.push(`Parçalar: ${chunks.join(' / ')}`);
+                return parts.join(' · ');
+            }
+            if (q.type === 'match' && q.pairs?.length) {
+                const pairs = q.pairs.map((p) => `${p.emoji || ''} ${p.tr}`.trim()).join(', ');
+                return `${q.prompt || 'Eşleştirme sorusu'} · ${pairs}`;
+            }
+            if (q.type === 'speak') {
+                return `${q.prompt || 'Konuşma sorusu'} · Osmanlıca: «${q.word}»`;
+            }
+            return q.prompt || q.word || formatQuestionTypeLabel(q);
+        }
+
+        function resolveWrongStudyTopic(q, bolumId) {
+            const titles = window.LISANI_GRAMMAR_TOPIC_TITLES || {};
+            const topics = window.LISANI_GRAMMAR_TOPICS || {};
+            const bolum = (BOLUMLER || []).find((b) => b.id === bolumId);
+
+            if (q?.grammarTopic) {
+                const id = q.grammarTopic;
+                return {
+                    topicId: id,
+                    topicLabel: titles[id] || id,
+                    studyHint: topics[id] || buildWrongItemTip(q),
+                    bolumTitle: bolum?.title || '',
+                };
+            }
+
+            const byType = {
+                card: {
+                    topicId: 'kelimeler',
+                    topicLabel: 'Kelime hazinesi',
+                    studyHint: 'Osmanlıca kelimeleri Türkçe anlamlarıyla eşleştirmeyi tekrar et.',
+                },
+                letter: {
+                    topicId: 'harfler',
+                    topicLabel: 'Harf bilgisi',
+                    studyHint: 'Osmanlı alfabesindeki harfleri ve okunuşlarını çalış.',
+                },
+                match: {
+                    topicId: 'eslestirme',
+                    topicLabel: 'Kelime eşleştirme',
+                    studyHint: 'Türkçe kelime / resim ile Osmanlıca yazılışı eşleştirmeyi tekrar et.',
+                },
+                tiles: {
+                    topicId: 'cümle',
+                    topicLabel: 'Cümle kurma',
+                    studyHint: 'Osmanlıca cümle parçalarını doğru sırayla birleştirmeyi çalış.',
+                },
+                speak: {
+                    topicId: 'konuşma',
+                    topicLabel: 'Konuşma pratiği',
+                    studyHint: 'Osmanlıca kelimenin Türkçe okunuşunu net ve yavaş söylemeyi tekrar et.',
+                },
+            };
+
+            const mapped = byType[q?.type];
+            if (mapped) {
+                return {
+                    topicId: mapped.topicId,
+                    topicLabel: mapped.topicLabel,
+                    studyHint: q?.learnTip || mapped.studyHint,
+                    bolumTitle: bolum?.title || '',
+                };
+            }
+
+            return {
+                topicId: bolumId || '',
+                topicLabel: bolum?.title || formatQuestionTypeLabel(q),
+                studyHint: buildWrongItemTip(q),
+                bolumTitle: bolum?.title || '',
+            };
+        }
+
+        function buildWrongItemTip(q) {
+            if (typeof window.buildLisaniLearnTip === 'function') return window.buildLisaniLearnTip(q);
+            return q?.learnTip || q?.grammarNote || '';
+        }
+
+        function pickQuestionReplayFields(q) {
+            const fields = [
+                'type', 'word', 'prompt', 'options', 'answer', 'answerOrder', 'tiles', 'pairs',
+                'pairIds', 'grammarTopic', 'grammarNote', 'learnTip', 'difficulty', 'tileParts',
+                'speakHint', 'speakMatch',
+            ];
+            const out = {};
+            fields.forEach((k) => {
+                if (q[k] != null) out[k] = q[k];
+            });
+            return out;
+        }
+
+        function packWrongItemForHistory(q, ctx = {}) {
+            const meta = q._wrongMeta || {};
+            const study = resolveWrongStudyTopic(q, ctx.bolum || '');
+            return {
+                type: q.type,
+                word: q.word,
+                prompt: q.prompt || '',
+                questionText: formatWrongQuestionText(q),
+                label: formatQuestionTypeLabel(q),
+                correct: meta.correctLabel || formatCorrectAnswer(q),
+                userAnswer: meta.userAnswer || '',
+                tip: meta.tip || buildWrongItemTip(q),
+                grammarTopic: q.grammarTopic || '',
+                studyTopic: study.topicLabel,
+                studyTopicId: study.topicId,
+                studyHint: study.studyHint,
+                bolum: ctx.bolum || '',
+                bolumTitle: study.bolumTitle,
+                options: Array.isArray(q.options) ? q.options.slice(0, 6) : [],
+                replay: pickQuestionReplayFields(q),
+            };
+        }
+
+        function unpackWrongItemForReview(item) {
+            if (!item?.replay) return null;
+            return {
+                ...JSON.parse(JSON.stringify(item.replay)),
+                _wrongMeta: {
+                    userAnswer: item.userAnswer || '',
+                    correctLabel: item.correct || '',
+                    tip: item.tip || '',
+                },
+            };
+        }
+
+        let selectedTrialId = null;
+
+        function recordWrongQuestion(q, meta = {}) {
             if (!q) return;
             const key = quizQuestionKey(q);
-            if (!activeWrongQuestions.some((w) => quizQuestionKey(w) === key)) {
-                activeWrongQuestions.push(JSON.parse(JSON.stringify(q)));
-            }
+            const copy = JSON.parse(JSON.stringify(q));
+            copy._wrongMeta = {
+                userAnswer: meta.userAnswer || '',
+                correctLabel: meta.correctLabel || formatCorrectAnswer(q),
+                tip: meta.tip || buildWrongItemTip(q),
+            };
+            const idx = activeWrongQuestions.findIndex((w) => quizQuestionKey(w) === key);
+            if (idx >= 0) activeWrongQuestions[idx] = copy;
+            else activeWrongQuestions.push(copy);
         }
 
         // --- GİZLİ TENİS OYUNU (2D) ---
@@ -915,6 +1158,12 @@
             };
 
             const serverTests = Array.isArray(data.recent_tests) ? data.recent_tests : [];
+            let localBackup = [];
+            try {
+                localBackup = JSON.parse(localStorage.getItem('lisani_test_history') || '[]');
+            } catch (e) {}
+            const localBeforeMerge = testHistory.length ? testHistory : localBackup;
+
             const hasDb =
                 window._lisaniServerStats.tests_count > 0 ||
                 window._lisaniServerStats.total_xp > 0 ||
@@ -922,18 +1171,25 @@
 
             if (hasDb) {
                 if (serverTests.length > 0) {
-                    testHistory = serverTests.map((r, i) => ({
-                        id: r.id || i + 1,
-                        date: r.date || '',
-                        level: r.level,
-                        bolum: r.bolum,
-                        step: r.step,
-                        test: r.test || '',
-                        correct: r.correct ?? 0,
-                        wrong: r.wrong ?? 0,
-                        percent: r.percent ?? 0,
-                        score: r.percent ?? 0,
-                    }));
+                    testHistory = serverTests.map((r, i) => {
+                        const localMatch = matchProgressRecord(r, localBeforeMerge);
+                        return {
+                            id: r.id || localMatch?.id || i + 1,
+                            date: r.date || '',
+                            level: r.level,
+                            bolum: r.bolum ?? localMatch?.bolum,
+                            step: r.step ?? localMatch?.step,
+                            test: r.test || '',
+                            correct: r.correct ?? 0,
+                            wrong: r.wrong ?? 0,
+                            percent: r.percent ?? 0,
+                            score: r.percent ?? 0,
+                            wrongItems: mergeWrongItemsFromLocal(
+                                r.wrong_items || r.wrongItems,
+                                localMatch?.wrongItems
+                            ),
+                        };
+                    });
                 } else if (window._lisaniServerStats.tests_count === 0) {
                     testHistory = [];
                 }
@@ -1065,7 +1321,7 @@
             const subtitle = document.getElementById('ai-screen-subtitle');
             const chartBadge = document.getElementById('ai-chart-badge-label');
             if (title) title.textContent = 'Gelişim Analizi';
-            if (subtitle) subtitle.textContent = 'Uygulamada çözdüğünüz testlerin skor geçmişi';
+            if (subtitle) subtitle.textContent = 'Solda yanlış soru detayı · sağda skor geçmişi';
             if (chartBadge) chartBadge.textContent = 'Skorlarım';
         }
         window.updateGelisimScreenForRole = updateGelisimScreenForRole;
@@ -1143,8 +1399,8 @@
                 const d = q.difficulty || 2;
                 if (kind === 'letter') return d >= 2 ? 1 : 0;
                 if (kind === 'card') return d >= 3 ? 2 : d >= 2 ? 1 : 0;
+                if (kind === 'match') return d >= 4 ? 3 : d >= 2 ? 1 : 0;
                 if (kind === 'tiles') return d >= 4 ? 3 : d >= 3 ? 2 : 0;
-                if (kind === 'speak') return d >= 4 ? 3 : d >= 3 ? 2 : 0;
                 if (kind === 'grammar') return d >= 4 ? 4 : d >= 3 ? 3 : 0;
                 return 0;
             }
@@ -1464,6 +1720,9 @@
             );
             tilesSelection = [];
             tilesPickedIndices = new Set();
+            matchSelectedLeft = null;
+            matchSelectedRight = null;
+            matchCompletedIds = new Set();
             activeQuestionAnswered = false;
         }
 
@@ -1604,6 +1863,9 @@
             if (wrap && imgEl) {
                 if (type === 'card') {
                     wrap.classList.remove('hidden');
+                } else if (type === 'match') {
+                    imgEl.textContent = '';
+                    wrap.classList.add('hidden');
                 } else {
                     imgEl.textContent = '';
                     wrap.classList.add('hidden');
@@ -2148,13 +2410,13 @@
             el.setAttribute('aria-label', `${activeLives} can kaldı`);
         }
 
-        function registerQuizWrong() {
+        function registerQuizWrong(meta = {}) {
             activeWrongs++;
             if (usesTestLives()) {
                 activeLives = Math.max(0, activeLives - 1);
                 updateQuizLivesUI();
             }
-            recordWrongQuestion(activeQuizQuestions[activeQuestionIndex]);
+            recordWrongQuestion(activeQuizQuestions[activeQuestionIndex], meta);
         }
 
         function eliminateFromTest() {
@@ -2317,7 +2579,10 @@
                 wrap.classList.remove('hidden');
                 if (imgEl) imgEl.textContent = image || '';
             }
-            if (wordEl) wordEl.innerHTML = (word || '').replace(/\n/g, '<br>');
+            if (wordEl) {
+                wordEl.innerHTML = (word || '').replace(/\n/g, '<br>');
+                wordEl.classList.toggle('arabic-text', type === 'speak' || type === 'tiles' || type === 'grammar');
+            }
         }
 
         function animateQuizCard() {
@@ -2610,6 +2875,10 @@
                 renderSpeakQuestion(q);
                 return;
             }
+            if (q.type === 'match') {
+                renderMatchQuestion(q);
+                return;
+            }
             if (q.type === 'tiles') {
                 renderTilesQuestion(q);
                 return;
@@ -2847,6 +3116,156 @@
         }
         window.ensureMicPermissionPublic = ensureMicPermission;
 
+        function shuffleMatchList(arr) {
+            const copy = arr.slice();
+            for (let i = copy.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [copy[i], copy[j]] = [copy[j], copy[i]];
+            }
+            return copy;
+        }
+
+        function clearMatchSelectionUI() {
+            document.querySelectorAll('.lisani-match-card.is-selected').forEach((el) => {
+                el.classList.remove('is-selected');
+            });
+        }
+
+        function tryCompleteMatchPair(q) {
+            if (!matchSelectedLeft || !matchSelectedRight) return;
+            const pair = (q.pairs || []).find((p) => p.id === matchSelectedLeft);
+            const correct = pair && pair.osm === matchSelectedRight.osm;
+
+            if (correct) {
+                matchCompletedIds.add(matchSelectedLeft);
+                document
+                    .querySelector(`.lisani-match-card[data-side="left"][data-pair-id="${matchSelectedLeft}"]`)
+                    ?.classList.add('is-matched');
+                matchSelectedRight.btn.classList.add('is-matched');
+                matchSelectedLeft = null;
+                matchSelectedRight = null;
+                clearMatchSelectionUI();
+                if (typeof playSuccessSound === 'function') playSuccessSound();
+
+                if (matchCompletedIds.size >= (q.pairs || []).length) {
+                    lockQuizQuestion();
+                    if (window.LisaniDailyTasks?.onQuizCorrect) window.LisaniDailyTasks.onQuizCorrect();
+                    scheduleQuizAdvance(true, '✓ Tüm eşleştirmeler doğru');
+                }
+                return;
+            }
+
+            matchSelectedRight.btn.classList.add('is-wrong');
+            if (typeof playClickSound === 'function') playClickSound();
+            setTimeout(() => {
+                matchSelectedRight?.btn?.classList.remove('is-wrong', 'is-selected');
+                clearMatchSelectionUI();
+                matchSelectedLeft = null;
+                matchSelectedRight = null;
+            }, 420);
+        }
+
+        function onMatchSelectLeft(pairId, btn, q) {
+            if (isQuizQuestionLocked()) return;
+            if (matchCompletedIds.has(pairId)) return;
+            clearMatchSelectionUI();
+            matchSelectedLeft = pairId;
+            btn.classList.add('is-selected');
+            tryCompleteMatchPair(q);
+        }
+
+        function onMatchSelectRight(osm, btn, q) {
+            if (isQuizQuestionLocked()) return;
+            if (btn.classList.contains('is-matched')) return;
+            document.querySelectorAll('.lisani-match-card[data-side="right"]').forEach((el) => {
+                el.classList.remove('is-selected');
+            });
+            matchSelectedRight = { osm, btn };
+            btn.classList.add('is-selected');
+            tryCompleteMatchPair(q);
+        }
+
+        function renderMatchQuestion(q) {
+            const source = q;
+            const current = activeQuestionIndex + 1;
+            const counterEl = document.getElementById('active-question-counter');
+            if (counterEl) counterEl.innerText = `${current} / ${total}`;
+
+            const progressBar = document.getElementById('quiz-progress-bar');
+            if (progressBar) progressBar.style.width = `${(current / total) * 100}%`;
+
+            const matchPrompt =
+                window.LISANI_MATCH_PROMPT || 'Resimleri Osmanlıca yazılışlarıyla eşleştir';
+            setQuizPrompt(source.prompt || matchPrompt);
+            setQuizTypeBadge('match');
+
+            const wordEl = document.getElementById('quiz-display-word');
+            if (wordEl) {
+                wordEl.textContent = 'Önce resme, sonra doğru Osmanlıca yazıya dokun';
+                wordEl.classList.remove('arabic-text');
+            }
+
+            applyQuizLearnHint(source);
+
+            document.getElementById('quiz-options-container')?.classList.add('hidden');
+            document.getElementById('quiz-voice-area')?.classList.add('hidden');
+            document.getElementById('quiz-tiles-area')?.classList.add('hidden');
+
+            matchSelectedLeft = null;
+            matchSelectedRight = null;
+            matchCompletedIds = new Set();
+
+            const area = document.getElementById('quiz-match-area');
+            if (!area) return;
+            area.classList.remove('hidden');
+            area.innerHTML = '';
+
+            const pairs = source.pairs || [];
+            if (pairs.length < 2) {
+                area.innerHTML =
+                    '<p class="text-[10px] theme-text-muted text-center py-4">Eşleştirme sorusu yüklenemedi.</p>';
+                return;
+            }
+
+            const grid = document.createElement('div');
+            grid.className = 'lisani-match-grid';
+
+            const leftCol = document.createElement('div');
+            leftCol.className = 'lisani-match-grid__col';
+
+            const rightCol = document.createElement('div');
+            rightCol.className = 'lisani-match-grid__col';
+
+            shuffleMatchList(pairs).forEach((p) => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'lisani-match-card';
+                btn.dataset.side = 'left';
+                btn.dataset.pairId = p.id;
+                btn.innerHTML = `<span class="lisani-match-card__emoji">${p.emoji || '📖'}</span><span class="lisani-match-card__label">${p.tr}</span>`;
+                bindTapAction(btn, () => onMatchSelectLeft(p.id, btn, source));
+                leftCol.appendChild(btn);
+            });
+
+            shuffleMatchList(pairs).forEach((p) => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'lisani-match-card lisani-match-card--osm';
+                btn.dataset.side = 'right';
+                btn.dataset.osm = p.osm;
+                btn.innerHTML = `<span class="lisani-match-card__word arabic-text">${p.osm}</span>`;
+                bindTapAction(btn, () => onMatchSelectRight(p.osm, btn, source));
+                rightCol.appendChild(btn);
+            });
+
+            grid.appendChild(leftCol);
+            grid.appendChild(rightCol);
+            area.appendChild(grid);
+
+            animateQuizCard();
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        }
+
         function renderSpeakQuestion(q) {
             const total = activeQuizQuestions.length;
             const current = activeQuestionIndex + 1;
@@ -2863,6 +3282,8 @@
             applyQuizLearnHint(q);
 
             document.getElementById('quiz-options-container')?.classList.add('hidden');
+            document.getElementById('quiz-match-area')?.classList.add('hidden');
+            document.getElementById('quiz-tiles-area')?.classList.add('hidden');
 
             const voiceArea = document.getElementById('quiz-voice-area');
             const skipLabel = speakSkipLabel();
@@ -3013,7 +3434,10 @@
                 if (answerEl) {
                     answerEl.innerHTML = `<span class="text-[10px] text-red-300 font-bold">Doğrusu: ${expectedLabel}</span>`;
                 }
-                finalizeQuizAnswer(false, null, `✗ Yanlış — doğru: «${expectedLabel}»`);
+                finalizeQuizAnswer(false, null, `✗ Yanlış — doğru: «${expectedLabel}»`, {
+                    userAnswer: got.join(' '),
+                    correctLabel: expectedLabel,
+                });
             }
         }
 
@@ -3099,13 +3523,21 @@
                 }
                 updateMicButtonState('ready');
                 if (!spoken) {
-                    handleQuizAnswer(false, null);
+                    handleQuizAnswer(false, null, null, {
+                        userAnswer: '(cevap verilmedi)',
+                        correctLabel: q.speakHint || formatCorrectAnswer(q),
+                    });
                     return;
                 }
                 const match = speechMatchesSpeak(spoken, q);
                 if (match === 'skip') handleQuizSkip();
                 else if (match) handleQuizAnswer(true, null);
-                else handleQuizAnswer(false, null);
+                else {
+                    handleQuizAnswer(false, null, null, {
+                        userAnswer: spoken.trim(),
+                        correctLabel: q.speakHint || formatCorrectAnswer(q),
+                    });
+                }
             }
 
             navigator.mediaDevices
@@ -3175,13 +3607,21 @@
                 }
                 if (micBtn) micBtn.classList.remove('is-listening');
                 if (!spoken) {
-                    handleQuizAnswer(false, null);
+                    handleQuizAnswer(false, null, null, {
+                        userAnswer: '(cevap verilmedi)',
+                        correctLabel: q.speakHint || formatCorrectAnswer(q),
+                    });
                     return;
                 }
                 const match = speechMatchesSpeak(spoken, q);
                 if (match === 'skip') handleQuizSkip();
                 else if (match) handleQuizAnswer(true, null);
-                else handleQuizAnswer(false, null);
+                else {
+                    handleQuizAnswer(false, null, null, {
+                        userAnswer: spoken.trim(),
+                        correctLabel: q.speakHint || formatCorrectAnswer(q),
+                    });
+                }
             }
 
             speechRecognition = new SR();
@@ -3260,7 +3700,7 @@
             finalizeQuizAnswer(true, null);
         }
 
-        function finalizeQuizAnswer(isCorrect, correctOption, feedbackMsg) {
+        function finalizeQuizAnswer(isCorrect, correctOption, feedbackMsg, wrongMeta = {}) {
             if (correctOption) {
                 document.querySelectorAll('#quiz-options-container button').forEach((b) => {
                     b.disabled = true;
@@ -3277,12 +3717,12 @@
                 updateLearningStats();
                 if (window.LisaniDailyTasks?.onQuizCorrect) window.LisaniDailyTasks.onQuizCorrect();
             } else {
-                registerQuizWrong();
+                registerQuizWrong(wrongMeta);
             }
             scheduleQuizAdvance(isCorrect, feedbackMsg);
         }
 
-        function handleQuizAnswer(isCorrect, correctOption, feedbackMsg) {
+        function handleQuizAnswer(isCorrect, correctOption, feedbackMsg, wrongMeta) {
             if (isQuizQuestionLocked()) return;
             lockQuizQuestion();
             playClickSound();
@@ -3290,7 +3730,8 @@
             finalizeQuizAnswer(
                 isCorrect,
                 correctOption,
-                feedbackMsg || (isCorrect ? '✓ Harika! Doğru cevap' : '✗ Yanlış')
+                feedbackMsg || (isCorrect ? '✓ Harika! Doğru cevap' : '✗ Yanlış'),
+                wrongMeta
             );
         }
 
@@ -3320,7 +3761,7 @@
             } else {
                 btn.className =
                     'lisani-quiz-option lisani-quiz-option--wrong w-full py-3 px-3.5 rounded-xl text-xs font-black transition-all text-left flex items-center gap-3';
-                registerQuizWrong();
+                registerQuizWrong({ userAnswer: selected, correctLabel: correct });
             }
 
             scheduleQuizAdvance(
@@ -3366,6 +3807,9 @@
                 wrong: lastTestSummary.wrong,
                 percent: lastTestSummary.percent,
                 score: lastTestSummary.percent,
+                wrongItems: (lastTestWrongQuestions || []).map((q) =>
+                    packWrongItemForHistory(q, { bolum: activeBolumId })
+                ),
             };
 
             testHistory.push(newRecord);
@@ -3529,6 +3973,8 @@
                 }
             }
 
+            renderQuizResultWrongs();
+
             setTestsSubview('result');
             if (!wasEliminated) {
                 renderProgressChart();
@@ -3550,9 +3996,20 @@
                 showToast('Tekrar çözülecek yanlış soru yok.', 'info');
                 return;
             }
+            startReviewFromWrongItems(
+                lastTestWrongQuestions.map((q) => packWrongItemForHistory(q, { bolum: activeBolumId }))
+            );
+        };
+
+        function startReviewFromWrongItems(wrongItems) {
+            const questions = (wrongItems || []).map(unpackWrongItemForReview).filter(Boolean);
+            if (!questions.length) {
+                showToast('Yanlış sorular yüklenemedi.', 'info');
+                return;
+            }
             playClickSound();
             isWrongReviewSession = true;
-            activeQuizQuestions = lastTestWrongQuestions.map((q) => JSON.parse(JSON.stringify(q)));
+            activeQuizQuestions = questions;
             activeQuestionIndex = 0;
             activeCorrects = 0;
             activeWrongs = 0;
@@ -3562,13 +4019,47 @@
             quizAdvanceTimer = null;
             setTestsSubview('quiz');
             renderQuizQuestion();
+        }
+
+        window.reviewHistoryWrongs = function () {
+            const deneme = getDisplayProgressHistory().find((d) => d.id === selectedTrialId);
+            if (!deneme?.wrongItems?.length) {
+                showToast('Bu sınavda kayıtlı yanlış soru yok.', 'info');
+                return;
+            }
+            startReviewFromWrongItems(deneme.wrongItems);
+        };
+
+        window.reviewAllRecentWrongs = function () {
+            const history = getDisplayProgressHistory().slice(-8);
+            const seen = new Set();
+            const items = [];
+            history.forEach((r) => {
+                (r.wrongItems || []).forEach((w) => {
+                    const key = `${w.type}|${w.word}|${w.correct}`;
+                    if (!seen.has(key)) {
+                        seen.add(key);
+                        items.push(w);
+                    }
+                });
+            });
+            if (!items.length) {
+                showToast('Tekrar çözülecek yanlış soru yok.', 'info');
+                return;
+            }
+            startReviewFromWrongItems(items);
         };
 
         function finishQuizAndGoProgress() {
             playClickSound();
             setTestsSubview('list');
             if (typeof switchTab === 'function') switchTab('ai', true);
-            if (typeof renderProgressChart === 'function') renderProgressChart();
+            if (typeof window.refreshProgressView === 'function') {
+                window.refreshProgressView();
+            } else {
+                if (typeof renderProgressChart === 'function') renderProgressChart();
+                if (typeof renderQuizHistoryList === 'function') renderQuizHistoryList();
+            }
         }
         window.finishQuizAndGoProgress = finishQuizAndGoProgress;
 
@@ -4672,22 +5163,25 @@
                 typeof window.Capacitor.isNativePlatform === 'function' &&
                 window.Capacitor.isNativePlatform();
             const show = !!url && !isNativeApp;
-            const el = document.getElementById('home-apk-download-row');
-            if (!el) return;
-            if (!show) {
-                el.classList.add('hidden');
-                return;
-            }
-            el.onclick = () => {
-                const a = document.createElement('a');
-                a.href = url;
-                a.setAttribute('download', filename);
-                a.rel = 'noopener';
-                document.body.appendChild(a);
-                a.click();
-                a.remove();
-            };
-            el.classList.remove('hidden');
+            const ids = ['home-apk-download-row', 'auth-apk-download-row'];
+            ids.forEach((id) => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                if (!show) {
+                    el.classList.add('hidden');
+                    return;
+                }
+                el.onclick = () => {
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.setAttribute('download', filename);
+                    a.rel = 'noopener';
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                };
+                el.classList.remove('hidden');
+            });
         }
 
         let currentActiveScreen = 'home';
@@ -5032,10 +5526,264 @@
             return 'Test';
         }
 
+        function lisaniEscapeHtml(str) {
+            return String(str || '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        }
+
+        function enrichWrongItemForDisplay(item) {
+            if (!item) return item;
+            const q = item.replay ? { ...item.replay } : item;
+            const study = resolveWrongStudyTopic(q, item.bolum || '');
+            return {
+                ...item,
+                questionText: item.questionText || formatWrongQuestionText(q),
+                studyTopic: item.studyTopic || study.topicLabel,
+                studyTopicId: item.studyTopicId || study.topicId,
+                studyHint: item.studyHint || item.tip || study.studyHint,
+                bolumTitle: item.bolumTitle || study.bolumTitle,
+                options: item.options?.length ? item.options : q.options || [],
+            };
+        }
+
+        window.openWrongItemStudy = function (topicId) {
+            if (typeof window.playClickSound === 'function') window.playClickSound();
+            const titles = window.LISANI_GRAMMAR_TOPIC_TITLES || {};
+            if (topicId && titles[topicId] && typeof window.openLearnCardDetail === 'function') {
+                window.openLearnCardDetail(topicId, { showDrillAction: true, drillTopic: topicId });
+                return;
+            }
+            if (typeof window.openKonuAnlatimi === 'function') window.openKonuAnlatimi();
+        };
+
+        function renderWrongItemCard(item, idx) {
+            const enriched = enrichWrongItemForDisplay(item);
+            const studyTopic = enriched.studyTopic || enriched.label || 'Genel tekrar';
+            const questionText =
+                enriched.questionText ||
+                enriched.prompt ||
+                (enriched.word ? `«${enriched.word}»` : 'Soru');
+            const studyHint = enriched.studyHint || enriched.tip || '';
+            const topicId = enriched.studyTopicId || enriched.grammarTopic || '';
+            const canStudyTopic = topicId && (window.LISANI_GRAMMAR_TOPIC_TITLES || {})[topicId];
+
+            const userBlock = enriched.userAnswer
+                ? `<div class="lisani-wrong-item__line"><span class="lisani-wrong-item__tag is-bad">Sen</span><span>${lisaniEscapeHtml(enriched.userAnswer)}</span></div>`
+                : '';
+            const correctBlock = enriched.correct
+                ? `<div class="lisani-wrong-item__line"><span class="lisani-wrong-item__tag is-good">Doğru</span><span class="arabic-text">${lisaniEscapeHtml(enriched.correct)}</span></div>`
+                : '';
+            const optionsBlock =
+                enriched.options?.length > 0
+                    ? `<div class="lisani-wrong-item__options"><span class="lisani-wrong-item__options-label">Seçenekler</span><span>${enriched.options.map((o) => lisaniEscapeHtml(o)).join(' · ')}</span></div>`
+                    : '';
+            const studyBtn = canStudyTopic
+                ? `<button type="button" class="lisani-wrong-item__study-btn" onclick="openWrongItemStudy('${topicId}')">Bu konuyu çalış</button>`
+                : '';
+
+            return `
+                <div class="lisani-wrong-item">
+                    <div class="lisani-wrong-item__study">
+                        <span class="lisani-wrong-item__study-icon" aria-hidden="true">📚</span>
+                        <div class="lisani-wrong-item__study-text">
+                            <span class="lisani-wrong-item__study-label">Çalışman gereken konu</span>
+                            <span class="lisani-wrong-item__study-topic">${lisaniEscapeHtml(studyTopic)}</span>
+                        </div>
+                        ${enriched.bolumTitle ? `<span class="lisani-wrong-item__bolum">${lisaniEscapeHtml(enriched.bolumTitle)} bölümü</span>` : ''}
+                    </div>
+                    <div class="lisani-wrong-item__head">
+                        <span class="lisani-wrong-item__idx">${idx + 1}</span>
+                        <span class="lisani-wrong-item__type">${lisaniEscapeHtml(enriched.label || enriched.type || 'Soru')}</span>
+                    </div>
+                    <p class="lisani-wrong-item__question-label">Soru</p>
+                    <p class="lisani-wrong-item__question arabic-text">${lisaniEscapeHtml(questionText)}</p>
+                    ${optionsBlock}
+                    ${userBlock || correctBlock ? `<div class="lisani-wrong-item__answers">${userBlock}${correctBlock}</div>` : ''}
+                    ${studyHint ? `<p class="lisani-wrong-item__study-hint"><span>Ne çalışmalısın:</span> ${lisaniEscapeHtml(studyHint)}</p>` : ''}
+                    ${studyBtn}
+                </div>
+            `;
+        }
+
+        function renderWrongItemsList(listEl, wrongItems) {
+            if (!listEl) return;
+            const wrongs = wrongItems || [];
+            if (!wrongs.length) {
+                listEl.innerHTML = '';
+                return;
+            }
+            listEl.innerHTML = wrongs.map((w, i) => renderWrongItemCard(w, i)).join('');
+        }
+
+        function renderQuizResultWrongs() {
+            const section = document.getElementById('quiz-result-wrongs-section');
+            const listEl = document.getElementById('quiz-result-wrongs-list');
+            const wrongs = (lastTestWrongQuestions || []).map((q) =>
+                packWrongItemForHistory(q, { bolum: activeBolumId })
+            );
+            if (!section || !listEl) return;
+            if (!wrongs.length) {
+                section.classList.add('hidden');
+                listEl.innerHTML = '';
+                return;
+            }
+            section.classList.remove('hidden');
+            renderWrongItemsList(listEl, wrongs);
+        }
+
+        function renderTrialWrongDetails(deneme) {
+            renderGelisimWrongsPanel(deneme);
+        }
+
+        function renderGelisimWrongsPanel(forcedTrial) {
+            const panel = document.getElementById('gelisim-wrongs-panel');
+            const listEl = document.getElementById('gelisim-wrongs-list');
+            const ctxEl = document.getElementById('gelisim-wrongs-context');
+            const retryBtn = document.getElementById('gelisim-wrongs-retry-btn');
+            const sidebar = document.getElementById('gelisim-wrongs-sidebar');
+            if (!panel || !listEl) return;
+
+            const history = getDisplayProgressHistory();
+            const trial =
+                forcedTrial ||
+                (selectedTrialId ? history.find((d) => d.id === selectedTrialId) : null) ||
+                history[history.length - 1];
+
+            let wrongs = trial?.wrongItems || [];
+            let contextText = trial ? `${formatTrialLabel(trial)} · ${trial.date}` : 'Sınav geçmişinden bir test seçin';
+            let emptyHtml =
+                '<p class="text-[10px] theme-text-muted leading-relaxed py-4 text-center">Henüz yanlış soru kaydı yok.<br>Test çözdükten sonra burada görürsün.</p>';
+
+            if (trial && !wrongs.length && (trial.wrong || 0) > 0) {
+                listEl.innerHTML = `<p class="text-[10px] theme-text-muted leading-relaxed py-3">Bu sınavda <strong class="text-red-400">${trial.wrong} yanlış</strong> var; soru detayı kayıtlı değil. Yeni testlerde detaylar solda listelenir.</p>`;
+                if (ctxEl) ctxEl.textContent = contextText;
+                retryBtn?.classList.add('hidden');
+                sidebar?.classList.remove('is-empty');
+                if (typeof lucide !== 'undefined') lucide.createIcons();
+                return;
+            }
+
+            if (!wrongs.length) {
+                const aggregated = [];
+                history
+                    .slice(-6)
+                    .reverse()
+                    .forEach((r) => {
+                        (r.wrongItems || []).forEach((w) => {
+                            aggregated.push({
+                                ...w,
+                                _trialLabel: formatTrialLabel(r),
+                            });
+                        });
+                    });
+                if (!aggregated.length) {
+                    listEl.innerHTML = emptyHtml;
+                    if (ctxEl) ctxEl.textContent = contextText;
+                    retryBtn?.classList.add('hidden');
+                    sidebar?.classList.toggle('is-empty', history.length === 0);
+                    return;
+                }
+                wrongs = aggregated;
+                contextText = 'Son testlerdeki yanlış sorular';
+                retryBtn?.classList.remove('hidden');
+                retryBtn?.setAttribute('onclick', 'reviewAllRecentWrongs()');
+            } else {
+                retryBtn?.classList.remove('hidden');
+                retryBtn?.setAttribute('onclick', 'reviewHistoryWrongs()');
+            }
+
+            sidebar?.classList.remove('is-empty');
+            if (ctxEl) ctxEl.textContent = contextText;
+            listEl.innerHTML = wrongs
+                .map((w, i) => {
+                    const trialNote = w._trialLabel
+                        ? `<p class="lisani-wrong-item__trial-note">${lisaniEscapeHtml(w._trialLabel)}</p>`
+                        : '';
+                    return `${trialNote}${renderWrongItemCard(w, i)}`;
+                })
+                .join('');
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        }
+
+        function renderGelisimImprovementPanel() {
+            const panel = document.getElementById('gelisim-improvement-panel');
+            const listEl = document.getElementById('gelisim-improvement-list');
+            const reviewAllBtn = document.getElementById('gelisim-review-all-wrongs-btn');
+            if (!panel || !listEl) return;
+
+            const history = getDisplayProgressHistory().slice(-8);
+            const topicMap = new Map();
+            let totalWrongs = 0;
+
+            history.forEach((r) => {
+                (r.wrongItems || []).forEach((w) => {
+                    const enriched = enrichWrongItemForDisplay(w);
+                    totalWrongs++;
+                    const key = enriched.studyTopicId || enriched.grammarTopic || enriched.studyTopic || enriched.word || enriched.type || 'genel';
+                    if (!topicMap.has(key)) {
+                        topicMap.set(key, {
+                            count: 0,
+                            studyHint: enriched.studyHint || enriched.tip || '',
+                            label: enriched.studyTopic || enriched.grammarTopic || enriched.word || enriched.label || 'Genel tekrar',
+                            topicId: enriched.studyTopicId || enriched.grammarTopic || '',
+                        });
+                    }
+                    const entry = topicMap.get(key);
+                    entry.count++;
+                    if (!entry.studyHint && (enriched.studyHint || enriched.tip)) {
+                        entry.studyHint = enriched.studyHint || enriched.tip;
+                    }
+                });
+            });
+
+            const topics = [...topicMap.values()].sort((a, b) => b.count - a.count).slice(0, 5);
+
+            if (!topics.length) {
+                panel.classList.add('hidden');
+                reviewAllBtn?.classList.add('hidden');
+                listEl.innerHTML = '';
+                return;
+            }
+
+            panel.classList.remove('hidden');
+            reviewAllBtn?.classList.toggle('hidden', totalWrongs === 0);
+            listEl.innerHTML = topics
+                .map(
+                    (v) => `
+                <div class="lisani-improvement-row">
+                    <div class="flex items-center justify-between gap-2">
+                        <div class="min-w-0 text-left">
+                            <p class="text-[9px] font-bold uppercase tracking-wide text-amber-400/90">Çalışman gereken konu</p>
+                            <span class="text-[11px] font-bold theme-text-main">${lisaniEscapeHtml(v.label)}</span>
+                        </div>
+                        <span class="text-[9px] font-bold text-red-400 shrink-0">${v.count}× yanlış</span>
+                    </div>
+                    ${
+                        v.studyHint
+                            ? `<p class="text-[10px] theme-text-muted mt-1 leading-relaxed">${lisaniEscapeHtml(v.studyHint.length > 160 ? `${v.studyHint.slice(0, 160)}…` : v.studyHint)}</p>`
+                            : ''
+                    }
+                    ${
+                        v.topicId && (window.LISANI_GRAMMAR_TOPIC_TITLES || {})[v.topicId]
+                            ? `<button type="button" class="lisani-wrong-item__study-btn lisani-wrong-item__study-btn--inline mt-2" onclick="openWrongItemStudy('${String(v.topicId).replace(/'/g, "\\'")}')">Konuyu aç</button>`
+                            : ''
+                    }
+                </div>
+            `
+                )
+                .join('');
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        }
+
         // Detay analizi kartına geçmiş sınavı yükler
         function showTrialDetail(id) {
             const deneme = getDisplayProgressHistory().find((d) => d.id === id);
             if (!deneme) return;
+
+            selectedTrialId = id;
 
             const detailCard = document.getElementById('selected-trial-detail-card');
             if (detailCard) detailCard.classList.remove('hidden');
@@ -5054,6 +5802,9 @@
             } else {
                 successTextEl.className = "text-sm font-black text-amber-450";
             }
+
+            renderTrialWrongDetails(deneme);
+            if (typeof lucide !== 'undefined') lucide.createIcons();
         }
 
         // Çözülen Sınavların Analiz Listesini Çizer
@@ -5070,6 +5821,8 @@
             // Hiç test çözülmemişse boş durum mesajı göster ve detay kartını gizle
             if (history.length === 0) {
                 if (detailCard) detailCard.classList.add('hidden');
+                renderGelisimWrongsPanel();
+                renderGelisimImprovementPanel();
                 const emptyMsg = 'Henüz çözülen sınav yok';
                 listEl.innerHTML = `
                     <div class="flex flex-col items-center justify-center py-8 text-center space-y-2">
@@ -5085,16 +5838,17 @@
             history.slice().reverse().forEach(record => {
                 const row = document.createElement('div');
                 row.className = "lisani-glass-panel lisani-glass-history-row";
+                if (selectedTrialId === record.id) row.classList.add('is-selected');
                 row.onclick = () => {
                     playClickSound();
                     showTrialDetail(record.id);
-                    showToast("Sınav detayı yüklendi.", "success");
                 };
                 
                 row.innerHTML = `
                     <div class="flex items-center space-x-2.5">
                         <span class="text-xs font-bold theme-text-main">${formatTrialLabel(record)}</span>
                         <span class="text-[9px] theme-text-muted font-semibold">${record.date}</span>
+                        ${(record.wrongItems || []).length ? `<span class="lisani-history-wrong-badge">${record.wrongItems.length} yanlış</span>` : record.wrong > 0 ? `<span class="lisani-history-wrong-badge">${record.wrong} yanlış</span>` : ''}
                     </div>
                     <div class="flex items-center space-x-2">
                         <span class="text-[10px] text-emerald-400 font-bold">${record.correct}D</span>
@@ -5104,6 +5858,12 @@
                 `;
                 listEl.appendChild(row);
             });
+
+            const latest = history[history.length - 1];
+            if (latest) showTrialDetail(latest.id);
+
+            renderGelisimWrongsPanel();
+            renderGelisimImprovementPanel();
         }
 
         // İNTERAKTİF TEST ANALİZ GRAPH SİSTEMİ (SVG)
@@ -5478,6 +6238,9 @@
         function showLetterDetail(letter) {
             _letterDetailCurrent = letter;
             initLetterFormHandlers();
+            if (typeof window.recordDailyLetterStudy === 'function') {
+                window.recordDailyLetterStudy(letter.name);
+            }
             document.getElementById('letter-detail-card').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
             document.getElementById('detail-title').innerText = `${letter.name} (${letter.ar})`;
             document.getElementById('detail-desc').innerText = letter.desc;
@@ -6659,8 +7422,9 @@ self.addEventListener('notificationclick', e => {
         // --- UYGULAMA DEĞERLENDİRME (5 yıldız) ---
         const APP_RATING_KEY = 'lisani_app_rating';
         const APP_RATING_PROMPT_KEY = 'lisani_app_rating_prompted';
+        const APP_RATING_SYNCED_KEY = 'lisani_app_rating_synced';
 
-        function renderAppRatingStars(container, selected, interactive) {
+        function renderAppRatingStars(container, selected, interactive, source = 'app') {
             if (!container) return;
             container.innerHTML = '';
             for (let n = 1; n <= 5; n++) {
@@ -6670,7 +7434,7 @@ self.addEventListener('notificationclick', e => {
                 btn.setAttribute('aria-label', `${n} yıldız`);
                 btn.textContent = n <= selected ? '★' : '☆';
                 if (interactive) {
-                    btn.onclick = () => setAppRating(n);
+                    btn.onclick = () => setAppRating(n, source);
                     btn.onmouseenter = () => highlightStars(container, n);
                     btn.onmouseleave = () => highlightStars(container, selected);
                 }
@@ -6694,10 +7458,11 @@ self.addEventListener('notificationclick', e => {
             }
         }
 
-        function setAppRating(stars) {
+        function setAppRating(stars, source = 'app') {
             const value = Math.max(1, Math.min(5, stars));
             try {
                 localStorage.setItem(APP_RATING_KEY, String(value));
+                localStorage.removeItem(APP_RATING_SYNCED_KEY);
             } catch (e) {}
             const settingsStars = document.getElementById('app-rating-stars');
             renderAppRatingStars(settingsStars, value, true);
@@ -6712,20 +7477,23 @@ self.addEventListener('notificationclick', e => {
             if (typeof showToast === 'function') {
                 showToast(`Değerlendirmen kaydedildi: ${value}/5`, 'success');
             }
+            if (typeof window.syncAppRatingToServer === 'function') {
+                window.syncAppRatingToServer(value, source);
+            }
         }
         window.setAppRating = setAppRating;
 
         function initAppRatingUI() {
             const settingsStars = document.getElementById('app-rating-stars');
             const rating = getAppRating();
-            renderAppRatingStars(settingsStars, rating, true);
+            renderAppRatingStars(settingsStars, rating, true, 'settings');
             const thanks = document.getElementById('app-rating-thanks');
             if (thanks && rating > 0) {
                 thanks.classList.remove('hidden');
                 thanks.textContent = `Puanın: ${rating}/5 ⭐`;
             }
             const modalStars = document.getElementById('app-rating-modal-stars');
-            renderAppRatingStars(modalStars, 0, true);
+            renderAppRatingStars(modalStars, 0, true, 'modal');
         }
 
         function maybePromptAppRating() {

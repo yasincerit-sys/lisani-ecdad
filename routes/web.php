@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\AppRatingController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\MessageController;
 use App\Http\Controllers\Api\ProgressController;
@@ -41,6 +42,11 @@ Route::prefix('api')->group(function () {
         Route::get('/yonetici/users', [YoneticiController::class, 'users']);
         Route::post('/yonetici/users/{userId}/ban', [YoneticiController::class, 'banUser']);
         Route::post('/yonetici/users/{userId}/unban', [YoneticiController::class, 'unbanUser']);
+
+        Route::post('/app-rating', [AppRatingController::class, 'store']);
+        Route::get('/yonetici/rating-notifications/unread-count', [AppRatingController::class, 'yoneticiUnreadCount']);
+        Route::get('/yonetici/rating-notifications', [AppRatingController::class, 'yoneticiIndex']);
+        Route::post('/yonetici/rating-notifications/mark-read', [AppRatingController::class, 'yoneticiMarkRead']);
 
         Route::get('/leaderboard', [LeaderboardController::class, 'index']);
 

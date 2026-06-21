@@ -387,6 +387,9 @@
         if (typeof window.stopMesajNotificationPoll === 'function') {
             window.stopMesajNotificationPoll();
         }
+        if (typeof window.stopYoneticiRatingNotificationPoll === 'function') {
+            window.stopYoneticiRatingNotificationPoll();
+        }
 
         if (typeof window.syncAppShellVisibility === 'function') {
             window.syncAppShellVisibility();
@@ -877,6 +880,9 @@
         if (typeof window.stopMesajNotificationPoll === 'function') {
             window.stopMesajNotificationPoll();
         }
+        if (typeof window.stopYoneticiRatingNotificationPoll === 'function') {
+            window.stopYoneticiRatingNotificationPoll();
+        }
         if (typeof window.resetAppShellForLogout === 'function') {
             window.resetAppShellForLogout();
         }
@@ -1287,6 +1293,206 @@
         _mesajNotifyInitialized = false;
     };
 
+    let _ratingNotifyPollTimer = null;
+    let _lastRatingUnreadCount = 0;
+    let _ratingNotifyInitialized = false;
+    let _ratingNotifyCache = [];
+
+    function formatRatingStars(stars) {
+        const n = Math.max(0, Math.min(5, Number(stars) || 0));
+        return '★'.repeat(n) + '☆'.repeat(5 - n);
+    }
+
+    function formatRatingDate(iso) {
+        if (!iso) return '';
+        try {
+            const d = new Date(iso);
+            return d.toLocaleString('tr-TR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+        } catch (e) {
+            return iso;
+        }
+    }
+
+    function updateYoneticiRatingBadge(unreadCount) {
+        const dot = document.getElementById('hoca-dash-notif-dot');
+        const countEl = document.getElementById('hoca-dash-notif-count');
+        const btn = document.getElementById('hoca-dash-notif-btn');
+        const unread = Math.max(0, Number(unreadCount) || 0);
+        const isYonetici = currentUserRole === 'yonetici';
+
+        if (btn) btn.classList.toggle('hidden', !isYonetici);
+        if (dot) dot.classList.toggle('hidden', !isYonetici || unread <= 0);
+        if (countEl) {
+            if (isYonetici && unread > 0) {
+                countEl.textContent = unread > 9 ? '9+' : String(unread);
+                countEl.classList.remove('hidden');
+            } else {
+                countEl.classList.add('hidden');
+            }
+        }
+    }
+
+    function renderYoneticiRatingNotifications(ratings) {
+        const list = document.getElementById('hoca-dash-rating-notif-list');
+        if (!list) return;
+        const items = Array.isArray(ratings) ? ratings : [];
+        if (!items.length) {
+            list.innerHTML = '<p class="text-[11px] theme-text-muted text-center py-6">Henüz değerlendirme yok.</p>';
+            return;
+        }
+        list.innerHTML = items
+            .map((r) => {
+                const user = r.user || {};
+                const name = escapeHtml(user.name || 'Kullanıcı');
+                const sinif = user.sinifAdi ? ` · ${escapeHtml(user.sinifAdi)}` : '';
+                const source = r.source === 'modal' ? 'Test sonrası' : r.source === 'settings' ? 'Ayarlar' : 'Uygulama';
+                return `
+                <div class="hoca-dash-rating-notif-item ${r.read ? '' : 'is-unread'}">
+                    <div class="flex items-start gap-2.5">
+                        <div class="w-9 h-9 rounded-full lisani-avatar-slot flex items-center justify-center text-sm overflow-hidden shrink-0">${formatAvatarHtml(user.avatar || '🎒')}</div>
+                        <div class="min-w-0 flex-1">
+                            <p class="text-[11px] font-bold theme-text-main truncate">${name}</p>
+                            <p class="hoca-dash-rating-notif-item__stars">${formatRatingStars(r.stars)} <span class="text-[10px] theme-text-muted">${r.stars}/5</span></p>
+                            <p class="hoca-dash-rating-notif-item__meta">${source}${sinif} · ${formatRatingDate(r.created_at)}</p>
+                        </div>
+                    </div>
+                </div>`;
+            })
+            .join('');
+    }
+
+    function notifyNewAppRatings(unreadCount, latestRating) {
+        if (currentUserRole !== 'yonetici') return;
+
+        if (!_ratingNotifyInitialized) {
+            _lastRatingUnreadCount = unreadCount || 0;
+            _ratingNotifyInitialized = true;
+            updateYoneticiRatingBadge(unreadCount);
+            return;
+        }
+
+        if ((unreadCount || 0) > _lastRatingUnreadCount) {
+            const user = latestRating?.user;
+            const name = user?.name || 'Bir kullanıcı';
+            const stars = latestRating?.stars || '?';
+            const msg = `${name} uygulamaya ${stars}/5 puan verdi.`;
+            if (typeof showToast === 'function') showToast(msg, 'info');
+            if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
+                try {
+                    new Notification('Yeni değerlendirme', { body: msg, tag: 'lisani-app-rating' });
+                } catch (e) {}
+            }
+        }
+
+        _lastRatingUnreadCount = unreadCount || 0;
+        updateYoneticiRatingBadge(unreadCount);
+    }
+
+    window.refreshYoneticiRatingNotifications = async function (silent) {
+        if (currentUserRole !== 'yonetici' || !window._loginDone) return null;
+        try {
+            const data = await apiFetch('/api/yonetici/rating-notifications');
+            _ratingNotifyCache = data.ratings || [];
+            const unread = data.unread_count || 0;
+            const latestUnread = _ratingNotifyCache.find((r) => !r.read) || _ratingNotifyCache[0];
+            notifyNewAppRatings(unread, latestUnread);
+            const modal = document.getElementById('hoca-dash-rating-notif-modal');
+            if (modal && !modal.classList.contains('hidden')) {
+                renderYoneticiRatingNotifications(_ratingNotifyCache);
+            }
+            return data;
+        } catch (e) {
+            if (!silent) return null;
+            return null;
+        }
+    };
+
+    window.openYoneticiRatingNotifications = async function () {
+        if (currentUserRole !== 'yonetici') {
+            showToast('Bu bildirimler yönetici hesabına özeldir.', 'info');
+            return;
+        }
+        const modal = document.getElementById('hoca-dash-rating-notif-modal');
+        if (!modal) return;
+        modal.classList.remove('hidden');
+        modal.setAttribute('aria-hidden', 'false');
+        const list = document.getElementById('hoca-dash-rating-notif-list');
+        if (list) list.innerHTML = '<p class="text-[11px] theme-text-muted text-center py-6">Yükleniyor...</p>';
+        try {
+            const data = await apiFetch('/api/yonetici/rating-notifications');
+            _ratingNotifyCache = data.ratings || [];
+            renderYoneticiRatingNotifications(_ratingNotifyCache);
+            updateYoneticiRatingBadge(data.unread_count || 0);
+            _lastRatingUnreadCount = data.unread_count || 0;
+            _ratingNotifyInitialized = true;
+        } catch (e) {
+            if (list) list.innerHTML = `<p class="text-[10px] text-red-400 text-center py-6">${escapeHtml(e.message || 'Yüklenemedi')}</p>`;
+        }
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+    };
+
+    window.closeYoneticiRatingNotifications = function () {
+        const modal = document.getElementById('hoca-dash-rating-notif-modal');
+        if (modal) {
+            modal.classList.add('hidden');
+            modal.setAttribute('aria-hidden', 'true');
+        }
+    };
+
+    window.markAllRatingNotificationsRead = async function () {
+        if (currentUserRole !== 'yonetici') return;
+        try {
+            const data = await apiFetch('/api/yonetici/rating-notifications/mark-read', {
+                method: 'POST',
+                body: JSON.stringify({}),
+            });
+            _ratingNotifyCache = (_ratingNotifyCache || []).map((r) => ({ ...r, read: true }));
+            renderYoneticiRatingNotifications(_ratingNotifyCache);
+            _lastRatingUnreadCount = data.unread_count || 0;
+            updateYoneticiRatingBadge(data.unread_count || 0);
+            showToast('Bildirimler okundu işaretlendi.', 'success');
+        } catch (e) {
+            showToast(e.message || 'İşlem başarısız.', 'error');
+        }
+    };
+
+    window.startYoneticiRatingNotificationPoll = function () {
+        if (_ratingNotifyPollTimer) clearInterval(_ratingNotifyPollTimer);
+        if (currentUserRole !== 'yonetici' || !window._loginDone) return;
+        window.refreshYoneticiRatingNotifications(true);
+        _ratingNotifyPollTimer = setInterval(() => {
+            if (window._loginDone && currentUserRole === 'yonetici') {
+                window.refreshYoneticiRatingNotifications(true);
+            }
+        }, 15000);
+    };
+
+    window.stopYoneticiRatingNotificationPoll = function () {
+        if (_ratingNotifyPollTimer) {
+            clearInterval(_ratingNotifyPollTimer);
+            _ratingNotifyPollTimer = null;
+        }
+        _lastRatingUnreadCount = 0;
+        _ratingNotifyInitialized = false;
+        _ratingNotifyCache = [];
+        updateYoneticiRatingBadge(0);
+    };
+
+    window.syncAppRatingToServer = async function (stars, source) {
+        if (!window._loginDone || currentUserRole === 'hoca' || currentUserRole === 'yonetici') return;
+        const value = Math.max(1, Math.min(5, Number(stars) || 0));
+        if (!value) return;
+        try {
+            await apiFetch('/api/app-rating', {
+                method: 'POST',
+                body: JSON.stringify({ stars: value, source: source || 'app' }),
+            });
+            try {
+                localStorage.setItem('lisani_app_rating_synced', '1');
+            } catch (e) {}
+        } catch (e) {}
+    };
+
     function shouldKeepSessionOpen() {
         if (localStorage.getItem('lisani_remember_me_pref') === 'false') return false;
         if (localStorage.getItem('lisani_remember_me') === 'true') return true;
@@ -1513,6 +1719,7 @@
                           }
                         : null,
                     recent_tests: history.map((r) => ({
+                        id: r.id,
                         date: r.date,
                         level: r.level,
                         test: r.test,
@@ -1521,6 +1728,24 @@
                         correct: r.correct,
                         wrong: r.wrong,
                         percent: r.percent,
+                        wrong_items: (r.wrongItems || []).slice(0, 12).map((w) => ({
+                            type: w.type,
+                            word: w.word,
+                            prompt: w.prompt,
+                            questionText: (w.questionText || '').slice(0, 320),
+                            label: w.label,
+                            correct: w.correct,
+                            userAnswer: w.userAnswer,
+                            tip: (w.tip || '').slice(0, 220),
+                            grammarTopic: w.grammarTopic,
+                            studyTopic: w.studyTopic,
+                            studyTopicId: w.studyTopicId,
+                            studyHint: (w.studyHint || '').slice(0, 220),
+                            bolum: w.bolum,
+                            bolumTitle: w.bolumTitle,
+                            options: (w.options || []).slice(0, 6),
+                            replay: w.replay,
+                        })),
                     })),
                 }),
             });
@@ -2496,6 +2721,11 @@
             window.updateDailyGoalUI();
         }
         if (typeof lucide !== 'undefined') lucide.createIcons();
+        if (isYonetici && typeof window.startYoneticiRatingNotificationPoll === 'function') {
+            window.startYoneticiRatingNotificationPoll();
+        } else if (typeof window.stopYoneticiRatingNotificationPoll === 'function') {
+            window.stopYoneticiRatingNotificationPoll();
+        }
     }
 
     let _waPollTimer = null;
@@ -3134,6 +3364,9 @@
         if (typeof window.startMesajNotificationPoll === 'function') {
             window.startMesajNotificationPoll();
         }
+        if (user.role === 'yonetici' && typeof window.startYoneticiRatingNotificationPoll === 'function') {
+            window.startYoneticiRatingNotificationPoll();
+        }
         await refreshMesajBadge();
         if (user.role === 'hoca' || user.role === 'yonetici') {
             await window.loadHocaProgressView();
@@ -3141,6 +3374,15 @@
         if (user.role === 'ogrenci' || user.role === 'yonetici') {
             await window.loadProgressFromServer();
             await window.syncProgressToServer();
+        }
+        if (user.role === 'ogrenci') {
+            try {
+                const localRating = parseInt(localStorage.getItem('lisani_app_rating') || '0', 10) || 0;
+                const synced = localStorage.getItem('lisani_app_rating_synced') === '1';
+                if (localRating > 0 && !synced && typeof window.syncAppRatingToServer === 'function') {
+                    await window.syncAppRatingToServer(localRating, 'app');
+                }
+            } catch (e) {}
         }
     };
 

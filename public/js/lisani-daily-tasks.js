@@ -7,21 +7,20 @@
     const RECENT_TASK_MEMORY = 6;
 
     const DAILY_TASK_POOL = [
-        { id: 'letters_3', title: 'Elifba çalış', desc: '3 harf incele', type: 'letters', target: 3, xp: 25, action: 'letters' },
-        { id: 'letters_5', title: '5 harf öğren', desc: 'Elifbadan 5 harf seç', type: 'letters', target: 5, xp: 30, action: 'letters' },
-        { id: 'letters_7', title: '7 harf keşfet', desc: 'Elifbadan 7 harf incele', type: 'letters', target: 7, xp: 35, action: 'letters' },
-        { id: 'translate_2', title: 'Kelime çevir', desc: '2 kelime çevir', type: 'translate', target: 2, xp: 25, action: 'translate' },
-        { id: 'translate_4', title: 'Çeviri pratiği', desc: '4 kelime çevir', type: 'translate', target: 4, xp: 30, action: 'translate' },
-        { id: 'quiz_3', title: '3 doğru cevap', desc: 'Testte 3 doğru yap', type: 'quiz_correct', target: 3, xp: 20, action: 'tests' },
-        { id: 'quiz_5', title: '5 doğru cevap', desc: 'Testte 5 doğru yap', type: 'quiz_correct', target: 5, xp: 30, action: 'tests' },
-        { id: 'quiz_8', title: '8 doğru cevap', desc: 'Testte 8 doğru yap', type: 'quiz_correct', target: 8, xp: 40, action: 'tests' },
-        { id: 'bolum_kelimeler', title: 'Temel bölüm', desc: 'Temel bölümünde bir test bitir', type: 'bolum_step', bolum: 'kelimeler', target: 1, xp: 30, action: 'tests', bolumStart: 'kelimeler' },
-        { id: 'bolum_harfler', title: 'Orta bölüm', desc: 'Orta bölümünde bir test bitir', type: 'bolum_step', bolum: 'harfler', target: 1, xp: 32, action: 'tests', bolumStart: 'harfler' },
-        { id: 'bolum_eslestirme', title: 'İleri bölüm', desc: 'İleri bölümünde bir test bitir', type: 'bolum_step', bolum: 'eslestirme', target: 1, xp: 35, action: 'tests', bolumStart: 'eslestirme' },
-        { id: 'bolum_ceviri', title: 'Uzman bölüm', desc: 'Uzman bölümünde bir test bitir', type: 'bolum_step', bolum: 'ceviri', target: 1, xp: 35, action: 'tests', bolumStart: 'ceviri' },
-        { id: 'bolum_open_harfler', title: 'Orta bölümü aç', desc: 'Orta bölümüne gir ve bir teste başla', type: 'bolum_open', bolum: 'harfler', target: 1, xp: 20, action: 'tests', bolumStart: 'harfler' },
-        { id: 'bolum_open_eslestirme', title: 'İleri bölümü aç', desc: 'İleri bölümüne gir ve bir teste başla', type: 'bolum_open', bolum: 'eslestirme', target: 1, xp: 22, action: 'tests', bolumStart: 'eslestirme' },
-        { id: 'bolum_ses', title: 'Usta bölümü dene', desc: 'Usta bölümünü aç ve konuşma sorusu dene', type: 'bolum_open', bolum: 'ses', target: 1, xp: 25, action: 'tests', bolumStart: 'ses' },
+        { id: 'letters_10', title: 'Elifba maratonu', desc: '10 farklı harf incele', type: 'letters', target: 10, xp: 40, action: 'letters' },
+        { id: 'letters_14', title: '14 harf öğren', desc: 'Elifbadan 14 farklı harf seç', type: 'letters', target: 14, xp: 50, action: 'letters' },
+        { id: 'letters_18', title: 'Elifba ustası', desc: '18 farklı harf keşfet', type: 'letters', target: 18, xp: 60, action: 'letters' },
+        { id: 'translate_8', title: 'Kelime çevir', desc: '8 kelime çevir', type: 'translate', target: 8, xp: 40, action: 'translate' },
+        { id: 'translate_15', title: 'Çeviri maratonu', desc: '15 kelime çevir', type: 'translate', target: 15, xp: 55, action: 'translate' },
+        { id: 'quiz_12', title: '12 doğru cevap', desc: 'Testte 12 doğru yap', type: 'quiz_correct', target: 12, xp: 40, action: 'tests' },
+        { id: 'quiz_18', title: '18 doğru cevap', desc: 'Testte 18 doğru yap', type: 'quiz_correct', target: 18, xp: 50, action: 'tests' },
+        { id: 'quiz_25', title: 'Test ustası', desc: 'Testte 25 doğru yap', type: 'quiz_correct', target: 25, xp: 65, action: 'tests' },
+        { id: 'bolum_kelimeler', title: 'Temel maraton', desc: 'Temel bölümünde 2 test bitir', type: 'bolum_step', bolum: 'kelimeler', target: 2, xp: 45, action: 'tests', bolumStart: 'kelimeler' },
+        { id: 'bolum_harfler', title: 'Orta maraton', desc: 'Orta bölümünde 2 test bitir', type: 'bolum_step', bolum: 'harfler', target: 2, xp: 50, action: 'tests', bolumStart: 'harfler' },
+        { id: 'bolum_eslestirme', title: 'İleri bölüm', desc: 'İleri bölümünde 2 test bitir', type: 'bolum_step', bolum: 'eslestirme', target: 2, xp: 55, action: 'tests', bolumStart: 'eslestirme' },
+        { id: 'bolum_ceviri', title: 'Uzman bölüm', desc: 'Uzman bölümünde 2 test bitir', type: 'bolum_step', bolum: 'ceviri', target: 2, xp: 60, action: 'tests', bolumStart: 'ceviri' },
+        { id: 'bolum_ses', title: 'Usta bölümü', desc: 'Usta bölümünde 2 test bitir', type: 'bolum_step', bolum: 'ses', target: 2, xp: 65, action: 'tests', bolumStart: 'ses' },
+        { id: 'bolum_ceviri_3', title: 'Uzman ustası', desc: 'Uzman bölümünde 3 test bitir', type: 'bolum_step', bolum: 'ceviri', target: 3, xp: 75, action: 'tests', bolumStart: 'ceviri' },
     ];
 
     function uid() {
@@ -97,6 +96,7 @@
                 todayDate: today,
                 taskId,
                 progress: 0,
+                studiedLetters: [],
                 rewardedToday: false,
                 streak: state?.streak || 0,
                 lastCompleteDate: state?.lastCompleteDate || null,
@@ -203,10 +203,28 @@
         }
     }
 
-    function onLetterStudy() {
-        const state = syncTaskDay(loadState());
+    function onLetterStudy(letterName) {
+        if (typeof hasStudentFeatures === 'function' && !hasStudentFeatures()) return;
+
+        let state = syncTaskDay(loadState());
+        if (state.rewardedToday) return;
+
         const task = getTaskForState(state);
-        if (task.type === 'letters') bumpProgress(1);
+        if (task.type !== 'letters') return;
+
+        if (letterName) {
+            const studied = state.studiedLetters || [];
+            if (studied.includes(letterName)) return;
+            state.studiedLetters = [...studied, letterName];
+        }
+
+        state.progress = (state.progress || 0) + 1;
+        if (state.progress >= task.target) {
+            awardTask(state, task);
+        } else {
+            saveState(state);
+            updateDailyGoalUI();
+        }
     }
 
     function onTranslate() {
@@ -401,7 +419,7 @@
         if (typeof window.getPlacementQuestionPool !== 'function') return [];
         const pool = window.getPlacementQuestionPool().filter((q) => q.options && q.options.length >= 2);
         const picked = [];
-        const perTier = { 1: 2, 2: 3, 3: 3, 4: 2 };
+        const perTier = { 1: 4, 2: 5, 3: 5, 4: 4 };
 
         function pickHardestForTier(tierQs, count) {
             const sorted = tierQs.slice().sort((a, b) => (b.difficulty || 0) - (a.difficulty || 0));

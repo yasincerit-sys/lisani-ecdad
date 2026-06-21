@@ -187,6 +187,14 @@
                 <button onclick="quickLogin()" class="w-full pt-6 pb-1 text-[9px] text-stone-700 hover:text-stone-500 transition-colors text-center">giriş</button>
             </div>
 
+            <p class="lisani-auth-apk-foot w-full text-center pt-4 pb-2 px-2">
+                <button type="button" id="auth-apk-download-row" class="lisani-apk-download-btn lisani-glass-action lisani-glass-action--primary hidden w-full py-3 rounded-xl text-[11px] font-bold inline-flex items-center justify-center gap-2">
+                    <i data-lucide="download" class="w-4 h-4 shrink-0" aria-hidden="true"></i>
+                    <span>Android uygulamasını indir (APK)</span>
+                </button>
+                <span class="block text-[9px] theme-text-muted mt-2">Giriş yapmadan indirebilirsiniz</span>
+            </p>
+
             </div>
 
         </div>
@@ -205,7 +213,7 @@
                         </div>
                         <div class="flex-1 min-w-0">
                             <h2 id="ai-screen-title" class="text-lg font-extrabold theme-text-main transition-colors">Gelişim Analizi</h2>
-                            <p id="ai-screen-subtitle" class="text-xs theme-text-muted transition-colors">Uygulamada çözdüğünüz testlerin skor geçmişi</p>
+                            <p id="ai-screen-subtitle" class="text-xs theme-text-muted transition-colors">Solda yanlış soru detayı · sağda skor geçmişi</p>
                         </div>
                         <button type="button" onclick="refreshGelisimTab()" class="lisani-odev-refresh-btn lisani-stats-refresh-btn shrink-0" title="İstatistikleri yenile" aria-label="İstatistikleri yenile">
                             <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
@@ -213,7 +221,24 @@
                     </div>
 
                     <!-- BÖLÜM: GELİŞİM GRAFİKLERİ VE ANALİZ -->
-                    <div id="ai-section-progress" class="space-y-4">
+                    <div id="ai-section-progress" class="gelisim-layout">
+                        <aside id="gelisim-wrongs-sidebar" class="gelisim-layout__aside" aria-label="Yanlış soru detayları">
+                            <div id="gelisim-wrongs-panel" class="lisani-glass-panel rounded-2xl p-4 space-y-3 transition-all border border-red-500/20 h-full">
+                                <div class="flex items-center justify-between gap-2 pb-2 border-b theme-border">
+                                    <span class="text-xs font-extrabold theme-text-main flex items-center gap-1.5 uppercase tracking-wider">
+                                        <i data-lucide="alert-circle" class="w-4 h-4 text-red-400"></i>
+                                        Yanlış Soru Detayı
+                                    </span>
+                                    <button type="button" id="gelisim-wrongs-retry-btn" class="lisani-glass-action lisani-glass-action--compact text-[9px] font-bold px-2.5 py-1 rounded-lg hidden" onclick="reviewHistoryWrongs()">Tekrar çöz</button>
+                                </div>
+                                <p id="gelisim-wrongs-context" class="text-[10px] theme-text-muted font-semibold">Sınav geçmişinden bir test seçin</p>
+                                <div id="gelisim-wrongs-list" class="gelisim-wrongs-list space-y-2 pr-1">
+                                    <p class="text-[10px] theme-text-muted leading-relaxed py-4 text-center">Henüz yanlış soru kaydı yok.<br>Test çözdükten sonra burada görürsün.</p>
+                                </div>
+                            </div>
+                        </aside>
+
+                        <div class="gelisim-layout__main space-y-4">
                         <!-- Çizgi Grafik Alanı (Modern Glass) -->
                         <div class="lisani-glass-panel rounded-3xl p-4 space-y-3 transition-all relative overflow-hidden">
                             <div class="flex justify-between items-center px-1">
@@ -267,6 +292,16 @@
                             </div>
                         </div>
 
+                        <div id="gelisim-improvement-panel" class="hidden lisani-glass-panel rounded-2xl p-4 border theme-border space-y-2.5 transition-all">
+                            <div class="flex items-center justify-between gap-2">
+                                <span class="text-[10px] font-extrabold theme-text-main uppercase tracking-wider">Gelişim Önerileri</span>
+                                <button type="button" class="lisani-glass-action lisani-glass-action--compact text-[9px] font-bold px-2.5 py-1 rounded-lg" onclick="openKonuAnlatimi()">Konu anlatımı</button>
+                            </div>
+                            <p class="text-[10px] theme-text-muted leading-relaxed">Son testlerdeki yanlışlara göre tekrar etmen gereken konular:</p>
+                            <div id="gelisim-improvement-list" class="space-y-2"></div>
+                            <button type="button" id="gelisim-review-all-wrongs-btn" class="lisani-glass-action lisani-glass-action--primary w-full py-2.5 rounded-xl text-[10px] font-bold hidden" onclick="reviewAllRecentWrongs()">Tüm yanlışları tekrar çöz</button>
+                        </div>
+
                         <!-- ÇÖZÜLEN TESTLERİN GEÇMİŞ LİSTESİ -->
                         <div class="lisani-glass-panel rounded-2xl p-4 space-y-3 transition-all">
                             <div class="flex items-center justify-between pb-2 border-b theme-border">
@@ -280,6 +315,7 @@
                                 <!-- JS ile dinamik olarak doldurulacaktır -->
                             </div>
                         </div>
+                        </div><!-- /.gelisim-layout__main -->
                     </div>
                 </div>
 
@@ -332,9 +368,10 @@
                                     <button type="button" onclick="loadHocaDashboard(true)" class="hoca-dash__icon-btn lisani-stats-refresh-btn" title="Yenile">
                                         <i data-lucide="refresh-cw" class="w-4 h-4"></i>
                                     </button>
-                                    <button type="button" class="hoca-dash__icon-btn" title="Bildirimler">
+                                    <button type="button" id="hoca-dash-notif-btn" class="hoca-dash__icon-btn relative" title="Değerlendirme bildirimleri" onclick="openYoneticiRatingNotifications()">
                                         <i data-lucide="bell" class="w-4 h-4"></i>
-                                        <span class="hoca-dash__notif-dot"></span>
+                                        <span id="hoca-dash-notif-dot" class="hoca-dash__notif-dot hidden"></span>
+                                        <span id="hoca-dash-notif-count" class="hoca-dash__notif-count hidden">0</span>
                                     </button>
                                     <div class="hoca-dash__profile">
                                         <div class="hoca-dash__profile-text">
@@ -563,6 +600,14 @@
                                     <span class="text-[9px] font-bold uppercase tracking-wide opacity-80">Yanlış</span>
                                     <p id="result-wrong-count" class="text-sm font-black mt-0.5">1</p>
                                 </div>
+                            </div>
+
+                            <div id="quiz-result-wrongs-section" class="hidden text-left space-y-2 w-full">
+                                <p class="text-[10px] font-extrabold theme-text-main uppercase tracking-wider flex items-center gap-1.5">
+                                    <i data-lucide="alert-circle" class="w-3.5 h-3.5 text-red-400"></i>
+                                    Yanlış yaptığın sorular
+                                </p>
+                                <div id="quiz-result-wrongs-list" class="space-y-2 max-h-[200px] overflow-y-auto pr-1"></div>
                             </div>
                         </div>
 
@@ -1364,6 +1409,24 @@
                 <p class="text-[11px] theme-text-muted">5 yıldız üzerinden puan ver</p>
                 <div id="app-rating-modal-stars" class="lisani-star-rating justify-center"></div>
                 <button type="button" onclick="closeAppRatingModal()" class="text-[10px] theme-text-muted underline">Şimdi değil</button>
+            </div>
+        </div>
+
+        <div id="hoca-dash-rating-notif-modal" class="hidden fixed inset-0 z-[90] flex items-end lg:items-center justify-center p-0 lg:p-6 bg-black/60 backdrop-blur-sm" aria-hidden="true">
+            <div class="lisani-glass-panel w-full max-w-md max-h-[85vh] flex flex-col rounded-t-3xl lg:rounded-3xl border theme-border overflow-hidden">
+                <div class="flex items-center justify-between gap-3 px-4 py-3 border-b theme-border shrink-0">
+                    <div>
+                        <h3 class="text-sm font-extrabold theme-text-main">Değerlendirme Bildirimleri</h3>
+                        <p class="text-[10px] theme-text-muted">Kullanıcıların uygulama puanları</p>
+                    </div>
+                    <button type="button" class="hoca-dash__icon-btn" onclick="closeYoneticiRatingNotifications()" aria-label="Kapat">
+                        <i data-lucide="x" class="w-4 h-4"></i>
+                    </button>
+                </div>
+                <div id="hoca-dash-rating-notif-list" class="flex-1 overflow-y-auto p-3 space-y-2"></div>
+                <div class="shrink-0 p-3 border-t theme-border flex gap-2">
+                    <button type="button" class="lisani-glass-action lisani-glass-action--primary flex-1 py-2.5 rounded-xl text-[10px] font-bold" onclick="markAllRatingNotificationsRead()">Tümünü okundu işaretle</button>
+                </div>
             </div>
         </div>
 

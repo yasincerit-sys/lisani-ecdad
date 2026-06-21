@@ -4,10 +4,11 @@
 (function () {
     'use strict';
 
-    const CARD = 'Osmanlıca kelimenin Türkçe karşılığını seçin';
+    const CARD = 'Resme bak · doğru Türkçe karşılığı seç';
     const LETTER = 'Harf adını seçin';
-    const SPEAK = 'Kelimeyi Türkçe okuyun';
+    const MATCH = 'Resimleri Osmanlıca yazılışlarıyla eşleştir';
     const TILES = 'Kelimeleri sırayla seçerek Türkçe cümle kurun';
+    const SPEAK = 'Osmanlıca kelimeyi gör · Türkçe oku';
 
     function normQuizWord(s) {
         return String(s)
@@ -90,13 +91,14 @@
         { tr: 'Kapı', osm: 'قاپی', diff: 1, hint: 'kapı', speakAlt: ['kapi'] },
         { tr: 'Kalp', osm: 'قلب', diff: 1, hint: 'kalp' },
         { tr: 'Göz', osm: 'گوز', diff: 1, hint: 'göz', speakAlt: ['goz'] },
-        { tr: 'El', osm: 'أل', diff: 1, hint: 'el' },
+        { tr: 'El', osm: 'ال', diff: 1, hint: 'el' },
         { tr: 'Anne', osm: 'آنه', diff: 1, hint: 'anne' },
         { tr: 'Baba', osm: 'بابا', diff: 1, hint: 'baba' },
         { tr: 'Günaydın', osm: 'گوناي دين', diff: 1, hint: 'günaydın', speakAlt: ['gunaydin', 'sabah'] },
         { tr: 'Güzel', osm: 'گوزل', diff: 1, hint: 'güzel', speakAlt: ['guzel'] },
         { tr: 'İyi', osm: 'ايى', diff: 1, hint: 'iyi' },
         { tr: 'Kuş', osm: 'قوش', diff: 1, hint: 'kuş', speakAlt: ['kus'] },
+        { tr: 'Kedi', osm: 'قطة', diff: 1, hint: 'kedi' },
         { tr: 'At', osm: 'آت', diff: 1, hint: 'at' },
         { tr: 'Okul', osm: 'مدرسه', diff: 3, hint: 'okul' },
         { tr: 'Öğrenci', osm: 'طالب', diff: 3, hint: 'öğrenci', speakAlt: ['ogrenci'] },
@@ -112,6 +114,8 @@
         { tr: 'Güneş', osm: 'كونش', diff: 3, hint: 'güneş', speakAlt: ['gunes'] },
         { tr: 'Ay', osm: 'آى', diff: 3, hint: 'ay' },
         { tr: 'Dost', osm: 'دوست', diff: 3, hint: 'dost' },
+        { tr: 'Din', osm: 'دين', diff: 4, hint: 'din' },
+        { tr: 'İman', osm: 'ايمان', diff: 4, hint: 'iman' },
         { tr: 'İlim', osm: 'علم', diff: 4, hint: 'ilim', speakAlt: ['ilm'] },
         { tr: 'Adalet', osm: 'عدالت', diff: 4, hint: 'adalet' },
         { tr: 'Sabır', osm: 'صبر', diff: 4, hint: 'sabır', speakAlt: ['sabir'] },
@@ -136,7 +140,159 @@
         { tr: 'Muhabbet', osm: 'محبة', diff: 6, hint: 'muhabbet' },
     ];
 
-    const WORDS = CORE_WORDS;
+    function wordDifficulty(w) {
+        return w?.difficulty ?? w?.diff ?? 2;
+    }
+
+    function isQuizVocabKey(key, osm) {
+        if (!key || !osm) return false;
+        if (key.length < 3 || key.length > 40) return false;
+        if ((key.match(/\s/g) || []).length > 3) return false;
+        if (/[0-9\[\](){}]/.test(key)) return false;
+        if (!/[\u0600-\u06FF]/.test(osm)) return false;
+        if (osm.length > 55) return false;
+        return true;
+    }
+
+    function guessWordDiff(tr, osm) {
+        const t = String(tr || '').replace(/\s/g, '').length;
+        const o = String(osm || '').replace(/\s/g, '').length;
+        if (t <= 4 && o <= 5) return 1;
+        if (t <= 7 && o <= 9) return 2;
+        if (t <= 11 && o <= 14) return 3;
+        if (t <= 16 && o <= 20) return 4;
+        if (t <= 22 && o <= 28) return 5;
+        return 6;
+    }
+
+    function vocabToWord(tr, osm) {
+        const key = normQuizWord(tr);
+        if (!isQuizVocabKey(key, osm)) return null;
+        const hint = key;
+        const entry = {
+            tr: tr.charAt(0).toLocaleUpperCase('tr-TR') + tr.slice(1),
+            osm,
+            diff: guessWordDiff(tr, osm),
+            difficulty: guessWordDiff(tr, osm),
+            hint,
+        };
+        return entry;
+    }
+
+    function mergeExtendedWords(core) {
+        const byOsm = new Map();
+        core.forEach((w) => {
+            const d = wordDifficulty(w);
+            byOsm.set(w.osm, { ...w, diff: w.diff ?? d, difficulty: d });
+        });
+
+        function ingestMap(map) {
+            if (!map || typeof map !== 'object') return;
+            Object.entries(map).forEach(([tr, osm]) => {
+                if (!osm || byOsm.has(osm)) return;
+                const w = vocabToWord(tr, osm);
+                if (w) byOsm.set(osm, w);
+            });
+        }
+
+        ingestMap(window.LISANI_OSM_VOCABULARY);
+
+        const semazenQuiz = window.LISANI_SEMAZEN_QUIZ_WORDS;
+        if (Array.isArray(semazenQuiz)) {
+            semazenQuiz.forEach((w) => {
+                if (!w?.osm || byOsm.has(w.osm)) return;
+                const d = wordDifficulty(w);
+                byOsm.set(w.osm, { ...w, diff: w.diff ?? d, difficulty: d });
+            });
+        } else {
+            ingestMap(window.LISANI_SEMAZEN_VOCABULARY);
+        }
+
+        return [...byOsm.values()];
+    }
+
+    const WORDS = mergeExtendedWords(CORE_WORDS);
+
+    const WORDS_BY_DIFF = {};
+    WORDS.forEach((w) => {
+        const d = wordDifficulty(w);
+        if (!WORDS_BY_DIFF[d]) WORDS_BY_DIFF[d] = [];
+        WORDS_BY_DIFF[d].push(w);
+    });
+
+    /** Kelime → emoji (eşleştirme ve görsel kartlar) */
+    const WORD_EMOJI = {
+        merhaba: '👋',
+        selam: '👋',
+        teşekkürler: '🙏',
+        tesekkurler: '🙏',
+        su: '💧',
+        çay: '🍵',
+        cay: '🍵',
+        kahve: '☕',
+        kitap: '📖',
+        kalem: '✏️',
+        defter: '📓',
+        ev: '🏠',
+        kapı: '🚪',
+        kapi: '🚪',
+        kedi: '🐱',
+        kuş: '🐦',
+        kus: '🐦',
+        at: '🐴',
+        el: '✋',
+        göz: '👁️',
+        goz: '👁️',
+        kalp: '❤️',
+        anne: '👩',
+        baba: '👨',
+        okul: '🏫',
+        cami: '🕌',
+        camii: '🕌',
+        güneş: '☀️',
+        gunes: '☀️',
+        ay: '🌙',
+        deniz: '🌊',
+        güzel: '🌸',
+        guzel: '🌸',
+        çocuk: '👶',
+        cocuk: '👶',
+        ekmek: '🍞',
+    };
+
+    const CURATED_MATCH_SETS = [
+        ['kahve', 'kedi', 'kitap'],
+        ['kahve', 'çay', 'su'],
+        ['kedi', 'kuş', 'at'],
+        ['kitap', 'kalem', 'defter'],
+        ['ev', 'kalp', 'el'],
+        ['anne', 'baba', 'göz'],
+        ['okul', 'cami', 'güneş'],
+        ['deniz', 'ay', 'güzel'],
+        ['merhaba', 'teşekkürler', 'evet'],
+        ['ilim', 'adalet', 'rahmet'],
+        ['takva', 'tevekkül', 'sabır'],
+        ['hakikat', 'batıl', 'zahir'],
+        ['kader', 'kaza', 'takva'],
+        ['muhabbet', 'marifet', 'tefekkür'],
+        ['ilim', 'hikmet', 'adalet'],
+        ['rahmet', 'sabır', 'ihsan'],
+        ['melekût', 'mülk', 'devlet'],
+    ];
+
+    function wordEmoji(w) {
+        const keys = [w.tr, w.hint, ...(w.speakAlt || [])].filter(Boolean);
+        for (let i = 0; i < keys.length; i++) {
+            const e = WORD_EMOJI[normQuizWord(keys[i])];
+            if (e) return e;
+        }
+        return '📖';
+    }
+
+    function findWordByTr(tr) {
+        const n = normQuizWord(tr);
+        return WORDS.find((w) => normQuizWord(w.tr) === n) || null;
+    }
 
     function collectBlockTerms(wordOrTr) {
         const terms = [];
@@ -202,10 +358,10 @@
         { osm: 'آب ايستييورم', parts: ['su', 'istiyorum'], decoys: ['kitap', 'kalem', 'okulda', 'yazıyorum', 'evde', 'gidiyorum'], diff: 2 },
         { osm: 'گوزل كون', parts: ['güzel', 'gün'], decoys: ['kötü', 'gece', 'okulda', 'deniz', 'vatan', 'yazıyorum'], diff: 2 },
         { osm: 'آو ايى', parts: ['ev', 'iyi'], decoys: ['kötü', 'kapı', 'deniz', 'vatan', 'okulda', 'yazıyorum'], diff: 2 },
-        { osm: 'مدرسه ده اوكونييورم', parts: ['okulda', 'okuyorum'], decoys: ['evde', 'yazıyorum', 'gidiyorum', 'deniz', 'vatan', 'kapı'], diff: 3 },
+        { osm: 'مدرسه ده اوقونييورم', parts: ['okulda', 'okuyorum'], decoys: ['evde', 'yazıyorum', 'gidiyorum', 'deniz', 'vatan', 'kapı'], diff: 3 },
         { osm: 'تشكر ايدرم', parts: ['teşekkür', 'ederim'], decoys: ['lütfen', 'evet', 'deniz', 'vatan', 'kapı', 'gidiyorum'], diff: 2 },
         { osm: 'ايى گونلر', parts: ['iyi', 'günler'], decoys: ['kötü', 'gece', 'deniz', 'vatan', 'kapı', 'yazıyorum'], diff: 2 },
-        { osm: 'خوش كلدك', parts: ['hoş', 'geldiniz'], decoys: ['evet', 'hayır', 'deniz', 'vatan', 'kapı', 'yazıyorum'], diff: 2 },
+        { osm: 'خوش گلدينيز', parts: ['hoş', 'geldiniz'], decoys: ['evet', 'hayır', 'deniz', 'vatan', 'kapı', 'yazıyorum'], diff: 2 },
         { osm: 'كتاب اوقونييورم', parts: ['kitap', 'okuyorum'], decoys: ['yazıyorum', 'okulda', 'evde', 'gidiyorum', 'deniz', 'vatan'], diff: 2 },
         { osm: 'قلم يازييورم', parts: ['kalem', 'yazıyorum'], decoys: ['okuyorum', 'okulda', 'evde', 'gidiyorum', 'deniz', 'vatan'], diff: 2 },
         { osm: 'لطفاً آب', parts: ['lütfen', 'su'], decoys: ['evet', 'hayır', 'deniz', 'vatan', 'kapı', 'gidiyorum'], diff: 2 },
@@ -219,7 +375,7 @@
         { osm: 'چای و قهوه', parts: ['çay', 've', 'kahve'], decoys: ['su', 'kitap', 'kalem', 'evde', 'gidiyorum', 'okuyorum'], diff: 2 },
         { osm: 'كتاب اوقونييورم آو ده', parts: ['kitap', 'okuyorum', 'evde'], decoys: ['okulda', 'yazıyorum', 'gidiyorum', 'kalem', 'çay', 'kahve'], diff: 2 },
         { osm: 'قلم يازييورم مدرسه ده', parts: ['kalem', 'yazıyorum', 'okulda'], decoys: ['okuyorum', 'evde', 'gidiyorum', 'kitap', 'çay', 'su'], diff: 2 },
-        { osm: 'گوناي دين يا دوست', parts: ['günaydın', 'dostum'], decoys: ['iyi', 'günler', 'akşamlar', 'geceler', 'merhaba', 'selam'], diff: 2 },
+        { osm: 'گوناي دين يا دوست', parts: ['günaydın', 'ya', 'dost'], decoys: ['iyi', 'günler', 'akşamlar', 'geceler', 'merhaba', 'selam'], diff: 2 },
         { osm: 'بوگون ناصل سين', parts: ['bugün', 'nasılsın'], decoys: ['merhaba', 'selam', 'iyi', 'günler', 'teşekkür', 'ederim'], diff: 2 },
         { osm: 'ايييم الحمد', parts: ['iyiyim', 'hamdolsun'], decoys: ['merhaba', 'selam', 'teşekkür', 'ederim', 'günaydın', 'hoş'], diff: 3 },
         { osm: 'سلام عليكم', parts: ['selamün', 'aleyküm'], decoys: ['merhaba', 'selam', 'hoş', 'geldiniz', 'günaydın', 'iyi'], diff: 3 },
@@ -228,8 +384,8 @@
         { osm: 'بن طالبم', parts: ['ben', 'öğrenciyim'], decoys: ['okuyorum', 'yazıyorum', 'okulda', 'evde', 'gidiyorum', 'kitap'], diff: 3 },
         { osm: 'بو گوزل كتاب', parts: ['bu', 'güzel', 'kitap'], decoys: ['kalem', 'defter', 'okuyorum', 'yazıyorum', 'evde', 'okulda'], diff: 3 },
         { osm: 'مدرسه يه گيدييورم', parts: ['okula', 'gidiyorum'], decoys: ['evde', 'okuyorum', 'yazıyorum', 'kitap', 'kalem', 'çay'], diff: 3 },
-        { osm: 'وطن سورييورم', parts: ['vatanımı', 'seviyorum'], decoys: ['millet', 'devlet', 'sultan', 'gidiyorum', 'okuyorum', 'yazıyorum'], diff: 3 },
-        { osm: 'علم نور', parts: ['ilim', 'nurdur'], decoys: ['hikmet', 'sabır', 'adalet', 'rahmet', 'gidiyorum', 'okuyorum'], diff: 4 },
+        { osm: 'وطنمى سورييورم', parts: ['vatanımı', 'seviyorum'], decoys: ['millet', 'devlet', 'sultan', 'gidiyorum', 'okuyorum', 'yazıyorum'], diff: 3 },
+        { osm: 'علم نور', parts: ['ilim', 'nur'], decoys: ['hikmet', 'sabır', 'adalet', 'rahmet', 'gidiyorum', 'okuyorum'], diff: 4 },
         { osm: 'صبر ایله كاپيلر آچيلير', parts: ['sabırla', 'kapılar', 'açılır'], decoys: ['ilim', 'hikmet', 'adalet', 'rahmet', 'gidiyorum', 'okuyorum'], diff: 4 },
         { osm: 'عدالت و رحمت', parts: ['adalet', 've', 'rahmet'], decoys: ['ilim', 'hikmet', 'sabır', 'din', 'iman', 'vatan'], diff: 4 },
         { osm: 'كتاب و قلم', parts: ['kitap', 've', 'kalem'], decoys: ['defter', 'okulda', 'yazıyorum', 'evde', 'gidiyorum', 'deniz'], diff: 2 },
@@ -238,17 +394,17 @@
         { osm: 'قلم يازييورم آو ده', parts: ['kalem', 'yazıyorum', 'evde'], decoys: ['okuyorum', 'okulda', 'gidiyorum', 'deniz', 'vatan', 'kapı'], diff: 3 },
         { osm: 'وطن و ملت سورييورم', parts: ['vatan', 've', 'millet', 'seviyorum'], decoys: ['gidiyorum', 'okuyorum', 'deniz', 'kapı', 'evde', 'sultan'], diff: 4 },
         { osm: 'دولت و سلطان', parts: ['devlet', 've', 'sultan'], decoys: ['vatan', 'millet', 'gidiyorum', 'okuyorum', 'deniz', 'kapı'], diff: 4 },
-        { osm: 'علم و حكمت و صبر', parts: ['ilim', 'hikmet', 've', 'sabır'], decoys: ['adalet', 'rahmet', 'gidiyorum', 'okuyorum', 'deniz', 'vatan'], diff: 5 },
-        { osm: 'عدالت و رحمت', parts: ['adalet', 've', 'rahmet'], decoys: ['ilim', 'hikmet', 'sabır', 'gidiyorum', 'okuyorum', 'deniz'], diff: 5 },
-        { osm: 'دين و ايمان و صبر', parts: ['din', 'iman', 've', 'sabır'], decoys: ['cami', 'ilim', 'hikmet', 'gidiyorum', 'okuyorum', 'deniz'], diff: 5 },
-        { osm: 'توكل و صبر و علم', parts: ['tevekkül', 'sabır', 've', 'ilim'], decoys: ['takva', 'ihsan', 'adalet', 'rahmet', 'gidiyorum', 'okuyorum'], diff: 6 },
+        { osm: 'علم و حكمت و صبر', parts: ['ilim', 've', 'hikmet', 've', 'sabır'], decoys: ['adalet', 'rahmet', 'gidiyorum', 'okuyorum', 'deniz', 'vatan'], diff: 5 },
+        { osm: 'حكمت و علم', parts: ['hikmet', 've', 'ilim'], decoys: ['sabır', 'adalet', 'rahmet', 'gidiyorum', 'okuyorum', 'deniz'], diff: 5 },
+        { osm: 'دين و ايمان و صبر', parts: ['din', 've', 'iman', 've', 'sabır'], decoys: ['cami', 'ilim', 'hikmet', 'gidiyorum', 'okuyorum', 'deniz'], diff: 5 },
+        { osm: 'توكل و صبر و علم', parts: ['tevekkül', 've', 'sabır', 've', 'ilim'], decoys: ['takva', 'ihsan', 'adalet', 'rahmet', 'gidiyorum', 'okuyorum'], diff: 6 },
         { osm: 'حقيقة و باطل', parts: ['hakikat', 've', 'batıl'], decoys: ['zahir', 'bâtın', 'ilim', 'hikmet', 'gidiyorum', 'okuyorum'], diff: 6 },
         { osm: 'ظاهر و باطن', parts: ['zahir', 've', 'bâtın'], decoys: ['hakikat', 'batıl', 'ilim', 'hikmet', 'gidiyorum', 'okuyorum'], diff: 6 },
         { osm: 'ملك و ملكوت', parts: ['mülk', 've', 'melekût'], decoys: ['devlet', 'sultan', 'vatan', 'millet', 'gidiyorum', 'okuyorum'], diff: 6 },
         { osm: 'قدر و قضاء', parts: ['kader', 've', 'kaza'], decoys: ['takva', 'tevekkül', 'ilim', 'hikmet', 'gidiyorum', 'okuyorum'], diff: 6 },
         { osm: 'استغفار و شفاعة', parts: ['istiğfar', 've', 'şefaat'], decoys: ['takva', 'ihsan', 'rahmet', 'adalet', 'gidiyorum', 'okuyorum'], diff: 6 },
-        { osm: 'تفكر و معرفة و محبة', parts: ['tefekkür', 'marifet', 've', 'muhabbet'], decoys: ['ilim', 'hikmet', 'sabır', 'adalet', 'gidiyorum', 'okuyorum'], diff: 6 },
-        { osm: 'تقوى و احسان و صبر', parts: ['takva', 'ihsan', 've', 'sabır'], decoys: ['tevekkül', 'fütüvvet', 'adalet', 'rahmet', 'gidiyorum', 'okuyorum'], diff: 6 },
+        { osm: 'تفكر و معرفة و محبة', parts: ['tefekkür', 've', 'marifet', 've', 'muhabbet'], decoys: ['ilim', 'hikmet', 'sabır', 'adalet', 'gidiyorum', 'okuyorum'], diff: 6 },
+        { osm: 'تقوى و احسان و صبر', parts: ['takva', 've', 'ihsan', 've', 'sabır'], decoys: ['tevekkül', 'fütüvvet', 'adalet', 'rahmet', 'gidiyorum', 'okuyorum'], diff: 6 },
     ];
 
     const GRAMMAR_PROMPT = 'Dil bilgisi — doğru seçeneği işaretleyin';
@@ -460,6 +616,17 @@
             };
         }
 
+        if (q.type === 'match') {
+            const pairs = q.pairs || [];
+            return {
+                title: 'Görsel eşleştirme',
+                summary: buildLisaniLearnTip(q),
+                detail:
+                    'Soldaki resim ve Türkçe kelimeyi, sağdaki doğru Osmanlıca yazılışla eşleştir. Hepsini doğru yapınca soru tamamlanır.',
+                examples: pairs.map((p) => `${p.emoji} ${p.tr} → ${p.osm}`),
+            };
+        }
+
         if (q.type === 'speak') {
             const w = findWordByOsm(q.word);
             return {
@@ -518,7 +685,10 @@
         }
         if (q.learnTip) return q.learnTip;
         if (q.grammarNote) return q.grammarNote;
-        if (q.type === 'speak' && q.speakHint) return `Okunuş hedefi: «${q.speakHint}»`;
+        if (q.type === 'match' && q.pairs?.length) {
+            return `Eşleştir: ${q.pairs.map((p) => `${p.emoji} ${p.tr}`).join(' · ')}`;
+        }
+        if (q.type === 'speak' && q.speakHint) return `Türkçe oku: «${q.speakHint}»`;
         if (q.type === 'tiles' && q.answerOrder?.length) return `Doğru cümle: «${q.answerOrder.join(' ')}»`;
         if (q.answer) return `Doğru cevap: «${q.answer}»`;
         return '';
@@ -558,12 +728,12 @@
             diff: 5,
         },
         {
-            osm: '«علم نور» cümlesinde «نور» hangi i\'rabı alır?',
+            osm: '«علم نور» cümlesinde «نور» ne anlama gelir?',
             prompt: GRAMMAR_PROMPT,
             topic: 'irab',
-            answer: 'Merfû\' (haber)',
-            wrong: ['Mansûb (meful)', 'Mecrûr', 'Meczûm'],
-            diff: 5,
+            answer: 'Haber (yüklemin anlattığı)',
+            wrong: ['Mübtedâ (özne)', 'Meful (nesne)', 'Sıfat'],
+            diff: 4,
         },
         {
             osm: 'Tenvin (ـٌ ـٍ ـً) genelde hangi halde görülür?',
@@ -729,22 +899,33 @@
     ];
 
     window.LISANI_QUIZ_META = {
-        card: { label: 'Eşleştir', icon: 'link' },
+        card: { label: 'Kelime', icon: 'image' },
         letter: { label: 'Harf', icon: 'type' },
-        speak: { label: 'Konuş', icon: 'mic' },
+        match: { label: 'Eşleştir', icon: 'link-2' },
         tiles: { label: 'Cümle Kur', icon: 'layout-grid' },
         grammar: { label: 'Dil Bilgisi', icon: 'book-open' },
+        speak: { label: 'Konuş', icon: 'mic' },
     };
 
     function pickWrong(answerWord, pool, diff, n) {
         const answerTr = typeof answerWord === 'string' ? answerWord : answerWord.tr;
         const blocked = collectBlockTerms(answerWord);
         const isEligible = (w, spread) =>
-            w.tr !== answerTr && !blocked.has(normQuizWord(w.tr)) && Math.abs(w.diff - diff) <= spread + 1;
+            w.tr !== answerTr &&
+            !blocked.has(normQuizWord(w.tr)) &&
+            Math.abs(wordDifficulty(w) - diff) <= spread + 1;
+
+        function bucketWords(spread) {
+            const out = [];
+            for (let d = Math.max(1, diff - spread - 1); d <= Math.min(6, diff + spread + 2); d++) {
+                if (WORDS_BY_DIFF[d]) out.push(...WORDS_BY_DIFF[d]);
+            }
+            return out.length ? out : pool;
+        }
 
         const spreads = diff >= 6 ? [0, 1] : diff >= 5 ? [0, 1, 2] : [0, 1, 2, 4, 8];
         for (const spread of spreads) {
-            const candidates = pool.filter((w) => isEligible(w, spread));
+            const candidates = bucketWords(spread).filter((w) => isEligible(w, spread));
             if (candidates.length >= n) {
                 return shuffle(candidates)
                     .slice(0, n)
@@ -768,17 +949,100 @@
     }
 
     function mkCard(w) {
-        const wrong = pickWrong(w, WORDS, w.diff, 3);
+        const diff = wordDifficulty(w);
+        const wrong = pickWrong(w, WORDS, diff, 3);
         const options = shuffle([w.tr, ...wrong]);
+        const emoji = wordEmoji(w);
         return {
             type: 'card',
             word: w.osm,
+            image: emoji !== '📖' ? emoji : undefined,
             prompt: CARD,
             options,
             answer: w.tr,
-            difficulty: w.diff,
+            difficulty: diff,
             learnTip: wordLearnTip(w),
         };
+    }
+
+    function mkMatch(wordSet) {
+        const pairs = wordSet.map((w) => ({
+            id: normQuizWord(w.tr),
+            emoji: wordEmoji(w),
+            tr: w.tr,
+            osm: w.osm,
+        }));
+        return {
+            type: 'match',
+            word: pairs.map((p) => p.osm).join(' · '),
+            prompt: MATCH,
+            pairs,
+            pairIds: pairs
+                .map((p) => p.id)
+                .sort()
+                .join('+'),
+            difficulty: Math.max(...wordSet.map((w) => w.diff || 1)),
+            learnTip: `Eşleştirme: ${pairs.map((p) => `${p.emoji} ${p.tr} = ${p.osm}`).join(' · ')}`,
+        };
+    }
+
+    function buildMatchPool() {
+        const pool = [];
+        const seen = new Set();
+
+        function addGroup(words) {
+            if (!words || words.length < 2) return false;
+            const key = words
+                .map((w) => normQuizWord(w.tr))
+                .sort()
+                .join('+');
+            if (seen.has(key)) return false;
+            seen.add(key);
+            pool.push(mkMatch(words));
+            return pool.length >= 900;
+        }
+
+        for (const keys of CURATED_MATCH_SETS) {
+            const words = keys.map((k) => findWordByTr(k)).filter(Boolean);
+            if (words.length >= 2 && addGroup(words)) return pool;
+        }
+
+        const matchCap = Math.min(450, WORDS.length);
+        const anchors = [];
+        for (let d = 1; d <= 6; d++) {
+            const bucket = WORDS_BY_DIFF[d] || [];
+            shuffle(bucket)
+                .slice(0, Math.ceil(matchCap / 6))
+                .forEach((w) => anchors.push(w));
+        }
+
+        for (const anchor of shuffle(anchors).slice(0, matchCap)) {
+            if (pool.length >= 900) break;
+            for (const groupSize of [3, 4]) {
+                const mates = shuffle(
+                    WORDS.filter(
+                        (w) =>
+                            w.tr !== anchor.tr &&
+                            Math.abs(wordDifficulty(w) - wordDifficulty(anchor)) <= 1
+                    )
+                );
+                const group = [anchor, ...mates.slice(0, groupSize - 1)];
+                if (group.length >= 2 && addGroup(group)) return pool;
+            }
+        }
+
+        if (!pool.length && WORDS.length >= 2) {
+            addGroup(WORDS.slice(0, 3));
+        }
+
+        const hardWords = WORDS.filter((w) => wordDifficulty(w) >= 4);
+        for (const anchor of shuffle(hardWords).slice(0, 500)) {
+            if (pool.length >= 900) break;
+            const mates = shuffle(hardWords.filter((w) => w.tr !== anchor.tr)).slice(0, 2);
+            if (mates.length >= 2) addGroup([anchor, ...mates]);
+        }
+
+        return pool;
     }
 
     function mkLetter(l) {
@@ -796,20 +1060,7 @@
         };
     }
 
-    function mkSpeak(s) {
-        return {
-            type: 'speak',
-            word: s.word,
-            speakHint: s.hint,
-            prompt: SPEAK,
-            speakMatch: s.speakMatch,
-            skipPhrases: SKIP_PHRASES,
-            difficulty: s.diff,
-            learnTip: `Kelimeyi Türkçe oku: «${s.hint}»${s.diff >= 5 ? ' · net ve yavaş söyle.' : ''}`,
-        };
-    }
-
-        function mkTiles(p) {
+    function mkTiles(p) {
         const parts = p.parts.slice();
         const tiles = parts.slice();
         const safeDecoys = filterTileDecoys(parts, p.decoys);
@@ -848,6 +1099,19 @@
         };
     }
 
+    function mkSpeak(item) {
+        const w = findWordByOsm(item.word);
+        return {
+            type: 'speak',
+            word: item.word,
+            speakHint: item.hint,
+            speakMatch: item.speakMatch || [item.hint],
+            prompt: SPEAK,
+            difficulty: item.diff || w?.diff || 2,
+            learnTip: w ? wordLearnTip(w) : `Okunuş: ${item.hint}`,
+        };
+    }
+
     function hashSessionSeed(str) {
         let h = 0;
         for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) | 0;
@@ -870,10 +1134,10 @@
         kelimeler: {
             baseDiff: 1,
             maxDiff: 3,
-            stepDiffBoost: 0.4,
+            stepDiffBoost: 0.35,
             tilesPartMin: 2,
             tilesPartMax: 2,
-            typeCycle: ['letter', 'card', 'letter', 'card', 'letter'],
+            typeCycle: ['match', 'card', 'speak', 'letter', 'match', 'card'],
             allowLetter: true,
         },
         harfler: {
@@ -882,7 +1146,7 @@
             stepDiffBoost: 0.55,
             tilesPartMin: 2,
             tilesPartMax: 3,
-            typeCycle: ['tiles', 'card', 'tiles', 'card', 'letter'],
+            typeCycle: ['match', 'card', 'tiles', 'speak', 'match', 'letter', 'card'],
             allowLetter: true,
         },
         eslestirme: {
@@ -891,7 +1155,7 @@
             stepDiffBoost: 0.65,
             tilesPartMin: 2,
             tilesPartMax: 4,
-            typeCycle: ['tiles', 'card', 'tiles', 'tiles', 'card', 'tiles', 'card', 'tiles'],
+            typeCycle: ['match', 'tiles', 'speak', 'match', 'card', 'tiles', 'match', 'tiles', 'card'],
             allowLetter: false,
         },
         ceviri: {
@@ -900,21 +1164,17 @@
             stepDiffBoost: 1.15,
             tilesPartMin: 4,
             tilesPartMax: 6,
-            typeCycle: ['grammar', 'tiles', 'grammar', 'card', 'tiles', 'grammar', 'tiles', 'grammar', 'card', 'tiles', 'grammar', 'speak'],
+            typeCycle: ['grammar', 'tiles', 'speak', 'grammar', 'card', 'tiles', 'grammar', 'match', 'grammar', 'tiles'],
             allowLetter: false,
-            maxSpeak: 2,
-            speakGap: 3,
         },
         ses: {
             baseDiff: 5,
             maxDiff: 6,
-            stepDiffBoost: 1.35,
+            stepDiffBoost: 1.5,
             tilesPartMin: 5,
             tilesPartMax: 6,
-            typeCycle: ['grammar', 'tiles', 'grammar', 'tiles', 'speak', 'grammar', 'tiles', 'grammar', 'tiles', 'speak', 'grammar', 'tiles'],
+            typeCycle: ['grammar', 'speak', 'tiles', 'grammar', 'speak', 'tiles', 'match', 'grammar', 'speak', 'tiles', 'match', 'grammar', 'tiles'],
             allowLetter: false,
-            maxSpeak: 3,
-            speakGap: 2,
         },
     };
 
@@ -926,50 +1186,20 @@
 
     function fallbackType(bolumId, cfg) {
         if (bolumId === 'ceviri' || bolumId === 'ses') return 'grammar';
-        if (bolumId === 'eslestirme') return 'tiles';
+        if (bolumId === 'eslestirme' || bolumId === 'kelimeler' || bolumId === 'harfler') return 'match';
         return 'card';
     }
 
     function buildLisaniSessionTypes(bolumId, sessionSize, stepIndex) {
         const cfg = BOLUM_QUIZ[bolumId] || BOLUM_QUIZ.kelimeler;
         const cycle = cfg.typeCycle || ['card'];
-        const maxSpeak = cfg.maxSpeak ?? (bolumId === 'ses' ? 3 : bolumId === 'ceviri' ? 2 : 1);
-        const speakGap = cfg.speakGap ?? (bolumId === 'ses' ? 2 : 3);
         const types = [];
         let ci = 0;
-        let speakCount = 0;
-        let sinceSpeak = speakGap;
 
         while (types.length < sessionSize) {
             let next = normalizeSessionType(cycle[ci % cycle.length], cfg, bolumId);
             ci += 1;
-
-            if (next === 'speak') {
-                const canSpeak = speakCount < maxSpeak && sinceSpeak >= speakGap;
-                if (!canSpeak) next = fallbackType(bolumId, cfg);
-            }
-
-            if (next === 'speak') {
-                speakCount += 1;
-                sinceSpeak = 0;
-            } else {
-                sinceSpeak += 1;
-            }
-
             types.push(next);
-        }
-
-        for (let i = 1; i < types.length; i++) {
-            if (types[i] === 'speak' && types[i - 1] === 'speak') {
-                for (let j = i + 1; j < types.length; j++) {
-                    if (types[j] !== 'speak') {
-                        const swap = types[j];
-                        types[j] = types[i];
-                        types[i] = swap;
-                        break;
-                    }
-                }
-            }
         }
 
         if (bolumId === 'kelimeler' || bolumId === 'harfler' || bolumId === 'eslestirme') {
@@ -1004,14 +1234,14 @@
     function validateQuestionBank() {
         const osmMap = new Map();
         const trMap = new Map();
-        WORDS.forEach((w) => {
+        CORE_WORDS.forEach((w) => {
             if (osmMap.has(w.osm)) throw new Error(`Kart osm tekrarı: ${w.osm}`);
             if (trMap.has(w.tr)) throw new Error(`Türkçe tekrarı: ${w.tr}`);
             osmMap.set(w.osm, w.tr);
             trMap.set(w.tr, w.osm);
         });
 
-        WORDS.forEach((w) => {
+        CORE_WORDS.forEach((w) => {
             const card = mkCard(w);
             if (!card.options.includes(card.answer)) throw new Error(`Cevap yok: ${w.osm}`);
             if (card.options.length !== 4) throw new Error(`4 şık yok: ${w.osm}`);
@@ -1065,27 +1295,60 @@
 
     validateQuestionBank();
 
-    window.LISANI_POOLS = {
-        card: WORDS.map(mkCard),
+    let matchPoolCache = null;
+    function getMatchPool() {
+        if (!matchPoolCache) matchPoolCache = buildMatchPool();
+        return matchPoolCache;
+    }
+
+    const pools = {
+        card: WORDS,
         letter: LETTERS.map(mkLetter),
-        speak: SPEAK_ITEMS.map(mkSpeak),
         tiles: TILE_PHRASES_OSM.map(mkTiles),
         grammar: GRAMMAR_ITEMS.map(mkGrammar),
+        speak: WORDS.filter((w) => w.hint),
+    };
+    Object.defineProperty(pools, 'match', {
+        enumerable: true,
+        get() {
+            return getMatchPool();
+        },
+    });
+    window.LISANI_POOLS = pools;
+
+    window.LisaniQuizBank = {
+        materializeQuestion(kind, raw) {
+            if (!raw) return null;
+            if (raw.type) return raw;
+            if (kind === 'card') return mkCard(raw);
+            if (kind === 'speak') {
+                return mkSpeak({
+                    word: raw.osm,
+                    hint: raw.hint,
+                    speakMatch: [raw.hint, ...(raw.speakAlt || [])].filter(Boolean),
+                    diff: wordDifficulty(raw),
+                });
+            }
+            return raw;
+        },
+        getWordCount() {
+            return WORDS.length;
+        },
     };
 
     window.LISANI_MIX_PATTERN = [
-        'card', 'card', 'card', 'letter', 'speak', 'card',
-        'tiles', 'card', 'letter', 'card', 'speak', 'card',
-        'tiles', 'card', 'letter', 'card', 'speak', 'tiles',
+        'card', 'match', 'card', 'letter', 'match', 'card',
+        'tiles', 'card', 'letter', 'match', 'card',
+        'tiles', 'card', 'letter', 'match', 'tiles',
         'card', 'card',
     ];
 
     window.LISANI_STEP_PATTERNS = [
-        ['card', 'letter', 'card', 'speak'],
-        ['letter', 'card', 'tiles', 'card'],
-        ['speak', 'card', 'letter', 'tiles'],
-        ['tiles', 'letter', 'card', 'speak'],
-        ['card', 'tiles', 'speak', 'letter'],
+        ['match', 'letter', 'card', 'match'],
+        ['letter', 'card', 'tiles', 'match'],
+        ['match', 'card', 'letter', 'tiles'],
+        ['tiles', 'letter', 'match', 'card'],
+        ['card', 'tiles', 'match', 'letter'],
     ];
     window.LISANI_QUESTIONS_PER_STEP = 4;
     window.LISANI_BOLUM_STEPS = 5;
@@ -1099,11 +1362,11 @@
     window.LISANI_GRAMMAR_TOPIC_TITLES = GRAMMAR_TOPIC_TITLES;
 
     window.LISANI_BOLUMLER = [
-        { id: 'kelimeler', title: 'Temel', desc: '5 test · harf ve kelime öğren', icon: 'T', color: 1, sessionSize: 5, baseDiff: 1 },
+        { id: 'kelimeler', title: 'Temel', desc: '5 test · eşleştirme ve kelime', icon: 'T', color: 1, sessionSize: 5, baseDiff: 1 },
         { id: 'harfler', title: 'Orta', desc: '5 test · cümle kurma', icon: 'O', color: 2, sessionSize: 8, baseDiff: 2 },
-        { id: 'eslestirme', title: 'İleri', desc: '5 test · eşleştirme, zorlaşır', icon: 'İ', color: 3, sessionSize: 12, baseDiff: 2 },
-        { id: 'ceviri', title: 'Uzman', desc: '5 test · dil bilgisi + ses', icon: 'U', color: 1, sessionSize: 14, baseDiff: 4 },
-        { id: 'ses', title: 'Usta', desc: '5 test · en zor · bilgi kartları', icon: '★', color: 2, sessionSize: 16, baseDiff: 5 },
+        { id: 'eslestirme', title: 'İleri', desc: '5 test · eşleştirme ve cümle', icon: 'İ', color: 3, sessionSize: 12, baseDiff: 2 },
+        { id: 'ceviri', title: 'Uzman', desc: '5 test · dil bilgisi + çeviri', icon: 'U', color: 1, sessionSize: 14, baseDiff: 4 },
+        { id: 'ses', title: 'Usta', desc: '5 test · konuşma + dil bilgisi', icon: '★', color: 2, sessionSize: 16, baseDiff: 5 },
     ];
 
     window.LISANI_GRAMMAR_TOPICS = GRAMMAR_TOPICS;
@@ -1117,10 +1380,12 @@
     window.LISANI_BOLUMLER.forEach((b) => { window.LISANI_QUIZ_BANK[b.id] = []; });
 
     window.LISANI_CARD_PROMPT = CARD;
-    window.LISANI_SPEAK_PROMPT = SPEAK;
+    window.LISANI_MATCH_PROMPT = MATCH;
     window.LISANI_TILES_PROMPT = TILES;
+    window.LISANI_SPEAK_PROMPT = SPEAK;
     window.LISANI_SKIP_SPEAK_LABEL = 'Şuan konuşamam';
     window.LISANI_SPEAK_LISTEN_SEC = 15;
     window.LISANI_CORE_WORDS = CORE_WORDS;
+    window.LISANI_ALL_WORDS = WORDS;
     window.LISANI_TILE_PHRASES_OSM = TILE_PHRASES_OSM;
 })();

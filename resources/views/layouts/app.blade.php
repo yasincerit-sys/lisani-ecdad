@@ -164,6 +164,9 @@
     <script src="{{ asset('js/lisani-gokhan-easter.js') }}?v={{ @filemtime(public_path('js/lisani-gokhan-easter.js')) ?: time() }}" defer></script>
     <script src="{{ asset('js/lisani-native-notifications.js') }}?v={{ @filemtime(public_path('js/lisani-native-notifications.js')) ?: time() }}" defer></script>
     <script src="{{ asset('js/lisani-native-shell.js') }}?v={{ @filemtime(public_path('js/lisani-native-shell.js')) ?: time() }}" defer></script>
+    <script src="{{ asset('js/lisani-osm-vocabulary.js') }}?v={{ @filemtime(public_path('js/lisani-osm-vocabulary.js')) ?: time() }}" defer></script>
+    <script src="{{ asset('js/lisani-semazen-vocabulary.js') }}?v={{ @filemtime(public_path('js/lisani-semazen-vocabulary.js')) ?: time() }}" defer></script>
+    <script src="{{ asset('js/lisani-semazen-quiz-words.js') }}?v={{ @filemtime(public_path('js/lisani-semazen-quiz-words.js')) ?: time() }}" defer></script>
     <script src="{{ asset('js/lisani-quiz-bank.js') }}?v={{ @filemtime(public_path('js/lisani-quiz-bank.js')) ?: time() }}" defer></script>
     <script src="{{ asset('js/lisani-osm-translate.js') }}?v={{ @filemtime(public_path('js/lisani-osm-translate.js')) ?: time() }}" defer></script>
     <script src="{{ asset('js/lisani-grammar-prep.js') }}?v={{ @filemtime(public_path('js/lisani-grammar-prep.js')) ?: time() }}" defer></script>

@@ -18,6 +18,7 @@
     const EXTRA_WORDS = {
         merhaba: 'مرحبا',
         selam: 'سلام',
+        su: 'آب',
         kitap: 'كتاب',
         teşekkürler: 'تشكر',
         tesekkurler: 'تشكر',
@@ -28,8 +29,8 @@
         istiyorum: 'ايستييورم',
         istiyor: 'ايستييور',
         istiyoruz: 'ايستييورز',
-        okuyorum: 'اوكونييورم',
-        okuyor: 'اوكونييور',
+        okuyorum: 'اوقونييورم',
+        okuyor: 'اوقونييور',
         yazıyorum: 'يازييورم',
         yaziyorum: 'يازييور\u0645',
         yazıyor: 'يازييور',
@@ -48,9 +49,9 @@
         akşamlar: 'آخشام',
         aksamlar: 'آخشام',
         geceler: 'گجه لر',
-        geldiniz: 'كلدك',
-        'hoş geldiniz': 'خوش كلدك',
-        'hos geldiniz': 'خوش كلدك',
+        'hoş geldiniz': 'خوش گلدينيز',
+        'hos geldiniz': 'خوش گلدينيز',
+        geldiniz: 'گلدينيز',
         güle: 'گله',
         gule: 'گله',
         teşekkür: 'تشكر',
@@ -80,8 +81,17 @@
         aleykum: 'عليكم',
         öğrenciyim: 'طالبم',
         ogrenciyim: 'طالبم',
-        vatanımı: 'وطن',
-        vatanimi: 'وطن',
+        vatanımı: 'وطنمى',
+        vatanimi: 'وطنمى',
+        ve: 'و',
+        el: 'ال',
+        nur: 'نور',
+        din: 'دين',
+        hoş: 'خوش',
+        hos: 'خوش',
+        ya: 'يا',
+        'günaydın ya dost': 'گوناي دين يا دوست',
+        'gunaydin ya dost': 'گوناي دين يا دوست',
         nurdur: 'نور',
         sabırla: 'صبر',
         sabirla: 'صبر',
@@ -263,7 +273,12 @@
     function buildOsmDictionary() {
         Object.entries(EXTRA_WORDS).forEach(([tr, ar]) => registerWord(tr, ar));
 
-        const core = window.LISANI_CORE_WORDS;
+        const vocab = window.LISANI_OSM_VOCABULARY;
+        if (vocab && typeof vocab === 'object') {
+            Object.entries(vocab).forEach(([tr, ar]) => registerWord(tr, ar));
+        }
+
+        const core = window.LISANI_ALL_WORDS || window.LISANI_CORE_WORDS;
         if (Array.isArray(core)) {
             core.forEach((w) => {
                 if (!w || !w.osm) return;
@@ -281,7 +296,13 @@
             });
         }
 
+        const semazen = window.LISANI_SEMAZEN_VOCABULARY;
+        if (semazen && typeof semazen === 'object') {
+            Object.entries(semazen).forEach(([tr, ar]) => registerWord(tr, ar));
+        }
+
         rebuildIndexes();
+        window.LISANI_OSM_WORD_COUNT = SORTED_WORD_KEYS.length;
     }
 
     function rebuildIndexes() {
@@ -299,7 +320,7 @@
     function ensureOsmDictionary() {
         const coreReady = Array.isArray(window.LISANI_CORE_WORDS) && window.LISANI_CORE_WORDS.length > 0;
         const needsRebuild =
-            SORTED_WORD_KEYS.length < 80 || (coreReady && !OSM_WORDS.merhaba);
+            SORTED_WORD_KEYS.length < 200 || (coreReady && !OSM_WORDS.merhaba);
         if (needsRebuild) buildOsmDictionary();
     }
 
