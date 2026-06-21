@@ -16,7 +16,7 @@ class AiBotRegistry
             'email' => 'bot.elif@lisaniecdad.app',
             'avatar_file' => 'istanbul/ayasofya.svg',
             'slug' => 'elif',
-            'total_xp' => 420,
+            'total_xp' => 21000,
             'avg_success' => 88,
             'tests' => [
                 ['date' => '05.06.2026', 'level' => 1, 'test' => 'Elifbası', 'correct' => 5, 'wrong' => 0, 'percent' => 100],
@@ -31,7 +31,7 @@ class AiBotRegistry
             'email' => 'bot.lugat@lisaniecdad.app',
             'avatar_file' => 'istanbul/galata.svg',
             'slug' => 'lugat',
-            'total_xp' => 380,
+            'total_xp' => 16000,
             'avg_success' => 76,
             'tests' => [
                 ['date' => '06.06.2026', 'level' => 2, 'test' => 'Kelime 1', 'correct' => 4, 'wrong' => 1, 'percent' => 80],
@@ -45,7 +45,7 @@ class AiBotRegistry
             'email' => 'bot.tercume@lisaniecdad.app',
             'avatar_file' => 'istanbul/kiz-kulesi.svg',
             'slug' => 'tercume',
-            'total_xp' => 510,
+            'total_xp' => 22000,
             'avg_success' => 84,
             'tests' => [
                 ['date' => '07.06.2026', 'level' => 3, 'test' => 'Tercüme 1', 'correct' => 5, 'wrong' => 0, 'percent' => 100],
@@ -60,7 +60,7 @@ class AiBotRegistry
             'email' => 'bot.hikmet@lisaniecdad.app',
             'avatar_file' => 'saray-kavvesi.svg',
             'slug' => 'hikmet',
-            'total_xp' => 290,
+            'total_xp' => 11500,
             'avg_success' => 72,
             'tests' => [
                 ['date' => '06.06.2026', 'level' => 1, 'test' => 'Genel', 'correct' => 4, 'wrong' => 1, 'percent' => 80],
@@ -74,7 +74,7 @@ class AiBotRegistry
             'email' => 'bot.mehmet@lisaniecdad.app',
             'avatar_file' => 'istanbul/bogaz.svg',
             'slug' => 'mehmet',
-            'total_xp' => 340,
+            'total_xp' => 13000,
             'avg_success' => 82,
             'tests' => [
                 ['date' => '07.06.2026', 'level' => 2, 'test' => 'Test 1', 'correct' => 4, 'wrong' => 1, 'percent' => 80],
@@ -87,7 +87,7 @@ class AiBotRegistry
             'email' => 'bot.ayse@lisaniecdad.app',
             'avatar_file' => 'istanbul/balat.svg',
             'slug' => 'ayse',
-            'total_xp' => 450,
+            'total_xp' => 19000,
             'avg_success' => 86,
             'tests' => [
                 ['date' => '07.06.2026', 'level' => 3, 'test' => 'Test 1', 'correct' => 5, 'wrong' => 0, 'percent' => 100],
@@ -101,7 +101,7 @@ class AiBotRegistry
             'email' => 'bot.zeynep@lisaniecdad.app',
             'avatar_file' => 'istanbul/gunbatimi.svg',
             'slug' => 'zeynep',
-            'total_xp' => 520,
+            'total_xp' => 24000,
             'avg_success' => 90,
             'tests' => [
                 ['date' => '07.06.2026', 'level' => 3, 'test' => 'Genel', 'correct' => 5, 'wrong' => 0, 'percent' => 100],
@@ -114,7 +114,7 @@ class AiBotRegistry
             'email' => 'bot.can@lisaniecdad.app',
             'avatar_file' => 'istanbul/kopru.svg',
             'slug' => 'can',
-            'total_xp' => 280,
+            'total_xp' => 10000,
             'avg_success' => 70,
             'tests' => [
                 ['date' => '06.06.2026', 'level' => 1, 'test' => 'Test 1', 'correct' => 3, 'wrong' => 2, 'percent' => 60],
@@ -126,7 +126,7 @@ class AiBotRegistry
             'email' => 'bot.ece@lisaniecdad.app',
             'avatar_file' => 'istanbul/camii.svg',
             'slug' => 'ece',
-            'total_xp' => 360,
+            'total_xp' => 15000,
             'avg_success' => 78,
             'tests' => [
                 ['date' => '07.06.2026', 'level' => 2, 'test' => 'Test 3', 'correct' => 4, 'wrong' => 1, 'percent' => 80],
@@ -139,7 +139,7 @@ class AiBotRegistry
             'email' => 'bot.burak@lisaniecdad.app',
             'avatar_file' => 'istanbul/eminonu.svg',
             'slug' => 'burak',
-            'total_xp' => 410,
+            'total_xp' => 17500,
             'avg_success' => 83,
             'tests' => [
                 ['date' => '07.06.2026', 'level' => 2, 'test' => 'Genel', 'correct' => 4, 'wrong' => 1, 'percent' => 80],
@@ -152,7 +152,7 @@ class AiBotRegistry
             'email' => 'bot.selin@lisaniecdad.app',
             'avatar_file' => 'istanbul/panorama.svg',
             'slug' => 'selin',
-            'total_xp' => 330,
+            'total_xp' => 12000,
             'avg_success' => 74,
             'tests' => [
                 ['date' => '06.06.2026', 'level' => 1, 'test' => 'Test 3', 'correct' => 4, 'wrong' => 1, 'percent' => 80],
@@ -164,7 +164,7 @@ class AiBotRegistry
             'email' => 'bot.emre@lisaniecdad.app',
             'avatar_file' => 'istanbul/sokak.svg',
             'slug' => 'emre',
-            'total_xp' => 470,
+            'total_xp' => 20000,
             'avg_success' => 85,
             'tests' => [
                 ['date' => '07.06.2026', 'level' => 3, 'test' => 'Test 1', 'correct' => 5, 'wrong' => 0, 'percent' => 100],
@@ -177,7 +177,7 @@ class AiBotRegistry
             'email' => 'bot.deniz@lisaniecdad.app',
             'avatar_file' => 'besiktas.svg',
             'slug' => 'deniz',
-            'total_xp' => 300,
+            'total_xp' => 11000,
             'avg_success' => 68,
             'tests' => [
                 ['date' => '06.06.2026', 'level' => 1, 'test' => 'Test 1', 'correct' => 3, 'wrong' => 2, 'percent' => 60],
@@ -189,7 +189,7 @@ class AiBotRegistry
             'email' => 'bot.fatma@lisaniecdad.app',
             'avatar_file' => 'bursaspor.svg',
             'slug' => 'fatma',
-            'total_xp' => 390,
+            'total_xp' => 17000,
             'avg_success' => 80,
             'tests' => [
                 ['date' => '07.06.2026', 'level' => 2, 'test' => 'Test 1', 'correct' => 4, 'wrong' => 1, 'percent' => 80],
@@ -202,7 +202,7 @@ class AiBotRegistry
             'email' => 'bot.ali@lisaniecdad.app',
             'avatar_file' => 'goztepe.svg',
             'slug' => 'ali',
-            'total_xp' => 440,
+            'total_xp' => 18000,
             'avg_success' => 87,
             'tests' => [
                 ['date' => '07.06.2026', 'level' => 3, 'test' => 'Test 2', 'correct' => 5, 'wrong' => 0, 'percent' => 100],
@@ -215,7 +215,7 @@ class AiBotRegistry
             'email' => 'bot.seda@lisaniecdad.app',
             'avatar_file' => 'eskisehirspor.svg',
             'slug' => 'seda',
-            'total_xp' => 350,
+            'total_xp' => 14000,
             'avg_success' => 75,
             'tests' => [
                 ['date' => '06.06.2026', 'level' => 2, 'test' => 'Test 2', 'correct' => 3, 'wrong' => 2, 'percent' => 60],

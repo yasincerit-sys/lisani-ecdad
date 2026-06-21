@@ -1592,6 +1592,18 @@ html.preline-ui[class*="theme-"] .theme-pick-btn.is-active {
     background: var(--theme-light-bg, rgba(255, 255, 255, 0.04));
 }
 
+.lisani-osm-translate-result.lisani-osm-result--miss,
+#home-osm-translate-result.lisani-osm-result--miss {
+    border-color: rgba(251, 191, 36, 0.35);
+}
+
+.lisani-osm-result--miss.lisani-osm-translate-result #osm-translate-main,
+#home-osm-translate-result.lisani-osm-result--miss #home-osm-translate-main {
+    font-family: inherit;
+    font-size: 0.95rem;
+    line-height: 1.45;
+}
+
 .lisani-osm-translate-result {
     background: var(--theme-light-bg, rgba(255, 255, 255, 0.04));
 }
@@ -6043,4 +6055,51 @@ html.preline-ui.theme-beyaz-cam .lisani-shell-foot-btn {
         background: var(--lisani-beyaz-cam-bg) !important;
         background-color: transparent !important;
     }
+}
+
+/* Test canları + uygulama değerlendirme */
+.lisani-quiz-lives {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+}
+
+.lisani-life-heart {
+    font-size: 11px;
+    line-height: 1;
+    color: rgba(255, 255, 255, 0.25);
+}
+
+.lisani-life-heart.is-full {
+    color: #f87171;
+}
+
+.lisani-star-rating {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.lisani-star-btn {
+    appearance: none;
+    border: none;
+    background: transparent;
+    font-size: 26px;
+    line-height: 1;
+    cursor: pointer;
+    color: rgba(255, 255, 255, 0.28);
+    padding: 2px;
+    transition: transform 0.12s ease, color 0.12s ease;
+}
+
+.lisani-star-btn.is-active {
+    color: #fbbf24;
+}
+
+.lisani-star-btn:active {
+    transform: scale(1.12);
+}
+
+#app-rating-modal .lisani-star-btn {
+    font-size: 32px;
 }

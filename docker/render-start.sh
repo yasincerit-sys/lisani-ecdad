@@ -9,6 +9,7 @@ fi
 
 php artisan config:clear
 php artisan migrate --force
+php artisan lisani:sync-preset-accounts || true
 
 if [ "${RUN_SEED:-false}" = "true" ]; then
     php artisan db:seed --force || true

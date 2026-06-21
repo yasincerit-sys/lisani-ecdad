@@ -30,6 +30,14 @@
         return {};
     }
 
+    function formatLbXp(xp) {
+        const n = Math.max(0, Number(xp) || 0);
+        if (typeof window.formatLisaniXp === 'function') {
+            return `${window.formatLisaniXp(n)} XP`;
+        }
+        return `${new Intl.NumberFormat('tr-TR').format(n)} XP`;
+    }
+
     function applyCsrfToken(token) {
         if (!token) return;
         const meta = document.querySelector('meta[name="csrf-token"]');
@@ -76,6 +84,9 @@
                     window._loginDone = false;
                 }
                 throw new Error('Oturumunuz yok veya süresi doldu. Lütfen tekrar giriş yapın.');
+            }
+            if (res.status === 503 && (data.error === 'maintenance' || data.message)) {
+                throw new Error(data.message || 'Uygulama geçici olarak kapalı.');
             }
             if (res.status === 404) {
                 throw new Error('İstek bulunamadı (404). Site adresini kontrol edin veya sayfayı yenileyin.');
@@ -190,6 +201,11 @@
             return;
         }
 
+        if (typeof window.clearUserLoggedOutFlag === 'function') {
+            window.clearUserLoggedOutFlag();
+        }
+        window._manualLogout = false;
+
         showLoading('Giriş yapılıyor...');
         try {
             const data = await apiFetch('/api/login', {
@@ -271,14 +287,14 @@
                     avatar:
                         typeof window.serializeAvatarForSave === 'function'
                             ? window.serializeAvatarForSave(
-                                  typeof selectedAvatarValue !== 'undefined'
-                                      ? selectedAvatarValue
+                                  typeof window.getSelectedAvatarValue === 'function'
+                                      ? window.getSelectedAvatarValue()
                                       : typeof window.DEFAULT_AVATAR !== 'undefined'
                                         ? window.DEFAULT_AVATAR
                                         : ''
                               )
-                            : typeof selectedAvatarValue !== 'undefined'
-                              ? selectedAvatarValue
+                            : typeof window.getSelectedAvatarValue === 'function'
+                              ? window.getSelectedAvatarValue()
                               : typeof window.DEFAULT_AVATAR !== 'undefined'
                                 ? window.DEFAULT_AVATAR
                                 : '',
@@ -741,7 +757,7 @@
                                 <div class="h-full rounded-full bg-gradient-to-r from-amber-600 to-amber-400" style="width:${barW}%"></div>
                             </div>
                             <div class="flex flex-wrap gap-x-3 gap-y-1 mt-2 text-[9px] font-bold">
-                                <span class="text-amber-400">${o.totalXp || 0} XP</span>
+                                <span class="text-amber-400">${formatLbXp(o.totalXp)}</span>
                                 <span class="theme-text-muted">${o.testsCount || 0} sınav</span>
                                 <span class="text-emerald-400">%${o.avgSuccess || 0} ort.</span>
                                 <span class="text-emerald-400">✓ ${analiz.toplamDogru ?? 0}</span>
@@ -1157,7 +1173,9 @@
         const nameInput = document.getElementById('edit-profile-username').value.trim();
         const emailInput = document.getElementById('edit-profile-email').value.trim();
         const rawAvatar =
-            typeof editAvatarValue !== 'undefined' ? editAvatarValue : currentUser?.avatar || '🐱';
+            typeof window.getEditAvatarValue === 'function'
+                ? window.getEditAvatarValue()
+                : currentUser?.avatar || '🐱';
         const avatar =
             typeof window.serializeAvatarForSave === 'function'
                 ? window.serializeAvatarForSave(rawAvatar)
@@ -1394,7 +1412,7 @@
                 <p class="text-[11px] font-bold theme-text-main truncate">${entry.name}${isMe ? ' <span class="text-[9px] theme-primary-color">(Sen)</span>' : ''}</p>
                 <p class="text-[9px] theme-text-muted">${entry.testsCount || 0} sınav · %${entry.avgSuccess || 0} ort.</p>
             </div>
-            <span class="text-[11px] font-black text-amber-400 shrink-0">${entry.totalXp || 0} XP</span>
+            <span class="text-[11px] font-black text-amber-400 shrink-0 text-right leading-tight">${formatLbXp(entry.totalXp)}</span>
         `;
         const avatarSlot = row.querySelector('[data-lb-avatar]');
         if (avatarSlot && typeof window.applyAvatarToContainer === 'function') {
@@ -1856,7 +1874,7 @@
                             <div class="h-full rounded-full" style="width:${barW}%;background:linear-gradient(90deg,#7c5cfc,#e056a0)"></div>
                         </div>
                         <div class="flex flex-wrap gap-x-3 gap-y-1 mt-2 text-[9px] font-bold">
-                            <span style="color:#fbbf24">${o.totalXp || 0} XP</span>
+                            <span style="color:#fbbf24">${formatLbXp(o.totalXp)}</span>
                             <span class="hoca-dash__recent-meta">${o.testsCount || 0} sınav</span>
                             <span style="color:#34d399">✓ ${analiz.toplamDogru ?? 0}</span>
                             <span style="color:#f87171">✗ ${analiz.toplamYanlis ?? 0}</span>

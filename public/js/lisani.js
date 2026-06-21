@@ -5,6 +5,12 @@
         let totalScore = 0;
         window._lisaniServerStats = null;
 
+        const LISANI_XP_PER_CORRECT = 500;
+
+        window.formatLisaniXp = function (xp) {
+            return new Intl.NumberFormat('tr-TR').format(Math.max(0, Number(xp) || 0));
+        };
+
         window.getLisaniProgress = function () {
             return {
                 testHistory: testHistory.slice(),
@@ -229,6 +235,8 @@
         let activeQuestionIndex = 0;
         let activeCorrects = 0;
         let activeWrongs = 0;
+        let activeLives = 3;
+        const TEST_LIVES_MAX = 3;
         let activeWrongQuestions = [];
         let lastTestWrongQuestions = [];
         let isWrongReviewSession = false;
@@ -596,7 +604,14 @@
         }
 
         function serializeAvatarForSave(value) {
-            if (isCustomPhotoAvatar(value)) return value;
+            if (typeof value === 'string' && (value.startsWith('team:') || value.startsWith('photo:'))) {
+                return value;
+            }
+            if (isCustomPhotoAvatar(value)) {
+                const storageMatch = value.match(/\/storage\/(avatars\/[^"?]+)/i);
+                if (storageMatch) return `photo:${storageMatch[1]}`;
+                return value;
+            }
             const file = extractAvatarSvgPath(value);
             if (file) return `team:${file}`;
             return value;
@@ -794,6 +809,16 @@
         let selectedAvatarValue = DEFAULT_AVATAR;
         let editAvatarValue = DEFAULT_AVATAR;
 
+        window.getSelectedAvatarValue = function () {
+            return selectedAvatarValue;
+        };
+        window.getEditAvatarValue = function () {
+            return editAvatarValue;
+        };
+        window.setEditAvatarValue = function (value) {
+            editAvatarValue = value || DEFAULT_AVATAR;
+        };
+
         let registeredUsers = {
             'ahmet': {
                 name: 'Ahmet',
@@ -947,7 +972,10 @@
             }
 
             avgSuccessEl.innerText = `%${avgSuccess}`;
-            totalXpEl.innerText = totalScore || server?.total_xp || 0;
+            const xpVal = totalScore || server?.total_xp || 0;
+            totalXpEl.innerText =
+                typeof window.formatLisaniXp === 'function' ? window.formatLisaniXp(xpVal) : xpVal;
+            totalXpEl.removeAttribute('title');
         }
 
         function triggerEditAvatarUpload() {
@@ -2092,6 +2120,63 @@
             return runQuizSession(bolumId, stepIndex);
         }
 
+        function usesTestLives() {
+            return !isGrammarDrillSession && !isWrongReviewSession;
+        }
+
+        function resetTestLives() {
+            activeLives = TEST_LIVES_MAX;
+            updateQuizLivesUI();
+        }
+
+        function updateQuizLivesUI() {
+            const el = document.getElementById('quiz-lives-display');
+            if (!el) return;
+            if (!usesTestLives()) {
+                el.classList.add('hidden');
+                el.innerHTML = '';
+                return;
+            }
+            el.classList.remove('hidden');
+            const parts = [];
+            for (let i = 0; i < TEST_LIVES_MAX; i++) {
+                parts.push(
+                    `<span class="lisani-life-heart${i < activeLives ? ' is-full' : ' is-empty'}" aria-hidden="true">${i < activeLives ? '♥' : '♡'}</span>`
+                );
+            }
+            el.innerHTML = parts.join('');
+            el.setAttribute('aria-label', `${activeLives} can kaldı`);
+        }
+
+        function registerQuizWrong() {
+            activeWrongs++;
+            if (usesTestLives()) {
+                activeLives = Math.max(0, activeLives - 1);
+                updateQuizLivesUI();
+            }
+            recordWrongQuestion(activeQuizQuestions[activeQuestionIndex]);
+        }
+
+        function eliminateFromTest() {
+            if (quizAdvanceTimer) {
+                clearTimeout(quizAdvanceTimer);
+                quizAdvanceTimer = null;
+            }
+            pendingStepCompletion = false;
+            stopSpeechListening();
+            lastTestSummary = {
+                correct: activeCorrects,
+                wrong: activeWrongs,
+                percent: Math.round((activeCorrects / Math.max(1, activeQuizQuestions.length)) * 100),
+                eliminated: true,
+            };
+            lastTestWrongQuestions = activeWrongQuestions.map((q) => JSON.parse(JSON.stringify(q)));
+            showQuizResultPanel(false, true);
+            setTestsSubview('result');
+            renderBolumList(activeBolumId);
+            if (typeof maybePromptAppRating === 'function') maybePromptAppRating();
+        }
+
         function runQuizSession(bolumId, stepIndex = 0) {
             const meta = getBolumMeta(bolumId);
             playClickSound();
@@ -2103,6 +2188,7 @@
             activeQuestionIndex = 0;
             activeCorrects = 0;
             activeWrongs = 0;
+            resetTestLives();
             activeWrongQuestions = [];
             isWrongReviewSession = false;
             pendingStepCompletion = false;
@@ -2130,6 +2216,7 @@
             if (typeof switchTab === 'function') switchTab('tests', true, true);
             currentActiveScreen = 'tests';
             renderQuizQuestion();
+            updateQuizLivesUI();
             if (typeof updateTestsTabForRole === 'function') updateTestsTabForRole();
             requestAnimationFrame(() => {
                 document.getElementById('quiz-active-view')?.scrollIntoView({ block: 'start', behavior: 'auto' });
@@ -2154,6 +2241,7 @@
             activeQuestionIndex = 0;
             activeCorrects = 0;
             activeWrongs = 0;
+            resetTestLives();
             activeWrongQuestions = [];
             pendingStepCompletion = false;
             activeSessionQuestionKeys = [];
@@ -2499,6 +2587,10 @@
             const delay = isCorrect ? 900 : showedLearn ? 4500 : 1100;
             quizAdvanceTimer = setTimeout(() => {
                 quizAdvanceTimer = null;
+                if (!isCorrect && usesTestLives() && activeLives <= 0) {
+                    eliminateFromTest();
+                    return;
+                }
                 activeQuestionIndex++;
                 if (activeQuestionIndex < activeQuizQuestions.length) {
                     renderQuizQuestion();
@@ -3180,13 +3272,12 @@
             }
             if (isCorrect) {
                 activeCorrects++;
-                totalScore += 10;
+                totalScore += LISANI_XP_PER_CORRECT;
                 updateUIPoints();
                 updateLearningStats();
                 if (window.LisaniDailyTasks?.onQuizCorrect) window.LisaniDailyTasks.onQuizCorrect();
             } else {
-                activeWrongs++;
-                recordWrongQuestion(activeQuizQuestions[activeQuestionIndex]);
+                registerQuizWrong();
             }
             scheduleQuizAdvance(isCorrect, feedbackMsg);
         }
@@ -3222,15 +3313,14 @@
                 btn.className =
                     'lisani-quiz-option lisani-quiz-option--correct w-full py-3 px-3.5 rounded-xl text-xs font-black transition-all text-left flex items-center gap-3';
                 activeCorrects++;
-                totalScore += 10;
+                totalScore += LISANI_XP_PER_CORRECT;
                 updateUIPoints();
                 updateLearningStats();
                 if (window.LisaniDailyTasks?.onQuizCorrect) window.LisaniDailyTasks.onQuizCorrect();
             } else {
                 btn.className =
                     'lisani-quiz-option lisani-quiz-option--wrong w-full py-3 px-3.5 rounded-xl text-xs font-black transition-all text-left flex items-center gap-3';
-                activeWrongs++;
-                recordWrongQuestion(activeQuizQuestions[activeQuestionIndex]);
+                registerQuizWrong();
             }
 
             scheduleQuizAdvance(
@@ -3382,19 +3472,21 @@
             proceedAfterStepTest(wasBolumCompleteBefore);
         }
 
-        function showQuizResultPanel(fromReview = false) {
+        function showQuizResultPanel(fromReview = false, eliminated = false) {
             const successPercent = lastTestSummary.percent ?? 0;
+            const wasEliminated = eliminated || lastTestSummary.eliminated;
 
             document.getElementById('result-correct-count').innerText = String(lastTestSummary.correct ?? 0);
             document.getElementById('result-wrong-count').innerText = String(lastTestSummary.wrong ?? 0);
 
             const pctEl = document.getElementById('result-percent');
-            pctEl.innerText = `%${successPercent}`;
+            pctEl.innerText = wasEliminated ? '—' : `%${successPercent}`;
 
             const ringFill = document.getElementById('result-score-ring-fill');
             if (ringFill) {
                 const circumference = 2 * Math.PI * 42;
-                const offset = circumference - (successPercent / 100) * circumference;
+                const pctForRing = wasEliminated ? 0 : successPercent;
+                const offset = circumference - (pctForRing / 100) * circumference;
                 ringFill.style.strokeDasharray = `${circumference}`;
                 ringFill.style.strokeDashoffset = `${offset}`;
             }
@@ -3402,7 +3494,10 @@
             const scoreRing = document.getElementById('result-score-ring');
             if (scoreRing) {
                 scoreRing.classList.remove('is-good', 'is-mid', 'is-low');
-                if (successPercent >= 80) {
+                if (wasEliminated) {
+                    scoreRing.classList.add('is-low');
+                    pctEl.className = 'lisani-quiz-score-ring__pct text-red-400';
+                } else if (successPercent >= 80) {
                     scoreRing.classList.add('is-good');
                     pctEl.className = 'lisani-quiz-score-ring__pct text-emerald-400';
                 } else if (successPercent >= 60) {
@@ -3416,15 +3511,16 @@
 
             const subtitle = document.getElementById('quiz-result-subtitle');
             if (subtitle) {
-                subtitle.textContent =
-                    successPercent === 100
-                        ? 'Tam puan! Sonuç kaydedildi'
-                        : 'Sonucun gelişim grafiğine kaydedildi';
+                subtitle.textContent = wasEliminated
+                    ? '3 yanlış cevap — bu testten elendin. Tekrar dene!'
+                    : successPercent === 100
+                      ? 'Tam puan! Sonuç kaydedildi'
+                      : 'Sonucun gelişim grafiğine kaydedildi';
             }
 
             const retryBtn = document.getElementById('quiz-retry-wrongs-btn');
             if (retryBtn) {
-                const hasWrongs = lastTestWrongQuestions.length > 0;
+                const hasWrongs = !wasEliminated && lastTestWrongQuestions.length > 0;
                 retryBtn.classList.toggle('hidden', !hasWrongs);
                 retryBtn.setAttribute('aria-hidden', hasWrongs ? 'false' : 'true');
                 const label = document.getElementById('quiz-retry-wrongs-label');
@@ -3434,12 +3530,17 @@
             }
 
             setTestsSubview('result');
-            renderProgressChart();
-            renderQuizHistoryList();
-            updateLearningStats();
-            if (typeof window.syncProgressToServer === 'function') window.syncProgressToServer();
-            if (!fromReview) {
+            if (!wasEliminated) {
+                renderProgressChart();
+                renderQuizHistoryList();
+                updateLearningStats();
+                if (typeof window.syncProgressToServer === 'function') window.syncProgressToServer();
+            }
+            if (!fromReview && !wasEliminated) {
                 showToast('Sınav tamamlandı! Sonuçlar grafiğe eklendi.', 'success');
+            }
+            if (!wasEliminated && typeof maybePromptAppRating === 'function') {
+                maybePromptAppRating();
             }
             if (typeof lucide !== 'undefined') lucide.createIcons();
         }
@@ -3455,6 +3556,7 @@
             activeQuestionIndex = 0;
             activeCorrects = 0;
             activeWrongs = 0;
+            resetTestLives();
             activeWrongQuestions = [];
             if (quizAdvanceTimer) clearTimeout(quizAdvanceTimer);
             quizAdvanceTimer = null;
@@ -4388,8 +4490,13 @@
         function updateUIPoints() {
             const ptsHome = document.getElementById('total-xp-display-home');
             const scoreDisplay = document.getElementById('home-score-display');
-            if (ptsHome) ptsHome.innerText = `${totalScore} XP`;
-            if (scoreDisplay) scoreDisplay.innerHTML = `<i data-lucide="zap" class="w-3.5 h-3.5 fill-current text-amber-500"></i><span>${totalScore} XP</span>`;
+            const xpText =
+                typeof window.formatLisaniXp === 'function'
+                    ? `${window.formatLisaniXp(totalScore)} XP`
+                    : `${totalScore} XP`;
+            if (ptsHome) ptsHome.innerText = xpText;
+            if (scoreDisplay)
+                scoreDisplay.innerHTML = `<i data-lucide="zap" class="w-3.5 h-3.5 fill-current text-amber-500"></i><span>${xpText}</span>`;
             lucide.createIcons();
         }
 
@@ -6549,6 +6656,94 @@ self.addEventListener('notificationclick', e => {
             }
         }
 
+        // --- UYGULAMA DEĞERLENDİRME (5 yıldız) ---
+        const APP_RATING_KEY = 'lisani_app_rating';
+        const APP_RATING_PROMPT_KEY = 'lisani_app_rating_prompted';
+
+        function renderAppRatingStars(container, selected, interactive) {
+            if (!container) return;
+            container.innerHTML = '';
+            for (let n = 1; n <= 5; n++) {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'lisani-star-btn' + (n <= selected ? ' is-active' : '');
+                btn.setAttribute('aria-label', `${n} yıldız`);
+                btn.textContent = n <= selected ? '★' : '☆';
+                if (interactive) {
+                    btn.onclick = () => setAppRating(n);
+                    btn.onmouseenter = () => highlightStars(container, n);
+                    btn.onmouseleave = () => highlightStars(container, selected);
+                }
+                container.appendChild(btn);
+            }
+        }
+
+        function highlightStars(container, count) {
+            container.querySelectorAll('.lisani-star-btn').forEach((btn, idx) => {
+                const n = idx + 1;
+                btn.classList.toggle('is-active', n <= count);
+                btn.textContent = n <= count ? '★' : '☆';
+            });
+        }
+
+        function getAppRating() {
+            try {
+                return parseInt(localStorage.getItem(APP_RATING_KEY) || '0', 10) || 0;
+            } catch (e) {
+                return 0;
+            }
+        }
+
+        function setAppRating(stars) {
+            const value = Math.max(1, Math.min(5, stars));
+            try {
+                localStorage.setItem(APP_RATING_KEY, String(value));
+            } catch (e) {}
+            const settingsStars = document.getElementById('app-rating-stars');
+            renderAppRatingStars(settingsStars, value, true);
+            const thanks = document.getElementById('app-rating-thanks');
+            if (thanks) {
+                thanks.classList.remove('hidden');
+                thanks.textContent = `Teşekkürler! ${value}/5 ⭐`;
+            }
+            const modal = document.getElementById('app-rating-modal');
+            if (modal) modal.classList.add('hidden');
+            if (typeof playClickSound === 'function') playClickSound();
+            if (typeof showToast === 'function') {
+                showToast(`Değerlendirmen kaydedildi: ${value}/5`, 'success');
+            }
+        }
+        window.setAppRating = setAppRating;
+
+        function initAppRatingUI() {
+            const settingsStars = document.getElementById('app-rating-stars');
+            const rating = getAppRating();
+            renderAppRatingStars(settingsStars, rating, true);
+            const thanks = document.getElementById('app-rating-thanks');
+            if (thanks && rating > 0) {
+                thanks.classList.remove('hidden');
+                thanks.textContent = `Puanın: ${rating}/5 ⭐`;
+            }
+            const modalStars = document.getElementById('app-rating-modal-stars');
+            renderAppRatingStars(modalStars, 0, true);
+        }
+
+        function maybePromptAppRating() {
+            if (getAppRating() > 0) return;
+            try {
+                if (localStorage.getItem(APP_RATING_PROMPT_KEY) === '1') return;
+                localStorage.setItem(APP_RATING_PROMPT_KEY, '1');
+            } catch (e) {}
+            const modal = document.getElementById('app-rating-modal');
+            if (modal) modal.classList.remove('hidden');
+        }
+        window.maybePromptAppRating = maybePromptAppRating;
+
+        window.closeAppRatingModal = function () {
+            const modal = document.getElementById('app-rating-modal');
+            if (modal) modal.classList.add('hidden');
+        };
+
         // --- BAŞLANGIÇ KURULUMLARI ---
         window.onload = function() {
             try {
@@ -6574,6 +6769,7 @@ self.addEventListener('notificationclick', e => {
             initDesktopWheelScroll();
             initToastSwipe();
             initRememberMeCheckbox();
+            initAppRatingUI();
 
             initDailyHadis();
 

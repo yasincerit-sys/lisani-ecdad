@@ -16,7 +16,13 @@
 
     /** Cümle parçaları ve fiil çekimleri — quiz bankası TILE_PHRASES ile uyumlu */
     const EXTRA_WORDS = {
-        ve: 'و',
+        merhaba: 'مرحبا',
+        selam: 'سلام',
+        kitap: 'كتاب',
+        teşekkürler: 'تشكر',
+        tesekkurler: 'تشكر',
+        dünya: 'دنيا',
+        dunya: 'دنيا',
         bu: 'بو',
         ben: 'بن',
         istiyorum: 'ايستييورم',
@@ -290,6 +296,44 @@
         });
     }
 
+    function ensureOsmDictionary() {
+        const coreReady = Array.isArray(window.LISANI_CORE_WORDS) && window.LISANI_CORE_WORDS.length > 0;
+        const needsRebuild =
+            SORTED_WORD_KEYS.length < 80 || (coreReady && !OSM_WORDS.merhaba);
+        if (needsRebuild) buildOsmDictionary();
+    }
+
+    function isDictionaryMiss(result) {
+        if (!result || !result.main) return true;
+        const main = String(result.main);
+        return (
+            main === 'Bu kelime veya cümle sözlükte yok.' ||
+            main === 'Bu Osmanlıca metin sözlükte bulunamadı.'
+        );
+    }
+
+    function translateInputText(text, opts) {
+        const trimmed = (text || '').trim();
+        if (!trimmed) return null;
+
+        ensureOsmDictionary();
+
+        if (opts && opts.homeWidget) {
+            return isArabicScript(trimmed) ? translateOsmToTr(trimmed) : translateTrToOsm(trimmed);
+        }
+
+        const autoMode = isArabicScript(trimmed) && osmTranslateMode === 'tr-to-osm';
+        return autoMode ? translateOsmToTr(trimmed) : translate(trimmed);
+    }
+
+    function prepareTranslateInput(input) {
+        if (!input) return '';
+        input.disabled = false;
+        input.removeAttribute('readonly');
+        input.removeAttribute('aria-disabled');
+        return input.value.trim();
+    }
+
     function isArabicScript(text) {
         return /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF]/.test(text || '');
     }
@@ -457,10 +501,13 @@
         const noteEl = noteId ? document.getElementById(noteId) : null;
         if (!box || !mainEl || !subEl) return;
 
+        const miss = isDictionaryMiss(result);
+
         mainEl.textContent = result.main;
         mainEl.dir = result.rtl ? 'rtl' : 'ltr';
         mainEl.classList.toggle('arabic-text', result.rtl);
         mainEl.classList.toggle('font-arabic', result.rtl);
+        mainEl.classList.toggle('lisani-osm-result--miss', miss);
 
         subEl.textContent = result.sub ? (result.rtl ? `"${result.sub}"` : result.sub) : '';
         subEl.dir = result.rtl ? 'ltr' : 'rtl';
@@ -468,7 +515,54 @@
         subEl.classList.toggle('hidden', !result.sub);
 
         if (noteEl) noteEl.textContent = result.note || '';
+        box.classList.toggle('lisani-osm-result--miss', miss);
         box.classList.remove('hidden');
+    }
+
+    function runTranslateFlow(input, renderFn, opts) {
+        try {
+            const text = prepareTranslateInput(input);
+            if (!text) {
+                if (typeof showToast === 'function') {
+                    showToast('Lütfen çevrilecek bir metin yazın.', 'error');
+                }
+                return null;
+            }
+
+            const result = translateInputText(text, opts);
+            if (!result || !result.main) {
+                const resultBoxId =
+                    opts && opts.homeWidget ? 'home-osm-translate-result' : 'osm-translate-result';
+                document.getElementById(resultBoxId)?.classList.add('hidden');
+                if (typeof showToast === 'function') {
+                    showToast('Bu metin için çeviri üretilemedi.', 'error');
+                }
+                return null;
+            }
+
+            renderFn(result);
+
+            if (
+                !isDictionaryMiss(result) &&
+                window.LisaniDailyTasks &&
+                typeof window.LisaniDailyTasks.onTranslate === 'function'
+            ) {
+                window.LisaniDailyTasks.onTranslate();
+            }
+
+            if (input && typeof input.focus === 'function') {
+                input.focus({ preventScroll: true });
+            }
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+            return result;
+        } catch (err) {
+            console.error('Osmanlıca çeviri hatası:', err);
+            ensureOsmDictionary();
+            if (typeof showToast === 'function') {
+                showToast('Çeviri sırasında bir hata oluştu. Tekrar deneyin.', 'error');
+            }
+            return null;
+        }
     }
 
     function renderResult(result) {
@@ -480,38 +574,15 @@
     }
 
     buildOsmDictionary();
+    window.rebuildOsmDictionary = buildOsmDictionary;
 
     window.runHomeOsmTranslate = function () {
         if (typeof playClickSound === 'function') playClickSound();
 
         const input = document.getElementById('home-osm-translate-input');
-        const resultBox = document.getElementById('home-osm-translate-result');
-        if (!input || !resultBox) return;
+        if (!input) return;
 
-        const text = input.value.trim();
-        if (!text) {
-            if (typeof showToast === 'function') {
-                showToast('Lütfen çevrilecek bir metin yazın.', 'error');
-            }
-            return;
-        }
-
-        const autoMode = isArabicScript(text) && osmTranslateMode === 'tr-to-osm';
-        const result = autoMode ? translateOsmToTr(text) : translate(text);
-
-        if (!result || !result.main) {
-            resultBox.classList.add('hidden');
-            if (typeof showToast === 'function') {
-                showToast('Bu metin için çeviri üretilemedi.', 'error');
-            }
-            return;
-        }
-
-        renderHomeResult(result);
-        if (window.LisaniDailyTasks && typeof window.LisaniDailyTasks.onTranslate === 'function') {
-            window.LisaniDailyTasks.onTranslate();
-        }
-        if (typeof lucide !== 'undefined') lucide.createIcons();
+        runTranslateFlow(input, renderHomeResult, { homeWidget: true });
     };
 
     window.homeOsmQuickTranslate = function (word) {
@@ -592,39 +663,28 @@
         if (typeof playClickSound === 'function') playClickSound();
 
         const input = document.getElementById('osm-translate-input');
-        const resultBox = document.getElementById('osm-translate-result');
-        if (!input || !resultBox) return;
+        if (!input) return;
 
-        const text = input.value.trim();
-        if (!text) {
-            if (typeof showToast === 'function') {
-                showToast('Lütfen çevrilecek bir metin yazın.', 'error');
-            }
-            return;
-        }
-
-        const autoMode = isArabicScript(text) && osmTranslateMode === 'tr-to-osm';
-        const result = autoMode ? translateOsmToTr(text) : translate(text);
-
-        if (!result || !result.main) {
-            resultBox.classList.add('hidden');
-            if (typeof showToast === 'function') {
-                showToast('Bu metin için çeviri üretilemedi.', 'error');
-            }
-            return;
-        }
-
-        renderResult(result);
-        if (window.LisaniDailyTasks && typeof window.LisaniDailyTasks.onTranslate === 'function') {
-            window.LisaniDailyTasks.onTranslate();
-        }
-        if (typeof lucide !== 'undefined') lucide.createIcons();
+        runTranslateFlow(input, renderResult, null);
     };
+
+    function bindTranslateInputs() {
+        ['osm-translate-input', 'home-osm-translate-input'].forEach((id) => {
+            const el = document.getElementById(id);
+            if (!el || el.dataset.osmBound === '1') return;
+            el.dataset.osmBound = '1';
+            el.addEventListener('input', () => {
+                el.disabled = false;
+                el.removeAttribute('readonly');
+            });
+        });
+    }
 
     document.addEventListener('DOMContentLoaded', function () {
         buildOsmDictionary();
         updateModeButtons();
         updateInputHint();
+        bindTranslateInputs();
         if (typeof lucide !== 'undefined') lucide.createIcons();
     });
 })();

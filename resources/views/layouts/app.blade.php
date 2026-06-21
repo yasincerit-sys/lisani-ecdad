@@ -165,11 +165,11 @@
     <script src="{{ asset('js/lisani-native-notifications.js') }}?v={{ @filemtime(public_path('js/lisani-native-notifications.js')) ?: time() }}" defer></script>
     <script src="{{ asset('js/lisani-native-shell.js') }}?v={{ @filemtime(public_path('js/lisani-native-shell.js')) ?: time() }}" defer></script>
     <script src="{{ asset('js/lisani-quiz-bank.js') }}?v={{ @filemtime(public_path('js/lisani-quiz-bank.js')) ?: time() }}" defer></script>
+    <script src="{{ asset('js/lisani-osm-translate.js') }}?v={{ @filemtime(public_path('js/lisani-osm-translate.js')) ?: time() }}" defer></script>
     <script src="{{ asset('js/lisani-grammar-prep.js') }}?v={{ @filemtime(public_path('js/lisani-grammar-prep.js')) ?: time() }}" defer></script>
     <script src="{{ asset('js/lisani-reward-wheel.js') }}?v={{ @filemtime(public_path('js/lisani-reward-wheel.js')) ?: time() }}" defer></script>
     <script src="{{ asset('js/lisani.js') }}?v={{ @filemtime(public_path('js/lisani.js')) ?: time() }}" defer></script>
     <script src="{{ asset('js/lisani-daily-tasks.js') }}?v={{ @filemtime(public_path('js/lisani-daily-tasks.js')) ?: time() }}" defer></script>
-    <script src="{{ asset('js/lisani-osm-translate.js') }}?v={{ @filemtime(public_path('js/lisani-osm-translate.js')) ?: time() }}" defer></script>
     <script src="{{ asset('js/lisani-laravel.js') }}?v={{ @filemtime(public_path('js/lisani-laravel.js')) ?: time() }}" defer></script>
     <script src="{{ asset('js/lisani-tennis-online.js') }}?v={{ @filemtime(public_path('js/lisani-tennis-online.js')) ?: time() }}" defer></script>
     @if($lisaniShitpost)

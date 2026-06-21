@@ -60,6 +60,8 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
+        \App\Support\PresetSystemAccounts::ensureAll();
+
         AiBotRegistry::ensureBotsExist();
 
         $this->command?->info('');

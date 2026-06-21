@@ -230,7 +230,7 @@
         { osm: 'مدرسه يه گيدييورم', parts: ['okula', 'gidiyorum'], decoys: ['evde', 'okuyorum', 'yazıyorum', 'kitap', 'kalem', 'çay'], diff: 3 },
         { osm: 'وطن سورييورم', parts: ['vatanımı', 'seviyorum'], decoys: ['millet', 'devlet', 'sultan', 'gidiyorum', 'okuyorum', 'yazıyorum'], diff: 3 },
         { osm: 'علم نور', parts: ['ilim', 'nurdur'], decoys: ['hikmet', 'sabır', 'adalet', 'rahmet', 'gidiyorum', 'okuyorum'], diff: 4 },
-        { osm: 'صبر ایله كاپılar آچيلır', parts: ['sabırla', 'kapılar', 'açılır'], decoys: ['ilim', 'hikmet', 'adalet', 'rahmet', 'gidiyorum', 'okuyorum'], diff: 4 },
+        { osm: 'صبر ایله كاپيلر آچيلير', parts: ['sabırla', 'kapılar', 'açılır'], decoys: ['ilim', 'hikmet', 'adalet', 'rahmet', 'gidiyorum', 'okuyorum'], diff: 4 },
         { osm: 'عدالت و رحمت', parts: ['adalet', 've', 'rahmet'], decoys: ['ilim', 'hikmet', 'sabır', 'din', 'iman', 'vatan'], diff: 4 },
         { osm: 'كتاب و قلم', parts: ['kitap', 've', 'kalem'], decoys: ['defter', 'okulda', 'yazıyorum', 'evde', 'gidiyorum', 'deniz'], diff: 2 },
         { osm: 'آنه و بابا ايى', parts: ['anne', 've', 'baba', 'iyi'], decoys: ['kötü', 'ev', 'kapı', 'gidiyorum', 'deniz', 'vatan'], diff: 3 },
@@ -900,8 +900,10 @@
             stepDiffBoost: 1.15,
             tilesPartMin: 4,
             tilesPartMax: 6,
-            typeCycle: ['grammar', 'tiles', 'speak', 'grammar', 'card', 'tiles', 'speak', 'grammar', 'tiles', 'speak', 'card', 'grammar'],
+            typeCycle: ['grammar', 'tiles', 'grammar', 'card', 'tiles', 'grammar', 'tiles', 'grammar', 'card', 'tiles', 'grammar', 'speak'],
             allowLetter: false,
+            maxSpeak: 2,
+            speakGap: 3,
         },
         ses: {
             baseDiff: 5,
@@ -909,29 +911,72 @@
             stepDiffBoost: 1.35,
             tilesPartMin: 5,
             tilesPartMax: 6,
-            typeCycle: ['speak', 'grammar', 'tiles', 'speak', 'grammar', 'speak', 'tiles', 'grammar', 'speak', 'tiles', 'grammar', 'speak'],
+            typeCycle: ['grammar', 'tiles', 'grammar', 'tiles', 'speak', 'grammar', 'tiles', 'grammar', 'tiles', 'speak', 'grammar', 'tiles'],
             allowLetter: false,
+            maxSpeak: 3,
+            speakGap: 2,
         },
     };
 
+    function normalizeSessionType(next, cfg, bolumId) {
+        if (next === 'letter' && cfg.allowLetter === false) return bolumId === 'ceviri' || bolumId === 'ses' ? 'grammar' : 'card';
+        if (next === 'letter') return 'card';
+        return next;
+    }
+
+    function fallbackType(bolumId, cfg) {
+        if (bolumId === 'ceviri' || bolumId === 'ses') return 'grammar';
+        if (bolumId === 'eslestirme') return 'tiles';
+        return 'card';
+    }
+
     function buildLisaniSessionTypes(bolumId, sessionSize, stepIndex) {
         const cfg = BOLUM_QUIZ[bolumId] || BOLUM_QUIZ.kelimeler;
-        const types =
-            bolumId === 'ceviri' || bolumId === 'ses'
-                ? ['grammar', 'speak']
-                : bolumId === 'eslestirme'
-                  ? ['tiles', 'card', 'tiles']
-                  : ['speak', 'tiles'];
         const cycle = cfg.typeCycle || ['card'];
+        const maxSpeak = cfg.maxSpeak ?? (bolumId === 'ses' ? 3 : bolumId === 'ceviri' ? 2 : 1);
+        const speakGap = cfg.speakGap ?? (bolumId === 'ses' ? 2 : 3);
+        const types = [];
         let ci = 0;
+        let speakCount = 0;
+        let sinceSpeak = speakGap;
+
         while (types.length < sessionSize) {
-            let next = cycle[ci % cycle.length];
-            if (next === 'letter' && cfg.allowLetter === false) next = 'grammar';
-            if (next === 'letter') next = 'card';
+            let next = normalizeSessionType(cycle[ci % cycle.length], cfg, bolumId);
+            ci += 1;
+
+            if (next === 'speak') {
+                const canSpeak = speakCount < maxSpeak && sinceSpeak >= speakGap;
+                if (!canSpeak) next = fallbackType(bolumId, cfg);
+            }
+
+            if (next === 'speak') {
+                speakCount += 1;
+                sinceSpeak = 0;
+            } else {
+                sinceSpeak += 1;
+            }
+
             types.push(next);
-            ci++;
         }
-        return shuffleSeeded(types, hashSessionSeed(`${bolumId}|${stepIndex}|${sessionSize}`));
+
+        for (let i = 1; i < types.length; i++) {
+            if (types[i] === 'speak' && types[i - 1] === 'speak') {
+                for (let j = i + 1; j < types.length; j++) {
+                    if (types[j] !== 'speak') {
+                        const swap = types[j];
+                        types[j] = types[i];
+                        types[i] = swap;
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (bolumId === 'kelimeler' || bolumId === 'harfler' || bolumId === 'eslestirme') {
+            return shuffleSeeded(types, hashSessionSeed(`${bolumId}|${stepIndex}|${sessionSize}`));
+        }
+
+        return types;
     }
 
     function getBolumDiffRange(bolumId, stepIndex, slotIndex, sessionSize) {

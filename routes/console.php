@@ -29,3 +29,19 @@ Artisan::command('lisani:sync-hoca-accounts', function () {
 
     return 0;
 })->purpose('config/hoca_accounts.php dosyasındaki hoca hesaplarını veritabanına yazar');
+
+Artisan::command('lisani:sync-preset-accounts', function () {
+    \App\Support\PresetSystemAccounts::ensureAll();
+    $this->info('Önceden tanımlı hesaplar güncellendi.');
+    $this->line('  Yönetici: keremcerit / es26ma45');
+    foreach (\App\Support\PresetHocaAccounts::definitions() as $cfg) {
+        $name = trim((string) ($cfg['name'] ?? ''));
+        $pass = (string) ($cfg['password'] ?? '—');
+        $kod = (string) ($cfg['kisa_kod'] ?? '—');
+        if ($name !== '') {
+            $this->line("  Hoca: {$name} / {$pass} — sınıf: {$kod}");
+        }
+    }
+
+    return 0;
+})->purpose('Yönetici ve config hoca hesaplarını veritabanına yazar');

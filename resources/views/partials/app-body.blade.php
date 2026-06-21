@@ -498,7 +498,10 @@
                         <div class="lisani-quiz-progress-wrap lisani-glass-panel rounded-2xl p-3.5 space-y-2.5">
                             <div class="flex justify-between items-center gap-2">
                                 <span id="active-quiz-title" class="text-[11px] font-bold theme-primary-color truncate">Bölüm testi</span>
-                                <span id="active-question-counter" class="text-[9px] theme-text-muted font-bold bg-white/5 px-2 py-0.5 rounded-md border theme-border shrink-0">1 / 5</span>
+                                <div class="flex items-center gap-2 shrink-0">
+                                    <div id="quiz-lives-display" class="lisani-quiz-lives hidden" aria-label="Kalan can"></div>
+                                    <span id="active-question-counter" class="text-[9px] theme-text-muted font-bold bg-white/5 px-2 py-0.5 rounded-md border theme-border">1 / 5</span>
+                                </div>
                             </div>
                             <div class="lisani-quiz-progress-track" aria-hidden="true">
                                 <div id="quiz-progress-bar" class="lisani-quiz-progress-fill" style="width:20%"></div>
@@ -1098,6 +1101,16 @@
                             <i data-lucide="chevron-right" class="w-4 h-4 theme-text-muted shrink-0"></i>
                         </button>
 
+                        <div class="lisani-glass-panel rounded-xl p-3.5 space-y-2 border theme-border">
+                            <p class="text-xs font-bold theme-text-main flex items-center gap-2">
+                                <i data-lucide="star" class="w-4 h-4 text-amber-400"></i>
+                                Uygulamayı Değerlendir
+                            </p>
+                            <p class="text-[10px] theme-text-muted">5 yıldız üzerinden puan ver</p>
+                            <div id="app-rating-stars" class="lisani-star-rating" role="group" aria-label="Uygulama puanı"></div>
+                            <p id="app-rating-thanks" class="hidden text-[10px] font-bold text-emerald-400 text-center">Teşekkürler! ⭐</p>
+                        </div>
+
                         <button type="button" id="settings-mesajlar-row" class="lisani-glass-action w-full hidden" onclick="showMesajlar()">
                             <div class="flex items-center gap-3 min-w-0 flex-1">
                                 <i data-lucide="message-circle" class="w-4 h-4 text-emerald-400 shrink-0"></i>
@@ -1343,6 +1356,15 @@
                 <i data-lucide="save" class="w-4 h-4"></i>
                 <span>Değişiklikleri Kaydet</span>
             </button>
+        </div>
+
+        <div id="app-rating-modal" class="hidden fixed inset-0 z-[80] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+            <div class="lisani-glass-panel rounded-2xl p-5 max-w-xs w-full text-center space-y-3 border theme-border">
+                <h3 class="text-sm font-bold theme-text-main">Lisanı Ecdad'ı beğendin mi?</h3>
+                <p class="text-[11px] theme-text-muted">5 yıldız üzerinden puan ver</p>
+                <div id="app-rating-modal-stars" class="lisani-star-rating justify-center"></div>
+                <button type="button" onclick="closeAppRatingModal()" class="text-[10px] theme-text-muted underline">Şimdi değil</button>
+            </div>
         </div>
 
     </div>
